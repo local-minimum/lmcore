@@ -115,7 +115,6 @@ public class TestSequenceExtensions
     {
         for (int i = 0; i < 10; i++)
         {
-
             Assert.True(
                 arr.Contains(arr.GetRandomElement())                
             );
@@ -127,7 +126,6 @@ public class TestSequenceExtensions
     {
         for (int i = 0; i < 10; i++)
         {
-
             Assert.True(
                 list.Contains(list.GetRandomElement())
             );

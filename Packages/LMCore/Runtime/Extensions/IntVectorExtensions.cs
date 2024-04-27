@@ -26,21 +26,28 @@ namespace LMCore.Extensions
         public static int LargestAxisMagnitude(this Vector2Int vector) => Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
         public static int LargetsAxisMagnitude(this Vector3Int vector) => Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y), Mathf.Abs(vector.z));
 
-        public static Vector2Int[] AsUnitComponents(this Vector2Int direction) => new Vector2Int[] {
-            new Vector2Int(direction.x.Sign(), 0),
-            new Vector2Int(0, direction.y.Sign()),
-        };
-        public static Vector3Int[] AsUnitComponents(this Vector3Int direction) => new Vector3Int[] {
-            new Vector3Int(direction.x.Sign(), 0, 0),
-            new Vector3Int(0, direction.y.Sign(), 0),
-            new Vector3Int(0, 0, direction.z.Sign()),
-        };
+        public static Vector2Int[] AsUnitComponents(this Vector2Int direction) => 
+            direction.IsUnitVector() ? 
+            new Vector2Int[] { direction } : 
+            new Vector2Int[] {
+                new Vector2Int(direction.x.Sign(), 0),
+                new Vector2Int(0, direction.y.Sign()),
+            };
+        public static Vector3Int[] AsUnitComponents(this Vector3Int direction) => 
+            direction.IsUnitVector() ?
+            new Vector3Int[] { direction } :
+            new Vector3Int[] {
+                new Vector3Int(direction.x.Sign(), 0, 0),
+                new Vector3Int(0, direction.y.Sign(), 0),
+                new Vector3Int(0, 0, direction.z.Sign()),
+            };
         #endregion
 
         public static bool IsUnitVector(this Vector2Int vector) =>
             Mathf.Abs(vector.x) + Mathf.Abs(vector.y) == 1;
         public static bool IsUnitVector(this Vector3Int vector) =>
             Mathf.Abs(vector.x) + Mathf.Abs(vector.y) + Mathf.Abs(vector.z) == 1;
+
         #region Cardinality
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int origin, Vector2Int target, bool resolveIndeterminateByRng = true) => PrimaryCardinalDirection(target - origin, resolveIndeterminateByRng);
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int direction, bool resolveIndeterminateByRng = true)
