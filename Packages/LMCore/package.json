@@ -1,0 +1,22 @@
+{
+  "name": "se.localminimum.lmcore",
+  "version": "0.0.1",
+  "displayName": "LocalMinimum: Convenience Unity Tooling",
+  "description": "Utility classes and basic functionality that is often nice to have",
+  "unity": "2022.3",
+  "unityRelease": "19f1",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "licensesUrl": "",
+  "license": "MIT",
+  "dependencies": {},
+ "keywords": [
+    "Utility"
+  ],
+  "author": {
+    "name": "Unity",
+    "email": "unity@example.com",
+    "url": "https://www.unity3d.com"
+  }
+}
+
