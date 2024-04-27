@@ -152,14 +152,17 @@ namespace LMCore.Extensions
             Mathf.Abs(vector.x.Sign()) + Mathf.Abs(vector.y.Sign()) + Mathf.Abs(vector.z.Sign()) == 1;
 
         public static bool IsOrthogonalCardinal(this Vector2Int cardinal1, Vector2Int cardinal2, bool trustCardinality = true) =>
-             cardinal1.x == 0 && cardinal2.x != 0 && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
+             (cardinal1.x == 0) == (cardinal2.x != 0) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
         public static bool IsOrthogonalCardinal(this Vector3Int cardinal1, Vector3Int cardinal2, bool trustCardinality = true) =>
-             (cardinal1.x == 0 && cardinal2.x != 0 || cardinal1.y == 0 && cardinal2.y != 0) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
+             ((cardinal1.x == 0) == (cardinal2.x != 0) || (cardinal1.y == 0) == (cardinal2.y != 0)) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
 
         public static bool IsInverseDirection(this Vector2Int direction1, Vector2Int direction2) =>
-            direction1.x == -direction2.x && direction1.y == -direction2.y;
+            direction1.x.Sign() == -direction2.x.Sign() 
+            && direction1.y.Sign() == -direction2.y.Sign();
         public static bool IsInverseDirection(this Vector3Int direction1, Vector3Int direction2) =>
-            direction1.x == -direction2.x && direction1.y == -direction2.y && direction1.z == -direction2.z;
+            direction1.x.Sign() == -direction2.x.Sign() 
+            && direction1.y.Sign() == -direction2.y.Sign() 
+            && direction1.z.Sign() == -direction2.z.Sign();
         #endregion
 
         #region Rotations
@@ -181,18 +184,18 @@ namespace LMCore.Extensions
         public static Vector2Int RotateCW(this Vector2Int direction) =>
             new Vector2Int(direction.y, -direction.x);
         public static Vector3Int RotateCW(this Vector3Int direction, Vector3Int up) => 
-            direction.RotateCW(up * -1);
+            direction.RotateCCW(up * -1);
 
 
         public static bool IsCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
-            cardinal1.RotateCW() == cardinal2;
+            cardinal1 == cardinal2.RotateCW();
         public static bool IsCWRotationOf(this Vector3Int cardinal1, Vector3Int cardinal2, Vector3Int up) =>
-            cardinal1.RotateCW(up) == cardinal2;
+            cardinal1 == cardinal2.RotateCW(up);
 
         public static bool IsCCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
-            cardinal1.RotateCCW() == cardinal2;
+            cardinal1 == cardinal2.RotateCCW();
         public static bool IsCCWRotationOf(this Vector3Int cardinal1, Vector3Int cardinal2, Vector3Int up) =>
-            cardinal1.RotateCCW(up) == cardinal2;
+            cardinal1 == cardinal2.RotateCCW(up);
 
         #endregion
 
