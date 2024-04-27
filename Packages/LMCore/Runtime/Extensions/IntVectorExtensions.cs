@@ -212,23 +212,23 @@ namespace LMCore.Extensions
         #endregion
 
         #region Intersection
-        public static Vector2Int OrthoIntersection(this Vector2Int point, Vector2Int target, Vector2Int direction)
+        public static Vector2Int OrthoIntersection(this Vector2Int point, Vector2Int target, Vector2Int axis)
         {
-            var candidate = new Vector2Int(point.x, target.y);
-            var diff = candidate - point;
-            if (diff.x * direction.x + diff.y * direction.y == 0) return candidate;
+            var candidate = new Vector2Int(target.x, point.y);
+            var direction = candidate - point;
+            if (!direction.IsOrthogonalCardinal(axis)) return candidate;
 
-            return new Vector2Int(target.x, point.y);
+            return new Vector2Int(point.x, target.y);
         }
         #endregion
 
         #region World
-        public static Vector3 ToPosition(this Vector2Int coords, int elevation = 0, int scale = 3) =>
+        public static Vector3 ToPositionFromXZPlane(this Vector2Int coords, int elevation = 0, int scale = 3) =>
             new Vector3(coords.x * scale, elevation * scale, coords.y * scale);
         public static Vector3 ToPosition(this Vector3Int coords, int scale = 3) =>
             new Vector3(coords.x * scale, coords.y * scale, coords.z * scale);
 
-        public static Vector3 ToDirection(this Vector2Int direction) => new Vector3(direction.x, 0, direction.y);
+        public static Vector3 ToDirectionFromXZPlane(this Vector2Int direction) => new Vector3(direction.x, 0, direction.y);
         public static Vector3 ToDirection(this Vector3Int direction) => new Vector3(direction.x, direction.y, direction.z);
         #endregion
     }

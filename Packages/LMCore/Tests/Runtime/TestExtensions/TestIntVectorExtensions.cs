@@ -357,7 +357,7 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void RotateCCW2D()
+    public void TestRotateCCW2D()
     {
         Assert.That(Vector2Int.up.RotateCCW(), Is.EqualTo(Vector2Int.left));
         Assert.That(Vector2Int.left.RotateCCW(), Is.EqualTo(Vector2Int.down));
@@ -367,7 +367,7 @@ public class TestIntVectorExtensions
 
 
     [Test]
-    public void RotateCW2D()
+    public void TestRotateCW2D()
     {
         Assert.That(Vector2Int.up.RotateCW(), Is.EqualTo(Vector2Int.right));
         Assert.That(Vector2Int.left.RotateCW(), Is.EqualTo(Vector2Int.up));
@@ -377,7 +377,7 @@ public class TestIntVectorExtensions
 
 
     [Test]
-    public void RotateCCW3D()
+    public void TestRotateCCW3D()
     {
         // XZ plane
         Assert.That(Vector3Int.forward.RotateCCW(Vector3Int.up), Is.EqualTo(Vector3Int.left));
@@ -408,7 +408,7 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void RotateCW3D()
+    public void TestRotateCW3D()
     {
         // Assuming it shares implementation with CCW this is only sentinals for smoke
 
@@ -432,7 +432,7 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void IsCWRotationOf2D() {
+    public void TestIsCWRotationOf2D() {
         // Sentinals assuming it borrows the rotation code
         Assert.True(Vector2Int.up.IsCWRotationOf(Vector2Int.left));
         Assert.False(Vector2Int.up.IsCWRotationOf(Vector2Int.right));
@@ -440,7 +440,7 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void IsCCWRotationOf2D()
+    public void TestIsCCWRotationOf2D()
     {
         // Sentinals assuming it borrows the rotation code
         Assert.True(Vector2Int.up.IsCCWRotationOf(Vector2Int.right));
@@ -449,7 +449,7 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void IsCWRotationOf3D()
+    public void TestIsCWRotationOf3D()
     {
         // Sentinals assuming it borrows the rotation code
         Assert.True(Vector3Int.forward.IsCWRotationOf(Vector3Int.left, Vector3Int.up));
@@ -458,11 +458,118 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void IsCCWRotationOf3D()
+    public void TestIsCCWRotationOf3D()
     {
         // Sentinals assuming it borrows the rotation code
         Assert.True(Vector3Int.forward.IsCCWRotationOf(Vector3Int.right, Vector3Int.up));
         Assert.False(Vector3Int.forward.IsCCWRotationOf(Vector3Int.left, Vector3Int.up));
         Assert.True(Vector3Int.forward.IsCCWRotationOf(Vector3Int.left, Vector3Int.down));
+    }
+
+    [Test]
+    [TestCase(0, 0, 0, 0, 0)]
+    [TestCase(12, 2, 12, 2, 0)]
+    [TestCase(1, 2, 3, 4, 4)]
+    [TestCase(-3, 1, 2, -2, 8)]
+    public void TestManhattanDistance2D(int x1, int y1, int x2, int y2, int d)
+    {
+        Assert.That(
+            new Vector2Int(x1, y1).ManhattanDistance(new Vector2Int(x2, y2)),
+            Is.EqualTo(d)
+        );
+    }
+
+    [Test]
+    [TestCase(0, 0, 0, 0, 0, 0, 0)]
+    [TestCase(12, 2, 3, 12, 2, 3, 0)]
+    [TestCase(1, 2, 3, 4, 5, 6, 9)]
+    [TestCase(-3, 1, 0, 2, -2, 7, 15)]
+    public void TestManhattanDistance3D(int x1, int y1, int z1, int x2, int y2, int z2, int d)
+    {
+        Assert.That(
+            new Vector3Int(x1, y1, z1).ManhattanDistance(new Vector3Int(x2, y2, z2)),
+            Is.EqualTo(d)
+        );
+    }
+
+    [Test]
+    [TestCase(0, 0, 0, 0, 0)]
+    [TestCase(4, 4, 4, 4, 0)]
+    [TestCase(1, 2, 3, 4, 2)]
+    [TestCase(10, 3, -2, 7, 12)]
+    public void TestChebyshevDistance2D(int x1, int y1, int x2, int y2, int d)
+    {
+        Assert.That(
+            new Vector2Int(x1, y1).ChebyshevDistance(new Vector2Int(x2, y2)),
+            Is.EqualTo(d)
+        );
+    }
+
+    [Test]
+    [TestCase(0, 0, 0, 0, 0, 0, 0)]
+    [TestCase(4, 4, 4, 4, 4, 4, 0)]
+    [TestCase(1, 2, 3, 4, 5, 6, 3)]
+    [TestCase(10, 3, -3, -2, 7, 1, 12)]
+    public void TestChebyshevDistance3D(int x1, int y1, int z1, int x2, int y2, int z2, int d)
+    {
+        Assert.That(
+            new Vector3Int(x1, y1, z1).ChebyshevDistance(new Vector3Int(x2, y2, z2)),
+            Is.EqualTo(d)
+        );
+    }
+
+    [Test]
+    public void TestOrthoIntersection2D()
+    {
+        Assert.That(
+            new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.right),
+            Is.EqualTo(new Vector2Int(3, 0))
+        );
+
+        Assert.That(
+            new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.left),
+            Is.EqualTo(new Vector2Int(3, 0))
+        );
+
+
+        Assert.That(
+            new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.up),
+            Is.EqualTo(new Vector2Int(1, 10))
+        );
+
+        Assert.That(
+            new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.down),
+            Is.EqualTo(new Vector2Int(1, 10))
+        );
+    }
+
+    [Test]
+    public void TestToPositionFromXZPlane()
+    {
+        Assert.That(new Vector2Int(1, 2).ToPositionFromXZPlane(10, 2), Is.EqualTo(new Vector3(2, 20, 4)));
+    }
+
+    [Test]
+    public void TestToPosition()
+    {
+        Assert.That(new Vector3Int(1, 2, 3).ToPosition(2), Is.EqualTo(new Vector3(2, 4, 6)));
+    }
+
+    [Test]
+    public void TestToDirectionFromXZPlane()
+    {
+        Assert.That(
+            new Vector2Int(1, 2).ToDirectionFromXZPlane(),
+            Is.EqualTo(new Vector3(1, 0, 2))
+        );
+    }
+
+    [Test]
+    public void TestToDirection()
+    {
+        Assert.That(
+            new Vector3Int(1, 2, 3).ToDirection(),
+            Is.EqualTo(new Vector3(1, 2, 3))
+        );
     }
 }
