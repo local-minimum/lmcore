@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Test Runner
+  m_Title: Console
   m_RootView: {fileID: 8}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -40,11 +40,11 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 419
+    y: 608
     width: 795
-    height: 538
-  m_MinSize: {x: 101, y: 121}
-  m_MaxSize: {x: 4001, y: 4021}
+    height: 349
+  m_MinSize: {x: 100, y: 100}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 2620
+  controlID: 114
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 99
+  controlID: 113
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -118,9 +118,9 @@ MonoBehaviour:
     x: 0
     y: 0
     width: 795
-    height: 419
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+    height: 608
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -146,8 +146,8 @@ MonoBehaviour:
     y: 0
     width: 304
     height: 645
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 18}
   m_Panes:
   - {fileID: 18}
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ProjectBrowser
+  m_Name: ConsoleWindow
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -172,14 +172,14 @@ MonoBehaviour:
     y: 645
     width: 1125
     height: 312
-  m_MinSize: {x: 231, y: 271}
-  m_MaxSize: {x: 10001, y: 10021}
-  m_ActualView: {fileID: 16}
+  m_MinSize: {x: 101, y: 121}
+  m_MaxSize: {x: 4001, y: 4021}
+  m_ActualView: {fileID: 21}
   m_Panes:
   - {fileID: 16}
   - {fileID: 21}
-  m_Selected: 0
-  m_LastSelected: 1
+  m_Selected: 1
+  m_LastSelected: 0
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -275,7 +275,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 39
+  controlID: 49
 --- !u!114 &12
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -320,8 +320,8 @@ MonoBehaviour:
     y: 0
     width: 821
     height: 645
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 19}
   m_Panes:
   - {fileID: 20}
@@ -349,9 +349,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 1125
-    y: 492
+    y: 681
     width: 794
-    height: 517
+    height: 328
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -363,12 +363,12 @@ MonoBehaviour:
     m_SaveData: []
     m_OverlaysVisible: 1
   m_Spl:
-    ID: 2641
+    ID: 144
     splitterInitialOffset: 351
     currentActiveSplitter: -1
     realSizes:
-    - 283
-    - 164
+    - 163
+    - 95
     relativeSizes:
     - 0.6331096
     - 0.36689037
@@ -378,7 +378,7 @@ MonoBehaviour:
     maxSizes:
     - 0
     - 0
-    lastTotalSize: 447
+    lastTotalSize: 258
     splitSize: 6
     xOffset: 0
     m_Version: 1
@@ -447,7 +447,7 @@ MonoBehaviour:
       name: LMPackage
       fullName: LMPackage
       resultStatus: 1
-      duration: 0.7752737
+      duration: 0.2492582
       messages: 
       output: 
       stacktrace: 
@@ -463,7 +463,7 @@ MonoBehaviour:
       name: TestExtensions.dll
       fullName: C:/Users/Admin/Documents/Unity/LMPackage/Library/ScriptAssemblies/TestExtensions.dll
       resultStatus: 1
-      duration: 0.7425599
+      duration: 0.209934
       messages: 
       output: 
       stacktrace: 
@@ -479,7 +479,7 @@ MonoBehaviour:
       name: TestIntVectorExtensions
       fullName: TestIntVectorExtensions
       resultStatus: 1
-      duration: 0.6850195
+      duration: 0.1507277
       messages: 
       output: 
       stacktrace: 
@@ -495,7 +495,7 @@ MonoBehaviour:
       name: TestAsUnitComponents2D
       fullName: TestIntVectorExtensions.TestAsUnitComponents2D
       resultStatus: 1
-      duration: 0.3055883
+      duration: 0.0136065
       messages: 
       output: 
       stacktrace: 
@@ -512,7 +512,7 @@ MonoBehaviour:
       name: TestAsUnitComponents2DIsUnit
       fullName: TestIntVectorExtensions.TestAsUnitComponents2DIsUnit
       resultStatus: 1
-      duration: 0.000213
+      duration: 0.0002056
       messages: 
       output: 
       stacktrace: 
@@ -529,7 +529,7 @@ MonoBehaviour:
       name: TestAsUnitComponents3D
       fullName: TestIntVectorExtensions.TestAsUnitComponents3D
       resultStatus: 1
-      duration: 0.0007332
+      duration: 0.0006806
       messages: 
       output: 
       stacktrace: 
@@ -546,7 +546,7 @@ MonoBehaviour:
       name: TestAsUnitComponents3DIsUnit
       fullName: TestIntVectorExtensions.TestAsUnitComponents3DIsUnit
       resultStatus: 1
-      duration: 0.0001669
+      duration: 0.0001609
       messages: 
       output: 
       stacktrace: 
@@ -563,7 +563,7 @@ MonoBehaviour:
       name: TestChebyshevDistance2D
       fullName: TestIntVectorExtensions.TestChebyshevDistance2D
       resultStatus: 1
-      duration: 0.0143928
+      duration: 0.0060864
       messages: 
       output: 
       stacktrace: 
@@ -579,7 +579,7 @@ MonoBehaviour:
       name: TestChebyshevDistance2D(0,0,0,0,0)
       fullName: TestIntVectorExtensions.TestChebyshevDistance2D(0,0,0,0,0)
       resultStatus: 1
-      duration: 0.001029
+      duration: 0.0010063
       messages: 
       output: 
       stacktrace: 
@@ -596,7 +596,7 @@ MonoBehaviour:
       name: TestChebyshevDistance2D(4,4,4,4,0)
       fullName: TestIntVectorExtensions.TestChebyshevDistance2D(4,4,4,4,0)
       resultStatus: 1
-      duration: 0.0002456
+      duration: 0.0000638
       messages: 
       output: 
       stacktrace: 
@@ -613,7 +613,7 @@ MonoBehaviour:
       name: TestChebyshevDistance2D(1,2,3,4,2)
       fullName: TestIntVectorExtensions.TestChebyshevDistance2D(1,2,3,4,2)
       resultStatus: 1
-      duration: 0.0001218
+      duration: 0.0000576
       messages: 
       output: 
       stacktrace: 
@@ -630,7 +630,7 @@ MonoBehaviour:
       name: TestChebyshevDistance2D(10,3,-2,7,12)
       fullName: TestIntVectorExtensions.TestChebyshevDistance2D(10,3,-2,7,12)
       resultStatus: 1
-      duration: 0.000119
+      duration: 0.0000545
       messages: 
       output: 
       stacktrace: 
@@ -647,7 +647,7 @@ MonoBehaviour:
       name: TestChebyshevDistance3D
       fullName: TestIntVectorExtensions.TestChebyshevDistance3D
       resultStatus: 1
-      duration: 0.0099601
+      duration: 0.0048837
       messages: 
       output: 
       stacktrace: 
@@ -663,7 +663,7 @@ MonoBehaviour:
       name: TestChebyshevDistance3D(0,0,0,0,0,0,0)
       fullName: TestIntVectorExtensions.TestChebyshevDistance3D(0,0,0,0,0,0,0)
       resultStatus: 1
-      duration: 0.0005646
+      duration: 0.0005688
       messages: 
       output: 
       stacktrace: 
@@ -680,7 +680,7 @@ MonoBehaviour:
       name: TestChebyshevDistance3D(4,4,4,4,4,4,0)
       fullName: TestIntVectorExtensions.TestChebyshevDistance3D(4,4,4,4,4,4,0)
       resultStatus: 1
-      duration: 0.0001562
+      duration: 0.0000697
       messages: 
       output: 
       stacktrace: 
@@ -697,7 +697,7 @@ MonoBehaviour:
       name: TestChebyshevDistance3D(1,2,3,4,5,6,3)
       fullName: TestIntVectorExtensions.TestChebyshevDistance3D(1,2,3,4,5,6,3)
       resultStatus: 1
-      duration: 0.0001009
+      duration: 0.0000547
       messages: 
       output: 
       stacktrace: 
@@ -714,7 +714,7 @@ MonoBehaviour:
       name: TestChebyshevDistance3D(10,3,-3,-2,7,1,12)
       fullName: TestIntVectorExtensions.TestChebyshevDistance3D(10,3,-3,-2,7,1,12)
       resultStatus: 1
-      duration: 0.0001989
+      duration: 0.000053
       messages: 
       output: 
       stacktrace: 
@@ -731,7 +731,7 @@ MonoBehaviour:
       name: TestIsCardinal2D
       fullName: TestIntVectorExtensions.TestIsCardinal2D
       resultStatus: 1
-      duration: 0.0116452
+      duration: 0.0054176
       messages: 
       output: 
       stacktrace: 
@@ -747,7 +747,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(0,0,False)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(0,0,False)
       resultStatus: 1
-      duration: 0.0007268
+      duration: 0.0005796
       messages: 
       output: 
       stacktrace: 
@@ -764,7 +764,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(1,1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(1,1,False)
       resultStatus: 1
-      duration: 0.0002186
+      duration: 0.0000701
       messages: 
       output: 
       stacktrace: 
@@ -781,7 +781,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(1,-1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(1,-1,False)
       resultStatus: 1
-      duration: 0.000116
+      duration: 0.000062
       messages: 
       output: 
       stacktrace: 
@@ -798,7 +798,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(-1,-1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(-1,-1,False)
       resultStatus: 1
-      duration: 0.0001057
+      duration: 0.0000596
       messages: 
       output: 
       stacktrace: 
@@ -815,7 +815,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(0,-11,True)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(0,-11,True)
       resultStatus: 1
-      duration: 0.0001677
+      duration: 0.0000617
       messages: 
       output: 
       stacktrace: 
@@ -832,7 +832,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(0,2,True)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(0,2,True)
       resultStatus: 1
-      duration: 0.0001147
+      duration: 0.000063
       messages: 
       output: 
       stacktrace: 
@@ -849,7 +849,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(4,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(4,0,True)
       resultStatus: 1
-      duration: 0.000103
+      duration: 0.0000591
       messages: 
       output: 
       stacktrace: 
@@ -866,7 +866,7 @@ MonoBehaviour:
       name: TestIsCardinal2D(-10,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal2D(-10,0,True)
       resultStatus: 1
-      duration: 0.0001759
+      duration: 0.0000588
       messages: 
       output: 
       stacktrace: 
@@ -883,7 +883,7 @@ MonoBehaviour:
       name: TestIsCardinal3D
       fullName: TestIntVectorExtensions.TestIsCardinal3D
       resultStatus: 1
-      duration: 0.0139734
+      duration: 0.0061101
       messages: 
       output: 
       stacktrace: 
@@ -899,7 +899,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,0,0,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,0,0,False)
       resultStatus: 1
-      duration: 0.0005287
+      duration: 0.0005395
       messages: 
       output: 
       stacktrace: 
@@ -916,7 +916,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(1,1,1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(1,1,1,False)
       resultStatus: 1
-      duration: 0.0001454
+      duration: 0.0000795
       messages: 
       output: 
       stacktrace: 
@@ -933,7 +933,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(1,-1,0,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(1,-1,0,False)
       resultStatus: 1
-      duration: 0.0001702
+      duration: 0.0000656
       messages: 
       output: 
       stacktrace: 
@@ -950,7 +950,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(-1,-1,0,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(-1,-1,0,False)
       resultStatus: 1
-      duration: 0.000135
+      duration: 0.0000603
       messages: 
       output: 
       stacktrace: 
@@ -967,7 +967,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,1,1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,1,1,False)
       resultStatus: 1
-      duration: 0.00013
+      duration: 0.0000604
       messages: 
       output: 
       stacktrace: 
@@ -984,7 +984,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(1,0,-1,False)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(1,0,-1,False)
       resultStatus: 1
-      duration: 0.000138
+      duration: 0.0000597
       messages: 
       output: 
       stacktrace: 
@@ -1001,7 +1001,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,-11,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,-11,0,True)
       resultStatus: 1
-      duration: 0.0001268
+      duration: 0.0000596
       messages: 
       output: 
       stacktrace: 
@@ -1018,7 +1018,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,2,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,2,0,True)
       resultStatus: 1
-      duration: 0.0002105
+      duration: 0.0000638
       messages: 
       output: 
       stacktrace: 
@@ -1035,7 +1035,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(4,0,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(4,0,0,True)
       resultStatus: 1
-      duration: 0.000228
+      duration: 0.0000596
       messages: 
       output: 
       stacktrace: 
@@ -1052,7 +1052,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(-10,0,0,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(-10,0,0,True)
       resultStatus: 1
-      duration: 0.0000961
+      duration: 0.0000593
       messages: 
       output: 
       stacktrace: 
@@ -1069,7 +1069,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,0,12,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,0,12,True)
       resultStatus: 1
-      duration: 0.0001127
+      duration: 0.0000584
       messages: 
       output: 
       stacktrace: 
@@ -1086,7 +1086,7 @@ MonoBehaviour:
       name: TestIsCardinal3D(0,0,-11,True)
       fullName: TestIntVectorExtensions.TestIsCardinal3D(0,0,-11,True)
       resultStatus: 1
-      duration: 0.0001282
+      duration: 0.0000597
       messages: 
       output: 
       stacktrace: 
@@ -1103,7 +1103,7 @@ MonoBehaviour:
       name: TestIsCCWRotationOf2D
       fullName: TestIntVectorExtensions.TestIsCCWRotationOf2D
       resultStatus: 1
-      duration: 0.0007823
+      duration: 0.0006064
       messages: 
       output: 
       stacktrace: 
@@ -1120,7 +1120,7 @@ MonoBehaviour:
       name: TestIsCCWRotationOf3D
       fullName: TestIntVectorExtensions.TestIsCCWRotationOf3D
       resultStatus: 1
-      duration: 0.0005873
+      duration: 0.0004762
       messages: 
       output: 
       stacktrace: 
@@ -1137,7 +1137,7 @@ MonoBehaviour:
       name: TestIsCWRotationOf2D
       fullName: TestIntVectorExtensions.TestIsCWRotationOf2D
       resultStatus: 1
-      duration: 0.0003263
+      duration: 0.0002687
       messages: 
       output: 
       stacktrace: 
@@ -1154,7 +1154,7 @@ MonoBehaviour:
       name: TestIsCWRotationOf3D
       fullName: TestIntVectorExtensions.TestIsCWRotationOf3D
       resultStatus: 1
-      duration: 0.0005012
+      duration: 0.0004209
       messages: 
       output: 
       stacktrace: 
@@ -1171,7 +1171,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D
       resultStatus: 1
-      duration: 0.023722
+      duration: 0.0053396
       messages: 
       output: 
       stacktrace: 
@@ -1187,7 +1187,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(4,0,-1,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(4,0,-1,0,True)
       resultStatus: 1
-      duration: 0.0004789
+      duration: 0.0004512
       messages: 
       output: 
       stacktrace: 
@@ -1204,7 +1204,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(-2,0,10,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(-2,0,10,0,True)
       resultStatus: 1
-      duration: 0.0001686
+      duration: 0.0000867
       messages: 
       output: 
       stacktrace: 
@@ -1221,7 +1221,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(0,3,0,-2,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(0,3,0,-2,True)
       resultStatus: 1
-      duration: 0.0001881
+      duration: 0.0000625
       messages: 
       output: 
       stacktrace: 
@@ -1238,7 +1238,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(1,0,20,0,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(1,0,20,0,False)
       resultStatus: 1
-      duration: 0.0002454
+      duration: 0.0000652
       messages: 
       output: 
       stacktrace: 
@@ -1255,7 +1255,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(4,0,0,0,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(4,0,0,0,False)
       resultStatus: 1
-      duration: 0.0001095
+      duration: 0.0000603
       messages: 
       output: 
       stacktrace: 
@@ -1272,7 +1272,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(0,5,0,1,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(0,5,0,1,False)
       resultStatus: 1
-      duration: 0.000111
+      duration: 0.0000608
       messages: 
       output: 
       stacktrace: 
@@ -1289,7 +1289,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(1,1,-1,-1,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(1,1,-1,-1,True)
       resultStatus: 1
-      duration: 0.0001608
+      duration: 0.0000596
       messages: 
       output: 
       stacktrace: 
@@ -1306,7 +1306,7 @@ MonoBehaviour:
       name: TestIsInverseDirection2D(0,0,0,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection2D(0,0,0,0,True)
       resultStatus: 1
-      duration: 0.0000754
+      duration: 0.000059
       messages: 
       output: 
       stacktrace: 
@@ -1323,7 +1323,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D
       resultStatus: 1
-      duration: 0.006199
+      duration: 0.0055803
       messages: 
       output: 
       stacktrace: 
@@ -1339,7 +1339,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(4,0,0,-1,0,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(4,0,0,-1,0,0,True)
       resultStatus: 1
-      duration: 0.0004823
+      duration: 0.0004769
       messages: 
       output: 
       stacktrace: 
@@ -1356,7 +1356,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(-2,0,0,10,0,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(-2,0,0,10,0,0,True)
       resultStatus: 1
-      duration: 0.0000987
+      duration: 0.0000695
       messages: 
       output: 
       stacktrace: 
@@ -1373,7 +1373,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(0,3,0,0,-2,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(0,3,0,0,-2,0,True)
       resultStatus: 1
-      duration: 0.0000734
+      duration: 0.0000627
       messages: 
       output: 
       stacktrace: 
@@ -1390,7 +1390,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(0,0,-5,0,0,12,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(0,0,-5,0,0,12,True)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000617
       messages: 
       output: 
       stacktrace: 
@@ -1407,7 +1407,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(1,0,0,20,0,0,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(1,0,0,20,0,0,False)
       resultStatus: 1
-      duration: 0.0000615
+      duration: 0.0000646
       messages: 
       output: 
       stacktrace: 
@@ -1424,7 +1424,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(4,0,0,0,0,0,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(4,0,0,0,0,0,False)
       resultStatus: 1
-      duration: 0.0000574
+      duration: 0.0000582
       messages: 
       output: 
       stacktrace: 
@@ -1441,7 +1441,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(0,5,0,0,1,0,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(0,5,0,0,1,0,False)
       resultStatus: 1
-      duration: 0.0000777
+      duration: 0.0000618
       messages: 
       output: 
       stacktrace: 
@@ -1458,7 +1458,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(0,0,-2,0,0,-4,False)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(0,0,-2,0,0,-4,False)
       resultStatus: 1
-      duration: 0.0000602
+      duration: 0.0000598
       messages: 
       output: 
       stacktrace: 
@@ -1475,7 +1475,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(1,1,-1,-1,-1,1,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(1,1,-1,-1,-1,1,True)
       resultStatus: 1
-      duration: 0.0000587
+      duration: 0.0000595
       messages: 
       output: 
       stacktrace: 
@@ -1492,7 +1492,7 @@ MonoBehaviour:
       name: TestIsInverseDirection3D(0,0,0,0,0,0,True)
       fullName: TestIntVectorExtensions.TestIsInverseDirection3D(0,0,0,0,0,0,True)
       resultStatus: 1
-      duration: 0.0000592
+      duration: 0.0000647
       messages: 
       output: 
       stacktrace: 
@@ -1509,7 +1509,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D
       resultStatus: 1
-      duration: 0.0056426
+      duration: 0.0056198
       messages: 
       output: 
       stacktrace: 
@@ -1525,7 +1525,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(1,0,1,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(1,0,1,0,True,False)
       resultStatus: 1
-      duration: 0.0004348
+      duration: 0.0004207
       messages: 
       output: 
       stacktrace: 
@@ -1542,7 +1542,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(1,0,-1,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(1,0,-1,0,True,False)
       resultStatus: 1
-      duration: 0.0000728
+      duration: 0.0000785
       messages: 
       output: 
       stacktrace: 
@@ -1559,7 +1559,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(0,1,0,1,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(0,1,0,1,True,False)
       resultStatus: 1
-      duration: 0.0000629
+      duration: 0.0000624
       messages: 
       output: 
       stacktrace: 
@@ -1576,7 +1576,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(0,1,0,-1,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(0,1,0,-1,True,False)
       resultStatus: 1
-      duration: 0.0000609
+      duration: 0.0000614
       messages: 
       output: 
       stacktrace: 
@@ -1593,7 +1593,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(0,1,1,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(0,1,1,0,True,True)
       resultStatus: 1
-      duration: 0.0000608
+      duration: 0.0000615
       messages: 
       output: 
       stacktrace: 
@@ -1610,7 +1610,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(0,1,-1,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(0,1,-1,0,True,True)
       resultStatus: 1
-      duration: 0.0000597
+      duration: 0.0000599
       messages: 
       output: 
       stacktrace: 
@@ -1627,7 +1627,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(1,0,0,5,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(1,0,0,5,True,True)
       resultStatus: 1
-      duration: 0.0000623
+      duration: 0.0000633
       messages: 
       output: 
       stacktrace: 
@@ -1644,7 +1644,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(1,3,0,5,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(1,3,0,5,True,True)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000609
       messages: 
       output: 
       stacktrace: 
@@ -1661,7 +1661,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(0,3,3,5,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(0,3,3,5,True,True)
       resultStatus: 1
-      duration: 0.0000616
+      duration: 0.0000598
       messages: 
       output: 
       stacktrace: 
@@ -1678,7 +1678,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal2D(1,3,0,5,False,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal2D(1,3,0,5,False,False)
       resultStatus: 1
-      duration: 0.0000641
+      duration: 0.0000625
       messages: 
       output: 
       stacktrace: 
@@ -1695,7 +1695,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D
       resultStatus: 1
-      duration: 0.00696
+      duration: 0.0067612
       messages: 
       output: 
       stacktrace: 
@@ -1711,7 +1711,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,0,0,1,0,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,0,0,1,0,0,True,False)
       resultStatus: 1
-      duration: 0.0004425
+      duration: 0.0004397
       messages: 
       output: 
       stacktrace: 
@@ -1728,7 +1728,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,0,0,-1,0,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,0,0,-1,0,0,True,False)
       resultStatus: 1
-      duration: 0.00007
+      duration: 0.0000716
       messages: 
       output: 
       stacktrace: 
@@ -1745,7 +1745,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,1,0,0,1,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,1,0,0,1,0,True,False)
       resultStatus: 1
-      duration: 0.0000632
+      duration: 0.0000612
       messages: 
       output: 
       stacktrace: 
@@ -1762,7 +1762,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,1,0,0,-1,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,1,0,0,-1,0,True,False)
       resultStatus: 1
-      duration: 0.0000833
+      duration: 0.0000621
       messages: 
       output: 
       stacktrace: 
@@ -1779,7 +1779,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,0,1,0,0,1,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,0,1,0,0,1,True,False)
       resultStatus: 1
-      duration: 0.0000616
+      duration: 0.0000681
       messages: 
       output: 
       stacktrace: 
@@ -1796,7 +1796,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,0,-1,0,0,0,True,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,0,-1,0,0,0,True,False)
       resultStatus: 1
-      duration: 0.0000595
+      duration: 0.0000603
       messages: 
       output: 
       stacktrace: 
@@ -1813,7 +1813,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,1,0,1,0,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,1,0,1,0,0,True,True)
       resultStatus: 1
-      duration: 0.0000612
+      duration: 0.0000606
       messages: 
       output: 
       stacktrace: 
@@ -1830,7 +1830,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,1,0,-1,0,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,1,0,-1,0,0,True,True)
       resultStatus: 1
-      duration: 0.0000598
+      duration: 0.0000613
       messages: 
       output: 
       stacktrace: 
@@ -1847,7 +1847,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,1,0,0,0,-5,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,1,0,0,0,-5,True,True)
       resultStatus: 1
-      duration: 0.0000618
+      duration: 0.0000621
       messages: 
       output: 
       stacktrace: 
@@ -1864,7 +1864,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,0,0,0,5,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,0,0,0,5,0,True,True)
       resultStatus: 1
-      duration: 0.0000588
+      duration: 0.0000648
       messages: 
       output: 
       stacktrace: 
@@ -1881,7 +1881,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,0,0,0,0,1,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,0,0,0,0,1,True,True)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000611
       messages: 
       output: 
       stacktrace: 
@@ -1898,7 +1898,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,0,10,1,0,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,0,10,1,0,0,True,True)
       resultStatus: 1
-      duration: 0.0000611
+      duration: 0.0000608
       messages: 
       output: 
       stacktrace: 
@@ -1915,7 +1915,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,0,2,0,2,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,0,2,0,2,0,True,True)
       resultStatus: 1
-      duration: 0.0000601
+      duration: 0.0000605
       messages: 
       output: 
       stacktrace: 
@@ -1932,7 +1932,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,3,0,0,5,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,3,0,0,5,0,True,True)
       resultStatus: 1
-      duration: 0.0000619
+      duration: 0.0000596
       messages: 
       output: 
       stacktrace: 
@@ -1949,7 +1949,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(0,3,0,3,5,0,True,True)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(0,3,0,3,5,0,True,True)
       resultStatus: 1
-      duration: 0.0000623
+      duration: 0.0000617
       messages: 
       output: 
       stacktrace: 
@@ -1966,7 +1966,7 @@ MonoBehaviour:
       name: TestIsOrhogonalCardinal3D(1,3,0,0,5,0,False,False)
       fullName: TestIntVectorExtensions.TestIsOrhogonalCardinal3D(1,3,0,0,5,0,False,False)
       resultStatus: 1
-      duration: 0.0000643
+      duration: 0.0000658
       messages: 
       output: 
       stacktrace: 
@@ -1983,7 +1983,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D
       fullName: TestIntVectorExtensions.TestIsUnitVector2D
       resultStatus: 1
-      duration: 0.0052938
+      duration: 0.0053372
       messages: 
       output: 
       stacktrace: 
@@ -1999,7 +1999,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(0,0,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(0,0,False)
       resultStatus: 1
-      duration: 0.0002377
+      duration: 0.0002358
       messages: 
       output: 
       stacktrace: 
@@ -2016,7 +2016,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(1,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(1,0,True)
       resultStatus: 1
-      duration: 0.0000683
+      duration: 0.0000656
       messages: 
       output: 
       stacktrace: 
@@ -2033,7 +2033,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(0,1,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(0,1,True)
       resultStatus: 1
-      duration: 0.0000624
+      duration: 0.000063
       messages: 
       output: 
       stacktrace: 
@@ -2050,7 +2050,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(0,-1,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(0,-1,True)
       resultStatus: 1
-      duration: 0.0000599
+      duration: 0.0000653
       messages: 
       output: 
       stacktrace: 
@@ -2067,7 +2067,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(-1,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(-1,0,True)
       resultStatus: 1
-      duration: 0.0000596
+      duration: 0.0000614
       messages: 
       output: 
       stacktrace: 
@@ -2084,7 +2084,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(2,0,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(2,0,False)
       resultStatus: 1
-      duration: 0.0000628
+      duration: 0.0000589
       messages: 
       output: 
       stacktrace: 
@@ -2101,7 +2101,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(1,1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(1,1,False)
       resultStatus: 1
-      duration: 0.0000601
+      duration: 0.0000593
       messages: 
       output: 
       stacktrace: 
@@ -2118,7 +2118,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(1,-1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(1,-1,False)
       resultStatus: 1
-      duration: 0.0000584
+      duration: 0.0000595
       messages: 
       output: 
       stacktrace: 
@@ -2135,7 +2135,7 @@ MonoBehaviour:
       name: TestIsUnitVector2D(2,-1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector2D(2,-1,False)
       resultStatus: 1
-      duration: 0.0000583
+      duration: 0.0000634
       messages: 
       output: 
       stacktrace: 
@@ -2152,7 +2152,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D
       fullName: TestIntVectorExtensions.TestIsUnitVector3D
       resultStatus: 1
-      duration: 0.0057908
+      duration: 0.0055384
       messages: 
       output: 
       stacktrace: 
@@ -2168,7 +2168,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(0,0,0,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(0,0,0,False)
       resultStatus: 1
-      duration: 0.0002547
+      duration: 0.0002419
       messages: 
       output: 
       stacktrace: 
@@ -2185,7 +2185,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(1,0,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(1,0,0,True)
       resultStatus: 1
-      duration: 0.0001085
+      duration: 0.000074
       messages: 
       output: 
       stacktrace: 
@@ -2202,7 +2202,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(0,1,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(0,1,0,True)
       resultStatus: 1
-      duration: 0.0000712
+      duration: 0.0000627
       messages: 
       output: 
       stacktrace: 
@@ -2219,7 +2219,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(0,0,1,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(0,0,1,True)
       resultStatus: 1
-      duration: 0.0000698
+      duration: 0.0000608
       messages: 
       output: 
       stacktrace: 
@@ -2236,7 +2236,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(0,0,-1,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(0,0,-1,True)
       resultStatus: 1
-      duration: 0.0000655
+      duration: 0.0000628
       messages: 
       output: 
       stacktrace: 
@@ -2253,7 +2253,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(0,-1,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(0,-1,0,True)
       resultStatus: 1
-      duration: 0.0000609
+      duration: 0.000061
       messages: 
       output: 
       stacktrace: 
@@ -2270,7 +2270,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(-1,0,0,True)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(-1,0,0,True)
       resultStatus: 1
-      duration: 0.0000598
+      duration: 0.0000628
       messages: 
       output: 
       stacktrace: 
@@ -2287,7 +2287,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(2,1,1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(2,1,1,False)
       resultStatus: 1
-      duration: 0.0000587
+      duration: 0.0000627
       messages: 
       output: 
       stacktrace: 
@@ -2304,7 +2304,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(1,1,1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(1,1,1,False)
       resultStatus: 1
-      duration: 0.0000585
+      duration: 0.0000608
       messages: 
       output: 
       stacktrace: 
@@ -2321,7 +2321,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(1,-1,-1,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(1,-1,-1,False)
       resultStatus: 1
-      duration: 0.0000626
+      duration: 0.000061
       messages: 
       output: 
       stacktrace: 
@@ -2338,7 +2338,7 @@ MonoBehaviour:
       name: TestIsUnitVector3D(2,-1,0,False)
       fullName: TestIntVectorExtensions.TestIsUnitVector3D(2,-1,0,False)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000607
       messages: 
       output: 
       stacktrace: 
@@ -2355,7 +2355,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude2D
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude2D
       resultStatus: 1
-      duration: 0.0049133
+      duration: 0.0045701
       messages: 
       output: 
       stacktrace: 
@@ -2371,7 +2371,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude2D(0,0,0)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude2D(0,0,0)
       resultStatus: 1
-      duration: 0.000413
+      duration: 0.0003961
       messages: 
       output: 
       stacktrace: 
@@ -2388,7 +2388,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude2D(1,2,2)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude2D(1,2,2)
       resultStatus: 1
-      duration: 0.0001158
+      duration: 0.0000621
       messages: 
       output: 
       stacktrace: 
@@ -2405,7 +2405,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude2D(4,2,4)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude2D(4,2,4)
       resultStatus: 1
-      duration: 0.0000611
+      duration: 0.0000545
       messages: 
       output: 
       stacktrace: 
@@ -2422,7 +2422,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude2D(-4,2,4)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude2D(-4,2,4)
       resultStatus: 1
-      duration: 0.0000534
+      duration: 0.0000526
       messages: 
       output: 
       stacktrace: 
@@ -2456,7 +2456,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D
       resultStatus: 1
-      duration: 0.0051864
+      duration: 0.0047718
       messages: 
       output: 
       stacktrace: 
@@ -2472,7 +2472,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(0,0,0,0)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(0,0,0,0)
       resultStatus: 1
-      duration: 0.0004667
+      duration: 0.000454
       messages: 
       output: 
       stacktrace: 
@@ -2489,7 +2489,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(1,2,3,3)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(1,2,3,3)
       resultStatus: 1
-      duration: 0.0000632
+      duration: 0.0000629
       messages: 
       output: 
       stacktrace: 
@@ -2506,7 +2506,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(4,2,3,4)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(4,2,3,4)
       resultStatus: 1
-      duration: 0.0000547
+      duration: 0.0000558
       messages: 
       output: 
       stacktrace: 
@@ -2523,7 +2523,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(4,7,3,7)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(4,7,3,7)
       resultStatus: 1
-      duration: 0.0000533
+      duration: 0.0000575
       messages: 
       output: 
       stacktrace: 
@@ -2540,7 +2540,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(-4,2,3,4)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(-4,2,3,4)
       resultStatus: 1
-      duration: 0.0000542
+      duration: 0.0000524
       messages: 
       output: 
       stacktrace: 
@@ -2557,7 +2557,7 @@ MonoBehaviour:
       name: TestLargestAxisMagnitude3D(10,-3,5,10)
       fullName: TestIntVectorExtensions.TestLargestAxisMagnitude3D(10,-3,5,10)
       resultStatus: 1
-      duration: 0.0000531
+      duration: 0.000052
       messages: 
       output: 
       stacktrace: 
@@ -2574,7 +2574,7 @@ MonoBehaviour:
       name: TestManhattanDistance2D
       fullName: TestIntVectorExtensions.TestManhattanDistance2D
       resultStatus: 1
-      duration: 0.0043074
+      duration: 0.0041766
       messages: 
       output: 
       stacktrace: 
@@ -2590,7 +2590,7 @@ MonoBehaviour:
       name: TestManhattanDistance2D(0,0,0,0,0)
       fullName: TestIntVectorExtensions.TestManhattanDistance2D(0,0,0,0,0)
       resultStatus: 1
-      duration: 0.00034
+      duration: 0.0003133
       messages: 
       output: 
       stacktrace: 
@@ -2607,7 +2607,7 @@ MonoBehaviour:
       name: TestManhattanDistance2D(12,2,12,2,0)
       fullName: TestIntVectorExtensions.TestManhattanDistance2D(12,2,12,2,0)
       resultStatus: 1
-      duration: 0.0000647
+      duration: 0.0000597
       messages: 
       output: 
       stacktrace: 
@@ -2624,7 +2624,7 @@ MonoBehaviour:
       name: TestManhattanDistance2D(1,2,3,4,4)
       fullName: TestIntVectorExtensions.TestManhattanDistance2D(1,2,3,4,4)
       resultStatus: 1
-      duration: 0.000053
+      duration: 0.0000576
       messages: 
       output: 
       stacktrace: 
@@ -2641,7 +2641,7 @@ MonoBehaviour:
       name: TestManhattanDistance2D(-3,1,2,-2,8)
       fullName: TestIntVectorExtensions.TestManhattanDistance2D(-3,1,2,-2,8)
       resultStatus: 1
-      duration: 0.0000526
+      duration: 0.0000537
       messages: 
       output: 
       stacktrace: 
@@ -2658,7 +2658,7 @@ MonoBehaviour:
       name: TestManhattanDistance3D
       fullName: TestIntVectorExtensions.TestManhattanDistance3D
       resultStatus: 1
-      duration: 0.0043564
+      duration: 0.0042408
       messages: 
       output: 
       stacktrace: 
@@ -2674,7 +2674,7 @@ MonoBehaviour:
       name: TestManhattanDistance3D(0,0,0,0,0,0,0)
       fullName: TestIntVectorExtensions.TestManhattanDistance3D(0,0,0,0,0,0,0)
       resultStatus: 1
-      duration: 0.0003751
+      duration: 0.0003638
       messages: 
       output: 
       stacktrace: 
@@ -2691,7 +2691,7 @@ MonoBehaviour:
       name: TestManhattanDistance3D(12,2,3,12,2,3,0)
       fullName: TestIntVectorExtensions.TestManhattanDistance3D(12,2,3,12,2,3,0)
       resultStatus: 1
-      duration: 0.0000664
+      duration: 0.0000629
       messages: 
       output: 
       stacktrace: 
@@ -2708,7 +2708,7 @@ MonoBehaviour:
       name: TestManhattanDistance3D(1,2,3,4,5,6,9)
       fullName: TestIntVectorExtensions.TestManhattanDistance3D(1,2,3,4,5,6,9)
       resultStatus: 1
-      duration: 0.0000545
+      duration: 0.0000541
       messages: 
       output: 
       stacktrace: 
@@ -2725,7 +2725,7 @@ MonoBehaviour:
       name: TestManhattanDistance3D(-3,1,0,2,-2,7,15)
       fullName: TestIntVectorExtensions.TestManhattanDistance3D(-3,1,0,2,-2,7,15)
       resultStatus: 1
-      duration: 0.0000548
+      duration: 0.0000526
       messages: 
       output: 
       stacktrace: 
@@ -2742,7 +2742,7 @@ MonoBehaviour:
       name: TestOrthoIntersection2D
       fullName: TestIntVectorExtensions.TestOrthoIntersection2D
       resultStatus: 1
-      duration: 0.0005796
+      duration: 0.0005738
       messages: 
       output: 
       stacktrace: 
@@ -2759,7 +2759,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D
       resultStatus: 1
-      duration: 0.0049236
+      duration: 0.0048501
       messages: 
       output: 
       stacktrace: 
@@ -2775,7 +2775,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(0,0,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(0,0,0,0)
       resultStatus: 1
-      duration: 0.0005123
+      duration: 0.0004995
       messages: 
       output: 
       stacktrace: 
@@ -2792,7 +2792,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(3,0,1,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(3,0,1,0)
       resultStatus: 1
-      duration: 0.0000671
+      duration: 0.0000673
       messages: 
       output: 
       stacktrace: 
@@ -2809,7 +2809,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(-4,0,-1,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(-4,0,-1,0)
       resultStatus: 1
-      duration: 0.0000614
+      duration: 0.0000644
       messages: 
       output: 
       stacktrace: 
@@ -2826,7 +2826,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(4,10,0,1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(4,10,0,1)
       resultStatus: 1
-      duration: 0.0000616
+      duration: 0.0000604
       messages: 
       output: 
       stacktrace: 
@@ -2843,7 +2843,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(4,-10,0,-1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(4,-10,0,-1)
       resultStatus: 1
-      duration: 0.0000589
+      duration: 0.0000592
       messages: 
       output: 
       stacktrace: 
@@ -2860,7 +2860,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2D(5,5,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2D(5,5,0,0)
       resultStatus: 1
-      duration: 0.0000581
+      duration: 0.0000587
       messages: 
       output: 
       stacktrace: 
@@ -2877,7 +2877,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DPoints
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DPoints
       resultStatus: 1
-      duration: 0.0019187
+      duration: 0.0018738
       messages: 
       output: 
       stacktrace: 
@@ -2894,7 +2894,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve
       resultStatus: 1
-      duration: 0.0046026
+      duration: 0.0045823
       messages: 
       output: 
       stacktrace: 
@@ -2910,7 +2910,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve(1,1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve(1,1)
       resultStatus: 1
-      duration: 0.0003418
+      duration: 0.000351
       messages: 
       output: 
       stacktrace: 
@@ -2927,7 +2927,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve(2,2)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve(2,2)
       resultStatus: 1
-      duration: 0.0000719
+      duration: 0.0000733
       messages: 
       output: 
       stacktrace: 
@@ -2944,7 +2944,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve(-1,-1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve(-1,-1)
       resultStatus: 1
-      duration: 0.000076
+      duration: 0.0000641
       messages: 
       output: 
       stacktrace: 
@@ -2961,7 +2961,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve(-3,3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve(-3,3)
       resultStatus: 1
-      duration: 0.0000653
+      duration: 0.000061
       messages: 
       output: 
       stacktrace: 
@@ -2978,7 +2978,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection2DResolve(3,-3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection2DResolve(3,-3)
       resultStatus: 1
-      duration: 0.0000654
+      duration: 0.0000613
       messages: 
       output: 
       stacktrace: 
@@ -2995,7 +2995,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D
       resultStatus: 1
-      duration: 0.0064407
+      duration: 0.0061257
       messages: 
       output: 
       stacktrace: 
@@ -3011,7 +3011,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(0,0,0,0,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(0,0,0,0,0,0)
       resultStatus: 1
-      duration: 0.0010766
+      duration: 0.0010817
       messages: 
       output: 
       stacktrace: 
@@ -3028,7 +3028,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(3,0,0,1,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(3,0,0,1,0,0)
       resultStatus: 1
-      duration: 0.0000769
+      duration: 0.0000768
       messages: 
       output: 
       stacktrace: 
@@ -3045,7 +3045,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(-4,0,0,-1,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(-4,0,0,-1,0,0)
       resultStatus: 1
-      duration: 0.000063
+      duration: 0.0000648
       messages: 
       output: 
       stacktrace: 
@@ -3062,7 +3062,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(4,10,1,0,1,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(4,10,1,0,1,0)
       resultStatus: 1
-      duration: 0.0000967
+      duration: 0.0000595
       messages: 
       output: 
       stacktrace: 
@@ -3079,7 +3079,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(4,-10,1,0,-1,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(4,-10,1,0,-1,0)
       resultStatus: 1
-      duration: 0.0000645
+      duration: 0.0000603
       messages: 
       output: 
       stacktrace: 
@@ -3096,7 +3096,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(4,10,100,0,0,1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(4,10,100,0,0,1)
       resultStatus: 1
-      duration: 0.000062
+      duration: 0.0000598
       messages: 
       output: 
       stacktrace: 
@@ -3113,7 +3113,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(4,-10,-100,0,0,-1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(4,-10,-100,0,0,-1)
       resultStatus: 1
-      duration: 0.0000632
+      duration: 0.0000581
       messages: 
       output: 
       stacktrace: 
@@ -3130,7 +3130,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(5,5,0,0,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(5,5,0,0,0,0)
       resultStatus: 1
-      duration: 0.0000892
+      duration: 0.0000671
       messages: 
       output: 
       stacktrace: 
@@ -3147,7 +3147,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(0,5,5,0,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(0,5,5,0,0,0)
       resultStatus: 1
-      duration: 0.0000669
+      duration: 0.0000616
       messages: 
       output: 
       stacktrace: 
@@ -3164,7 +3164,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3D(5,0,5,0,0,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3D(5,0,5,0,0,0)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000617
       messages: 
       output: 
       stacktrace: 
@@ -3181,7 +3181,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DPoints
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DPoints
       resultStatus: 1
-      duration: 0.0006045
+      duration: 0.0005905
       messages: 
       output: 
       stacktrace: 
@@ -3198,7 +3198,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve
       resultStatus: 1
-      duration: 0.0054516
+      duration: 0.0050504
       messages: 
       output: 
       stacktrace: 
@@ -3214,7 +3214,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(1,1,1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(1,1,1)
       resultStatus: 1
-      duration: 0.0003051
+      duration: 0.0002703
       messages: 
       output: 
       stacktrace: 
@@ -3231,7 +3231,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(2,2,2)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(2,2,2)
       resultStatus: 1
-      duration: 0.0000761
+      duration: 0.0000755
       messages: 
       output: 
       stacktrace: 
@@ -3248,7 +3248,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(-1,-1,-1)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(-1,-1,-1)
       resultStatus: 1
-      duration: 0.0000718
+      duration: 0.0000648
       messages: 
       output: 
       stacktrace: 
@@ -3265,7 +3265,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(-3,3,3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(-3,3,3)
       resultStatus: 1
-      duration: 0.0000631
+      duration: 0.0000675
       messages: 
       output: 
       stacktrace: 
@@ -3282,7 +3282,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(3,-3,-3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(3,-3,-3)
       resultStatus: 1
-      duration: 0.0000615
+      duration: 0.0000613
       messages: 
       output: 
       stacktrace: 
@@ -3299,7 +3299,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(3,0,-3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(3,0,-3)
       resultStatus: 1
-      duration: 0.0000709
+      duration: 0.0000666
       messages: 
       output: 
       stacktrace: 
@@ -3316,7 +3316,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(0,-3,-3)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(0,-3,-3)
       resultStatus: 1
-      duration: 0.0000667
+      duration: 0.0000682
       messages: 
       output: 
       stacktrace: 
@@ -3333,7 +3333,7 @@ MonoBehaviour:
       name: TestPrimaryCardinalDirection3DResolve(3,-3,0)
       fullName: TestIntVectorExtensions.TestPrimaryCardinalDirection3DResolve(3,-3,0)
       resultStatus: 1
-      duration: 0.0000657
+      duration: 0.000065
       messages: 
       output: 
       stacktrace: 
@@ -3350,7 +3350,7 @@ MonoBehaviour:
       name: TestRandom2DDirection
       fullName: TestIntVectorExtensions.TestRandom2DDirection
       resultStatus: 1
-      duration: 0.0006696
+      duration: 0.0006178
       messages: 
       output: 
       stacktrace: 
@@ -3367,7 +3367,7 @@ MonoBehaviour:
       name: TestRandom3DDirection
       fullName: TestIntVectorExtensions.TestRandom3DDirection
       resultStatus: 1
-      duration: 0.0006362
+      duration: 0.0005574
       messages: 
       output: 
       stacktrace: 
@@ -3384,7 +3384,7 @@ MonoBehaviour:
       name: TestRotateCCW2D
       fullName: TestIntVectorExtensions.TestRotateCCW2D
       resultStatus: 1
-      duration: 0.0002795
+      duration: 0.0002674
       messages: 
       output: 
       stacktrace: 
@@ -3401,7 +3401,7 @@ MonoBehaviour:
       name: TestRotateCCW3D
       fullName: TestIntVectorExtensions.TestRotateCCW3D
       resultStatus: 1
-      duration: 0.0008608
+      duration: 0.0008753
       messages: 
       output: 
       stacktrace: 
@@ -3418,7 +3418,7 @@ MonoBehaviour:
       name: TestRotateCW2D
       fullName: TestIntVectorExtensions.TestRotateCW2D
       resultStatus: 1
-      duration: 0.0002639
+      duration: 0.0002563
       messages: 
       output: 
       stacktrace: 
@@ -3435,7 +3435,7 @@ MonoBehaviour:
       name: TestRotateCW3D
       fullName: TestIntVectorExtensions.TestRotateCW3D
       resultStatus: 1
-      duration: 0.0005355
+      duration: 0.0005177
       messages: 
       output: 
       stacktrace: 
@@ -3452,7 +3452,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D
       resultStatus: 1
-      duration: 0.0046993
+      duration: 0.00449
       messages: 
       output: 
       stacktrace: 
@@ -3468,7 +3468,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D(0,0,0)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D(0,0,0)
       resultStatus: 1
-      duration: 0.0003363
+      duration: 0.0003383
       messages: 
       output: 
       stacktrace: 
@@ -3485,7 +3485,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D(1,2,1)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D(1,2,1)
       resultStatus: 1
-      duration: 0.000065
+      duration: 0.0000605
       messages: 
       output: 
       stacktrace: 
@@ -3502,7 +3502,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D(4,2,2)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D(4,2,2)
       resultStatus: 1
-      duration: 0.0000524
+      duration: 0.0000533
       messages: 
       output: 
       stacktrace: 
@@ -3519,7 +3519,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D(-4,2,2)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D(-4,2,2)
       resultStatus: 1
-      duration: 0.000055
+      duration: 0.0000519
       messages: 
       output: 
       stacktrace: 
@@ -3536,7 +3536,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude2D(10,-3,3)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude2D(10,-3,3)
       resultStatus: 1
-      duration: 0.0000508
+      duration: 0.0000526
       messages: 
       output: 
       stacktrace: 
@@ -3553,7 +3553,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D
       resultStatus: 1
-      duration: 0.005133
+      duration: 0.0047898
       messages: 
       output: 
       stacktrace: 
@@ -3569,7 +3569,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(0,0,0,0)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(0,0,0,0)
       resultStatus: 1
-      duration: 0.0004318
+      duration: 0.0004239
       messages: 
       output: 
       stacktrace: 
@@ -3586,7 +3586,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(1,2,3,1)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(1,2,3,1)
       resultStatus: 1
-      duration: 0.0000646
+      duration: 0.0000653
       messages: 
       output: 
       stacktrace: 
@@ -3603,7 +3603,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(4,2,3,2)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(4,2,3,2)
       resultStatus: 1
-      duration: 0.0000753
+      duration: 0.0000546
       messages: 
       output: 
       stacktrace: 
@@ -3620,7 +3620,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(4,7,3,3)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(4,7,3,3)
       resultStatus: 1
-      duration: 0.0000593
+      duration: 0.0000508
       messages: 
       output: 
       stacktrace: 
@@ -3637,7 +3637,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(-4,2,3,2)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(-4,2,3,2)
       resultStatus: 1
-      duration: 0.0000525
+      duration: 0.0000539
       messages: 
       output: 
       stacktrace: 
@@ -3654,7 +3654,7 @@ MonoBehaviour:
       name: TestSmallestAxisMagnitude3D(10,-3,5,3)
       fullName: TestIntVectorExtensions.TestSmallestAxisMagnitude3D(10,-3,5,3)
       resultStatus: 1
-      duration: 0.0000559
+      duration: 0.0000561
       messages: 
       output: 
       stacktrace: 
@@ -3671,7 +3671,7 @@ MonoBehaviour:
       name: TestToDirection
       fullName: TestIntVectorExtensions.TestToDirection
       resultStatus: 1
-      duration: 0.0005742
+      duration: 0.0005037
       messages: 
       output: 
       stacktrace: 
@@ -3688,7 +3688,7 @@ MonoBehaviour:
       name: TestToDirectionFromXZPlane
       fullName: TestIntVectorExtensions.TestToDirectionFromXZPlane
       resultStatus: 1
-      duration: 0.0002947
+      duration: 0.0002206
       messages: 
       output: 
       stacktrace: 
@@ -3705,7 +3705,7 @@ MonoBehaviour:
       name: TestToPosition
       fullName: TestIntVectorExtensions.TestToPosition
       resultStatus: 1
-      duration: 0.0002412
+      duration: 0.0002188
       messages: 
       output: 
       stacktrace: 
@@ -3722,7 +3722,7 @@ MonoBehaviour:
       name: TestToPositionFromXZPlane
       fullName: TestIntVectorExtensions.TestToPositionFromXZPlane
       resultStatus: 1
-      duration: 0.000248
+      duration: 0.0002159
       messages: 
       output: 
       stacktrace: 
@@ -3739,7 +3739,7 @@ MonoBehaviour:
       name: TestRectExtensions
       fullName: TestRectExtensions
       resultStatus: 1
-      duration: 0.0114774
+      duration: 0.0098647
       messages: 
       output: 
       stacktrace: 
@@ -3755,7 +3755,7 @@ MonoBehaviour:
       name: TestApplyForRect
       fullName: TestRectExtensions.TestApplyForRect
       resultStatus: 1
-      duration: 0.0040887
+      duration: 0.0037781
       messages: 
       output: 
       stacktrace: 
@@ -3772,7 +3772,7 @@ MonoBehaviour:
       name: TestArea
       fullName: TestRectExtensions.TestArea
       resultStatus: 1
-      duration: 0.000256
+      duration: 0.0001682
       messages: 
       output: 
       stacktrace: 
@@ -3789,7 +3789,7 @@ MonoBehaviour:
       name: TestUnion
       fullName: TestRectExtensions.TestUnion
       resultStatus: 1
-      duration: 0.0009784
+      duration: 0.0008379
       messages: 
       output: 
       stacktrace: 
@@ -3806,7 +3806,7 @@ MonoBehaviour:
       name: TestUnionIsRect
       fullName: TestRectExtensions.TestUnionIsRect
       resultStatus: 1
-      duration: 0.0007937
+      duration: 0.0006366
       messages: 
       output: 
       stacktrace: 
@@ -3823,7 +3823,7 @@ MonoBehaviour:
       name: TestScalarExtensions
       fullName: TestScalarExtensions
       resultStatus: 1
-      duration: 0.0058155
+      duration: 0.0049988
       messages: 
       output: 
       stacktrace: 
@@ -3839,7 +3839,7 @@ MonoBehaviour:
       name: TestSign
       fullName: TestScalarExtensions.TestSign
       resultStatus: 1
-      duration: 0.0016206
+      duration: 0.0014644
       messages: 
       output: 
       stacktrace: 
@@ -3855,7 +3855,7 @@ MonoBehaviour:
       name: TestSign(0,0)
       fullName: TestScalarExtensions.TestSign(0,0)
       resultStatus: 1
-      duration: 0.000383
+      duration: 0.0003762
       messages: 
       output: 
       stacktrace: 
@@ -3872,7 +3872,7 @@ MonoBehaviour:
       name: TestSign(1,1)
       fullName: TestScalarExtensions.TestSign(1,1)
       resultStatus: 1
-      duration: 0.0000607
+      duration: 0.0000613
       messages: 
       output: 
       stacktrace: 
@@ -3889,7 +3889,7 @@ MonoBehaviour:
       name: TestSign(2,1)
       fullName: TestScalarExtensions.TestSign(2,1)
       resultStatus: 1
-      duration: 0.0000816
+      duration: 0.0000527
       messages: 
       output: 
       stacktrace: 
@@ -3906,7 +3906,7 @@ MonoBehaviour:
       name: TestSign(-1,-1)
       fullName: TestScalarExtensions.TestSign(-1,-1)
       resultStatus: 1
-      duration: 0.0000594
+      duration: 0.000052
       messages: 
       output: 
       stacktrace: 
@@ -3923,7 +3923,7 @@ MonoBehaviour:
       name: TestSign(-3,-1)
       fullName: TestScalarExtensions.TestSign(-3,-1)
       resultStatus: 1
-      duration: 0.0000541
+      duration: 0.0000513
       messages: 
       output: 
       stacktrace: 
@@ -3940,7 +3940,7 @@ MonoBehaviour:
       name: TestSequenceExtensions
       fullName: TestSequenceExtensions
       resultStatus: 1
-      duration: 0.0306922
+      duration: 0.0342498
       messages: 
       output: 
       stacktrace: 
@@ -3956,7 +3956,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultArray
       fullName: TestSequenceExtensions.TestGetNthOrDefaultArray
       resultStatus: 1
-      duration: 0.0011574
+      duration: 0.0011044
       messages: 
       output: 
       stacktrace: 
@@ -3972,7 +3972,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultArray(0,-1,1)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultArray(0,-1,1)
       resultStatus: 1
-      duration: 0.0002125
+      duration: 0.0001913
       messages: 
       output: 
       stacktrace: 
@@ -3989,7 +3989,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultArray(1,-1,2)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultArray(1,-1,2)
       resultStatus: 1
-      duration: 0.0000628
+      duration: 0.0000586
       messages: 
       output: 
       stacktrace: 
@@ -4006,7 +4006,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultArray(2,-1,3)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultArray(2,-1,3)
       resultStatus: 1
-      duration: 0.0000533
+      duration: 0.0000554
       messages: 
       output: 
       stacktrace: 
@@ -4023,7 +4023,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultArray(3,-1,-1)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultArray(3,-1,-1)
       resultStatus: 1
-      duration: 0.0000518
+      duration: 0.0000516
       messages: 
       output: 
       stacktrace: 
@@ -4040,7 +4040,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultEmptyArray
       fullName: TestSequenceExtensions.TestGetNthOrDefaultEmptyArray
       resultStatus: 1
-      duration: 0.0001412
+      duration: 0.0001349
       messages: 
       output: 
       stacktrace: 
@@ -4057,7 +4057,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultEmptyList
       fullName: TestSequenceExtensions.TestGetNthOrDefaultEmptyList
       resultStatus: 1
-      duration: 0.0002733
+      duration: 0.0002155
       messages: 
       output: 
       stacktrace: 
@@ -4074,7 +4074,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultList
       fullName: TestSequenceExtensions.TestGetNthOrDefaultList
       resultStatus: 1
-      duration: 0.0044303
+      duration: 0.0052862
       messages: 
       output: 
       stacktrace: 
@@ -4090,7 +4090,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultList(0,-1,1)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultList(0,-1,1)
       resultStatus: 1
-      duration: 0.00025
+      duration: 0.0002479
       messages: 
       output: 
       stacktrace: 
@@ -4107,7 +4107,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultList(1,-1,2)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultList(1,-1,2)
       resultStatus: 1
-      duration: 0.0000639
+      duration: 0.0000592
       messages: 
       output: 
       stacktrace: 
@@ -4124,7 +4124,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultList(2,-1,3)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultList(2,-1,3)
       resultStatus: 1
-      duration: 0.0000529
+      duration: 0.0000564
       messages: 
       output: 
       stacktrace: 
@@ -4141,7 +4141,7 @@ MonoBehaviour:
       name: TestGetNthOrDefaultList(3,-1,-1)
       fullName: TestSequenceExtensions.TestGetNthOrDefaultList(3,-1,-1)
       resultStatus: 1
-      duration: 0.000055
+      duration: 0.0000553
       messages: 
       output: 
       stacktrace: 
@@ -4158,7 +4158,7 @@ MonoBehaviour:
       name: TestGetNthOrLastArray
       fullName: TestSequenceExtensions.TestGetNthOrLastArray
       resultStatus: 1
-      duration: 0.0044461
+      duration: 0.0063775
       messages: 
       output: 
       stacktrace: 
@@ -4174,7 +4174,7 @@ MonoBehaviour:
       name: TestGetNthOrLastArray(0,1)
       fullName: TestSequenceExtensions.TestGetNthOrLastArray(0,1)
       resultStatus: 1
-      duration: 0.0002538
+      duration: 0.0002497
       messages: 
       output: 
       stacktrace: 
@@ -4191,7 +4191,7 @@ MonoBehaviour:
       name: TestGetNthOrLastArray(1,2)
       fullName: TestSequenceExtensions.TestGetNthOrLastArray(1,2)
       resultStatus: 1
-      duration: 0.0000585
+      duration: 0.0000594
       messages: 
       output: 
       stacktrace: 
@@ -4208,7 +4208,7 @@ MonoBehaviour:
       name: TestGetNthOrLastArray(2,3)
       fullName: TestSequenceExtensions.TestGetNthOrLastArray(2,3)
       resultStatus: 1
-      duration: 0.000085
+      duration: 0.0000523
       messages: 
       output: 
       stacktrace: 
@@ -4225,7 +4225,7 @@ MonoBehaviour:
       name: TestGetNthOrLastArray(3,3)
       fullName: TestSequenceExtensions.TestGetNthOrLastArray(3,3)
       resultStatus: 1
-      duration: 0.0000594
+      duration: 0.0000587
       messages: 
       output: 
       stacktrace: 
@@ -4242,7 +4242,7 @@ MonoBehaviour:
       name: TestGetNthOrLastList
       fullName: TestSequenceExtensions.TestGetNthOrLastList
       resultStatus: 1
-      duration: 0.0046516
+      duration: 0.0048609
       messages: 
       output: 
       stacktrace: 
@@ -4258,7 +4258,7 @@ MonoBehaviour:
       name: TestGetNthOrLastList(0,1)
       fullName: TestSequenceExtensions.TestGetNthOrLastList(0,1)
       resultStatus: 1
-      duration: 0.00033
+      duration: 0.0002992
       messages: 
       output: 
       stacktrace: 
@@ -4275,7 +4275,7 @@ MonoBehaviour:
       name: TestGetNthOrLastList(1,2)
       fullName: TestSequenceExtensions.TestGetNthOrLastList(1,2)
       resultStatus: 1
-      duration: 0.0000611
+      duration: 0.0000634
       messages: 
       output: 
       stacktrace: 
@@ -4292,7 +4292,7 @@ MonoBehaviour:
       name: TestGetNthOrLastList(2,3)
       fullName: TestSequenceExtensions.TestGetNthOrLastList(2,3)
       resultStatus: 1
-      duration: 0.0000547
+      duration: 0.0000546
       messages: 
       output: 
       stacktrace: 
@@ -4309,7 +4309,7 @@ MonoBehaviour:
       name: TestGetNthOrLastList(3,3)
       fullName: TestSequenceExtensions.TestGetNthOrLastList(3,3)
       resultStatus: 1
-      duration: 0.0000858
+      duration: 0.0000544
       messages: 
       output: 
       stacktrace: 
@@ -4326,7 +4326,7 @@ MonoBehaviour:
       name: TestGetRandomElementArr
       fullName: TestSequenceExtensions.TestGetRandomElementArr
       resultStatus: 1
-      duration: 0.0005227
+      duration: 0.0004604
       messages: 
       output: 
       stacktrace: 
@@ -4343,7 +4343,7 @@ MonoBehaviour:
       name: TestGetRandomElementList
       fullName: TestSequenceExtensions.TestGetRandomElementList
       resultStatus: 1
-      duration: 0.0002105
+      duration: 0.0001994
       messages: 
       output: 
       stacktrace: 
@@ -4360,7 +4360,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray
       fullName: TestSequenceExtensions.TestGetWrappingNthArray
       resultStatus: 1
-      duration: 0.0046426
+      duration: 0.0050584
       messages: 
       output: 
       stacktrace: 
@@ -4376,7 +4376,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray(0,1)
       fullName: TestSequenceExtensions.TestGetWrappingNthArray(0,1)
       resultStatus: 1
-      duration: 0.0002368
+      duration: 0.0002301
       messages: 
       output: 
       stacktrace: 
@@ -4393,7 +4393,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray(1,2)
       fullName: TestSequenceExtensions.TestGetWrappingNthArray(1,2)
       resultStatus: 1
-      duration: 0.0000603
+      duration: 0.0000591
       messages: 
       output: 
       stacktrace: 
@@ -4410,7 +4410,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray(2,3)
       fullName: TestSequenceExtensions.TestGetWrappingNthArray(2,3)
       resultStatus: 1
-      duration: 0.0000549
+      duration: 0.0000523
       messages: 
       output: 
       stacktrace: 
@@ -4427,7 +4427,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray(3,1)
       fullName: TestSequenceExtensions.TestGetWrappingNthArray(3,1)
       resultStatus: 1
-      duration: 0.0000532
+      duration: 0.0000523
       messages: 
       output: 
       stacktrace: 
@@ -4444,7 +4444,7 @@ MonoBehaviour:
       name: TestGetWrappingNthArray(73,2)
       fullName: TestSequenceExtensions.TestGetWrappingNthArray(73,2)
       resultStatus: 1
-      duration: 0.0000604
+      duration: 0.0000521
       messages: 
       output: 
       stacktrace: 
@@ -4461,7 +4461,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList
       fullName: TestSequenceExtensions.TestGetWrappingNthList
       resultStatus: 1
-      duration: 0.0046146
+      duration: 0.0051923
       messages: 
       output: 
       stacktrace: 
@@ -4477,7 +4477,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList(0,1)
       fullName: TestSequenceExtensions.TestGetWrappingNthList(0,1)
       resultStatus: 1
-      duration: 0.0003206
+      duration: 0.0003066
       messages: 
       output: 
       stacktrace: 
@@ -4494,7 +4494,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList(1,2)
       fullName: TestSequenceExtensions.TestGetWrappingNthList(1,2)
       resultStatus: 1
-      duration: 0.000087
+      duration: 0.0000582
       messages: 
       output: 
       stacktrace: 
@@ -4511,7 +4511,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList(2,3)
       fullName: TestSequenceExtensions.TestGetWrappingNthList(2,3)
       resultStatus: 1
-      duration: 0.0000569
+      duration: 0.0000544
       messages: 
       output: 
       stacktrace: 
@@ -4528,7 +4528,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList(3,1)
       fullName: TestSequenceExtensions.TestGetWrappingNthList(3,1)
       resultStatus: 1
-      duration: 0.0000509
+      duration: 0.0000536
       messages: 
       output: 
       stacktrace: 
@@ -4545,7 +4545,7 @@ MonoBehaviour:
       name: TestGetWrappingNthList(73,2)
       fullName: TestSequenceExtensions.TestGetWrappingNthList(73,2)
       resultStatus: 1
-      duration: 0.0000522
+      duration: 0.000052
       messages: 
       output: 
       stacktrace: 
@@ -4562,7 +4562,7 @@ MonoBehaviour:
       name: TestVectorExtensions
       fullName: TestVectorExtensions
       resultStatus: 1
-      duration: 0.0052169
+      duration: 0.0063495
       messages: 
       output: 
       stacktrace: 
@@ -4578,7 +4578,7 @@ MonoBehaviour:
       name: TestToVector2Int
       fullName: TestVectorExtensions.TestToVector2Int
       resultStatus: 1
-      duration: 0.0003183
+      duration: 0.0003531
       messages: 
       output: 
       stacktrace: 
@@ -4595,7 +4595,7 @@ MonoBehaviour:
       name: TestToVector2IntWithScale
       fullName: TestVectorExtensions.TestToVector2IntWithScale
       resultStatus: 1
-      duration: 0.000171
+      duration: 0.0001678
       messages: 
       output: 
       stacktrace: 
@@ -4612,7 +4612,7 @@ MonoBehaviour:
       name: TestToVector3Int
       fullName: TestVectorExtensions.TestToVector3Int
       resultStatus: 1
-      duration: 0.0002887
+      duration: 0.0002363
       messages: 
       output: 
       stacktrace: 
@@ -4629,7 +4629,7 @@ MonoBehaviour:
       name: TestToVector3IntWithScale
       fullName: TestVectorExtensions.TestToVector3IntWithScale
       resultStatus: 1
-      duration: 0.0002156
+      duration: 0.0001687
       messages: 
       output: 
       stacktrace: 
@@ -4754,7 +4754,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/se.localminimum.lmcore/Tests/Runtime/TestExtensions
+    - Packages/se.localminimum.lmcore/Runtime/UI
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -4762,30 +4762,30 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Packages/se.localminimum.lmcore/Tests/Runtime/TestExtensions
+  - Packages/se.localminimum.lmcore/Runtime/UI
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 93}
-    m_SelectedIDs: 4cc20000
-    m_LastClickedID: 49740
-    m_ExpandedIDs: 000000001006000084c100008cc100001ec2000022c200002ec2000000ca9a3bffffff7f
+    m_SelectedIDs: 7c6b0000
+    m_LastClickedID: 27516
+    m_ExpandedIDs: 0000000006690000086900000a6900000c6900000e690000986a000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: Runtime
-      m_OriginalName: Runtime
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 49698
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 7}
     m_SearchString: 
@@ -4799,7 +4799,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 
+    m_ExpandedIDs: 0000000006690000086900000a6900000c6900000e690000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -4843,7 +4843,7 @@ MonoBehaviour:
       m_IsRenaming: 0
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
-      m_ClientGUIView: {fileID: 2}
+      m_ClientGUIView: {fileID: 7}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -4879,7 +4879,7 @@ MonoBehaviour:
     x: 1125
     y: 73
     width: 794
-    height: 398
+    height: 587
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -4941,9 +4941,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: d8c70000
+      m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 806dfcff4c7efcffd285fcff588dfcffe694fcffd09afcffa8a0fcff80a6fcff64b6fcff18bcfcff24c5fcff7accfcff1cd9fcffb6defcff3ee4fcff2aedfcffb40afdff3810fdff3016fdff221ffdffa824fdff6a2dfdffc637fdff803efdff9e48fdff004ffdffe053fdff9464fdffd46ffdff4c74fdfff680fdffc486fdffc88afdffc88efdff8294fdff8c98fdff249efdff30a5fdff40acfdfff2affdffd6b3fdff72b9fdffaabefdffd0c3fdffd0c8fdff0ed1fdffaed8fdffeedbfdffdee1fdff0ce5fdff8ce9fdff4aecfdff6eedfdffe4f4fdff94f7fdff52fafdff6600feffd007feff9c0afeffac10feff9413feff3c16feff281bfeffae24feffa427feffb62dfefffa33feff103afeff543ffeff0642feff7046feff4849feff344afeffe24cfeff4451feff7ea5feff
+      m_ExpandedIDs: 1cd3ffffc2deffffe4f3ffff72f9ffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -5411,9 +5411,9 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 372
+    x: 304
     y: 73
-    width: 992
+    width: 819
     height: 624
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -5431,7 +5431,7 @@ MonoBehaviour:
   m_ShowGizmos: 0
   m_TargetDisplay: 0
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
-  m_TargetSize: {x: 992, y: 603}
+  m_TargetSize: {x: 819, y: 603}
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
@@ -5446,8 +5446,8 @@ MonoBehaviour:
     m_VRangeLocked: 0
     hZoomLockedByDefault: 0
     vZoomLockedByDefault: 0
-    m_HBaseRangeMin: -496
-    m_HBaseRangeMax: 496
+    m_HBaseRangeMin: -409.5
+    m_HBaseRangeMax: 409.5
     m_VBaseRangeMin: -301.5
     m_VBaseRangeMax: 301.5
     m_HAllowExceedBaseRangeMin: 1
@@ -5467,23 +5467,23 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 21
-      width: 992
+      width: 819
       height: 603
     m_Scale: {x: 1, y: 1}
-    m_Translation: {x: 496, y: 301.5}
+    m_Translation: {x: 409.5, y: 301.5}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -496
+      x: -409.5
       y: -301.5
-      width: 992
+      width: 819
       height: 603
     m_MinimalGUI: 1
   m_defaultScale: 1
-  m_LastWindowPixelSize: {x: 992, y: 624}
+  m_LastWindowPixelSize: {x: 819, y: 624}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000000000000
@@ -5512,7 +5512,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 718
-    width: 1365
+    width: 1124
     height: 291
   m_SerializedDataModeController:
     m_DataMode: 0

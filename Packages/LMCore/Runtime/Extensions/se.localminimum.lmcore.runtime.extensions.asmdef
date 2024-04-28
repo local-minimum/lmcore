@@ -1,5 +1,5 @@
 {
-    "name": "Extensions",
+    "name": "se.localminimum.lmcore.runtime.extensions",
     "rootNamespace": "LMCore.Extensions",
     "references": [],
     "includePlatforms": [],

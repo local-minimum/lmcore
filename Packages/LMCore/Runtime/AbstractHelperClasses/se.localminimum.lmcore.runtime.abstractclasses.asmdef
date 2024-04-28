@@ -1,5 +1,5 @@
 {
-    "name": "Abstract Classes",
+    "name": "se.localminimum.lmcore.runtime.abstractclasses",
     "rootNamespace": "LMCore.AbstractClasses",
     "references": [],
     "includePlatforms": [],
