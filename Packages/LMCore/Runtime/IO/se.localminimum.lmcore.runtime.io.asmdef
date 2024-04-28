@@ -1,0 +1,14 @@
+{
+    "name": "se.localminimum.lmcore.runtime.io",
+    "rootNamespace": "LMCore.IO",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
