@@ -49,7 +49,17 @@ namespace LMCore.Extensions
             Mathf.Abs(vector.x) + Mathf.Abs(vector.y) + Mathf.Abs(vector.z) == 1;
 
         #region Cardinality
+        /// <summary>
+        /// Returns unit vector along the primary carninal axis.
+        /// 
+        /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
+        /// </summary>
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int origin, Vector2Int target, bool resolveIndeterminateByRng = true) => PrimaryCardinalDirection(target - origin, resolveIndeterminateByRng);
+        /// <summary>
+        /// Returns unit vector along the primary carninal axis.
+        /// 
+        /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
+        /// </summary>
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int direction, bool resolveIndeterminateByRng = true)
         {
             var x = Mathf.Abs(direction.x);
@@ -77,7 +87,17 @@ namespace LMCore.Extensions
 
             return Vector2Int.zero;
         }
+        /// <summary>
+        /// Returns unit vector along the primary carninal axis.
+        /// 
+        /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
+        /// </summary>
         public static Vector3Int PrimaryCardinalDirection(this Vector3Int origin, Vector3Int target, bool resolveIndeterminateByRng = true) => PrimaryCardinalDirection(target - origin, resolveIndeterminateByRng);
+        /// <summary>
+        /// Returns unit vector along the primary carninal axis.
+        /// 
+        /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
+        /// </summary>
         public static Vector3Int PrimaryCardinalDirection(this Vector3Int direction, bool resolveIndeterminateByRng = true)
         {
             var x = Mathf.Abs(direction.x);
@@ -151,8 +171,22 @@ namespace LMCore.Extensions
         public static bool IsCardinal(this Vector3Int vector) =>
             Mathf.Abs(vector.x.Sign()) + Mathf.Abs(vector.y.Sign()) + Mathf.Abs(vector.z.Sign()) == 1;
 
+        /// <summary>
+        /// If the two vectors are at 90 degrees
+        /// </summary>
+        /// <param name="cardinal1">First cardinal vector</param>
+        /// <param name="cardinal2">Second cardinal vector</param>
+        /// <param name="trustCardinality">If both vectors need verification to be cardinal vectors</param>
+        /// <returns></returns>
         public static bool IsOrthogonalCardinal(this Vector2Int cardinal1, Vector2Int cardinal2, bool trustCardinality = true) =>
              (cardinal1.x == 0) == (cardinal2.x != 0) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
+        /// <summary>
+        /// If the two vectors are at 90 degrees
+        /// </summary>
+        /// <param name="cardinal1">First cardinal vector</param>
+        /// <param name="cardinal2">Second cardinal vector</param>
+        /// <param name="trustCardinality">If both vectors need verification to be cardinal vectors</param>
+        /// <returns></returns>
         public static bool IsOrthogonalCardinal(this Vector3Int cardinal1, Vector3Int cardinal2, bool trustCardinality = true) =>
              ((cardinal1.x == 0) == (cardinal2.x != 0) || (cardinal1.y == 0) == (cardinal2.y != 0)) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
 
@@ -187,44 +221,83 @@ namespace LMCore.Extensions
             direction.RotateCCW(up * -1);
 
 
+        /// <summary>
+        /// If the first vector is a clockwise rotation of the second
+        /// </summary>
         public static bool IsCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
             cardinal1 == cardinal2.RotateCW();
+        /// <summary>
+        /// If the first vector is a clockwise rotation of the second around the up axis
+        /// </summary>
         public static bool IsCWRotationOf(this Vector3Int cardinal1, Vector3Int cardinal2, Vector3Int up) =>
             cardinal1 == cardinal2.RotateCW(up);
 
+        /// <summary>
+        /// If the first vector is a counter-clockwise rotation of the second
+        /// </summary>
         public static bool IsCCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
             cardinal1 == cardinal2.RotateCCW();
+        /// <summary>
+        /// If the first vector is a counter-clockwise rotation of the second around the up axis
+        /// </summary>
         public static bool IsCCWRotationOf(this Vector3Int cardinal1, Vector3Int cardinal2, Vector3Int up) =>
             cardinal1 == cardinal2.RotateCCW(up);
 
         #endregion
 
         #region Distances
+        /// <summary>
+        /// Summation of distances along all axis
+        /// </summary>
         public static int ManhattanDistance(this Vector2Int point, Vector2Int other) =>
                 Mathf.Abs(point.x - other.x) + Mathf.Abs(point.y - other.y);
+        /// <summary>
+        /// Summation of distances along all axis
+        /// </summary>
         public static int ManhattanDistance(this Vector3Int point, Vector3Int other) =>
                 Mathf.Abs(point.x - other.x) + Mathf.Abs(point.y - other.y) + Mathf.Abs(point.z - other.z);
 
+        /// <summary>
+        /// Largest distance along any distance
+        /// </summary>
         public static int ChebyshevDistance(this Vector2Int point, Vector2Int other) =>
             Mathf.Max(Mathf.Abs(point.x - other.x), Mathf.Abs(point.y - other.y));
+        /// <summary>
+        /// Largest distance along any distance
+        /// </summary>
         public static int ChebyshevDistance(this Vector3Int point, Vector3Int other) =>
             Mathf.Max(Mathf.Abs(point.x - other.x), Mathf.Abs(point.y - other.y), Mathf.Abs(point.z - other.z));
         #endregion
 
         #region Intersection
-        public static Vector2Int OrthoIntersection(this Vector2Int point, Vector2Int target, Vector2Int axis)
+        /// <summary>
+        /// Get the intersection point of two vectors
+        /// </summary>
+        /// <param name="point">Reference point</param>
+        /// <param name="target">Ohter point</param>
+        /// <param name="cardinalAxis">The cardinal axis from the reference point on which the intersection should lie</param>
+        public static Vector2Int OrthoIntersection(this Vector2Int point, Vector2Int target, Vector2Int cardinalAxis)
         {
             var candidate = new Vector2Int(target.x, point.y);
             var direction = candidate - point;
-            if (!direction.IsOrthogonalCardinal(axis)) return candidate;
+            if (!direction.IsOrthogonalCardinal(cardinalAxis)) return candidate;
 
             return new Vector2Int(point.x, target.y);
         }
         #endregion
 
         #region World
+        /// <summary>
+        /// Returns float world position assuming the 2D int vector represents an XZ plane
+        /// </summary>
+        /// <param name="elevation">Elevation of the 2D in vector plane in int-space</param>
+        /// <param name="scale">Size of each int space step in the world coordinates space</param>
         public static Vector3 ToPositionFromXZPlane(this Vector2Int coords, int elevation = 0, int scale = 3) =>
             new Vector3(coords.x * scale, elevation * scale, coords.y * scale);
+        /// <summary>
+        /// Returns float world position
+        /// </summary>
+        /// <param name="scale">Size of each int space step in the world coordinates space</param>
         public static Vector3 ToPosition(this Vector3Int coords, int scale = 3) =>
             new Vector3(coords.x * scale, coords.y * scale, coords.z * scale);
 

@@ -8,6 +8,9 @@ namespace LMCore.Extensions
     {
         public static int Area(this RectInt rect) => rect.width * rect.height;
 
+        /// <summary>
+        /// Apply action over all coordinates of the rect excluding max
+        /// </summary>
         public static void ApplyForRect(this RectInt rect, System.Action<int, int> action)
         {
             for (int y = rect.min.y, yMax = rect.max.y; y < yMax; y++)
@@ -19,6 +22,9 @@ namespace LMCore.Extensions
             }
         }
 
+        /// <summary>
+        /// Makes a union rect of the bounding box for the two rects
+        /// </summary>
         public static RectInt Union(this RectInt rect, RectInt other)
         {
             var min = Vector2Int.Min(rect.min, other.min);
@@ -29,7 +35,6 @@ namespace LMCore.Extensions
         /// <summary>
         /// Answers if the union of the two rects includes any area outside either rect
         /// </summary>
-        /// <returns></returns>
         public static bool UnionIsRect(this RectInt rect, RectInt other)
         {
             var union = rect.Union(other);

@@ -29,7 +29,7 @@ public class TestVectorExtensions
     public void TestToVector2Int()
     {
         Assert.That(
-            new Vector3(3, 9, 12).ToVector2Int(),
+            new Vector3(3, 9, 12).ToVector2IntXZPlane(),
             Is.EqualTo(new Vector2Int(1, 4))
         );
     }
@@ -38,7 +38,7 @@ public class TestVectorExtensions
     public void TestToVector2IntWithScale()
     {
         Assert.That(
-            new Vector3(2, 4, 8).ToVector2Int(2),
+            new Vector3(2, 4, 8).ToVector2IntXZPlane(2),
             Is.EqualTo(new Vector2Int(1, 4))
         );
     }
