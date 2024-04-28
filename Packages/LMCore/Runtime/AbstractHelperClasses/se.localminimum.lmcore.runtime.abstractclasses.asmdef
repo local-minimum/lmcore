@@ -1,6 +1,6 @@
 {
-    "name": "Extensions",
-    "rootNamespace": "LMCore.Extensions",
+    "name": "Abstract Classes",
+    "rootNamespace": "LMCore.AbstractClasses",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
