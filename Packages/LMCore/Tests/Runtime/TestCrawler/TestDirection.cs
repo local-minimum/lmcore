@@ -9,6 +9,28 @@ using UnityEngine.TestTools;
 public class TestDirection
 {
     [Test]
+    [TestCase(4, 0, Direction.East)]
+    [TestCase(-1, 0, Direction.West)]
+    [TestCase(0, 4, Direction.North)]
+    [TestCase(0, -3, Direction.South)]
+    public void TestAsDirection(int x, int y, Direction direction)
+    {
+        Assert.AreEqual(direction, new Vector2Int(x, y).AsDirection());
+    }
+
+    [Test]
+    [TestCase(1, 0, 0, Direction.East)]
+    [TestCase(-3, 0, 0, Direction.West)]
+    [TestCase(0, 2, 0, Direction.Up)]
+    [TestCase(0, -1, 0, Direction.Down)]
+    [TestCase(0, 0, 1, Direction.North)]
+    [TestCase(0, 0, -1, Direction.South)]
+    public void TestAsDirection(int x, int y, int z, Direction direction)
+    {
+        Assert.AreEqual(direction, new Vector3Int(x, y, z).AsDirection());
+    }
+
+    [Test]
     [TestCase(Direction.North, Direction.West)]
     [TestCase(Direction.West, Direction.South)]
     [TestCase(Direction.South, Direction.East)]
@@ -16,6 +38,16 @@ public class TestDirection
     public void TestRotateCCW(Direction from, Direction to)
     {
         Assert.AreEqual(to, from.RotateCCW());
+    }
+
+    [Test]
+    [TestCase(Direction.North, Direction.Up, Direction.West)]
+    [TestCase(Direction.North, Direction.Down, Direction.East)]
+    [TestCase(Direction.West, Direction.North, Direction.Down)]
+    [TestCase(Direction.South, Direction.East, Direction.Up)]
+    public void TestRotate3DCCW(Direction from, Direction up, Direction to)
+    {
+        Assert.AreEqual(to, from.Rotate3DCCW(up));
     }
 
     [Test]
@@ -29,10 +61,23 @@ public class TestDirection
     }
 
     [Test]
+    [TestCase(Direction.North, Direction.Up, Direction.East)]
+    [TestCase(Direction.North, Direction.Down, Direction.West)]
+    [TestCase(Direction.West, Direction.North, Direction.Up)]
+    [TestCase(Direction.South, Direction.East, Direction.Down)]
+    public void TestRotate3DCW(Direction from, Direction up, Direction to)
+    {
+        Assert.AreEqual(to, from.Rotate3DCW(up));
+    }
+
+
+    [Test]
     [TestCase(Direction.North, Direction.South)]
     [TestCase(Direction.South, Direction.North)]
     [TestCase(Direction.West, Direction.East)]
     [TestCase(Direction.East, Direction.West)]
+    [TestCase(Direction.Up, Direction.Down)]
+    [TestCase(Direction.Down, Direction.Up)]
     public void TestInverse(Direction from, Direction to)
     {
         Assert.AreEqual(to, from.Inverse());
@@ -50,6 +95,22 @@ public class TestDirection
             direction.Translate(new Vector2Int(x1, y1))            
         );
     }
+
+    [Test]
+    [TestCase(Direction.North, 1, 2, 3, 1, 2, 4)]
+    [TestCase(Direction.South, 1, 2, 3, 1, 2, 2)]
+    [TestCase(Direction.West, 1, 2, 3, 0, 2, 3)]
+    [TestCase(Direction.East, 1, 2, 3, 2, 2, 3)]
+    [TestCase(Direction.Up, 1, 2, 3, 1, 3, 3)]
+    [TestCase(Direction.Down, 1, 2, 3, 1, 1, 3)]
+    public void TestTranslateVector3(Direction direction, int x1, int y1, int z1, int x2, int y2, int z2)
+    {
+        Assert.AreEqual(
+            new Vector3Int(x2, y2, z2),
+            direction.Translate(new Vector3Int(x1, y1, z1))
+        );
+    }
+
 
     [Test]
     [TestCase(Direction.North, 0, 1)]
