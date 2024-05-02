@@ -1,23 +1,23 @@
+using LMCore.AbstractClasses;
 using UnityEngine;
 using UnityEngine.UI;
-using LMCore.AbstractClasses;
 
 namespace LMCore.UI
 {
     public class DelayedActionUI : Singleton<DelayedActionUI>
     {
         [SerializeField]
-        TMPro.TextMeshProUGUI TextGUI;
+        private TMPro.TextMeshProUGUI TextGUI;
 
         [SerializeField]
-        Image ProgressImage;
+        private Image ProgressImage;
 
         [SerializeField]
-        GameObject DisplayRoot;
+        private GameObject DisplayRoot;
 
-        System.Action onWaitDone;
-        float waitStart;
-        float waitDuration;
+        private System.Action onWaitDone;
+        private float waitStart;
+        private float waitDuration;
 
         public void ShowMessage(string message, System.Action onWaitDone, float waitDuration = 1)
         {
@@ -37,7 +37,7 @@ namespace LMCore.UI
             }
         }
 
-        void ClearMessage()
+        private void ClearMessage()
         {
             onWaitDone = null;
             DisplayRoot.SetActive(false);

@@ -10,6 +10,7 @@ namespace LMCore.UI
     {
         public float time;
         public Sprite sprite;
+
         [TextArea]
         public string subtitle;
 
@@ -45,32 +46,32 @@ namespace LMCore.UI
     public class Slideshow : MonoBehaviour
     {
         [SerializeField]
-        string NextScene = "Menu";
+        private string NextScene = "Menu";
 
         [SerializeField]
-        SlideshowFrame[] frames;
+        private SlideshowFrame[] frames;
 
         [SerializeField, Range(0, 2)]
-        float InitialDelay;
+        private float InitialDelay;
 
-        int frameIndex = 0;
-
-        [SerializeField]
-        Image MainImage;
+        private int frameIndex = 0;
 
         [SerializeField]
-        TextMeshProUGUI Subtitle;
+        private Image MainImage;
 
         [SerializeField]
-        SimpleButton SkipButton;
+        private TextMeshProUGUI Subtitle;
 
         [SerializeField]
-        string ButtonTextAfterShow = "Leave";
+        private SimpleButton SkipButton;
 
         [SerializeField]
-        AudioSource Speaker;
+        private string ButtonTextAfterShow = "Leave";
 
-        void UpdateFrame(SlideshowFrame frame)
+        [SerializeField]
+        private AudioSource Speaker;
+
+        private void UpdateFrame(SlideshowFrame frame)
         {
             if (frame.sprite != null)
             {

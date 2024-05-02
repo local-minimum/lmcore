@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 using LMCore.Extensions;
-using System.Runtime.InteropServices.WindowsRuntime;
+using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
 public class TestSequenceExtensions
 {
-    static int[] arr = { 1, 2, 3 };
-    static List<int> list = new List<int>() { 1, 2, 3};
+    private static int[] arr = { 1, 2, 3 };
+    private static List<int> list = new List<int>() { 1, 2, 3 };
 
     [Test]
     [TestCase(0, 1)]
@@ -20,7 +16,7 @@ public class TestSequenceExtensions
     public void TestGetNthOrLastArray(int idx, int expected)
     {
         Assert.That(
-            arr.GetNthOrLast(idx), 
+            arr.GetNthOrLast(idx),
             Is.EqualTo(expected)
         );
     }
@@ -116,7 +112,7 @@ public class TestSequenceExtensions
         for (int i = 0; i < 10; i++)
         {
             Assert.True(
-                arr.Contains(arr.GetRandomElement())                
+                arr.Contains(arr.GetRandomElement())
             );
         }
     }
@@ -131,5 +127,4 @@ public class TestSequenceExtensions
             );
         }
     }
-
 }

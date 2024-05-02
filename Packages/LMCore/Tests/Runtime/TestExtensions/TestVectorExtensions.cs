@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using LMCore.Extensions;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
-using LMCore.Extensions;
 
 public class TestVectorExtensions
 {
@@ -11,7 +8,7 @@ public class TestVectorExtensions
     public void TestToVector3Int()
     {
         Assert.That(
-            new Vector3(3, 9, 12).ToVector3Int(), 
+            new Vector3(3, 9, 12).ToVector3Int(),
             Is.EqualTo(new Vector3Int(1, 3, 4))
         );
     }

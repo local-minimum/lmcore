@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.Extensions
@@ -33,7 +31,6 @@ namespace LMCore.Extensions
         /// Sets all children as not active
         /// </summary>
         public static void HideAllChildren(this Transform parent) => parent.SetAllChildrenVisibility(false);
-
 
         /// <summary>
         /// Sets all children as active

@@ -13,13 +13,13 @@ namespace LMCore.ProcGen
         }
 
         #region Language
+
         private static string[] language = new string[]{
         "Swedish",
         "English",
         "German",
         "Spanish",
     };
-
 
         public static string GetRandomLanguage()
         {
@@ -32,9 +32,11 @@ namespace LMCore.ProcGen
         }
 
         public static string GetWeightedRandomLanguage(int[] weights) => GetWeightedChoice(language, weights);
-        #endregion
+
+        #endregion Language
 
         #region Country
+
         private static Dictionary<string, string[]> languageToCountries = new Dictionary<string, string[]>() {
         { "Swedish", new string[] { "Sweden" } },
         { "English", new string[] { "Great Britain", "United States", "Australia", "New Zeeland", "Canada" } },
@@ -62,15 +64,18 @@ namespace LMCore.ProcGen
             var weights = languageToCountryWeights[language];
             return GetWeightedChoice(countries, weights);
         }
-        #endregion
+
+        #endregion Country
 
         #region Swedish
+
         private static string[] SweFirstNames = new string[] {
         "Anna", "Eva", "Maria", "Karin", "Sara", "Christina", "Lena", "Emma", "Kerstin", "Marie", "Malin",
         "Jenny", "Ingrid", "Hanna", "Linda", "Annika", "Susanne", "Elin", "Monica", "Birgitta",
         "Lars", "Mikael", "Anders", "Johan", "Erik", "Per", "Peter", "Thomas", "Karl", "Jan", "Daniel",
         "Fredrik", "Mohammad", "Andreas", "Stefan", "Hans", "Mats", "Marcus", "Mattias", "Magnus"
     };
+
         private static string[] SweSurnames = new string[] {
         "Andersson", "Johansson", "Karlsson", "Nilsson", "Eriksson", "Larsson", "Olsson", "Persson", "Svensson",
         "Gustafsson", "Pettersson", "Jonsson", "Jansson", "Hansson", "Bengtsson", "Jönsson", "Lindberg",
@@ -78,9 +83,11 @@ namespace LMCore.ProcGen
     };
 
         private static string GetSwedishName() => $"{SweFirstNames[Random.Range(0, SweFirstNames.Length)]} {SweSurnames[Random.Range(0, SweSurnames.Length)]}";
-        #endregion
+
+        #endregion Swedish
 
         #region English
+
         private static string[] EngFirstNames = new string[]
         {
         "James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "David", "Elizabeth",
@@ -102,9 +109,11 @@ namespace LMCore.ProcGen
         };
 
         private static string GetEnglishName() => $"{EngFirstNames[Random.Range(0, EngFirstNames.Length)]} {EngSurnames[Random.Range(0, EngSurnames.Length)]}";
-        #endregion
+
+        #endregion English
 
         #region German
+
         private static string[] GerFirstNames = new string[]
         {
         "Peter", "Michael", "Wolfgang", "Thomas", "Klaus", "Werner", "Manfred",
@@ -126,9 +135,11 @@ namespace LMCore.ProcGen
         };
 
         private static string GetGermanName() => $"{GerFirstNames[Random.Range(0, GerFirstNames.Length)]} {GerSurnames[Random.Range(0, GerSurnames.Length)]}";
-        #endregion
+
+        #endregion German
 
         #region Spanish
+
         private static string[] EspFirstNames = new string[]
         {
         "Maria", "Jose", "Juan", "Francisco", "Antonio", "Ana", "Manuel", "Miguel", "Carmen",
@@ -152,7 +163,8 @@ namespace LMCore.ProcGen
         };
 
         private static string GetSpanishName() => $"{EspFirstNames[Random.Range(0, EspFirstNames.Length)]} {EspSurnames[Random.Range(0, EspSurnames.Length)]} {EspSurnames[Random.Range(0, EspSurnames.Length)]}";
-        #endregion
+
+        #endregion Spanish
 
         public static string GetName(string language)
         {

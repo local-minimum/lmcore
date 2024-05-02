@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace LMCore.ProcGen
 {
-
     public static class OccupationList
     {
         private static string[] UncommonOccupations = new string[]
@@ -277,6 +276,7 @@ namespace LMCore.ProcGen
 };
 
         public static string[] AllOccupations => Occupations.Concat(UncommonOccupations).ToArray();
+
         public static string GetRandomOccupation() => Occupations[Random.Range(0, Occupations.Length)];
     }
 }

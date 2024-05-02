@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 namespace LMCore.Extensions
 {
@@ -17,23 +14,28 @@ namespace LMCore.Extensions
         };
 
         public static Vector2Int Random2DDirection() => Cardinal2DVectors[Random.Range(0, 4)];
+
         public static Vector3Int Random3DDirection() => Cardinal3DVectors[Random.Range(0, 6)];
 
         #region Axis
+
         public static int SmallestAxisMagnitude(this Vector2Int vector) => Mathf.Min(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+
         public static int SmallestAxisMagnitude(this Vector3Int vector) => Mathf.Min(Mathf.Abs(vector.x), Mathf.Abs(vector.y), Mathf.Abs(vector.z));
 
         public static int LargestAxisMagnitude(this Vector2Int vector) => Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+
         public static int LargetsAxisMagnitude(this Vector3Int vector) => Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y), Mathf.Abs(vector.z));
 
-        public static Vector2Int[] AsUnitComponents(this Vector2Int direction) => 
-            direction.IsUnitVector() ? 
-            new Vector2Int[] { direction } : 
+        public static Vector2Int[] AsUnitComponents(this Vector2Int direction) =>
+            direction.IsUnitVector() ?
+            new Vector2Int[] { direction } :
             new Vector2Int[] {
                 new Vector2Int(direction.x.Sign(), 0),
                 new Vector2Int(0, direction.y.Sign()),
             };
-        public static Vector3Int[] AsUnitComponents(this Vector3Int direction) => 
+
+        public static Vector3Int[] AsUnitComponents(this Vector3Int direction) =>
             direction.IsUnitVector() ?
             new Vector3Int[] { direction } :
             new Vector3Int[] {
@@ -41,23 +43,27 @@ namespace LMCore.Extensions
                 new Vector3Int(0, direction.y.Sign(), 0),
                 new Vector3Int(0, 0, direction.z.Sign()),
             };
-        #endregion
+
+        #endregion Axis
 
         public static bool IsUnitVector(this Vector2Int vector) =>
             Mathf.Abs(vector.x) + Mathf.Abs(vector.y) == 1;
+
         public static bool IsUnitVector(this Vector3Int vector) =>
             Mathf.Abs(vector.x) + Mathf.Abs(vector.y) + Mathf.Abs(vector.z) == 1;
 
         #region Cardinality
+
         /// <summary>
         /// Returns unit vector along the primary carninal axis.
-        /// 
+        ///
         /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
         /// </summary>
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int origin, Vector2Int target, bool resolveIndeterminateByRng = true) => PrimaryCardinalDirection(target - origin, resolveIndeterminateByRng);
+
         /// <summary>
         /// Returns unit vector along the primary carninal axis.
-        /// 
+        ///
         /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
         /// </summary>
         public static Vector2Int PrimaryCardinalDirection(this Vector2Int direction, bool resolveIndeterminateByRng = true)
@@ -87,15 +93,17 @@ namespace LMCore.Extensions
 
             return Vector2Int.zero;
         }
+
         /// <summary>
         /// Returns unit vector along the primary carninal axis.
-        /// 
+        ///
         /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
         /// </summary>
         public static Vector3Int PrimaryCardinalDirection(this Vector3Int origin, Vector3Int target, bool resolveIndeterminateByRng = true) => PrimaryCardinalDirection(target - origin, resolveIndeterminateByRng);
+
         /// <summary>
         /// Returns unit vector along the primary carninal axis.
-        /// 
+        ///
         /// If indeterminate it will either return the zero vector or random selected among candidates of equal length
         /// </summary>
         public static Vector3Int PrimaryCardinalDirection(this Vector3Int direction, bool resolveIndeterminateByRng = true)
@@ -168,6 +176,7 @@ namespace LMCore.Extensions
         }
 
         public static bool IsCardinal(this Vector2Int vector) => (vector.x == 0) != (vector.y == 0);
+
         public static bool IsCardinal(this Vector3Int vector) =>
             Mathf.Abs(vector.x.Sign()) + Mathf.Abs(vector.y.Sign()) + Mathf.Abs(vector.z.Sign()) == 1;
 
@@ -180,6 +189,7 @@ namespace LMCore.Extensions
         /// <returns></returns>
         public static bool IsOrthogonalCardinal(this Vector2Int cardinal1, Vector2Int cardinal2, bool trustCardinality = true) =>
              (cardinal1.x == 0) == (cardinal2.x != 0) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
+
         /// <summary>
         /// If the two vectors are at 90 degrees
         /// </summary>
@@ -191,20 +201,25 @@ namespace LMCore.Extensions
              ((cardinal1.x == 0) == (cardinal2.x != 0) || (cardinal1.y == 0) == (cardinal2.y != 0)) && (trustCardinality || cardinal1.IsCardinal() && cardinal2.IsCardinal());
 
         public static bool IsInverseDirection(this Vector2Int direction1, Vector2Int direction2) =>
-            direction1.x.Sign() == -direction2.x.Sign() 
+            direction1.x.Sign() == -direction2.x.Sign()
             && direction1.y.Sign() == -direction2.y.Sign();
+
         public static bool IsInverseDirection(this Vector3Int direction1, Vector3Int direction2) =>
-            direction1.x.Sign() == -direction2.x.Sign() 
-            && direction1.y.Sign() == -direction2.y.Sign() 
+            direction1.x.Sign() == -direction2.x.Sign()
+            && direction1.y.Sign() == -direction2.y.Sign()
             && direction1.z.Sign() == -direction2.z.Sign();
-        #endregion
+
+        #endregion Cardinality
 
         #region Rotations
+
         public static Quaternion AsQuaternion(this Vector2Int direction) => Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+
         public static Quaternion AsQuaternion(this Vector3Int direction) => Quaternion.LookRotation(new Vector3(direction.x, direction.y, direction.z));
 
         public static Vector2Int RotateCCW(this Vector2Int direction) =>
             new Vector2Int(-direction.y, direction.x);
+
         public static Vector3Int RotateCCW(this Vector3Int direction, Vector3Int up)
         {
             if (up.y > 0) return new Vector3Int(-direction.z, direction.y, direction.x);
@@ -217,15 +232,16 @@ namespace LMCore.Extensions
 
         public static Vector2Int RotateCW(this Vector2Int direction) =>
             new Vector2Int(direction.y, -direction.x);
-        public static Vector3Int RotateCW(this Vector3Int direction, Vector3Int up) => 
-            direction.RotateCCW(up * -1);
 
+        public static Vector3Int RotateCW(this Vector3Int direction, Vector3Int up) =>
+            direction.RotateCCW(up * -1);
 
         /// <summary>
         /// If the first vector is a clockwise rotation of the second
         /// </summary>
         public static bool IsCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
             cardinal1 == cardinal2.RotateCW();
+
         /// <summary>
         /// If the first vector is a clockwise rotation of the second around the up axis
         /// </summary>
@@ -237,20 +253,23 @@ namespace LMCore.Extensions
         /// </summary>
         public static bool IsCCWRotationOf(this Vector2Int cardinal1, Vector2Int cardinal2) =>
             cardinal1 == cardinal2.RotateCCW();
+
         /// <summary>
         /// If the first vector is a counter-clockwise rotation of the second around the up axis
         /// </summary>
         public static bool IsCCWRotationOf(this Vector3Int cardinal1, Vector3Int cardinal2, Vector3Int up) =>
             cardinal1 == cardinal2.RotateCCW(up);
 
-        #endregion
+        #endregion Rotations
 
         #region Distances
+
         /// <summary>
         /// Summation of distances along all axis
         /// </summary>
         public static int ManhattanDistance(this Vector2Int point, Vector2Int other) =>
                 Mathf.Abs(point.x - other.x) + Mathf.Abs(point.y - other.y);
+
         /// <summary>
         /// Summation of distances along all axis
         /// </summary>
@@ -262,14 +281,17 @@ namespace LMCore.Extensions
         /// </summary>
         public static int ChebyshevDistance(this Vector2Int point, Vector2Int other) =>
             Mathf.Max(Mathf.Abs(point.x - other.x), Mathf.Abs(point.y - other.y));
+
         /// <summary>
         /// Largest distance along any distance
         /// </summary>
         public static int ChebyshevDistance(this Vector3Int point, Vector3Int other) =>
             Mathf.Max(Mathf.Abs(point.x - other.x), Mathf.Abs(point.y - other.y), Mathf.Abs(point.z - other.z));
-        #endregion
+
+        #endregion Distances
 
         #region Intersection
+
         /// <summary>
         /// Get the intersection point of two vectors
         /// </summary>
@@ -284,9 +306,11 @@ namespace LMCore.Extensions
 
             return new Vector2Int(point.x, target.y);
         }
-        #endregion
+
+        #endregion Intersection
 
         #region World
+
         /// <summary>
         /// Returns float world position assuming the 2D int vector represents an XZ plane
         /// </summary>
@@ -294,6 +318,7 @@ namespace LMCore.Extensions
         /// <param name="scale">Size of each int space step in the world coordinates space</param>
         public static Vector3 ToPositionFromXZPlane(this Vector2Int coords, int elevation = 0, int scale = 3) =>
             new Vector3(coords.x * scale, elevation * scale, coords.y * scale);
+
         /// <summary>
         /// Returns float world position
         /// </summary>
@@ -302,7 +327,9 @@ namespace LMCore.Extensions
             new Vector3(coords.x * scale, coords.y * scale, coords.z * scale);
 
         public static Vector3 ToDirectionFromXZPlane(this Vector2Int direction) => new Vector3(direction.x, 0, direction.y);
+
         public static Vector3 ToDirection(this Vector3Int direction) => new Vector3(direction.x, direction.y, direction.z);
-        #endregion
+
+        #endregion World
     }
 }

@@ -6,16 +6,15 @@ namespace LMCore.UI
 {
     public class SimpleButton : MonoBehaviour
     {
-
+        [SerializeField]
+        private Color DefaultColor;
 
         [SerializeField]
-        Color DefaultColor;
-        [SerializeField]
-        Color SelectedColor;
+        private Color SelectedColor;
 
-        TextMeshProUGUI _colorTarget;
+        private TextMeshProUGUI _colorTarget;
 
-        TextMeshProUGUI ColorTarget
+        private TextMeshProUGUI ColorTarget
         {
             get
             {
@@ -40,10 +39,11 @@ namespace LMCore.UI
         }
 
         [SerializeField]
-        UnityEvent OnClick;
+        private UnityEvent OnClick;
 
-        SimpleButtonGroup _group;
-        SimpleButtonGroup Group
+        private SimpleButtonGroup _group;
+
+        private SimpleButtonGroup Group
         {
             get
             {
@@ -54,6 +54,7 @@ namespace LMCore.UI
                 return _group;
             }
         }
+
         public void Selected()
         {
             Debug.Log($"Selected {name}");

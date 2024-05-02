@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.Extensions
@@ -46,10 +44,10 @@ namespace LMCore.Extensions
 
             var uSize = union.size;
             var rSize = rect.size;
-            var oSize = other.size; 
+            var oSize = other.size;
 
             return uSize.x == rSize.x && uSize.x == oSize.x && uSize.y <= rSize.y + oSize.y
                 || uSize.y == rSize.y && uSize.y == oSize.y && uSize.x <= rSize.x + oSize.x;
-        }           
+        }
     }
 }

@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using LMCore.Crawler;
 using LMCore.IO;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 public class TestDirection
 {
@@ -71,7 +67,6 @@ public class TestDirection
         Assert.AreEqual(to, from.Rotate3DCW(up));
     }
 
-
     [Test]
     [TestCase(Direction.North, Direction.South)]
     [TestCase(Direction.South, Direction.North)]
@@ -93,7 +88,7 @@ public class TestDirection
     {
         Assert.AreEqual(
             new Vector2Int(x2, y2),
-            direction.Translate(new Vector2Int(x1, y1))            
+            direction.Translate(new Vector2Int(x1, y1))
         );
     }
 
@@ -111,7 +106,6 @@ public class TestDirection
             direction.Translate(new Vector3Int(x1, y1, z1))
         );
     }
-
 
     [Test]
     [TestCase(Direction.North, 0, 1)]

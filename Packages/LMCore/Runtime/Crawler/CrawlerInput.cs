@@ -1,15 +1,15 @@
-using System.Linq;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
 using LMCore.AbstractClasses;
 using LMCore.IO;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LMCore.Crawler
 {
-    public class CrawlerInput :  BlockableActions
+    public class CrawlerInput : BlockableActions
     {
-        Queue<Movement> queue = new Queue<Movement>();
+        private Queue<Movement> queue = new Queue<Movement>();
 
         private class Press
         {
@@ -21,7 +21,7 @@ namespace LMCore.Crawler
                 this.movement = movement;
                 this.time = time;
             }
-            
+
             public Press()
             {
                 movement = Movement.None;
@@ -29,7 +29,7 @@ namespace LMCore.Crawler
             }
         }
 
-        List<Press> pressStack = new List<Press>();
+        private List<Press> pressStack = new List<Press>();
 
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
@@ -40,22 +40,28 @@ namespace LMCore.Crawler
                 pressStack.Add(new Press(movement, Time.timeSinceLevelLoad));
 
                 queue.Enqueue(movement);
-            } else if (context.phase == InputActionPhase.Canceled)
+            }
+            else if (context.phase == InputActionPhase.Canceled)
             {
                 pressStack.RemoveAll(press => press.movement == movement);
             }
         }
 
-        public void OnMoveForward(InputAction.CallbackContext context) => 
+        public void OnMoveForward(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.Forward);
+
         public void OnMoveBackward(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.Backward);
+
         public void OnStrafeLeft(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.StrafeLeft);
+
         public void OnStrafeRight(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.StrafeRight);
+
         public void OnTurnCCW(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.TurnCCW);
+
         public void OnTurnCW(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.TurnCW);
 
@@ -68,13 +74,14 @@ namespace LMCore.Crawler
         public int QueueDepth => queue.Count;
 
         [SerializeField, Tooltip("Initial delay before held key is counted again"), Range(0, 2)]
-        float holdingAsFirstRepress = 0.8f;
+        private float holdingAsFirstRepress = 0.8f;
+
         [SerializeField, Tooltip("Continued re-press time"), Range(0, 2)]
-        float holdingAsRePress = 0.4f;
+        private float holdingAsRePress = 0.4f;
 
-        Movement mostRecentRefill = Movement.None;
+        private Movement mostRecentRefill = Movement.None;
 
-        Movement CheckQueueRefill(bool enqueue)
+        private Movement CheckQueueRefill(bool enqueue)
         {
             var candidate = pressStack.LastOrDefault(press => Time.timeSinceLevelLoad - press.time < holdingAsRePress);
 
@@ -120,7 +127,7 @@ namespace LMCore.Crawler
 
             return movement;
         }
-        
+
         private void Update()
         {
             if (QueueDepth <= 0)

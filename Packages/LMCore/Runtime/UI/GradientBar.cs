@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace LMCore.UI
 {
@@ -12,12 +9,13 @@ namespace LMCore.UI
     public class GradientBar : MonoBehaviour
     {
         [SerializeField, Tooltip("The bar which uses fill to show 0-1 progres")]
-        Image Bar;
+        private Image Bar;
 
         [SerializeField, Tooltip("Must start at 0 and go to 1 for both axis.")]
-        AnimationCurve gradient;
+        private AnimationCurve gradient;
 
-        int _MaxValue;
+        private int _MaxValue;
+
         public int MaxValue
         {
             get => _MaxValue;
@@ -28,7 +26,8 @@ namespace LMCore.UI
             }
         }
 
-        int _CurrentValue;
+        private int _CurrentValue;
+
         public int CurrentValue
         {
             get => _CurrentValue;
@@ -39,8 +38,9 @@ namespace LMCore.UI
             }
         }
 
-        void UpdateGradient() => UpdateGradient(Mathf.Clamp01((float)CurrentValue / MaxValue));
-        void UpdateGradient(float progress)
+        private void UpdateGradient() => UpdateGradient(Mathf.Clamp01((float)CurrentValue / MaxValue));
+
+        private void UpdateGradient(float progress)
         {
             Bar.fillAmount = gradient.Evaluate(progress);
         }

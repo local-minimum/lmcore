@@ -1,53 +1,55 @@
+using LMCore.AbstractClasses;
+using LMCore.Extensions;
+using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using LMCore.AbstractClasses;
-using LMCore.Extensions;
-using LMCore.IO;
 
 namespace LMCore.UI
 {
     public class KeyPressHUD : Singleton<KeyPressHUD>
     {
         [SerializeField]
-        GameObject[] ExtraActions;
+        private GameObject[] ExtraActions;
 
         [SerializeField]
-        GameObject RotateCCW;
+        private GameObject RotateCCW;
 
         [SerializeField]
-        GameObject MoveForward;
+        private GameObject MoveForward;
 
         [SerializeField]
-        GameObject RotateCW;
+        private GameObject RotateCW;
 
         [SerializeField]
-        GameObject StrafeLeft;
+        private GameObject StrafeLeft;
 
         [SerializeField]
-        GameObject MoveBackward;
+        private GameObject MoveBackward;
 
         [SerializeField]
-        GameObject StrafeRight;
+        private GameObject StrafeRight;
 
         [SerializeField]
-        Color DefaultColor;
+        private Color DefaultColor;
+
         [SerializeField]
-        Color ActiveColor;
+        private Color ActiveColor;
+
         [SerializeField]
-        Color PressedColor;
+        private Color PressedColor;
 
         [SerializeField, Range(0, 1)]
-        float easeToDefaultTime = 0.1f;
+        private float easeToDefaultTime = 0.1f;
 
         private struct Ease
         {
             public readonly GameObject Target;
             public readonly Color StartColor;
-            float StartTime;
-            float Duration;
+            private float StartTime;
+            private float Duration;
 
             public Ease(GameObject target, Color startColor, float duration)
             {
@@ -58,12 +60,11 @@ namespace LMCore.UI
             }
 
             public float CalculateProgress() => Mathf.Clamp01((Time.timeSinceLevelLoad - StartTime) / Duration);
-            
         }
 
-        List<Ease> eases = new List<Ease>();
+        private List<Ease> eases = new List<Ease>();
 
-        void ApplyEffect(GameObject go, Color color)
+        private void ApplyEffect(GameObject go, Color color)
         {
             foreach (Image image in go.GetComponentsInChildren<Image>())
             {
@@ -82,23 +83,28 @@ namespace LMCore.UI
             {
                 case Movement.Forward:
                     return MoveForward;
+
                 case Movement.Backward:
                     return MoveBackward;
+
                 case Movement.StrafeLeft:
                     return StrafeLeft;
+
                 case Movement.StrafeRight:
                     return StrafeRight;
+
                 case Movement.TurnCCW:
                     return RotateCCW;
+
                 case Movement.TurnCW:
                     return RotateCW;
-                   
+
                 default:
-                    return null; 
+                    return null;
             }
         }
 
-        List<Movement> pressed = new List<Movement>();
+        private List<Movement> pressed = new List<Movement>();
 
         private void SyncPressed()
         {
@@ -122,7 +128,6 @@ namespace LMCore.UI
             eases = eases.Where(e => e.Target != go).ToList();
 
             SyncPressed();
-            
         }
 
         public void Release(Movement movement)
@@ -133,13 +138,13 @@ namespace LMCore.UI
             if (pressed.Count > 0)
             {
                 eases.Add(new Ease(go, pressed.Last() == movement ? ActiveColor : PressedColor, easeToDefaultTime));
-            }            
+            }
 
             pressed.Remove(movement);
 
             SyncPressed();
         }
-        
+
         private void Start()
         {
             ApplyEffect(RotateCCW, DefaultColor);
@@ -196,12 +201,15 @@ namespace LMCore.UI
         {
             set
             {
-                if (value) {
+                if (value)
+                {
                     transform.ShowAllChildren();
-                } else {
+                }
+                else
+                {
                     transform.HideAllChildren();
                 };
             }
-        }        
+        }
     }
 }

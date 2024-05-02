@@ -1,9 +1,8 @@
-using System.Collections;
+using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using LMCore.Extensions;
 
 namespace LMCore.UI
 {
@@ -14,14 +13,15 @@ namespace LMCore.UI
         public event SelectButtonEvent OnSelectButton;
 
         [SerializeField]
-        SimpleButton[] Buttons;
+        private SimpleButton[] Buttons;
 
-        List<SimpleButton> VisibleButtons => Buttons.Where(b => b.gameObject.activeSelf).ToList();
+        private List<SimpleButton> VisibleButtons => Buttons.Where(b => b.gameObject.activeSelf).ToList();
 
         [SerializeField]
-        bool WrapSelection = true;
+        private bool WrapSelection = true;
 
-        SimpleButton _Selected;
+        private SimpleButton _Selected;
+
         public SimpleButton Selected
         {
             get => _Selected;
@@ -39,19 +39,21 @@ namespace LMCore.UI
         /// <summary>
         /// Inputs/North (Forward)
         /// </summary>
-        const string upActionId = "00703aab-a4e6-4870-9afd-59a0a6bb99fa";
+        private const string upActionId = "00703aab-a4e6-4870-9afd-59a0a6bb99fa";
+
         /// <summary>
         /// Inputs/South (Backwards)
         /// </summary>
-        const string downActionId = "324d3a1c-59af-4607-a1c7-87629a3a9903";
+        private const string downActionId = "324d3a1c-59af-4607-a1c7-87629a3a9903";
+
         /// <summary>
         /// Inputs/Interact event
         /// </summary>
-        const string interactActionId = "911be32a-e601-4f55-bcb3-49f94aa29fff";
+        private const string interactActionId = "911be32a-e601-4f55-bcb3-49f94aa29fff";
 
+        private PlayerInput _input;
 
-        PlayerInput _input;
-        PlayerInput Input
+        private PlayerInput Input
         {
             get
             {
@@ -63,7 +65,7 @@ namespace LMCore.UI
             }
         }
 
-        void RegisterCallbacks()
+        private void RegisterCallbacks()
         {
             if (Input == null)
             {
@@ -78,12 +80,15 @@ namespace LMCore.UI
                     case interactActionId:
                         evt.AddListener(DoInteract);
                         break;
+
                     case upActionId:
                         evt.AddListener(DoUp);
                         break;
+
                     case downActionId:
                         evt.AddListener(DoDown);
                         break;
+
                     default:
                         Debug.Log($"Not assigning {evt.actionId} ({evt.actionName})");
                         break;
@@ -91,7 +96,7 @@ namespace LMCore.UI
             }
         }
 
-        void UnregisterCallbacks()
+        private void UnregisterCallbacks()
         {
             if (Input == null) return;
 
@@ -102,9 +107,11 @@ namespace LMCore.UI
                     case interactActionId:
                         evt.RemoveListener(DoInteract);
                         break;
+
                     case upActionId:
                         evt.RemoveListener(DoUp);
                         break;
+
                     case downActionId:
                         evt.RemoveListener(DoDown);
                         break;

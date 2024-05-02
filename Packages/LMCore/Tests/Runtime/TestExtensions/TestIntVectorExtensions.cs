@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 using LMCore.Extensions;
+using NUnit.Framework;
 using System.Linq;
+using UnityEngine;
 
 public class TestIntVectorExtensions
 {
@@ -17,7 +14,7 @@ public class TestIntVectorExtensions
                 IntVectorExtensions.Cardinal2DVectors.Contains(
                     IntVectorExtensions.Random2DDirection()
                 )
-            );                
+            );
         }
     }
 
@@ -90,7 +87,7 @@ public class TestIntVectorExtensions
     public void TestAsUnitComponents2D()
     {
         Assert.That(
-            new Vector2Int(3, -5).AsUnitComponents(), 
+            new Vector2Int(3, -5).AsUnitComponents(),
             Is.EqualTo(new Vector2Int[] { Vector2Int.right, Vector2Int.down })
         );
     }
@@ -120,7 +117,8 @@ public class TestIntVectorExtensions
     [TestCase(1, 1, false)]
     [TestCase(1, -1, false)]
     [TestCase(2, -1, false)]
-    public void TestIsUnitVector2D( int x, int y, bool unit ) { 
+    public void TestIsUnitVector2D(int x, int y, bool unit)
+    {
         Assert.That(new Vector2Int(x, y).IsUnitVector(), Is.EqualTo(unit));
     }
 
@@ -365,7 +363,6 @@ public class TestIntVectorExtensions
         Assert.That(Vector2Int.right.RotateCCW(), Is.EqualTo(Vector2Int.up));
     }
 
-
     [Test]
     public void TestRotateCW2D()
     {
@@ -374,7 +371,6 @@ public class TestIntVectorExtensions
         Assert.That(Vector2Int.down.RotateCW(), Is.EqualTo(Vector2Int.left));
         Assert.That(Vector2Int.right.RotateCW(), Is.EqualTo(Vector2Int.down));
     }
-
 
     [Test]
     public void TestRotateCCW3D()
@@ -432,7 +428,8 @@ public class TestIntVectorExtensions
     }
 
     [Test]
-    public void TestIsCWRotationOf2D() {
+    public void TestIsCWRotationOf2D()
+    {
         // Sentinals assuming it borrows the rotation code
         Assert.True(Vector2Int.up.IsCWRotationOf(Vector2Int.left));
         Assert.False(Vector2Int.up.IsCWRotationOf(Vector2Int.right));
@@ -530,7 +527,6 @@ public class TestIntVectorExtensions
             new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.left),
             Is.EqualTo(new Vector2Int(3, 0))
         );
-
 
         Assert.That(
             new Vector2Int(1, 0).OrthoIntersection(new Vector2Int(3, 10), Vector2Int.up),

@@ -4,14 +4,14 @@ namespace LMCore.IO
 {
     public static class GameSettings
     {
-
-        static readonly string SettingsRoot = "GameSettings";
-        static readonly string MovementsRoot = $"{SettingsRoot}.Movement";
-        static readonly string UIRoot = $"{SettingsRoot}.UI";
+        private static readonly string SettingsRoot = "GameSettings";
+        private static readonly string MovementsRoot = $"{SettingsRoot}.Movement";
+        private static readonly string UIRoot = $"{SettingsRoot}.UI";
 
         public class BoolSetting
         {
             public delegate void OnChangeEvent(bool value);
+
             public event OnChangeEvent OnChange;
 
             public readonly string Key;

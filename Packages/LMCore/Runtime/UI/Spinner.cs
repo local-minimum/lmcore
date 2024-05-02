@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,30 +6,30 @@ namespace LMCore.UI
     public class Spinner : MonoBehaviour
     {
         [SerializeField]
-        Color NoColor;
+        private Color NoColor;
 
         [SerializeField]
-        Color FullColor;
+        private Color FullColor;
 
         [SerializeField]
-        AnimationCurve SpinnerColorLerp;
+        private AnimationCurve SpinnerColorLerp;
 
         [SerializeField]
-        AnimationCurve SpinningSpeed;
+        private AnimationCurve SpinningSpeed;
 
         [SerializeField]
-        float SpinningSpeedMultiplier = 1;
+        private float SpinningSpeedMultiplier = 1;
 
         [SerializeField]
-        float SpinDuration = 2f;
+        private float SpinDuration = 2f;
 
-        float SpinStart;
+        private float SpinStart;
 
         [SerializeField]
-        Image Img;
+        private Image Img;
 
-        bool Spinning;
-        Quaternion StartRotation;
+        private bool Spinning;
+        private Quaternion StartRotation;
 
         public void Spin(float spinDuration = -1f)
         {

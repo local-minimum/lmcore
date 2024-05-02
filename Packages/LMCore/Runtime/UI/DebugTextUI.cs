@@ -1,13 +1,13 @@
-using TMPro;
 using LMCore.AbstractClasses;
+using TMPro;
 
 namespace LMCore.UI
 {
     public class DebugTextUI : Singleton<DebugTextUI>
     {
+        private TextMeshProUGUI TextUI;
 
-        TextMeshProUGUI TextUI;
-        void Start()
+        private void Start()
         {
             TextUI = GetComponentInChildren<TextMeshProUGUI>();
         }
@@ -15,11 +15,12 @@ namespace LMCore.UI
         public string Text
         {
             get { return TextUI?.text; }
-            set { 
+            set
+            {
                 if (TextUI != null)
                 {
                     TextUI.text = value;
-                }                
+                }
             }
         }
     }

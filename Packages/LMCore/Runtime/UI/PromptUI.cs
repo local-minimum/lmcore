@@ -1,16 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 using LMCore.AbstractClasses;
 using LMCore.Extensions;
+using TMPro;
+using UnityEngine;
 
 namespace LMCore.UI
 {
     public class PromptUI : Singleton<PromptUI>
     {
         [SerializeField]
-        TextMeshProUGUI prompt;
+        private TextMeshProUGUI prompt;
 
         private void Start()
         {

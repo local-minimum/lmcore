@@ -1,32 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 using LMCore.Extensions;
+using NUnit.Framework;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class TestRectExtensions
 {
-    static RectInt emptyRect = new RectInt(0, 1, 0, 0);
-    static RectInt r1 = new RectInt(0, 1, 2, 3);
-    static RectInt r2 = new RectInt(0, 4, 2, 5);
-    static RectInt r3 = new RectInt(2, 4, 2, 5);
-    static RectInt r4 = new RectInt(0, 3, 2, 9);
-    static RectInt r5 = new RectInt(1, 1, 4, 3);
-    static RectInt r6 = new RectInt(10, 1, 4, 3);
+    private static RectInt emptyRect = new RectInt(0, 1, 0, 0);
+    private static RectInt r1 = new RectInt(0, 1, 2, 3);
+    private static RectInt r2 = new RectInt(0, 4, 2, 5);
+    private static RectInt r3 = new RectInt(2, 4, 2, 5);
+    private static RectInt r4 = new RectInt(0, 3, 2, 9);
+    private static RectInt r5 = new RectInt(1, 1, 4, 3);
+    private static RectInt r6 = new RectInt(10, 1, 4, 3);
 
     [Test]
     public void TestArea()
     {
         Assert.That(
-            r1.Area(), 
+            r1.Area(),
             Is.EqualTo(6)
         );
     }
 
     [Test]
     public void TestApplyForRect()
-    {        
+    {
         var coords = new HashSet<Vector2Int>();
 
         System.Action<int, int> check = (x, y) =>
