@@ -15,29 +15,41 @@ namespace LMCore.Crawler
         {
             public Movement movement;
             public float time;
+            public int resuses;
 
-            public Press(Movement movement, float time)
+            public Press(Movement movement)
             {
                 this.movement = movement;
-                this.time = time;
+                time = Time.timeSinceLevelLoad;
+                resuses = 0;
             }
 
             public Press()
             {
                 movement = Movement.None;
                 time = 0;
+                resuses = 0;
             }
+
+            public void Reuse()
+            {
+                time = Time.timeSinceLevelLoad;
+                resuses++;
+            }
+
+            public override string ToString() => $"[{movement} ({time})]";
         }
 
         private List<Press> pressStack = new List<Press>();
 
+        public string PressStackInfo => string.Join(" < ", pressStack);
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
             if (context.phase == InputActionPhase.Started)
             {
                 if (ActionsBlocked) return;
 
-                pressStack.Add(new Press(movement, Time.timeSinceLevelLoad));
+                pressStack.Add(new Press(movement));
 
                 queue.Enqueue(movement);
             }
@@ -79,28 +91,31 @@ namespace LMCore.Crawler
         [SerializeField, Tooltip("Continued re-press time"), Range(0, 2)]
         private float holdingAsRePress = 0.4f;
 
+        [SerializeField]
+        private AnimationCurve delayEasing;
+
         private Movement mostRecentRefill = Movement.None;
 
+        private bool ReadyToReuse(Press press)
+        {
+            var neededDelta = Mathf.Lerp(holdingAsFirstRepress, holdingAsRePress, delayEasing.Evaluate(press.resuses));
+            return Time.timeSinceLevelLoad - press.time > neededDelta;
+        }
+
+        // TODO: Perhaps refill before queuing?
         private Movement CheckQueueRefill(bool enqueue)
         {
-            var candidate = pressStack.LastOrDefault(press => Time.timeSinceLevelLoad - press.time < holdingAsRePress);
+            var candidate = pressStack.LastOrDefault();
 
             // Indication that the stack is empty or not yet passed enough time
-            if (candidate.movement == Movement.None)
+            if (candidate == null || candidate.movement == Movement.None || !ReadyToReuse(candidate))
             {
                 // If the movement that we're awaiting is no the same as the pressent it's new and we
                 // use longer time before redoing it
-                if (pressStack.LastOrDefault().movement != mostRecentRefill)
+                if (candidate?.movement != mostRecentRefill)
                 {
                     mostRecentRefill = Movement.None;
                 }
-                return Movement.None;
-            }
-
-            // If it's the first time for this movement lets reset recent, because it's new
-            if (candidate.movement != mostRecentRefill && Time.timeSinceLevelLoad - candidate.time < holdingAsFirstRepress)
-            {
-                mostRecentRefill = Movement.None;
                 return Movement.None;
             }
 
@@ -110,7 +125,7 @@ namespace LMCore.Crawler
                 queue.Enqueue(candidate.movement);
             }
 
-            candidate.time = Time.timeSinceLevelLoad;
+            candidate.Reuse();
             mostRecentRefill = candidate.movement;
 
             return candidate.movement;
