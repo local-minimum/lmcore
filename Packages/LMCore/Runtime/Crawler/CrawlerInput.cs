@@ -51,6 +51,13 @@ namespace LMCore.Crawler
 
                 pressStack.Add(new Press(movement));
 
+                var waitingMove = CheckQueueRefill(false);
+
+                if (waitingMove != movement)
+                {
+                    queue.Enqueue(waitingMove);
+                }
+
                 queue.Enqueue(movement);
             }
             else if (context.phase == InputActionPhase.Canceled)
@@ -88,21 +95,24 @@ namespace LMCore.Crawler
         [SerializeField, Tooltip("Initial delay before held key is counted again"), Range(0, 2)]
         private float holdingAsFirstRepress = 0.8f;
 
-        [SerializeField, Tooltip("Continued re-press time"), Range(0, 2)]
+        [SerializeField, Tooltip("Minimum delay after having held a key for a while"), Range(0, 2)]
         private float holdingAsRePress = 0.4f;
 
-        [SerializeField]
+        [
+            SerializeField, 
+            Tooltip("How to ease between the two delays (y=1 -> first press delay, y=0 ->minimum delay). Each re-use counts as 1 x-unit so to have 3 step easing curve should start at 0 and end at 2. Last point's right tangent should probably be constant.")
+        ]
         private AnimationCurve delayEasing;
 
         private Movement mostRecentRefill = Movement.None;
 
         private bool ReadyToReuse(Press press)
         {
-            var neededDelta = Mathf.Lerp(holdingAsFirstRepress, holdingAsRePress, delayEasing.Evaluate(press.resuses));
+            float e = delayEasing.Evaluate(press.resuses);
+            var neededDelta = Mathf.Lerp(holdingAsRePress, holdingAsFirstRepress, e);
             return Time.timeSinceLevelLoad - press.time > neededDelta;
         }
 
-        // TODO: Perhaps refill before queuing?
         private Movement CheckQueueRefill(bool enqueue)
         {
             var candidate = pressStack.LastOrDefault();

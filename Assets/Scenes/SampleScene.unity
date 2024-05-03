@@ -1931,8 +1931,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1ec5e5a17d0e274197a267edf0b4182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holdingAsFirstRepress: 0.7
-  holdingAsRePress: 0.3
+  holdingAsFirstRepress: 0.5
+  holdingAsRePress: 0.2
   delayEasing:
     serializedVersion: 2
     m_Curve:
