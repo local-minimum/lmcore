@@ -141,6 +141,9 @@ namespace LMCore.Crawler
             return candidate.movement;
         }
 
+        /// <summary>
+        /// Get and consume the next movement from the queue
+        /// </summary>
         public Movement GetMovement()
         {
             var movement = queue.Count == 0 ? Movement.None : queue.Dequeue();
@@ -152,6 +155,13 @@ namespace LMCore.Crawler
 
             return movement;
         }
+
+        /// <summary>
+        /// Check what the upcomming movement is without consuming it
+        /// </summary>
+        /// <returns>Next movement in queue</returns>
+        public Movement Peak() => queue.Count == 0 ? Movement.None : queue.Peek();
+        
 
         private void Update()
         {

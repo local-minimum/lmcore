@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using LMCore.Extensions;
 
-public class NaiveMover : MonoBehaviour
+public class NaiveInstantMovement : MonoBehaviour
 {
     [SerializeField]
     private int StepSize = 3;
