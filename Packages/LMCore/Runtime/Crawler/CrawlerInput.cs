@@ -106,10 +106,30 @@ namespace LMCore.Crawler
 
         private Movement mostRecentRefill = Movement.None;
 
-        private bool ReadyToReuse(Press press)
+        float PressDuration(Press press)
         {
             float e = delayEasing.Evaluate(press.resuses);
-            var neededDelta = Mathf.Lerp(holdingAsRePress, holdingAsFirstRepress, e);
+            return Mathf.Lerp(holdingAsRePress, holdingAsFirstRepress, e);
+        }
+
+        public bool HasReuseAtTime(out float time)
+        {
+            if (pressStack.Count == 0)
+            {
+                time = 0;
+                return false;
+            }
+
+            var press = pressStack.Last();
+            var pressDuration = PressDuration(press);
+
+            time = pressDuration + press.time;
+            return true;
+        }
+
+        private bool ReadyToReuse(Press press)
+        {
+            var neededDelta = PressDuration(press);
             return Time.timeSinceLevelLoad - press.time > neededDelta;
         }
 

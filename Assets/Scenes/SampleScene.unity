@@ -2114,7 +2114,7 @@ MonoBehaviour:
   StepSize: 3
   StartLookDirection: 0
   turnTime: 0.2
-  translationTime: 0.45
+  translationTime: 1.335
 --- !u!1 &694166379
 GameObject:
   m_ObjectHideFlags: 0
