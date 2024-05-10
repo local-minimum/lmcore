@@ -10,103 +10,124 @@ public class NaiveSmoothMovement : MonoBehaviour
     [SerializeField]
     private int StepSize = 3;
 
-    CrawlerInput cInput;
-
-    [SerializeField]
-    Direction StartLookDirection;
-
-    Vector2Int Position;
-    Direction LookDirection;
-
-    [SerializeField, Range(0, 2)]
-    float turnTime = 0.2f;
-
-    [SerializeField, Range(0, 2)]
-    float translationTime = 0.45f;
+    CrawlerInput2 cInput;
+    GridEntity gEntity;
 
     [SerializeField]
     void Start()
     {
-        cInput = GetComponent<CrawlerInput>();
-        Sync();
+        cInput = GetComponent<CrawlerInput2>();
+        gEntity = GetComponent<GridEntity>();
+        gEntity.Sync();
     }
 
-    void Sync()
-    {
-        transform.position = Position.ToPositionFromXZPlane();
-        transform.rotation = LookDirection.AsQuaternion();
-    }
 
-    Movement ActiveMovement = Movement.None;
-    float startTime;
+    int animationTickId;
+    Movement Animation = Movement.None;
+    float animationStartTime;
+    float animationInterpolationStart;
+    float animationDuration;
+
     bool turning;
     Quaternion activeStartRotation;
     Quaternion activeEndRotation;
     Vector3 activeStartPosition;
     Vector3 activeEndPosition;
-    float moveTime = 999;
+
+    private void OnEnable()
+    {
+        if (cInput == null)
+        {
+            cInput = GetComponent<CrawlerInput2>();
+        }
+
+        cInput.OnMovement += CInput_OnMovement;
+        ElasticGameClock.OnTickEnd += ElasticGameClock_OnTickEnd;
+        ElasticGameClock.OnTickEndAdjustment += ElasticGameClock_OnTickEndAdjustment;
+    }
+
+
+    private void OnDisable()
+    {
+        cInput.OnMovement -= CInput_OnMovement;
+        ElasticGameClock.OnTickEnd -= ElasticGameClock_OnTickEnd;
+        ElasticGameClock.OnTickEndAdjustment -= ElasticGameClock_OnTickEndAdjustment;
+    }
+
+    private void ElasticGameClock_OnTickEndAdjustment(int tickId, float unadjustedProgress, float adjustedProgress, float endTime)
+    {
+        if (animationTickId != tickId) return;
+
+        animationStartTime = Time.timeSinceLevelLoad;
+        animationDuration = endTime - animationStartTime;
+        animationInterpolationStart = unadjustedProgress;
+    }
+
+    private void ElasticGameClock_OnTickEnd(int tickId)
+    {
+        if (animationTickId == tickId)
+        {
+            EndAnimation();
+        }
+    }
+
+    private void CInput_OnMovement(int tickId, Movement movement, float duration)
+    {
+        if (Animation != Movement.None) { EndAnimation(); }
+
+        animationTickId = tickId;
+        Animation = movement;
+        animationStartTime = Time.timeSinceLevelLoad;
+        animationInterpolationStart = 0;
+        animationDuration = duration;
+        turning = movement.IsRotation();
+
+        if (turning)
+        {
+            activeStartRotation = transform.rotation;
+            activeEndRotation = gEntity.LookDirection.ApplyRotation(movement).AsQuaternion();
+        } else if (movement != Movement.None)
+        {
+            activeStartPosition = transform.position;
+            activeEndPosition = gEntity.LookDirection
+                .RelativeTranslation(movement)
+                .Translate(gEntity.Position)
+                .ToPositionFromXZPlane();
+        }
+    }
+
+    void EndAnimation()
+    {
+        if (turning)
+        {
+            gEntity.Rotate(Animation);
+        } else
+        {
+            gEntity.Translate(Animation);
+        }
+
+        gEntity.Sync();
+        Animation = Movement.None;
+    } 
 
     void Update()
     {
-        if (ActiveMovement == Movement.None) {
-            ActiveMovement = cInput.GetMovement();
-            startTime = Time.timeSinceLevelLoad;
-            turning = ActiveMovement.IsRotation();
+        if (Animation == Movement.None) { return; }
 
-            if (ActiveMovement == Movement.None )
-            {
-                moveTime = 999;
-                return;
-            }
+        var progress = animationInterpolationStart + (1 - animationInterpolationStart) * Mathf.Clamp01((Time.timeSinceLevelLoad - animationStartTime) / animationDuration);
 
-            if (cInput.HasReuseAtTime(out float reuseTime))
-            {
-                float maxTime = reuseTime - Time.timeSinceLevelLoad;
-                if (turning)
-                {
-                    moveTime = Mathf.Min(turnTime, maxTime, moveTime);
-                } else
-                {
-                    moveTime = Mathf.Min(translationTime, maxTime, moveTime);
-                }
-                Debug.Log($"{ActiveMovement}: {moveTime}");
-            } else
-            {
-                moveTime = turning ? turnTime : translationTime;
-            }
+        if (progress == 1)
+        {
+            EndAnimation();
+            return;
+        }
 
-            if (turning)
-            {
-                activeStartRotation = transform.rotation;
-                activeEndRotation = LookDirection.ApplyRotation(ActiveMovement).AsQuaternion();
-            } else if (ActiveMovement != Movement.None)
-            {
-                activeStartPosition = transform.position;
-                activeEndPosition = LookDirection
-                    .RelativeTranslation(ActiveMovement)
-                    .Translate(Position)
-                    .ToPositionFromXZPlane();
-
-            }
-        } else if (turning) {
-            float progress = Mathf.Clamp01((Time.timeSinceLevelLoad - startTime) / moveTime);
+        if (turning)
+        {
             transform.rotation = Quaternion.Lerp(activeStartRotation, activeEndRotation, progress);
-            if (progress >= 1f)
-            {
-                LookDirection = LookDirection.ApplyRotation(ActiveMovement);
-                ActiveMovement = Movement.None;
-            }
         } else
         {
-            float progress = Mathf.Clamp01((Time.timeSinceLevelLoad - startTime) / moveTime);
             transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, progress);
-            if (progress >= 1f)
-            {
-                Position = LookDirection
-                    .RelativeTranslation(ActiveMovement)
-                    .Translate(Position);
-                ActiveMovement = Movement.None;
-            }
         }
     }
 }

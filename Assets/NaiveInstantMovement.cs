@@ -1,7 +1,5 @@
 using LMCore.Crawler;
 using LMCore.IO;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using LMCore.Extensions;
 
@@ -10,46 +8,42 @@ public class NaiveInstantMovement : MonoBehaviour
     [SerializeField]
     private int StepSize = 3;
 
-    CrawlerInput cInput;
+    CrawlerInput2 cInput;
+    GridEntity gEntity;
 
-    [SerializeField]
-    Direction StartLookDirection;
-
-    Vector2Int Position;
-    Direction LookDirection;
 
     void Start()
     {
-        cInput = GetComponent<CrawlerInput>();
-        Sync();
+        gEntity = GetComponent<GridEntity>();
+        gEntity.Sync();
     }
 
-    void Translate(Movement movement)
-    {
-        Position = LookDirection.RelativeTranslation(movement).Translate(Position);
-    }
 
-    void RotateMovement(Movement movement)
+    private void OnEnable()
     {
-        LookDirection = LookDirection.ApplyRotation(movement);
-    }
-
-    void Sync()
-    {
-        transform.position = Position.ToPositionFromXZPlane();
-        transform.rotation = LookDirection.AsQuaternion();
-    }
-
-    void Update()
-    {
-        if (cInput.QueueDepth > 0)
+        if (cInput == null)
         {
-            var movement = cInput.GetMovement();
-
-            if (movement.IsTranslation()) Translate(movement);
-            if (movement.IsRotation()) RotateMovement(movement);
-            
-            Sync();
+            cInput = GetComponent<CrawlerInput2>();
         }
+        cInput.OnMovement += CInput_OnMovement;
+    }
+
+    private void OnDisable()
+    {
+        cInput.OnMovement -= CInput_OnMovement;
+    }
+
+
+
+    private void CInput_OnMovement(int tickId, Movement movement, float duration)
+    {
+        if (movement.IsRotation()) {
+            gEntity.Rotate(movement);
+        }
+        else if (movement.IsTranslation())
+        {
+            gEntity.Translate(movement);
+        }
+        gEntity.Sync();
     }
 }

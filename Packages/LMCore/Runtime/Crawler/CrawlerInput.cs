@@ -112,18 +112,34 @@ namespace LMCore.Crawler
             return Mathf.Lerp(holdingAsRePress, holdingAsFirstRepress, e);
         }
 
-        public bool HasReuseAtTime(out float time)
+        public bool HasUseBefore(out float time)
         {
-            if (pressStack.Count == 0)
+            if (QueueDepth == 0 && pressStack.Count == 0)
             {
                 time = 0;
                 return false;
             }
 
+            time = delayEasing.Evaluate(QueueDepth);
+
+            if (pressStack.Count == 0)
+            {
+                Debug.Log("Queue trigger reuse time");
+                return true;
+            }
+
             var press = pressStack.Last();
             var pressDuration = PressDuration(press);
 
-            time = pressDuration + press.time;
+            Debug.Log($"Multi reasions {time} / {pressDuration} (-{Time.timeSinceLevelLoad - press.time})");
+
+            time = Mathf.Max(
+                holdingAsRePress, // If we're overdue lets just say now!
+                Mathf.Min(
+                    time, // Queue-depth based speed
+                    pressDuration - (Time.timeSinceLevelLoad - press.time) // Duration of the requeue minus
+                    )
+            );
             return true;
         }
 

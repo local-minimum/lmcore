@@ -335,6 +335,53 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42101826}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &48931395
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 48931397}
+  - component: {fileID: 48931396}
+  m_Layer: 0
+  m_Name: Systems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &48931396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48931395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dd4df07faa1cad43acc2610fa74a493, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minTickDuration: 0.2
+  baseTickDuration: 0.4
+  adjustmentSplit: 0.75
+--- !u!4 &48931397
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48931395}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.5, y: 1.5, z: 12}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &149169750
 GameObject:
   m_ObjectHideFlags: 0
@@ -1893,10 +1940,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 605766710}
-  - component: {fileID: 605766711}
   - component: {fileID: 605766712}
   - component: {fileID: 605766713}
   - component: {fileID: 605766714}
+  - component: {fileID: 605766715}
+  - component: {fileID: 605766716}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1920,44 +1968,6 @@ Transform:
   - {fileID: 330585546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &605766711
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 605766709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1ec5e5a17d0e274197a267edf0b4182, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdingAsFirstRepress: 0.5
-  holdingAsRePress: 0.2
-  delayEasing:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: -1.1188034
-      outSlope: -1.1188034
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.025974026
-    - serializedVersion: 3
-      time: 2
-      value: 0
-      inSlope: -0.1786325
-      outSlope: Infinity
-      tangentMode: 97
-      weightedMode: 0
-      inWeight: 0.038277507
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!114 &605766712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1986,8 +1996,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnMoveForward
         m_Mode: 0
         m_Arguments:
@@ -2002,8 +2012,8 @@ MonoBehaviour:
     m_ActionName: Crawling/New action
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnMoveBackward
         m_Mode: 0
         m_Arguments:
@@ -2018,8 +2028,8 @@ MonoBehaviour:
     m_ActionName: Crawling/New action
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnStrafeLeft
         m_Mode: 0
         m_Arguments:
@@ -2034,8 +2044,8 @@ MonoBehaviour:
     m_ActionName: Crawling/New action
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnStrafeRight
         m_Mode: 0
         m_Arguments:
@@ -2050,8 +2060,8 @@ MonoBehaviour:
     m_ActionName: Crawling/New action
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnTurnCW
         m_Mode: 0
         m_Arguments:
@@ -2066,8 +2076,8 @@ MonoBehaviour:
     m_ActionName: Crawling/New action
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 605766711}
-        m_TargetAssemblyTypeName: LMCore.Crawler.CrawlerInput, se.localminimum.lmcore.runtime.crawler
+      - m_Target: {fileID: 605766715}
+        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
         m_MethodName: OnTurnCCW
         m_Mode: 0
         m_Arguments:
@@ -2098,7 +2108,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StepSize: 3
-  StartLookDirection: 0
 --- !u!114 &605766714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2112,9 +2121,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StepSize: 3
+--- !u!114 &605766715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605766709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b16ef6ca89f91048bf5ba8e3227a521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reuseAfterTickProgress: 0.95
+  minResuseAfterTime: 0.35
+--- !u!114 &605766716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605766709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84f679e1724ad1c48b59f8c131fd8b17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   StartLookDirection: 0
-  turnTime: 0.2
-  translationTime: 1.335
 --- !u!1 &694166379
 GameObject:
   m_ObjectHideFlags: 0
@@ -3723,3 +3756,4 @@ SceneRoots:
   - {fileID: 2121290728}
   - {fileID: 1265535853}
   - {fileID: 1552154965}
+  - {fileID: 48931397}
