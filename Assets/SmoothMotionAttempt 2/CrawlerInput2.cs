@@ -43,6 +43,7 @@ public class CrawlerInput2 : MonoBehaviour
 
     Movement currentMovement;
     Movement nextMovement;
+    Movement nextNextMovement;
 
     [SerializeField]
     bool replayTurns;
@@ -65,17 +66,21 @@ public class CrawlerInput2 : MonoBehaviour
         {
             currentMovement = movement;
             ElasticGameClock.instance.RequestTick();
-        } else
+        } else if (nextMovement == Movement.None)
         {
             nextMovement = movement;
             ElasticGameClock.instance.AdjustEndOfTick();
+        } else
+        {
+            nextNextMovement = movement;
         }
     }
 
     void ShiftQueue()
     {
         currentMovement = nextMovement;
-        nextMovement = Movement.None;
+        nextMovement = nextNextMovement;
+        nextNextMovement = Movement.None;
     }
 
     private HeldButtonInfo GetReplay(bool force=false)
@@ -171,9 +176,11 @@ public class CrawlerInput2 : MonoBehaviour
         }
     }
 
+    bool HasEmptyQueue => currentMovement == Movement.None || nextMovement == Movement.None || nextNextMovement == Movement.None;
+
     private void Update()
     {
-        if (currentMovement == Movement.None || nextMovement == Movement.None)
+        if (HasEmptyQueue)
         {
             var replay = GetReplay();
             if (replay != null)
