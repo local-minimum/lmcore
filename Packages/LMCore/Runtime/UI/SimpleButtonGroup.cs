@@ -15,6 +15,9 @@ namespace LMCore.UI
         [SerializeField]
         private SimpleButton[] Buttons;
 
+        [SerializeField]
+        bool Navigational = true;
+
         private List<SimpleButton> VisibleButtons => Buttons.Where(b => b.gameObject.activeSelf).ToList();
 
         [SerializeField]
@@ -172,7 +175,7 @@ namespace LMCore.UI
         private void OnEnable()
         {
             SelectDefault();
-            RegisterCallbacks();
+            if (Navigational) RegisterCallbacks();
         }
 
         public void SelectDefault()
@@ -183,7 +186,22 @@ namespace LMCore.UI
 
         private void OnDisable()
         {
-            UnregisterCallbacks();
+            if (Navigational) UnregisterCallbacks();
+        }
+
+
+        private bool _interactable = true;
+        public bool Interactable
+        {
+            get => _interactable;
+            set
+            {
+                _interactable = value;
+                foreach (var button in VisibleButtons)
+                {
+                    button.enabled = value;
+                }
+            }
         }
     }
 }
