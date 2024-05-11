@@ -683,8 +683,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minTickDuration: 0.2
-  baseTickDuration: 0.4
-  adjustmentSplit: 0.75
+  baseTickDuration: 0.35
+  adjustmentSplit: 0.8
 --- !u!4 &48931397
 Transform:
   m_ObjectHideFlags: 0
@@ -3757,6 +3757,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StepSize: 3
+  turnDurationFactor: 0.3
   bounceAtProgress: 0.4
 --- !u!114 &605766715
 MonoBehaviour:
@@ -3770,8 +3771,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b16ef6ca89f91048bf5ba8e3227a521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  replayTurns: 0
   reuseAfterTickProgress: 0.95
-  minResuseAfterTime: 0.35
+  minResuseAfterTime: 0.3
 --- !u!114 &605766716
 MonoBehaviour:
   m_ObjectHideFlags: 0

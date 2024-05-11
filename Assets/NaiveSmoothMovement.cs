@@ -10,6 +10,9 @@ public class NaiveSmoothMovement : MonoBehaviour
     [SerializeField]
     private int StepSize = 3;
 
+    [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
+    float turnDurationFactor = 1f;
+
     CrawlerInput2 cInput;
     GridEntity gEntity;
 
@@ -83,9 +86,20 @@ public class NaiveSmoothMovement : MonoBehaviour
     {
         if (animationTickId != tickId) return;
 
+        var turnCompensatedUnadjustedProgress = turning ? Mathf.Clamp01(unadjustedProgress / turnDurationFactor) : unadjustedProgress;
+
         animationStartTime = Time.timeSinceLevelLoad;
-        animationDuration = endTime - animationStartTime;
-        animationInterpolationStart = unadjustedProgress;
+
+        var remainder = endTime - animationStartTime;
+        if (turnCompensatedUnadjustedProgress < 1)
+        {
+
+            animationDuration = turning ? remainder * turnDurationFactor : remainder;
+        } else
+        {
+            animationDuration = 0.00000001f;
+        }
+        animationInterpolationStart = turnCompensatedUnadjustedProgress;
     }
 
     private void ElasticGameClock_OnTickEnd(int tickId)
@@ -104,8 +118,8 @@ public class NaiveSmoothMovement : MonoBehaviour
         Animation = movement;
         animationStartTime = Time.timeSinceLevelLoad;
         animationInterpolationStart = 0;
-        animationDuration = duration;
         turning = movement.IsRotation();
+        animationDuration = turning ? duration * turnDurationFactor : duration;
 
         if (turning)
         {

@@ -44,6 +44,8 @@ public class CrawlerInput2 : MonoBehaviour
     Movement currentMovement;
     Movement nextMovement;
 
+    [SerializeField]
+    bool replayTurns;
     
     [SerializeField, Range(0, 1)]
     float reuseAfterTickProgress = 0.95f;
@@ -102,7 +104,8 @@ public class CrawlerInput2 : MonoBehaviour
 
             EnqueueMovement(movement);
 
-            replayStack.Add(new HeldButtonInfo(movement));
+            if (replayTurns || movement.IsTranslation())
+                replayStack.Add(new HeldButtonInfo(movement));
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
