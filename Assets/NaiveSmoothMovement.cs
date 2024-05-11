@@ -26,13 +26,24 @@ public class NaiveSmoothMovement : MonoBehaviour
         }
     }
 
-    void Start()
+    void Awake()
     {
         cInput = GetComponent<CrawlerInput2>();
         gEntity = GetComponent<GridEntity>();
         gEntity.Sync();
+        GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
+        enabled = !GameSettings.InstantMovement.Value;
     }
 
+    private void OnDestroy()
+    {
+        GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
+    }
+
+    private void InstantMovement_OnChange(bool value)
+    {
+        enabled = !value;
+    }
 
     int animationTickId;
     Movement Animation = Movement.None;
@@ -123,7 +134,10 @@ public class NaiveSmoothMovement : MonoBehaviour
 
         gEntity.Sync();
         Animation = Movement.None;
-    } 
+    }
+
+    [SerializeField, Range(0, 0.5f)]
+    float bounceAtProgress = 0.4f;
 
     void Update()
     {
@@ -140,12 +154,12 @@ public class NaiveSmoothMovement : MonoBehaviour
         if (turning)
         {
             transform.rotation = Quaternion.Lerp(activeStartRotation, activeEndRotation, progress);
-        } else if (allowedTranslation || progress < 0.5f)
+        } else if (allowedTranslation || progress < bounceAtProgress)
         {
             transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, progress);
         } else
         {
-            transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, 1 - progress);
+            transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, 2 * bounceAtProgress - progress);
         }
     }
 }

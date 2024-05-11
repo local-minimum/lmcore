@@ -1,9 +1,11 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace LMCore.UI
 {
+    [RequireComponent(typeof(EventTrigger))]
     public class SimpleButton : MonoBehaviour
     {
         [SerializeField]

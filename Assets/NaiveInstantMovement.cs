@@ -24,12 +24,23 @@ public class NaiveInstantMovement : MonoBehaviour
         }
     }
 
-    void Start()
+    void Awake()
     {
         gEntity = GetComponent<GridEntity>();
         gEntity.Sync();
+        GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
+        enabled = GameSettings.InstantMovement.Value;
     }
 
+    private void OnDestroy()
+    {
+        GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
+    }
+
+    private void InstantMovement_OnChange(bool value)
+    {
+        enabled = value;
+    }
 
     private void OnEnable()
     {
@@ -57,6 +68,9 @@ public class NaiveInstantMovement : MonoBehaviour
             if (gController.CanMoveTo(movement, StepSize))
             {
                 gEntity.Translate(movement);
+            } else
+            {
+                Debug.Log($"Can't move {movement} because collides with wall");
             }
         }
         gEntity.Sync();
