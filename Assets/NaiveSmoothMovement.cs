@@ -13,7 +13,19 @@ public class NaiveSmoothMovement : MonoBehaviour
     CrawlerInput2 cInput;
     GridEntity gEntity;
 
-    [SerializeField]
+    private GridEntityController _gController;
+    private GridEntityController gController
+    {
+        get
+        {
+            if (_gController == null)
+            {
+                _gController = GetComponent<GridEntityController>();
+            }
+            return _gController;
+        }
+    }
+
     void Start()
     {
         cInput = GetComponent<CrawlerInput2>();
@@ -31,6 +43,8 @@ public class NaiveSmoothMovement : MonoBehaviour
     bool turning;
     Quaternion activeStartRotation;
     Quaternion activeEndRotation;
+
+    bool allowedTranslation;
     Vector3 activeStartPosition;
     Vector3 activeEndPosition;
 
@@ -88,6 +102,7 @@ public class NaiveSmoothMovement : MonoBehaviour
             activeEndRotation = gEntity.LookDirection.ApplyRotation(movement).AsQuaternion();
         } else if (movement != Movement.None)
         {
+            allowedTranslation = gController.CanMoveTo(movement, StepSize);
             activeStartPosition = transform.position;
             activeEndPosition = gEntity.LookDirection
                 .RelativeTranslation(movement)
@@ -101,7 +116,7 @@ public class NaiveSmoothMovement : MonoBehaviour
         if (turning)
         {
             gEntity.Rotate(Animation);
-        } else
+        } else if (allowedTranslation)
         {
             gEntity.Translate(Animation);
         }
@@ -125,9 +140,12 @@ public class NaiveSmoothMovement : MonoBehaviour
         if (turning)
         {
             transform.rotation = Quaternion.Lerp(activeStartRotation, activeEndRotation, progress);
-        } else
+        } else if (allowedTranslation || progress < 0.5f)
         {
             transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, progress);
+        } else
+        {
+            transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, 1 - progress);
         }
     }
 }

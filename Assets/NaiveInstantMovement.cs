@@ -11,6 +11,18 @@ public class NaiveInstantMovement : MonoBehaviour
     CrawlerInput2 cInput;
     GridEntity gEntity;
 
+    private GridEntityController _gController;
+    private GridEntityController gController
+    {
+        get
+        {
+            if (_gController == null)
+            {
+                _gController = GetComponent<GridEntityController>();
+            }
+            return _gController;
+        }
+    }
 
     void Start()
     {
@@ -42,7 +54,10 @@ public class NaiveInstantMovement : MonoBehaviour
         }
         else if (movement.IsTranslation())
         {
-            gEntity.Translate(movement);
+            if (gController.CanMoveTo(movement, StepSize))
+            {
+                gEntity.Translate(movement);
+            }
         }
         gEntity.Sync();
     }
