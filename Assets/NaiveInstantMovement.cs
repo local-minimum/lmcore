@@ -8,6 +8,9 @@ public class NaiveInstantMovement : MonoBehaviour
     [SerializeField]
     private int StepSize = 3;
 
+    [SerializeField]
+    NodeShaker WallHitShakeTarget;
+
     CrawlerInput2 cInput;
     GridEntity gEntity;
 
@@ -70,6 +73,7 @@ public class NaiveInstantMovement : MonoBehaviour
                 gEntity.Translate(movement);
             } else
             {
+                WallHitShakeTarget?.Shake();
                 Debug.Log($"Can't move {movement} because collides with wall");
             }
         }
