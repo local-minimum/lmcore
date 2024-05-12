@@ -19,8 +19,30 @@ namespace LMCore.UI
             public string name;
             public SimpleButton button;
             public Movement movement;
+            public GamePlayAction action;
+
+            public bool IsMovement => movement != Movement.None;
+            public bool IsAction => action != GamePlayAction.None;
+
+            public GameSettings.StringSetting Setting
+            {
+                get
+                {
+                    if (IsMovement) return GameSettings.GetMovementSetting(movement);
+                    if (IsAction) return GameSettings.GetCustomString("x");
+                    return null;
+                }
+            }
+
+            public override string ToString()
+            {
+                if (IsMovement) return $"[{name} -> {movement}]";
+                if (IsAction) return $"[{name} -> {action}]";
+                return $"[{name} -> **VOID** ]";
+            }
         }
 
+        [Header("Configuration")]
         [SerializeField]
         PlayerInput playerInput;
 
@@ -34,13 +56,15 @@ namespace LMCore.UI
         string cancelButton = "escape";
 
         [SerializeField]
+        int bindingIndex;
+
+        [Header("Bindings")]
+        [SerializeField]
         List<KeyBinding> bindings = new List<KeyBinding>();
 
         [SerializeField]
         SimpleButtonGroup ButtonGroup;
 
-        [SerializeField]
-        int bindingIndex;
 
         #region Update Button Text
         void SetButtonText(SimpleButton button, string text)
@@ -77,21 +101,43 @@ namespace LMCore.UI
             SetButtonTextFromPath(button, binding.effectivePath);
         }
 
-        void SetButtonRebinding(SimpleButton button)
+        [Header("Rebinding effects")]
+        [SerializeField]
+        string rebindingText = "_";
+
+        [SerializeField]
+        bool blinkWhileRebinding = true;
+
+        [SerializeField, Range(0, 5)]
+        float rebindingBlinkFrequency = 1.0f;
+
+        bool rebinding;
+        SimpleButton rebindingButton;
+        float rebindingBlink;
+
+        void SetButtonRebinding()
         {
-            button.Text = "...";
+            if (!rebinding || rebindingButton == null) return;
+
+            if (Time.timeSinceLevelLoad > rebindingBlink)
+            {
+                rebindingButton.Text = rebindingButton.Text == rebindingText ? "" : rebindingText;
+                rebindingBlink = Time.timeSinceLevelLoad + rebindingBlinkFrequency;
+            }
         }
 
-        private void SyncButtonWithPath(Movement movement, string path)
+        private void SyncButtonWithPath(KeyBinding binding, string path)
         {
-            var binding = bindings.FirstOrDefault(b => b.movement == movement);
-            if (binding == null || binding.button == null)
+            if (binding == null) { 
+                Debug.LogWarning("No binding supplied");
+                return;
+            } else if (binding.button == null)
             {
-                Debug.LogWarning($"Could not find a button for movement {movement}");
+                Debug.LogWarning($"Binding {binding} doesn't have a button");
                 return;
             }
 
-            Debug.Log($"Syncing {movement} as {path}");
+            Debug.Log($"Syncing {binding} as {path}");
             SetButtonTextFromPath(binding.button, path);
         }
         #endregion Update Button Text
@@ -115,9 +161,16 @@ namespace LMCore.UI
             if (binding == null) return null;
             return GetAction(binding);
         }
+        public InputAction GetAction(GamePlayAction action)
+        {
+            var binding = GetBinding(action);
+            if (binding == null) return null;
+            return GetAction(binding);
+        }
 
         KeyBinding GetBinding(InputAction action) => bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
         KeyBinding GetBinding(Movement movement) => bindings.FirstOrDefault(b => b.movement == movement);
+        KeyBinding GetBinding(GamePlayAction action) => bindings.FirstOrDefault(b => b.action == action);
 
         #region Syncing
         /// <summary>
@@ -139,7 +192,7 @@ namespace LMCore.UI
         /// </summary>
         void SyncInputBindingWithSettings(InputAction action, KeyBinding binding)
         {
-            var setting = GameSettings.GetMovementSetting(binding.movement);
+            var setting = binding.Setting;
             if (setting != null)
             {
                 if (string.IsNullOrEmpty(setting.Value))
@@ -196,10 +249,10 @@ namespace LMCore.UI
         {
             foreach (var binding in bindings)
             {
-                var setting = GameSettings.GetMovementSetting(binding.movement);
+                var setting = binding.Setting;
                 if (setting == null || registeredCallbacks.ContainsKey(setting)) { continue; }
 
-                GameSettings.StringSetting.OnChangeEvent callback = newValue => SyncButtonWithPath(binding.movement, newValue);
+                GameSettings.StringSetting.OnChangeEvent callback = newValue => SyncButtonWithPath(binding, newValue);
 
                 registeredCallbacks.Add(setting, callback);
                 setting.OnChange += callback;
@@ -243,8 +296,6 @@ namespace LMCore.UI
             return $"{binding.name}/{binding.path}/{binding.effectivePath}";
         }
 
-        bool rebinding;
-
         #region Rebinding
         /// <summary>
         /// Callback function for triggering remapping single binding
@@ -276,10 +327,11 @@ namespace LMCore.UI
         /// </summary>
         public void RemapAction(Movement movement, string key)
         {
-            var binding = bindings.FirstOrDefault(b => b.movement == movement);
+            var binding = GetBinding(movement);
             if (binding == null)
             {
                 Debug.LogError($"Failed to set {movement} -> {key} binding because movement not known");
+                return;
             }
 
             var action = GetAction(binding);
@@ -287,15 +339,33 @@ namespace LMCore.UI
             action.ApplyBindingOverride(bindingIndex, $"<{bindingGroup}>/{key}");
         }
 
+        public void RemapAction(GamePlayAction action, string key)
+        {
+            var binding = GetBinding(action);
+            if (binding == null)
+            {
+                Debug.LogError($"Failed to set {action} -> {key} binding because action not known");
+                return;
+            }
+
+            var inputAction = GetAction(binding);
+
+            inputAction.ApplyBindingOverride(bindingIndex, $"<{bindingGroup}>/{key}");
+        }
+
         private void RemapAction(SimpleButton button, InputAction actionToRebind, KeyBinding binding)
         {
             if (rebinding) { return; }
+
             rebinding = true;
+            rebindingButton = button;
+            rebindingBlink = -1f;
+
             ButtonGroup.Interactable = false;
 
             button.Selected();
 
-            SetButtonRebinding(button);
+            SetButtonRebinding();
 
             BlockableActions.BlockAction(this);
 
@@ -321,7 +391,7 @@ namespace LMCore.UI
             rebinding = false;
             if (rebound)
             {
-                var setting = GameSettings.GetMovementSetting(binding.movement);
+                var setting = binding.Setting;
 
                 if (setting == null)
                 {
@@ -351,13 +421,18 @@ namespace LMCore.UI
         {
             foreach (var binding in bindings)
             {
-                var setting = GameSettings.GetMovementSetting(binding.movement);
+                var setting = binding.Setting;
                 if (setting == null) continue;
 
                 setting.RestoreDefault();
             }
 
             SyncActions();
+        }
+
+        private void Update()
+        {
+            SetButtonRebinding();
         }
     }
 }
