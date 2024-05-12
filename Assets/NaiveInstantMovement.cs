@@ -1,7 +1,7 @@
 using LMCore.Crawler;
 using LMCore.IO;
+using LMCore.Juice;
 using UnityEngine;
-using LMCore.Extensions;
 
 public class NaiveInstantMovement : MonoBehaviour
 {
