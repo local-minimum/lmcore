@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.IO
@@ -7,6 +8,7 @@ namespace LMCore.IO
         private static readonly string SettingsRoot = "GameSettings";
         private static readonly string MovementsRoot = $"{SettingsRoot}.Movement";
         private static readonly string UIRoot = $"{SettingsRoot}.UI";
+        private static readonly string CustomRoot = "Custom";
 
         public class StringSetting
         {
@@ -89,6 +91,7 @@ namespace LMCore.IO
             }
         }
 
+        #region Movement
         public static readonly BoolSetting InstantMovement = new BoolSetting($"{MovementsRoot}.InstantMovemnt", false);
         private static readonly StringSetting MovementForward = new StringSetting($"{MovementsRoot}.{Movement.Forward}", "w");
         private static readonly StringSetting MovementBackward = new StringSetting($"{MovementsRoot}.{Movement.Backward}", "s");
@@ -108,6 +111,7 @@ namespace LMCore.IO
                 default: return null;
             }
         }
+        #endregion Movement
 
         public static readonly BoolSetting MinimiapVisible = new BoolSetting($"{UIRoot}.Minimap.Visible", true);
         public static readonly BoolSetting KeyPressHUDVisible = new BoolSetting($"{UIRoot}.KeyPressHUD.Visible", true);
@@ -127,5 +131,39 @@ namespace LMCore.IO
             MinimiapVisible.StoreCurrrentValue();
             KeyPressHUDVisible.StoreCurrrentValue();
         }
+
+        #region Custom Settings
+        private static Dictionary<string, BoolSetting> CustomBools = new Dictionary<string, BoolSetting>();
+        public static BoolSetting GetCustomBool(string key, bool defaultValue = false)
+        {
+            var fullKey = $"{CustomRoot}.{key}";
+            if (CustomBools.ContainsKey(fullKey))
+            {
+                return CustomBools[fullKey];
+            }
+
+            var setting = new BoolSetting(fullKey, defaultValue);
+
+            CustomBools[fullKey] = setting;
+
+            return setting;
+        }
+
+        private static Dictionary<string, StringSetting> CustomStrings = new Dictionary<string, StringSetting>();
+        public static StringSetting GetCustomString(string key, string defaultValue = null)
+        {
+            var fullKey = $"{CustomRoot}.{key}";
+            if (CustomStrings.ContainsKey(fullKey))
+            {
+                return CustomStrings[fullKey];
+            }
+
+            var setting = new StringSetting(fullKey, defaultValue);
+
+            CustomStrings[fullKey] = setting;
+
+            return setting;
+        }
+        #endregion Custom Settings
     }
 }
