@@ -1,3 +1,4 @@
+using LMCore.IO;
 using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,101 +40,77 @@ namespace LMCore.UI
             }
         }
 
-        /// <summary>
-        /// Inputs/North (Forward)
-        /// </summary>
-        private const string upActionId = "00703aab-a4e6-4870-9afd-59a0a6bb99fa";
-
-        /// <summary>
-        /// Inputs/South (Backwards)
-        /// </summary>
-        private const string downActionId = "324d3a1c-59af-4607-a1c7-87629a3a9903";
-
-        /// <summary>
-        /// Inputs/Interact event
-        /// </summary>
-        private const string interactActionId = "911be32a-e601-4f55-bcb3-49f94aa29fff";
-
-        private PlayerInput _input;
-
-        private PlayerInput Input
-        {
-            get
-            {
-                if (_input == null)
-                {
-                    _input = FindAnyObjectByType<PlayerInput>();
-                }
-                return _input;
-            }
-        }
-
         private void RegisterCallbacks()
         {
-            if (Input == null)
+            var selectAction = MovementKeybindingUI.instance.GetActions(GamePlayAction.Select).FirstOrDefault();
+            if (selectAction != null)
             {
-                Debug.LogWarning("No keybindings");
-                return;
+                selectAction.started += DoInteract;
+            } else
+            {
+                Debug.LogWarning("No known select binding");
             }
 
-            foreach (var evt in Input.actionEvents)
+            var upAction = MovementKeybindingUI.instance.GetAction(Movement.Forward);
+            if (upAction != null)
             {
-                switch (evt.actionId)
-                {
-                    case interactActionId:
-                        evt.AddListener(DoInteract);
-                        break;
+                upAction.started += DoUp;
+            } else
+            {
+                Debug.LogWarning("No known forward binding");
+            }
 
-                    case upActionId:
-                        evt.AddListener(DoUp);
-                        break;
-
-                    case downActionId:
-                        evt.AddListener(DoDown);
-                        break;
-
-                    default:
-                        Debug.Log($"Not assigning {evt.actionId} ({evt.actionName})");
-                        break;
-                }
+            var downAction = MovementKeybindingUI.instance.GetAction(Movement.Backward);
+            if (downAction != null)
+            {
+                downAction.started += DoDown;
+            } else
+            {
+                Debug.LogWarning("No known backward binding");
             }
         }
 
         private void UnregisterCallbacks()
         {
-            if (Input == null) return;
-
-            foreach (var evt in Input.actionEvents)
+            var selectAction = MovementKeybindingUI.instance.GetActions(GamePlayAction.Select).FirstOrDefault();
+            if (selectAction != null)
             {
-                switch (evt.actionId)
-                {
-                    case interactActionId:
-                        evt.RemoveListener(DoInteract);
-                        break;
+                selectAction.started -= DoInteract;
+            } else
+            {
+                Debug.LogWarning("No known select binding");
+            }
 
-                    case upActionId:
-                        evt.RemoveListener(DoUp);
-                        break;
+            var upAction = MovementKeybindingUI.instance.GetAction(Movement.Forward);
+            if (upAction != null)
+            {
+                upAction.started -= DoUp;
+            } else
+            {
+                Debug.LogWarning("No known forward binding");
+            }
 
-                    case downActionId:
-                        evt.RemoveListener(DoDown);
-                        break;
-                }
+            var downAction = MovementKeybindingUI.instance.GetAction(Movement.Backward);
+            if (downAction != null)
+            {
+                downAction.started -= DoDown;
+            } else
+            {
+                Debug.LogWarning("No known backward binding");
             }
         }
 
         public void DoInteract(InputAction.CallbackContext context)
         {
-            if (!context.performed) return;
-
+            Debug.Log("Interact");
+            if (!Navigational) return;
             Selected?.Click();
         }
 
         public void DoUp(InputAction.CallbackContext context)
         {
-            if (!context.performed) return;
+            if (!Navigational) return;
 
-            Debug.Log("Up");
             var selectedIdx = VisibleButtons.IndexOf(Selected);
             if (selectedIdx < 0)
             {
@@ -154,9 +131,8 @@ namespace LMCore.UI
 
         public void DoDown(InputAction.CallbackContext context)
         {
-            if (!context.performed) return;
+            if (!Navigational) return;
 
-            Debug.Log("Down");
             var selectedIdx = VisibleButtons.IndexOf(Selected);
             if (selectedIdx < 0)
             {
@@ -175,18 +151,20 @@ namespace LMCore.UI
         private void OnEnable()
         {
             SelectDefault();
-            if (Navigational) RegisterCallbacks();
+            RegisterCallbacks();
         }
 
         public void SelectDefault()
         {
+            if (!Navigational) return;
+
             var defaultBtn = VisibleButtons.FirstOrDefault();
             defaultBtn?.Selected();
         }
 
         private void OnDisable()
         {
-            if (Navigational) UnregisterCallbacks();
+            UnregisterCallbacks();
         }
 
 

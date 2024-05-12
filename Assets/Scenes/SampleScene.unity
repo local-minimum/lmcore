@@ -4964,7 +4964,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1fe81b03190dbc45b189472a79d3db6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Buttons: []
+  Buttons:
+  - {fileID: 900212227}
+  - {fileID: 1831006086}
+  - {fileID: 792871456}
+  - {fileID: 1133527935}
+  - {fileID: 1294080983}
+  - {fileID: 700886818}
+  - {fileID: 245148563}
   Navigational: 0
   WrapSelection: 0
 --- !u!114 &707098225
