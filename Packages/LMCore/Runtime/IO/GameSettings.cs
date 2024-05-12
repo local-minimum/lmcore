@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.IO
@@ -7,8 +8,9 @@ namespace LMCore.IO
     {
         private static readonly string SettingsRoot = "GameSettings";
         private static readonly string MovementsRoot = $"{SettingsRoot}.Movement";
+        private static readonly string ActionsRoot = $"{SettingsRoot}.Actions";
         private static readonly string UIRoot = $"{SettingsRoot}.UI";
-        private static readonly string CustomRoot = "Custom";
+        private static readonly string CustomRoot = $"{SettingsRoot}.Custom";
 
         public class StringSetting
         {
@@ -93,6 +95,7 @@ namespace LMCore.IO
 
         #region Movement
         public static readonly BoolSetting InstantMovement = new BoolSetting($"{MovementsRoot}.InstantMovemnt", false);
+
         private static readonly StringSetting MovementForward = new StringSetting($"{MovementsRoot}.{Movement.Forward}", "w");
         private static readonly StringSetting MovementBackward = new StringSetting($"{MovementsRoot}.{Movement.Backward}", "s");
         private static readonly StringSetting MovementLeft = new StringSetting($"{MovementsRoot}.{Movement.StrafeLeft}", "a");
@@ -112,6 +115,21 @@ namespace LMCore.IO
             }
         }
         #endregion Movement
+
+        #region Gameplay Action
+        private static Dictionary<GamePlayAction, StringSetting> _actionSettings = new Dictionary<GamePlayAction, StringSetting>();
+        public static IEnumerable<StringSetting> GetActionSettings(GamePlayAction action) => action
+            .AsPrimitives()
+            .Select(a => 
+            {
+                if (_actionSettings.ContainsKey(a)) return _actionSettings[a];
+
+                var setting = new StringSetting($"{ActionsRoot}.{a}");
+                _actionSettings[a] = setting;
+
+                return setting;
+            });
+        #endregion Gameplay Action
 
         public static readonly BoolSetting MinimiapVisible = new BoolSetting($"{UIRoot}.Minimap.Visible", true);
         public static readonly BoolSetting KeyPressHUDVisible = new BoolSetting($"{UIRoot}.KeyPressHUD.Visible", true);

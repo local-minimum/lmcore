@@ -4944,6 +4944,10 @@ MonoBehaviour:
     button: {fileID: 900212227}
     movement: 5
     action: 0
+  - name: Interact
+    button: {fileID: 245148563}
+    movement: 0
+    action: 3
   ButtonGroup: {fileID: 707098224}
   rebindingText: _
   blinkWhileRebinding: 1

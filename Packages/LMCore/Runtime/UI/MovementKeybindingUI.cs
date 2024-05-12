@@ -29,7 +29,7 @@ namespace LMCore.UI
                 get
                 {
                     if (IsMovement) return GameSettings.GetMovementSetting(movement);
-                    if (IsAction) return GameSettings.GetCustomString("x");
+                    if (IsAction) return GameSettings.GetActionSettings(action).FirstOrDefault();
                     return null;
                 }
             }
@@ -161,6 +161,7 @@ namespace LMCore.UI
             if (binding == null) return null;
             return GetAction(binding);
         }
+
         public InputAction GetAction(GamePlayAction action)
         {
             var binding = GetBinding(action);
@@ -168,9 +169,15 @@ namespace LMCore.UI
             return GetAction(binding);
         }
 
+        public IEnumerable<InputAction> GetActions(GamePlayAction action) =>
+            GetBindings(action)
+            .Select(b => GetAction(b))
+            .Where(a => a != null);
+
         KeyBinding GetBinding(InputAction action) => bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
         KeyBinding GetBinding(Movement movement) => bindings.FirstOrDefault(b => b.movement == movement);
         KeyBinding GetBinding(GamePlayAction action) => bindings.FirstOrDefault(b => b.action == action);
+        IEnumerable<KeyBinding> GetBindings(GamePlayAction action) => bindings.Where(b => (b.action & action) == action);
 
         #region Syncing
         /// <summary>
