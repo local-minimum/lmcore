@@ -331,5 +331,15 @@ namespace LMCore.Extensions
         public static Vector3 ToDirection(this Vector3Int direction) => new Vector3(direction.x, direction.y, direction.z);
 
         #endregion World
+
+        #region 2D/3D
+        public static Vector3Int To3DFromXZPlane(this Vector2Int vector, int elevation = 0) => new Vector3Int(vector.x, elevation, vector.y);
+        public static Vector2Int To2DInXZPlane(this Vector3Int vector) => new Vector2Int(vector.x, vector.z);
+        public static Vector2Int To2DInXZPlane(this Vector3Int vector, out int elevation)
+        {
+            elevation = vector.y;
+            return new Vector2Int(vector.x, vector.z);
+        }
+        #endregion
     }
 }

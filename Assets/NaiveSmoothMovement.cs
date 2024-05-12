@@ -131,7 +131,7 @@ public class NaiveSmoothMovement : MonoBehaviour
             activeStartPosition = transform.position;
             activeEndPosition = gEntity.LookDirection
                 .RelativeTranslation(movement)
-                .Translate(gEntity.Position)
+                .Translate(gEntity.Position2D)
                 .ToPositionFromXZPlane();
         }
     }
