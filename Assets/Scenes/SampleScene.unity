@@ -1333,7 +1333,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2093,7 +2093,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3339,7 +3339,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11.7
+  m_fontSize: 11.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3716,7 +3716,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82ca609072c74d143b54121ae7ef5f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bindingUI: {fileID: 707098223}
   forward: uparrow
   backward: downarrow
   left: 
@@ -4074,7 +4073,7 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 605766715}
-        m_TargetAssemblyTypeName: CrawlerInput2, Assembly-CSharp
+        m_TargetAssemblyTypeName: CrawlerInput, Assembly-CSharp
         m_MethodName: OnMoveForward
         m_Mode: 0
         m_Arguments:
@@ -4210,7 +4209,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 605766709}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b16ef6ca89f91048bf5ba8e3227a521, type: 3}
+  m_Script: {fileID: 11500000, guid: c0b82733869bf8e43ae9a47ff601df83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   replayTurns: 0
@@ -6060,7 +6059,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6366,7 +6365,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13.8
+  m_fontSize: 11.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6500,7 +6499,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6815,7 +6814,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13.15
+  m_fontSize: 11.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7832,7 +7831,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -10085,7 +10084,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.05
+  m_fontSize: 38.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -10314,7 +10313,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82ca609072c74d143b54121ae7ef5f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bindingUI: {fileID: 707098223}
   forward: numpad8
   backward: numpad5
   left: numpad4
@@ -10583,7 +10581,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24.4
+  m_fontSize: 19.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -10786,7 +10784,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82ca609072c74d143b54121ae7ef5f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bindingUI: {fileID: 707098223}
   forward: w
   backward: s
   left: a
@@ -11127,7 +11124,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13.8
+  m_fontSize: 11.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -11261,7 +11258,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11.7
+  m_fontSize: 11.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

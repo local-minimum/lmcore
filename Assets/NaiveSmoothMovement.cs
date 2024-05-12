@@ -13,7 +13,7 @@ public class NaiveSmoothMovement : MonoBehaviour
     [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
     float turnDurationFactor = 1f;
 
-    CrawlerInput2 cInput;
+    CrawlerInput cInput;
     GridEntity gEntity;
 
     private GridEntityController _gController;
@@ -31,7 +31,7 @@ public class NaiveSmoothMovement : MonoBehaviour
 
     void Awake()
     {
-        cInput = GetComponent<CrawlerInput2>();
+        cInput = GetComponent<CrawlerInput>();
         gEntity = GetComponent<GridEntity>();
         gEntity.Sync();
         GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
@@ -66,7 +66,7 @@ public class NaiveSmoothMovement : MonoBehaviour
     {
         if (cInput == null)
         {
-            cInput = GetComponent<CrawlerInput2>();
+            cInput = GetComponent<CrawlerInput>();
         }
 
         cInput.OnMovement += CInput_OnMovement;

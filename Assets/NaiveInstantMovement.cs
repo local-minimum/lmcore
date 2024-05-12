@@ -11,7 +11,7 @@ public class NaiveInstantMovement : MonoBehaviour
     [SerializeField]
     NodeShaker WallHitShakeTarget;
 
-    CrawlerInput2 cInput;
+    CrawlerInput cInput;
     GridEntity gEntity;
 
     private GridEntityController _gController;
@@ -49,7 +49,7 @@ public class NaiveInstantMovement : MonoBehaviour
     {
         if (cInput == null)
         {
-            cInput = GetComponent<CrawlerInput2>();
+            cInput = GetComponent<CrawlerInput>();
         }
         cInput.OnMovement += CInput_OnMovement;
     }

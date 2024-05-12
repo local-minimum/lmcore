@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using LMCore.IO;
+using LMCore.Crawler;
 using System.Linq;
 
 public delegate void MovementEvent(int tickId, Movement movement, float duration);
 
-public class CrawlerInput2 : MonoBehaviour
+public class CrawlerInput : MonoBehaviour
 {
     public event MovementEvent OnMovement;
 
