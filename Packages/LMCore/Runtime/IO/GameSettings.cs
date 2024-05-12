@@ -32,7 +32,7 @@ namespace LMCore.IO
 
                 set
                 {
-                    PlayerPrefs.SetString(Key, value);
+                    PlayerPrefs.SetString(Key, value ?? "");
                     OnChange?.Invoke(value);
                 }
             }

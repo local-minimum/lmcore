@@ -38,21 +38,59 @@ public class KeybindingUI : MonoBehaviour
     [SerializeField]
     int bindingIndex;
 
-    void SetButtonText(SimpleButton button, InputBinding binding)
+    void SetButtonText(SimpleButton button, string text)
     {
-        Debug.Log($"Syncing {button.name}: {binding.effectivePath}");
-        var text = binding.effectivePath.Split('/').LastOrDefault();
-        button.Text = text.ToUpper();
+        if (string.IsNullOrEmpty(text))
+        {
+            button.Text = "";
+        } else
+        {
+            button.Text = text.ToUpper().Replace("NUMPAD", "NUM").Replace("ARROW", "");
+        }
     }
 
-    void SyncActions()
+    void SetButtonTextFromPath(SimpleButton button, string path)
     {
-        if (playerInput == null) { return; }
+        if (string.IsNullOrEmpty(path))
+        {
+            button.Text = "";
+        }
+        SetButtonText(button, path.Split('/').LastOrDefault());
+    }
 
-        var actions = playerInput.actions
-            .Where(a => a.actionMap.name == actionMapFilter)
-            .ToList();
+    void SetButtonText(SimpleButton button, InputBinding binding, bool actionBound = true)
+    {
+        if (!actionBound)
+        {
+            Debug.LogWarning($"No binding for {button.name}");
+            SetButtonText(button, null);
+            return;
+        }
 
+        Debug.Log($"Syncing {button.name}: {binding.effectivePath}");
+        SetButtonTextFromPath(button, binding.effectivePath);
+    }
+    
+    void SetButtonRebinding(SimpleButton button)
+    {
+        button.Text = "...";
+    }
+
+    private void SyncButtonWithPath(Movement movement, string path)
+    {
+        var binding = bindings.FirstOrDefault(b => b.movement == movement);
+        if (binding == null || binding.button == null)
+        {
+            Debug.LogWarning($"Could not find a button for movement {movement}");
+            return;
+        }
+
+        Debug.Log($"Syncing {movement} as {path}");
+        SetButtonTextFromPath(binding.button, path);
+    }
+
+    void PopulateUnassigned(List<InputAction> actions)
+    {
         var unassigned = actions
             .Where(a => !bindings.Any(b => b.name == a.name || b.name == a.id.ToString()));
 
@@ -60,20 +98,64 @@ public class KeybindingUI : MonoBehaviour
         {
             bindings.Add(new KeyBinding { name = binding.name });
         }
+    }
+
+    List<InputAction> actions
+    {
+        get
+        {
+            if (playerInput == null) { return new List<InputAction> (); }
+
+            return playerInput.actions
+                .Where(a => a.actionMap.name == actionMapFilter)
+                .ToList();
+        }
+    }
+
+    InputAction GetAction(KeyBinding binding) => actions.FirstOrDefault(a => a.name == binding.name || a.id.ToString() == binding.name);
+    KeyBinding GetBinding(InputAction action) => bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
+
+    void SyncInputBindingWithSettings(InputAction action, KeyBinding binding)
+    {
+        var setting = GameSettings.GetMovementSetting(binding.movement);
+        if (setting != null)
+        {
+            if (string.IsNullOrEmpty(setting.Value))
+            {
+                action.Disable();
+            } else
+            {
+                action.ApplyBindingOverride(bindingIndex, $"<{bindingGroup}>/{setting.Value}");
+                action.Enable();
+            }
+        } else
+        {
+            Debug.LogWarning($"No movement setting availabled for {binding.movement}");
+        }
+    }
+
+    void SyncActions()
+    {
+        PopulateUnassigned(actions);
 
         foreach ( var action in actions)
         {
-            var binding = bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
-            if (binding == null || binding.button == null) { continue; }
+            var binding = GetBinding(action);
+            if (binding == null || binding.button == null) {
+                if (binding == null)
+                {
+                    Debug.LogWarning($"No binding found for {action.name}/{action.id}");
+                } else
+                {
+                    Debug.LogWarning($"Binding {binding.name}/{binding.movement} has no button assigned");
+                }
+                continue; 
+            }
 
             binding.button.DeSelect();
 
-            var setting = GameSettings.GetMovementSetting(binding.movement);
-            if (setting != null)
-            {
-                action.ApplyBindingOverride(bindingIndex, $"<{bindingGroup}>/{setting.Value}");
-            }
-            SetButtonText(binding.button, action.bindings[bindingIndex]);
+            SyncInputBindingWithSettings(action, binding);
+            SetButtonText(binding.button, action.bindings[bindingIndex], action.enabled);
         }
     }
 
@@ -115,25 +197,6 @@ public class KeybindingUI : MonoBehaviour
         UnregisterCallbacks(); 
     }
 
-    private void SyncButtonWithPath(Movement movement, string path)
-    {
-        var binding = bindings.FirstOrDefault(b => b.movement == movement);
-        if (binding == null)
-        {
-            Debug.LogWarning($"Could not find a button for movement {movement}");
-            return;
-        }
-
-        Debug.Log($"Syncing {movement} as {path}");
-        if (string.IsNullOrEmpty(path))
-        {
-            binding.button.Text = "";
-        } else
-        {
-            var text = path.Split('/').LastOrDefault();
-            binding.button.Text = text.ToUpper();
-        }
-    }
 
     string SummarizeAction(InputAction action)
     {
@@ -149,11 +212,6 @@ public class KeybindingUI : MonoBehaviour
     bool rebinding;
 
 
-    void SetButtonRebinding(SimpleButton button)
-    {
-        button.Text = "...";
-    }
-
     public void RemapAction(SimpleButton button)
     {
         var binding = bindings.FirstOrDefault(b => b.button == button);
@@ -163,9 +221,7 @@ public class KeybindingUI : MonoBehaviour
             return;
         }
 
-        var action = playerInput.actions
-            .Where(a => a.actionMap.name == actionMapFilter)
-            .FirstOrDefault(a => binding.name == a.name || binding.name == a.id.ToString());
+        var action = GetAction(binding);
 
         if (action == null)
         {
@@ -174,6 +230,19 @@ public class KeybindingUI : MonoBehaviour
         }
 
         RemapAction(button, action, binding);
+    }
+
+    public void RemapAction(Movement movement, string key)
+    {
+        var binding = bindings.FirstOrDefault(b => b.movement == movement);
+        if (binding == null)
+        {
+            Debug.LogError($"Failed to set {movement} -> {key} binding because movement not known");
+        }
+
+        var action = GetAction(binding);
+
+        action.ApplyBindingOverride(bindingIndex, $"<{bindingGroup}>/{key}");
     }
 
     private void RemapAction(SimpleButton button, InputAction actionToRebind, KeyBinding binding)
