@@ -1,68 +1,124 @@
-using LMCore.AbstractClasses;
-using LMCore.IO;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using LMCore.IO;
+using System.Linq;
 
 namespace LMCore.Crawler
 {
-    public class CrawlerInput : BlockableActions
-    {
-        private Queue<Movement> queue = new Queue<Movement>();
+    public delegate void MovementEvent(int tickId, Movement movement, float duration);
 
-        private class Press
+    public class CrawlerInput : MonoBehaviour
+    {
+        public event MovementEvent OnMovement;
+
+        private class HeldButtonInfo
         {
             public Movement movement;
             public float time;
-            public int resuses;
+            public int replays;
 
-            public Press(Movement movement)
+            public HeldButtonInfo(Movement movement)
             {
                 this.movement = movement;
                 time = Time.timeSinceLevelLoad;
-                resuses = 0;
+                replays = 0;
             }
 
-            public Press()
+            public HeldButtonInfo()
             {
                 movement = Movement.None;
                 time = 0;
-                resuses = 0;
+                replays = 0;
             }
 
-            public void Reuse()
+            public void Replay()
             {
                 time = Time.timeSinceLevelLoad;
-                resuses++;
+                replays++;
             }
 
             public override string ToString() => $"[{movement} ({time})]";
         }
 
-        private List<Press> pressStack = new List<Press>();
+        private List<HeldButtonInfo> replayStack = new List<HeldButtonInfo>();
 
-        public string PressStackInfo => string.Join(" < ", pressStack);
+        Movement currentMovement;
+        Movement nextMovement;
+        Movement nextNextMovement;
+
+        [SerializeField]
+        bool replayTurns;
+
+        [SerializeField, Range(0, 1)]
+        float reuseAfterTickProgress = 0.95f;
+
+        [SerializeField, Range(0, 1)]
+        float minResuseAfterTime = 0.35f;
+
+        private bool ReadyToReuse(HeldButtonInfo press)
+        {
+            float referenceDuration = ElasticGameClock.instance.ClampedReferenceDuration;
+            return Time.timeSinceLevelLoad - press.time > Mathf.Max(referenceDuration * reuseAfterTickProgress, minResuseAfterTime);
+        }
+
+        void EnqueueMovement(Movement movement)
+        {
+            if (currentMovement == Movement.None)
+            {
+                currentMovement = movement;
+                ElasticGameClock.instance.RequestTick();
+            }
+            else if (nextMovement == Movement.None)
+            {
+                nextMovement = movement;
+                ElasticGameClock.instance.AdjustEndOfTick();
+            }
+            else
+            {
+                nextNextMovement = movement;
+            }
+        }
+
+        void ShiftQueue()
+        {
+            currentMovement = nextMovement;
+            nextMovement = nextNextMovement;
+            nextNextMovement = Movement.None;
+        }
+
+        private HeldButtonInfo GetReplay(bool force = false)
+        {
+            var candidate = replayStack.LastOrDefault();
+
+            // Indication that the stack is empty or not yet passed enough time
+            if (candidate == null || candidate.movement == Movement.None || !force && !ReadyToReuse(candidate))
+            {
+                return null;
+            }
+
+            return candidate;
+        }
+
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
             if (context.phase == InputActionPhase.Started)
             {
-                if (ActionsBlocked) return;
-
-                pressStack.Add(new Press(movement));
-
-                var waitingMove = CheckQueueRefill(false);
-
-                if (waitingMove != movement)
+                var waitingButton = GetReplay();
+                if (waitingButton != null)
                 {
-                    queue.Enqueue(waitingMove);
+                    waitingButton.Replay();
+                    EnqueueMovement(waitingButton.movement);
                 }
 
-                queue.Enqueue(movement);
+                EnqueueMovement(movement);
+
+                if (replayTurns || movement.IsTranslation())
+                    replayStack.Add(new HeldButtonInfo(movement));
             }
             else if (context.phase == InputActionPhase.Canceled)
             {
-                pressStack.RemoveAll(press => press.movement == movement);
+                replayStack.RemoveAll(press => press.movement == movement);
             }
         }
 
@@ -84,126 +140,60 @@ namespace LMCore.Crawler
         public void OnTurnCW(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.TurnCW);
 
-        public void Clear()
+
+        private void OnEnable()
         {
-            queue.Clear();
-            pressStack.Clear();
+            ElasticGameClock.OnTickEnd += ElasticGameClock_OnTickEnd;
+            ElasticGameClock.OnTickStart += ElasticGameClock_OnTickStart;
         }
 
-        public int QueueDepth => queue.Count;
 
-        [SerializeField, Tooltip("Initial delay before held key is counted again"), Range(0, 2)]
-        private float holdingAsFirstRepress = 0.8f;
-
-        [SerializeField, Tooltip("Minimum delay after having held a key for a while"), Range(0, 2)]
-        private float holdingAsRePress = 0.4f;
-
-        [
-            SerializeField, 
-            Tooltip("How to ease between the two delays (y=1 -> first press delay, y=0 ->minimum delay). Each re-use counts as 1 x-unit so to have 3 step easing curve should start at 0 and end at 2. Last point's right tangent should probably be constant.")
-        ]
-        private AnimationCurve delayEasing;
-
-        private Movement mostRecentRefill = Movement.None;
-
-        float PressDuration(Press press)
+        private void OnDisable()
         {
-            float e = delayEasing.Evaluate(press.resuses);
-            return Mathf.Lerp(holdingAsRePress, holdingAsFirstRepress, e);
+            ElasticGameClock.OnTickEnd -= ElasticGameClock_OnTickEnd;
+            ElasticGameClock.OnTickStart -= ElasticGameClock_OnTickStart;
         }
 
-        public bool HasUseBefore(out float time)
+        private void ElasticGameClock_OnTickStart(int tickId, float expectedDuration)
         {
-            if (QueueDepth == 0 && pressStack.Count == 0)
+            if (currentMovement != Movement.None)
             {
-                time = 0;
-                return false;
+                Debug.Log($"{tickId}: {currentMovement} ({expectedDuration})");
+                OnMovement?.Invoke(tickId, currentMovement, expectedDuration);
             }
-
-            time = delayEasing.Evaluate(QueueDepth);
-
-            if (pressStack.Count == 0)
-            {
-                Debug.Log("Queue trigger reuse time");
-                return true;
-            }
-
-            var press = pressStack.Last();
-            var pressDuration = PressDuration(press);
-
-            Debug.Log($"Multi reasions {time} / {pressDuration} (-{Time.timeSinceLevelLoad - press.time})");
-
-            time = Mathf.Max(
-                holdingAsRePress, // If we're overdue lets just say now!
-                Mathf.Min(
-                    time, // Queue-depth based speed
-                    pressDuration - (Time.timeSinceLevelLoad - press.time) // Duration of the requeue minus
-                    )
-            );
-            return true;
         }
 
-        private bool ReadyToReuse(Press press)
+        private void ElasticGameClock_OnTickEnd(int tickId)
         {
-            var neededDelta = PressDuration(press);
-            return Time.timeSinceLevelLoad - press.time > neededDelta;
-        }
-
-        private Movement CheckQueueRefill(bool enqueue)
-        {
-            var candidate = pressStack.LastOrDefault();
-
-            // Indication that the stack is empty or not yet passed enough time
-            if (candidate == null || candidate.movement == Movement.None || !ReadyToReuse(candidate))
+            ShiftQueue();
+            if (currentMovement == Movement.None)
             {
-                // If the movement that we're awaiting is no the same as the pressent it's new and we
-                // use longer time before redoing it
-                if (candidate?.movement != mostRecentRefill)
+                var replay = GetReplay(true);
+                if (replay != null)
                 {
-                    mostRecentRefill = Movement.None;
+                    replay.Replay();
+                    EnqueueMovement(replay.movement);
                 }
-                return Movement.None;
             }
-
-            // Add movement to queue and update time
-            if (enqueue)
+            else
             {
-                queue.Enqueue(candidate.movement);
+                ElasticGameClock.instance.RequestTick();
             }
-
-            candidate.Reuse();
-            mostRecentRefill = candidate.movement;
-
-            return candidate.movement;
         }
 
-        /// <summary>
-        /// Get and consume the next movement from the queue
-        /// </summary>
-        public Movement GetMovement()
-        {
-            var movement = queue.Count == 0 ? Movement.None : queue.Dequeue();
-
-            if (movement == Movement.None)
-            {
-                movement = CheckQueueRefill(false);
-            }
-
-            return movement;
-        }
-
-        /// <summary>
-        /// Check what the upcomming movement is without consuming it
-        /// </summary>
-        /// <returns>Next movement in queue</returns>
-        public Movement Peak() => queue.Count == 0 ? Movement.None : queue.Peek();
-        
+        bool HasEmptyQueue => currentMovement == Movement.None || nextMovement == Movement.None || nextNextMovement == Movement.None;
 
         private void Update()
         {
-            if (QueueDepth <= 0)
+            if (HasEmptyQueue)
             {
-                CheckQueueRefill(true);
+                var replay = GetReplay();
+                if (replay != null)
+                {
+                    replay.Replay();
+                    EnqueueMovement(replay.movement);
+
+                }
             }
         }
     }
