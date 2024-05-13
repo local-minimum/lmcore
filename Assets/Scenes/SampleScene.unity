@@ -4339,6 +4339,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: eb522f42-6e70-40f3-b696-7d038c6daa8e
     m_ActionName: Crawling/New action
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 63a8547d-d2a8-4566-8f45-bd2b5171ca71
+    m_ActionName: Crawling/Interact[/Keyboard/space]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Crawling
@@ -4924,30 +4928,37 @@ MonoBehaviour:
     button: {fileID: 1831006086}
     movement: 1
     action: 0
+    defaultKey: w
   - name: Backward
     button: {fileID: 1294080983}
     movement: 2
     action: 0
+    defaultKey: s
   - name: StrafeLeft
     button: {fileID: 1133527935}
     movement: 3
     action: 0
+    defaultKey: a
   - name: StrafeRight
     button: {fileID: 700886818}
     movement: 4
     action: 0
+    defaultKey: d
   - name: RotateCW
     button: {fileID: 792871456}
     movement: 6
     action: 0
+    defaultKey: e
   - name: RotateCCW
     button: {fileID: 900212227}
     movement: 5
     action: 0
+    defaultKey: q
   - name: Interact
     button: {fileID: 245148563}
     movement: 0
     action: 3
+    defaultKey: space
   ButtonGroup: {fileID: 707098224}
   rebindingText: _
   blinkWhileRebinding: 1

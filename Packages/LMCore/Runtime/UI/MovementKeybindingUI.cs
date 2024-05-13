@@ -20,6 +20,7 @@ namespace LMCore.UI
             public SimpleButton button;
             public Movement movement;
             public GamePlayAction action;
+            public string defaultKey;
 
             public bool IsMovement => movement != Movement.None;
             public bool IsAction => action != GamePlayAction.None;
@@ -28,8 +29,8 @@ namespace LMCore.UI
             {
                 get
                 {
-                    if (IsMovement) return GameSettings.GetMovementSetting(movement);
-                    if (IsAction) return GameSettings.GetActionSettings(action).FirstOrDefault();
+                    if (IsMovement) return GameSettings.GetMovementSetting(movement, defaultKey);
+                    if (IsAction) return GameSettings.GetActionSettings(action, defaultKey).FirstOrDefault();
                     return null;
                 }
             }

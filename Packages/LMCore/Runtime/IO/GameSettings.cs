@@ -96,35 +96,25 @@ namespace LMCore.IO
         #region Movement
         public static readonly BoolSetting InstantMovement = new BoolSetting($"{MovementsRoot}.InstantMovemnt", false);
 
-        private static readonly StringSetting MovementForward = new StringSetting($"{MovementsRoot}.{Movement.Forward}", "w");
-        private static readonly StringSetting MovementBackward = new StringSetting($"{MovementsRoot}.{Movement.Backward}", "s");
-        private static readonly StringSetting MovementLeft = new StringSetting($"{MovementsRoot}.{Movement.StrafeLeft}", "a");
-        private static readonly StringSetting MovementRight = new StringSetting($"{MovementsRoot}.{Movement.StrafeRight}", "d");
-        private static readonly StringSetting MovementTurnCW = new StringSetting($"{MovementsRoot}.{Movement.TurnCW}", "e");
-        private static readonly StringSetting MovementTurnCCW = new StringSetting($"{MovementsRoot}.{Movement.TurnCCW}", "q");
-        public static StringSetting GetMovementSetting(Movement movement) { 
-            switch (movement)
-            {
-                case Movement.Forward: return MovementForward;
-                case Movement.Backward: return MovementBackward;
-                case Movement.StrafeLeft: return MovementLeft;
-                case Movement.StrafeRight: return MovementRight;
-                case Movement.TurnCW: return MovementTurnCW;  
-                case Movement.TurnCCW: return MovementTurnCCW;
-                default: return null;
-            }
+        private static Dictionary<Movement, StringSetting> _movementSettings = new Dictionary<Movement, StringSetting>();
+        public static StringSetting GetMovementSetting(Movement movement, string defaultValue = null) { 
+            if (_movementSettings.ContainsKey(movement)) return _movementSettings[movement];
+
+            var setting = new StringSetting($"{MovementsRoot}.{movement}", defaultValue);
+            _movementSettings.Add(movement, setting);
+            return setting;
         }
         #endregion Movement
 
         #region Gameplay Action
         private static Dictionary<GamePlayAction, StringSetting> _actionSettings = new Dictionary<GamePlayAction, StringSetting>();
-        public static IEnumerable<StringSetting> GetActionSettings(GamePlayAction action) => action
+        public static IEnumerable<StringSetting> GetActionSettings(GamePlayAction action, string defaultValue = null) => action
             .AsPrimitives()
             .Select(a => 
             {
                 if (_actionSettings.ContainsKey(a)) return _actionSettings[a];
 
-                var setting = new StringSetting($"{ActionsRoot}.{a}");
+                var setting = new StringSetting($"{ActionsRoot}.{a}", defaultValue);
                 _actionSettings[a] = setting;
 
                 return setting;
