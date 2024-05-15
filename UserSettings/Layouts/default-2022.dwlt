@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Console
+  m_Title: Game
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 124
+  controlID: 102
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: ProjectBrowser
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -121,15 +121,15 @@ MonoBehaviour:
     y: 520
     width: 1125
     height: 437
-  m_MinSize: {x: 101, y: 121}
-  m_MaxSize: {x: 4001, y: 4021}
-  m_ActualView: {fileID: 20}
+  m_MinSize: {x: 231, y: 271}
+  m_MaxSize: {x: 10001, y: 10021}
+  m_ActualView: {fileID: 15}
   m_Panes:
   - {fileID: 15}
   - {fileID: 20}
   - {fileID: 13}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -6238,10 +6238,10 @@ MonoBehaviour:
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 79}
-    m_SelectedIDs: e0710000
-    m_LastClickedID: 29152
-    m_ExpandedIDs: 00000000ae710000b0710000b2710000b4710000b6710000b871000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 139}
+    m_SelectedIDs: 62720000
+    m_LastClickedID: 29282
+    m_ExpandedIDs: 000000002a7200002c7200002e72000030720000327200003472000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -6269,7 +6269,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000ae710000b0710000b2710000b4710000b6710000b8710000
+    m_ExpandedIDs: 000000002a7200002c7200002e720000307200003272000034720000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -6294,24 +6294,24 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 566d0000
-    m_LastClickedInstanceID: 27990
+    m_SelectedInstanceIDs: 
+    m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000f4740000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: MovementKeybindingUI
+      m_OriginalName: MovementKeybindingUI
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 12254
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 5}
     m_CreateAssetUtility:
@@ -6367,7 +6367,7 @@ MonoBehaviour:
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 0
+  m_LastVerticalScrollValue: 594
   m_GlobalObjectId: 
   m_InspectorMode: 0
   m_LockTracker:
@@ -6411,9 +6411,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 566d0000
-      m_LastClickedID: 27990
-      m_ExpandedIDs: aa9bfeff589cfeff06aefffff2ecffffc0f5ffff2afbffffd86c0000086d0000566d0000766e0000546f0000766f0000
+      m_SelectedIDs: 9a6d0000
+      m_LastClickedID: 28058
+      m_ExpandedIDs: a6faffffc26e0000d46f0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
