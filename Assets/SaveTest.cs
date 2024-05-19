@@ -1,10 +1,23 @@
 using LMCore.IO;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class SaveTest : MonoBehaviour
 {
     [SerializeField]
-    SerializableDictionary<string, int> test = new SerializableDictionary<string, int>();
+    SerializableDictionary<string, int> serializableDictionary = new SerializableDictionary<string, int>();
+
+    [SerializeField]
+    SerializableDictionary<string, GameObject> serializableDictionary2 = new SerializableDictionary<string, GameObject>();
+
+    private void Start()
+    {
+        serializableDictionary.TryAdd("test", 1);
+        serializableDictionary.TryAdd("me", 2);
+
+        foreach (var kvp in serializableDictionary)
+        {
+            Debug.Log(kvp.Key);
+        }
+    }
 }

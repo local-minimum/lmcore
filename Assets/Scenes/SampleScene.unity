@@ -664,6 +664,7 @@ GameObject:
   - component: {fileID: 48931397}
   - component: {fileID: 48931396}
   - component: {fileID: 48931398}
+  - component: {fileID: 48931399}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -715,6 +716,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSaves: 3
   SavePattern: GameSave_{id}.json
+--- !u!114 &48931399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48931395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9695ea902ec3808408c2be96903df36c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializableDictionary:
+    keys:
+    - test
+    - me
+    - me2
+    values: 2c0000000200000000000000
+  serializableDictionary2:
+    keys:
+    - Cell 1,1
+    - Cell 1,2
+    values:
+    - {fileID: 1458799305}
+    - {fileID: 483784990}
 --- !u!1 &66529005
 GameObject:
   m_ObjectHideFlags: 0
@@ -3590,7 +3616,7 @@ GameObject:
   - component: {fileID: 483784993}
   - component: {fileID: 483784992}
   m_Layer: 0
-  m_Name: Floor
+  m_Name: Floor 1,2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4209,7 +4235,6 @@ GameObject:
   - component: {fileID: 605766715}
   - component: {fileID: 605766716}
   - component: {fileID: 605766717}
-  - component: {fileID: 605766718}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4436,21 +4461,6 @@ MonoBehaviour:
   WallMask:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &605766718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 605766709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9695ea902ec3808408c2be96903df36c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  test:
-    keys: []
-    values: 
 --- !u!1 &616944357
 GameObject:
   m_ObjectHideFlags: 0
@@ -8764,7 +8774,7 @@ GameObject:
   - component: {fileID: 1458799308}
   - component: {fileID: 1458799307}
   m_Layer: 0
-  m_Name: Floor
+  m_Name: Floor 1,1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
