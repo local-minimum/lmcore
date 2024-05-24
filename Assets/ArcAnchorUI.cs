@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ArcAnchorUI : MonoBehaviour
@@ -56,7 +54,7 @@ public class ArcAnchorUI : MonoBehaviour
         var r = Radius;
         var theta = Theta;
 
-        var a = Mathf.Lerp(theta, -theta, progress);
+        var a = Mathf.LerpUnclamped(theta, -theta, progress);
         switch (anchor)
         {
             case Anchor.Bottom:

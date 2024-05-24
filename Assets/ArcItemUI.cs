@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class ArcItemUI : MonoBehaviour
 {
     private ArcAnchorUI _anchorUI;
@@ -18,14 +16,11 @@ public class ArcItemUI : MonoBehaviour
         }
     }
 
-    [SerializeField, Range(0, 1)]
-    float position = 0.5f;
-
-    private void Update()
+    void UpdateAnchor()
     {
         var rt = GetComponent<RectTransform>();
 
-        var pt = anchor.GetPoint(position, out float normalAngle);
+        var pt = anchor.GetPoint(_position, out float normalAngle);
 
         var rotation = rt.rotation.eulerAngles;
         rotation.z = normalAngle;
@@ -35,4 +30,19 @@ public class ArcItemUI : MonoBehaviour
         rt.anchorMax = Vector2.zero;
         rt.localPosition = pt;
     }
+
+    [SerializeField, HideInInspector]
+    float _position = 0.5f;
+    public float Position
+    {
+        get { return _position; }
+        set
+        {
+            _position = value;
+            UpdateAnchor();
+        }
+    }
+
+    [Tooltip("For layouting with space between"), Range(0, 1)]
+    public float progressClaimed = 0.1f;
 }
