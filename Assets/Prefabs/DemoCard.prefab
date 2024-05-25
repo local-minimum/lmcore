@@ -229,6 +229,7 @@ MonoBehaviour:
   hoverClaimSpaceFactor: 1.2
   arcItem: {fileID: 3553372936197358512}
   hoverPivot: {x: 0.5, y: 0.2}
+  BringForward: 1
 --- !u!114 &7948289990820995134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,7 +330,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1120908497606073636}
         m_TargetAssemblyTypeName: TwoSidedUI, Assembly-CSharp
-        m_MethodName: Flip
+        m_MethodName: EaseFlip
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -354,7 +355,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  Disabled: 0
   activationDuration: 1.5
+  disableOnComplete: 1
 --- !u!1 &4561055483632193381
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,6 +677,62 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   front: {fileID: 5312127821655045609}
   back: {fileID: 4985244046025333810}
+  easeToBack:
+    StartValue: 0
+    EndValue: 180
+    fullEaseDuration: 0.3
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  easeToFront:
+    StartValue: 180
+    EndValue: 360
+    fullEaseDuration: 0.3
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
 --- !u!1 &7201288588153994283
 GameObject:
   m_ObjectHideFlags: 0

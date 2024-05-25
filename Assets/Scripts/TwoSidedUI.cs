@@ -9,40 +9,49 @@ public class TwoSidedUI : MonoBehaviour
     [SerializeField]
     GameObject back;
 
-    [ContextMenu("Show Front")]
-    public void ShowFront()
-    {
-        var euler = transform.eulerAngles;
-        euler.y = 0;
-        transform.localEulerAngles = euler;
-    }
+    [SerializeField]
+    TemporalEasing<float> easeToBack;
 
-    [ContextMenu("Show Back")]
-    public void ShowBack() { 
-        var euler = transform.eulerAngles;
-        euler.y = 180;
-        transform.localEulerAngles = euler;
-    }
+    [SerializeField]
+    TemporalEasing<float> easeToFront;
 
     bool FrontVisible(float yRotation) => yRotation < 90f || yRotation > 270f;
+    bool FrontVisible() => FrontVisible(transform.localEulerAngles.y);
 
-    [ContextMenu("Flip")]
-    public void Flip()
+    void SetRotation(float angle)
     {
         var euler = transform.localEulerAngles;
-        euler.y = FrontVisible(euler.y) ? 180 : 0;
+        euler.y = angle; 
         transform.localEulerAngles = euler;
+    }
+
+    [ContextMenu("Show Front")]
+    public void ShowFront() => SetRotation(0f);
+
+    [ContextMenu("Show Back")]
+    public void ShowBack() => SetRotation(180f);
+
+    [ContextMenu("Flip")]
+    public void Flip() => SetRotation(FrontVisible() ? 180 : 0);
+
+    TemporalEasing<float> activeEasing;
+
+    public void EaseFlip()
+    {
+        activeEasing = FrontVisible() ? easeToBack : easeToFront;
+        activeEasing.EaseStartToEnd();
     }
 
     [ContextMenu("Normalize")]
-    public void Normalize() { 
-        var euler = transform.localEulerAngles;
-        euler.y = FrontVisible(euler.y) ? 0 : 180;
-        transform.localEulerAngles = euler;
-    }
+    public void Normalize() => SetRotation(FrontVisible() ? 0 : 180);
 
     void Update()
     {
+        if (activeEasing?.IsEasing == true)
+        {
+            SetRotation(activeEasing.Evaluate());
+        }
+
         var showFront = FrontVisible(transform.eulerAngles.y);
 
         if (front != null) front.SetActive(showFront);

@@ -80,11 +80,24 @@ public class TemporalEasing<T>
         {
             return (T) Convert.ChangeType(
                 Vector2.Lerp(
-                (Vector2)Convert.ChangeType(StartValue, typeof(Vector2)),
-                (Vector2)Convert.ChangeType(EndValue, typeof(Vector2)),
+                (Vector2)Convert.ChangeType(StartValue, t),
+                (Vector2)Convert.ChangeType(EndValue, t),
                 progress
             ), t);
         }
+        if (t == typeof(float))
+        {
+            return (T)Convert.ChangeType(
+                Mathf.Lerp(
+                    (float)Convert.ChangeType(StartValue, t),
+                    (float)Convert.ChangeType(EndValue, t),
+                    progress
+                ),
+                t
+            );
+        }
+
+
 
         return progress == 1 ? EndValue : StartValue;
     }
