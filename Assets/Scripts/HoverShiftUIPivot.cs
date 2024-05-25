@@ -24,6 +24,9 @@ public class HoverShiftUIPivot : MonoBehaviour
 
     Vector2 neutralPivot;
 
+    [SerializeField, Tooltip("Item becomes first child when shifting")]
+    bool BringForward = true;
+
     private void Start()
     {
         if (arcItem)
@@ -40,6 +43,7 @@ public class HoverShiftUIPivot : MonoBehaviour
 
     float EaseProgress => Mathf.Clamp01((Time.timeSinceLevelLoad - easingStartTime) / easeDuration);
 
+    int defaultChildIndex;
     public void PointerEnter()
     {
         easingStartTime = Time.timeSinceLevelLoad;
@@ -47,6 +51,22 @@ public class HoverShiftUIPivot : MonoBehaviour
         easingEnd = 1;
 
         if (arcItem) arcItem.progressClaimed = neutralClaim * hoverClaimSpaceFactor;
+
+        if (BringForward)
+        {
+            var parent = arcItem.transform.parent;
+            for (int childIdx = 0; childIdx < parent.childCount; childIdx++)
+            {
+                if (parent.GetChild(childIdx) == arcItem.gameObject)
+                {
+                    defaultChildIndex = childIdx;
+                    break;
+                }
+            }
+            
+            arcItem.transform.SetAsLastSibling();
+        }
+
         isEasing = true;
     }
 
@@ -57,6 +77,12 @@ public class HoverShiftUIPivot : MonoBehaviour
         easingEnd = 0;
 
         if (arcItem) arcItem.progressClaimed = neutralClaim;
+
+        if (BringForward)
+        {
+            arcItem.transform.SetSiblingIndex(defaultChildIndex);
+        }
+
         isEasing = true;
     }
 
