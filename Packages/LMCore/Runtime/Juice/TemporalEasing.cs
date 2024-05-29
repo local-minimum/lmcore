@@ -3,18 +3,17 @@ using UnityEngine;
 
 namespace LMCore.Juice
 {
-    public delegate void EaseEndEvent(bool isAtEnd);
+    public delegate void EaseCompleteEvent(bool isAtEnd);
 
     [Serializable]
     public class TemporalEasing<T>
     {
-        public event EaseEndEvent OnEaseEnd;
+        public event EaseCompleteEvent OnEaseComplete;
 
         public T StartValue;
         public T EndValue;
 
-        [SerializeField]
-        private float fullEaseDuration;
+        public float fullEaseDuration;
 
         [SerializeField]
         AnimationCurve easing;
@@ -73,7 +72,7 @@ namespace LMCore.Juice
             if (TimeProgress == 1)
             {
                 IsEasing = false;
-                OnEaseEnd?.Invoke(progress == 1);
+                OnEaseComplete?.Invoke(progress == 1);
             }
 
             if (t == typeof(Vector2))
@@ -96,8 +95,6 @@ namespace LMCore.Juice
                     t
                 );
             }
-
-
 
             return progress == 1 ? EndValue : StartValue;
         }

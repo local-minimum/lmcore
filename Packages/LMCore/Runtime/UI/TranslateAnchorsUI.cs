@@ -74,12 +74,12 @@ namespace LMCore.UI
 
         private void OnEnable()
         {
-            easing.OnEaseEnd += Easing_OnEaseEnd;
+            easing.OnEaseComplete += Easing_OnEaseEnd;
         }
 
         private void OnDisable()
         {
-            easing.OnEaseEnd -= Easing_OnEaseEnd;
+            easing.OnEaseComplete -= Easing_OnEaseEnd;
         }
 
         private void Easing_OnEaseEnd(bool isAtEnd)

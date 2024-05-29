@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 7252554043487563502}
   - component: {fileID: 7948289990820995134}
   - component: {fileID: 6655414105587561377}
+  - component: {fileID: 8127506005460318469}
   m_Layer: 5
   m_Name: DemoCard
   m_TagString: Untagged
@@ -186,7 +187,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a2e04cfc955f548a930c01a8653ae3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _position: 0.5
+  _position: 0.61300004
   progressClaimed: 0.1
 --- !u!114 &7252554043487563502
 MonoBehaviour:
@@ -358,6 +359,82 @@ MonoBehaviour:
   Disabled: 0
   activationDuration: 1.5
   disableOnComplete: 1
+--- !u!114 &8127506005460318469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2902367229871007391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efa121b17253ddf428eedeacaed931bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scaleReferenceRect: {fileID: 974504211586939433}
+  OrderBeforeTarget: 1
+  managedBehaviours:
+  - {fileID: 7252554043487563502}
+  - {fileID: 3553372936197358512}
+  - {fileID: 6655414105587561377}
+  - {fileID: 7948289990820995134}
+  target: {fileID: 0}
+  rotationEasing:
+    StartValue: 0
+    EndValue: 1
+    fullEaseDuration: 0.4
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.9992676
+        value: 1
+        inSlope: 0.5111247
+        outSlope: 0.5111247
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.03346844
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  positionEasing:
+    StartValue: 0
+    EndValue: 1
+    fullEaseDuration: 0.6
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0.20840457
+        outSlope: 0.20840457
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.032809295
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.24518168
+        outSlope: 0.24518168
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.034859896
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
 --- !u!1 &4561055483632193381
 GameObject:
   m_ObjectHideFlags: 0
@@ -472,6 +549,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  startFill: 0
 --- !u!1 &4985244046025333810
 GameObject:
   m_ObjectHideFlags: 0

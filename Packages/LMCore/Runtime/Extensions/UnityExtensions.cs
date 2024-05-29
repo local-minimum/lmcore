@@ -36,5 +36,18 @@ namespace LMCore.Extensions
         /// Sets all children as active
         /// </summary>
         public static void ShowAllChildren(this Transform parent) => parent.SetAllChildrenVisibility(true);
-    }
+
+        public static Canvas GetCanvas(this RectTransform transform) => transform.GetComponentInParent<Canvas>();
+
+        public static Vector2 CalculateSize(this RectTransform transform)
+        {
+            var anchorDelta = (transform.anchorMax - transform.anchorMin);
+            var parentSize = ((RectTransform)transform.parent)?.CalculateSize() ?? transform.GetCanvas().pixelRect.size;
+            var size = anchorDelta * parentSize;
+            if (size.x == 0) size.x = transform.sizeDelta.x;
+            if (size.y == 0) size.y = transform.sizeDelta.y;
+
+            return size;
+        }
+    }    
 }
