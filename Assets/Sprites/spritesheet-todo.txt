@@ -4,7 +4,7 @@
 
 - [x] Stairs Down (x4 New Level)
 - [x] Stiars Up (4x New Level)
-- [ ] Ramp 3tiles (4x New Elevation)
+- [x] Ramp 3tiles (4x New Elevation)
 
 - [x] WallSpikesTrap x4
 - [x] FireBallTrap x4
@@ -13,14 +13,14 @@
 - [x] Preasure plate
 
 - [x] WallButton x4
+- [x] WallLadder
 
-
-- [ ] Statue/Pillar
-- [ ] NPC
-- [ ] Enemy
+- [x] Statue/Pillar
+- [x] NPC
+- [x] Enemy
 - [x] Chest
-- [xz] Fireplace
-- [ ] Trashpile
+- [x] Fireplace
+- [-] Trashpile (functionally a chest
 
 - [ ] Water x14 (or x1?)
 - [ ] Fire  x14
