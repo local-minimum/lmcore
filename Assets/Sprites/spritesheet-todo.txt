@@ -1,0 +1,29 @@
+- [x] KeyDoor x2
+- [x] Obstruction x2
+- [x] Alcove (4x)
+
+- [x] Stairs Down (x4 New Level)
+- [x] Stiars Up (4x New Level)
+- [ ] Ramp 3tiles (4x New Elevation)
+
+- [x] WallSpikesTrap x4
+- [x] FireBallTrap x4
+- [x] Teleporter x3
+- [x] TrapDoor x2
+- [x] Preasure plate
+
+- [x] WallButton x4
+
+
+- [ ] Statue/Pillar
+- [ ] NPC
+- [ ] Enemy
+- [x] Chest
+- [xz] Fireplace
+- [ ] Trashpile
+
+- [ ] Water x14 (or x1?)
+- [ ] Fire  x14
+- [ ] Ice   x14
+
+
