@@ -8,5 +8,135 @@
         "."
     ],
     "propertyTypes": [
+        {
+            "id": 7,
+            "name": "Aspect",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "Always",
+                "Transient",
+                "Never",
+                "Sometimes"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 1,
+            "name": "Direction",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "None",
+                "North",
+                "South",
+                "West",
+                "East",
+                "Up",
+                "Down"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 6,
+            "name": "Interaction",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "Open",
+                "Closed",
+                "Interactable",
+                "Locked",
+                "Obstruction"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 3,
+            "name": "Orientation",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "None",
+                "Vertical",
+                "Horizontal"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 5,
+            "name": "Rotation",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "None",
+                "Clock-Wise",
+                "Counter Clock-Wise"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+                {
+                    "name": "Down",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "East",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "North",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "South",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "Up",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "West",
+                    "type": "bool",
+                    "value": false
+                }
+            ],
+            "name": "CubeSides",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Transition",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "None",
+                "Entry",
+                "Exit",
+                "Intermediary",
+                "EntryAndExit"
+            ],
+            "valuesAsFlags": false
+        }
     ]
 }
