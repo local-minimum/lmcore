@@ -1,21 +1,58 @@
 {
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
     "activeFile": "Mapping.tsx",
+    "automapping.whileDrawing": false,
     "expandedProjectPaths": [
         "."
     ],
     "fileStates": {
+        "Automapping/AutomappingDungeons.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 437.33333333333337,
+                "y": 398
+            }
+        },
+        "DemoLevel.tmx": {
+            "expandedGroupLayers": [
+                7,
+                9
+            ],
+            "scale": 0.75,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 477.33333333333326,
+                "y": 305.99999999999994
+            }
+        },
         "Mapping.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "Rules/AutomappingDungeons.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 209.090909090909,
+                "y": 986.3636363636363
+            }
         }
     },
     "last.imagePath": "C:/Users/Admin/Documents/Unity/LMPackage/Assets/Tiled",
+    "map.height": 32,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 32,
     "openFiles": [
         "Mapping.tsx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "Interaction",
+    "property.type": "bool",
     "recentFiles": [
+        "Automapping/AutomappingDungeons.tmx",
         "Mapping.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"

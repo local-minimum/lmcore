@@ -1,11 +1,12 @@
 {
-    "automappingRulesFile": "",
+    "automappingRulesFile": "Rules/rules.txt",
     "commands": [
     ],
     "compatibilityVersion": 1100,
     "extensionsPath": "extensions",
     "folders": [
-        "."
+        ".",
+        "Automapping"
     ],
     "propertyTypes": [
         {
@@ -20,6 +21,55 @@
                 "Sometimes"
             ],
             "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+                {
+                    "name": "Down",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "East",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "North",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "South",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "Up",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "West",
+                    "type": "bool",
+                    "value": false
+                }
+            ],
+            "name": "CubeSides",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset"
+            ]
         },
         {
             "id": 1,
@@ -74,55 +124,6 @@
                 "Counter Clock-Wise"
             ],
             "valuesAsFlags": false
-        },
-        {
-            "color": "#ffa0a0a4",
-            "drawFill": true,
-            "id": 8,
-            "members": [
-                {
-                    "name": "Down",
-                    "type": "bool",
-                    "value": false
-                },
-                {
-                    "name": "East",
-                    "type": "bool",
-                    "value": false
-                },
-                {
-                    "name": "North",
-                    "type": "bool",
-                    "value": false
-                },
-                {
-                    "name": "South",
-                    "type": "bool",
-                    "value": false
-                },
-                {
-                    "name": "Up",
-                    "type": "bool",
-                    "value": false
-                },
-                {
-                    "name": "West",
-                    "type": "bool",
-                    "value": false
-                }
-            ],
-            "name": "CubeSides",
-            "type": "class",
-            "useAs": [
-                "property",
-                "map",
-                "layer",
-                "object",
-                "tile",
-                "tileset",
-                "wangcolor",
-                "wangset"
-            ]
         },
         {
             "id": 4,
