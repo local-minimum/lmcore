@@ -8,4 +8,5 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 8b3a43ac7bf126f48a8fef3ba7291efa, type: 3}
-  tileSize: 3.89
+  tileSize: 3
+  onlyImportFlaggedLayers: 1

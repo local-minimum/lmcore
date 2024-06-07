@@ -8,6 +8,14 @@ namespace LMCore.IO
     [System.Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
+        public SerializableDictionary() { }
+        public SerializableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> elements)
+        {
+            foreach (var  element in elements) { 
+                this.Add(element.Key, element.Value);
+            }
+        }
+
         [SerializeField, HideInInspector] private List<TKey> keys = new List<TKey>();
         [SerializeField, HideInInspector] private List<TValue> values = new List<TValue>();
 

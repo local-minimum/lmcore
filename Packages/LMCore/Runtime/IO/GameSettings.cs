@@ -94,7 +94,7 @@ namespace LMCore.IO
         }
 
         #region Movement
-        public static readonly BoolSetting InstantMovement = new BoolSetting($"{MovementsRoot}.InstantMovemnt", false);
+        public static readonly BoolSetting InstantMovement = new BoolSetting($"{MovementsRoot}.InstantMovement", false);
 
         private static Dictionary<Movement, StringSetting> _movementSettings = new Dictionary<Movement, StringSetting>();
         public static StringSetting GetMovementSetting(Movement movement, string defaultValue = null) { 
