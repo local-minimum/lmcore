@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using UnityEditor.AssetImporters;
+using UnityEditor.Purchasing;
 using UnityEngine;
 
 
@@ -36,7 +37,7 @@ static class IntCSVParserUtil
 
                         return 1;
                     })
-                    // This is just fake...
+                    // This is just fake... should rewrite to not have to sum it all
                     .Sum())
             .Sum();
 
@@ -49,7 +50,7 @@ static class IntCSVParserUtil
 static class XElementExtensions
 {
     public static string GetAttribute(this XElement element, string attributeName) =>
-        element.Attribute(attributeName).Value;
+        element.Attribute(attributeName)?.Value;
 
     public static int GetIntAttribute(this XElement element, string attributeName) => 
         int.Parse(element.GetAttribute(attributeName));
@@ -112,19 +113,90 @@ public class TiledDungeonImporter : ScriptedImporter
     }
 
     [SerializeField]
+    public class TiledEnum<T>
+    {
+        public string TypeName;
+        public T Value;
+    }
+
+    [SerializeField]
+    public class TiledEnums
+    {
+        public SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>> StringEnums = new SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>>(); 
+        public SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>> IntEnums = new SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>>(); 
+
+        public static bool IsEnumProperty(XElement property) => property.GetAttribute("propertytype") != null && property.Element("properties") == null;
+
+        public static bool IsStringEnumProperty(XElement property) => IsEnumProperty(property) && property.GetAttribute("type") == "int";
+        public static bool IsIntEnumProperty(XElement property) => IsEnumProperty(property) && (property.GetAttribute("type") == null || property.GetAttribute("type") == "string");
+
+        public TiledEnum<int> parseIntEnum(XElement property)
+        {
+            var typeName = property.GetAttribute("propertytype");
+
+            if (!IntEnums.ContainsKey(typeName))
+            {
+                IntEnums.Add(typeName, new SerializableDictionary<int, TiledEnum<int>>());
+            }
+
+            var intEnum = IntEnums[typeName];
+
+            var intValue = property.GetIntAttribute("value");
+
+            if (!intEnum.ContainsKey(intValue))
+            {
+                intEnum.Add(intValue, new () { TypeName = typeName, Value = intValue });
+            }
+
+            return intEnum[intValue];
+        }
+
+        public TiledEnum<string> parseStringEnum(XElement property)
+        {
+            var typeName = property.GetAttribute("propertytype");
+
+            if (!StringEnums.ContainsKey(typeName))
+            {
+                StringEnums.Add(typeName, new SerializableDictionary<string, TiledEnum<string>>());
+            }
+
+            var stringEnum = StringEnums[typeName];
+
+            var stringValue = property.GetAttribute("value");
+
+            if (!stringEnum.ContainsKey(stringValue))
+            {
+                stringEnum.Add(stringValue, new TiledEnum<string>() { TypeName = typeName, Value = stringValue });
+            }
+            return stringEnum[stringValue];
+        }
+    }
+
+
+    [SerializeField]
     public class CustomProperties
     {
-        // Not Supported: file, object or class
+        // Not Supported: file, object, enums
         public SerializableDictionary<string, string> Strings;
         public SerializableDictionary<string, int> Ints;
         public SerializableDictionary<string, float> Floats;
         public SerializableDictionary<string, bool> Bools;
         public SerializableDictionary<string, Color> Colors;
+        public SerializableDictionary<string, CustomProperties> Classes;
+        public SerializableDictionary<string, TiledEnum<string>> StringEnums;
+        public SerializableDictionary<string, TiledEnum<int>> IntEnums;
 
-        private static IEnumerable<XElement> FilterByType(XElement properties, string type) =>
-            properties.Elements().Where(element => element.GetAttribute("type") == type);
+        private static IEnumerable<XElement> FilterByNonEnumType(
+            XElement properties, 
+            string type, 
+            bool includeMissingAttribute
+        ) =>
+            properties.Elements().Where(element => 
+                !TiledEnums.IsEnumProperty(element) && 
+                (element.GetAttribute("type") == type || includeMissingAttribute && element.GetAttribute("type") == null)
+            );
 
-        private static T Parse<T>(XElement property)
+        private static T Parse<T>(XElement property, TiledEnums enums)
         {
             var t = typeof(T);
 
@@ -153,21 +225,43 @@ public class TiledDungeonImporter : ScriptedImporter
                 return (T)Convert.ChangeType(property.GetBoolAttribute("value"), t);
             }
 
+            if (t == typeof(CustomProperties))
+            {
+                return (T) Convert.ChangeType(from(property.Element("properties"), enums), t);
+            }
+
             throw new NotImplementedException($"Custom properties of type {t} not supported");
         }
 
-        private static SerializableDictionary<string, T> FromFilter<T>(XElement properties, string type) => new SerializableDictionary<string, T>(
-                FilterByType(properties, type)
-                    .Select(property => new KeyValuePair<string, T>(property.GetAttribute("name"), Parse<T>(property)))
+        private static SerializableDictionary<string, T> FromFilter<T>(
+            XElement properties, 
+            string type,
+            TiledEnums enums,
+            bool includeMissingType = false
+        ) => new SerializableDictionary<string, T>(
+                FilterByNonEnumType(properties, type, includeMissingType)
+                    .Select(property => new KeyValuePair<string, T>(property.GetAttribute("name"), Parse<T>(property, enums)))
             );
 
-        public static CustomProperties from(XElement properties) => properties == null ? null : new CustomProperties()
+        public static CustomProperties from(XElement properties, TiledEnums enums) => properties == null ? null : new CustomProperties()
         {
-            Strings = FromFilter<string>(properties, "string"),
-            Ints = FromFilter<int>(properties, "int"),
-            Floats = FromFilter<float>(properties, "float"),
-            Bools = FromFilter<bool>(properties, "bool"),
-            Colors = FromFilter<Color>(properties, "color"),
+            Strings = FromFilter<string>(properties, "string", enums, true),
+            Ints = FromFilter<int>(properties, "int", enums),
+            Floats = FromFilter<float>(properties, "float", enums),
+            Bools = FromFilter<bool>(properties, "bool", enums),
+            Colors = FromFilter<Color>(properties, "color", enums),
+            StringEnums = new SerializableDictionary<string, TiledEnum<string>>(
+                properties
+                    .Elements()
+                    .Where(property => TiledEnums.IsStringEnumProperty(property))
+                    .Select(property => new KeyValuePair<string, TiledEnum<string>>(property.GetAttribute("name"), enums.parseStringEnum(property)))
+            ),
+            IntEnums = new SerializableDictionary<string, TiledEnum<int>>(
+                properties
+                    .Elements()
+                    .Where(property => TiledEnums.IsIntEnumProperty(property))
+                    .Select(property => new KeyValuePair<string, TiledEnum<int>>(property.GetAttribute("name"), enums.parseIntEnum(property)))
+            )
         };
     }
 
@@ -180,11 +274,11 @@ public class TiledDungeonImporter : ScriptedImporter
 
         public override string ToString() => $"<MapMetadata size={MapSize} infinite={Infinite} />";
 
-        public static MapMetadata from(XElement map) => map == null ? null :
+        public static MapMetadata from(XElement map, TiledEnums enums) => map == null ? null :
             new MapMetadata() {
                 MapSize = map.GetVector2IntAttribute("width", "height"),
                 Infinite = map.GetBoolAttribute("infinite"),
-                CustomProperties = CustomProperties.from(map.Element("properties")),
+                CustomProperties = CustomProperties.from(map.Element("properties"), enums),
             };
     }
 
@@ -209,7 +303,7 @@ public class TiledDungeonImporter : ScriptedImporter
         public int[,] Tiles;
         public CustomProperties CustomProperties;
 
-        public static TileLayer from(XElement layer)
+        public static TileLayer from(XElement layer, TiledEnums enums)
         {
             if (layer == null) return null;
 
@@ -226,7 +320,7 @@ public class TiledDungeonImporter : ScriptedImporter
                 Name = layer.GetAttribute("name"),
                 LayerSize = layerSize,
                 Tiles = IntCSVParserUtil.Parse((string)data, layerSize),
-                CustomProperties = CustomProperties.from(layer.Element("properties")),
+                CustomProperties = CustomProperties.from(layer.Element("properties"), enums),
             };
         }
 
@@ -264,16 +358,16 @@ public class TiledDungeonImporter : ScriptedImporter
 
         public string LayerNames() => string.Join(", ", Layers.Select(layer => layer.Name));
 
-        public static LayerGroup from(XElement group, bool filterImport) => group == null ? null : new LayerGroup()
+        public static LayerGroup from(XElement group, TiledEnums enums, bool filterImport) => group == null ? null : new LayerGroup()
         {
             Id = group.GetIntAttribute("id"),
             Name = group.GetAttribute("name"),
             Layers = group.Elements()
                 .Where(element => element.Name == "layer")
-                .Select(layer => TileLayer.from(layer))
+                .Select(layer => TileLayer.from(layer, enums))
                 .Where(layer => !filterImport || (layer?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false))
                 .ToList(),
-            CustomProperties = CustomProperties.from(group.Element("properties")),
+            CustomProperties = CustomProperties.from(group.Element("properties"), enums),
         };
     }
 
@@ -281,31 +375,44 @@ public class TiledDungeonImporter : ScriptedImporter
     [Serializable]
     public class TiledMap
     {
+        public TiledEnums Enums;
         public MapMetadata Metadata;
         public List<TilesetMetadata> Tilesets;
         public List<TileLayer> Layers;
         public List<LayerGroup> Groups;
 
-        public static TiledMap from(XElement map, bool filterLayerImport) => map == null ? null : new TiledMap()
+        public static TiledMap from(XElement map, TiledEnums enums, bool filterLayerImport)
         {
-            Metadata = MapMetadata.from(map),
-            Tilesets = map
+            if (map == null) return new TiledMap() { 
+                Enums = enums, 
+                Metadata = new MapMetadata(), 
+                Tilesets = new List<TilesetMetadata>(), 
+                Layers = new List<TileLayer>(), 
+                Groups = new List<LayerGroup>() 
+            };
+
+            return  new TiledMap()
+            {
+                Enums = enums,
+                Metadata = MapMetadata.from(map, enums),
+                Tilesets = map
                 .Elements()
                 .Where(element => element.Name == "tileset")
                 .Select(tileset => TilesetMetadata.from(tileset))
                 .ToList(),
-            Layers = map
+                Layers = map
                 .Elements()
                 .Where(element => element.Name == "layer")
-                .Select(layer => TileLayer.from(layer))
+                .Select(layer => TileLayer.from(layer, enums))
                 .Where(layer => !filterLayerImport || (layer?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false))
                 .ToList(),
-            Groups = map
+                Groups = map
                 .Elements()
                 .Where(element => element.Name == "group")
-                .Select(group => LayerGroup.from(group, filterLayerImport))
+                .Select(group => LayerGroup.from(group, enums, filterLayerImport))
                 .ToList(),
-        };
+            };
+        }
 
         public string LayerNames()
         {
@@ -316,13 +423,13 @@ public class TiledDungeonImporter : ScriptedImporter
 
     void ProcessMap(XElement map)
     {
-
-        var processedMap = TiledMap.from(map, onlyImportFlaggedLayers);
+        var enums = new TiledEnums();
+        var processedMap = TiledMap.from(map, enums, onlyImportFlaggedLayers);
         Debug.Log($"RootLayers: {processedMap.Layers.Count}");
         Debug.Log($"Groups: {processedMap.Groups.Count}");
         Debug.Log($"Layers: {processedMap.LayerNames()}");
 
-        var layer = TileLayer.from(map.Element("group").Element("layer"));
+        var layer = TileLayer.from(map.Element("group").Element("layer"), enums);
         Debug.Log(layer.TilesAsASCII());
     }
 }
