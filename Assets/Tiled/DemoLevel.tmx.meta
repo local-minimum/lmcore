@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 2c693164372253d4c90c06f8fd54811e
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 8b3a43ac7bf126f48a8fef3ba7291efa, type: 3}
+  tileSize: 3.89

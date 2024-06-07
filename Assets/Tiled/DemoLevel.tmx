@@ -39,6 +39,10 @@
 </data>
   </layer>
   <layer id="11" name="dungeon" width="32" height="32">
+   <properties>
+    <property name="Elevation" type="int" value="0"/>
+    <property name="Imported" type="bool" value="true"/>
+   </properties>
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,9,8,8,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -75,6 +79,10 @@
 </data>
   </layer>
   <layer id="12" name="modifiers" width="32" height="32">
+   <properties>
+    <property name="Elevation" type="int" value="0"/>
+    <property name="Imported" type="bool" value="true"/>
+   </properties>
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -149,6 +157,10 @@
 </data>
   </layer>
   <layer id="10" name="dungeon1" width="32" height="32">
+   <properties>
+    <property name="Elevation" type="int" value="1"/>
+    <property name="Imported" type="bool" value="true"/>
+   </properties>
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,6,5,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,16,0,0,0,0,0,0,0,0,0,33,0,0,7,0,0,7,0,0,0,0,0,0,0,0,0,0,
@@ -187,6 +199,7 @@
   <layer id="3" name="modifiers" width="32" height="32">
    <properties>
     <property name="Elevation" type="int" value="1"/>
+    <property name="Imported" type="bool" value="true"/>
    </properties>
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
