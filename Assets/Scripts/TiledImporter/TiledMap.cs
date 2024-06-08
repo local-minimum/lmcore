@@ -38,7 +38,7 @@ namespace TiledImporter
 
             tiledMap.Groups = map.HydrateElementsByName(
                 "group",
-                TiledGroup.fromFactory(enums, filterImports),
+                TiledGroup.FromFactory(enums, filterImports),
                 TiledGroup.ShouldBeImported(filterImports)
             ).ToList();
 

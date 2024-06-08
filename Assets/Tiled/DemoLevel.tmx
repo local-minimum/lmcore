@@ -2,6 +2,9 @@
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="1">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0">
+  <properties>
+   <property name="Imported" type="bool" value="true"/>
+  </properties>
   <layer id="5" name="prototype" width="32" height="32">
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -120,6 +123,9 @@
   </layer>
  </group>
  <group id="7" name="Elevation 1" opacity="0.3">
+  <properties>
+   <property name="Imported" type="bool" value="true"/>
+  </properties>
   <layer id="1" name="prototype1" width="32" height="32" opacity="0.42">
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,

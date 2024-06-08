@@ -50,7 +50,7 @@ static class XElementExtensions
 
     #region Elements
     public static IEnumerable<XElement> ElementsByName(this XElement element, string elementName) =>
-        element.Elements().Where(element => element.Name == elementName);
+        element.Elements().Where(child => child.Name == elementName);
 
     public static IEnumerable<T> HydrateElementsByName<T>(
         this XElement element, 

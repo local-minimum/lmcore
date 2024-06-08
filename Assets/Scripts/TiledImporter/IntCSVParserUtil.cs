@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TiledImporter
 {
@@ -10,21 +8,13 @@ namespace TiledImporter
         {
             var output = new int[size.y, size.x];
 
-            foreach (
-                var (rowIdx, row)
-                in text
-                    .Split("\n")
-                    .Select((row, rowIdx) =>
-                        new KeyValuePair<int, IEnumerable<string>>(
-                            rowIdx,
-                            row.Trim().Split(",")
-                    ))
-            )
+            var rowIdx = 0;
+            foreach (var row in text.Trim().Split("\n"))
             {
                 int colIdx = 0;
-                foreach (var value in row)
+
+                foreach (var value in row.Trim().Split(","))
                 {
-                    colIdx++;
                     if (rowIdx < size.y && colIdx < size.x)
                     {
                         if (int.TryParse(value.Trim(), out int intValue))
@@ -33,10 +23,13 @@ namespace TiledImporter
                         }
                         else
                         {
-                            Debug.LogWarning($"Parser encountered unexpected int value '{value}'");
+                            Debug.LogWarning($"Parser encountered unexpected int value '{value}' ({rowIdx}, {colIdx})");
                         }
                     }
+                    colIdx++;
                 }
+
+                rowIdx++;
             }
 
             return output;

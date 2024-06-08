@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using UnityEngine;
 
 namespace TiledImporter
 {
@@ -20,18 +21,23 @@ namespace TiledImporter
             return (TiledGroup group) => !filterLayerImport || (group?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false);
         }
 
-        public static Func<XElement, TiledGroup> fromFactory(TiledEnums enums, bool filterImport)
+        public static Func<XElement, TiledGroup> FromFactory(TiledEnums enums, bool filterImport)
         {
-            return (XElement group) => from(group, enums, filterImport);
+            return (XElement group) => From(group, enums, filterImport);
         }
 
-        public static TiledGroup from(XElement group, TiledEnums enums, bool filterImport) => group == null ? null : new TiledGroup()
+        public static TiledGroup From(XElement group, TiledEnums enums, bool filterImport)
         {
-            Id = group.GetIntAttribute("id"),
-            Name = group.GetAttribute("name"),
-            Layers = group.HydrateElementsByName("layer", TiledLayer.fromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
-            Groups = group.HydrateElementsByName("group", fromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
-            CustomProperties = TiledCustomProperties.from(group.Element("properties"), enums),
-        };
+            if (group == null) return null;
+
+            return new TiledGroup()
+            {
+                Id = group.GetIntAttribute("id"),
+                Name = group.GetAttribute("name"),
+                Layers = group.HydrateElementsByName("layer", TiledLayer.fromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
+                Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
+                CustomProperties = TiledCustomProperties.from(group.Element("properties"), enums),
+            };
+        }
     }
 }
