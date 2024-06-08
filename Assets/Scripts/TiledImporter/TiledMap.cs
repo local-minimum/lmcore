@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace TiledImporter
 {
+
     [Serializable]
     public class TiledMap: ScriptableObject
     {
@@ -16,23 +17,23 @@ namespace TiledImporter
         public List<TiledGroup> Groups = new List<TiledGroup>();
         public TiledCustomProperties CustomProperties;
 
-        public static TiledMap from(XElement map, TiledEnums enums, string source, bool filterImports)
+        public static TiledMap From(XElement map, TiledEnums enums, string source, bool filterImports)
         {
             var tiledMap = CreateInstance<TiledMap>();
             tiledMap.Enums = enums;
 
             if (map == null) return tiledMap;
 
-            tiledMap.Metadata = TiledMapMetadata.from(map, enums, source);
+            tiledMap.Metadata = TiledMapMetadata.From(map, enums, source);
 
             tiledMap.Tilesets = map.HydrateElementsByName(
                 "tileset",
-                TiledTilesetMetadata.from
+                TiledTilesetMetadata.From
             ).ToList();
 
             tiledMap.Layers = map.HydrateElementsByName(
                 "layer", 
-                TiledLayer.fromFactory(enums), 
+                TiledLayer.FromFactory(enums), 
                 TiledLayer.ShouldBeImported(filterImports)
             ).ToList();
 
@@ -42,7 +43,7 @@ namespace TiledImporter
                 TiledGroup.ShouldBeImported(filterImports)
             ).ToList();
 
-            tiledMap.CustomProperties = TiledCustomProperties.from(map.Element("properties"), enums);
+            tiledMap.CustomProperties = TiledCustomProperties.From(map.Element("properties"), enums);
 
             return tiledMap;
         }

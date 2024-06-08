@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using UnityEngine;
 
 namespace TiledImporter
 {
@@ -34,9 +33,9 @@ namespace TiledImporter
             {
                 Id = group.GetIntAttribute("id"),
                 Name = group.GetAttribute("name"),
-                Layers = group.HydrateElementsByName("layer", TiledLayer.fromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
+                Layers = group.HydrateElementsByName("layer", TiledLayer.FromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
                 Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
-                CustomProperties = TiledCustomProperties.from(group.Element("properties"), enums),
+                CustomProperties = TiledCustomProperties.From(group.Element("properties"), enums),
             };
         }
     }

@@ -18,13 +18,13 @@ namespace TiledImporter
 
         public override string ToString() => $"<MapMetadata size={MapSize} infinite={Infinite} />";
 
-        public static TiledMapMetadata from(XElement map, TiledEnums enums, string source) => map == null ? null :
+        public static TiledMapMetadata From(XElement map, TiledEnums enums, string source) => map == null ? null :
             new TiledMapMetadata()
             {
                 MapSize = map.GetVector2IntAttribute("width", "height"),
                 Class = map.GetAttribute("class"),
                 Infinite = map.GetBoolAttribute("infinite"),
-                CustomProperties = TiledCustomProperties.from(map.Element("properties"), enums),
+                CustomProperties = TiledCustomProperties.From(map.Element("properties"), enums),
                 Source = source
             };
     }

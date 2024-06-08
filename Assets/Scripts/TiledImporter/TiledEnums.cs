@@ -12,10 +12,10 @@ namespace TiledImporter
 
         public static bool IsEnumProperty(XElement property) => property.GetAttribute("propertytype") != null && property.Element("properties") == null;
 
-        public static bool IsStringEnumProperty(XElement property) => IsEnumProperty(property) && property.GetAttribute("type") == "int";
-        public static bool IsIntEnumProperty(XElement property) => IsEnumProperty(property) && (property.GetAttribute("type") == null || property.GetAttribute("type") == "string");
+        public static bool IsIntEnum(XElement property) => IsEnumProperty(property) && property.GetAttribute("type") == "int";
+        public static bool IsStringEnum(XElement property) => IsEnumProperty(property) && (property.GetAttribute("type") == null || property.GetAttribute("type") == "string");
 
-        public TiledEnum<int> parseIntEnum(XElement property)
+        public TiledEnum<int> ParseIntEnum(XElement property)
         {
             var typeName = property.GetAttribute("propertytype");
 
@@ -36,7 +36,7 @@ namespace TiledImporter
             return intEnum[intValue];
         }
 
-        public TiledEnum<string> parseStringEnum(XElement property)
+        public TiledEnum<string> ParseStringEnum(XElement property)
         {
             var typeName = property.GetAttribute("propertytype");
 

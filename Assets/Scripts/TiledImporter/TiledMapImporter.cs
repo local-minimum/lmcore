@@ -11,7 +11,7 @@ namespace TiledImporter
     /// A bit inspired by SuperTiled2Unity https://github.com/Seanba/SuperTiled2Unity/
     /// </summary>
     [ScriptedImporter(1, new[] { "tmx" })]
-    public partial class TiledDungeonImporter : ScriptedImporter
+    public partial class TiledMapImporter : ScriptedImporter
     {
         [SerializeField, Tooltip("If only those levels with the custom boolean property 'Imported' set to true are imported")]
         bool onlyImportFlaggedLayers = true;
@@ -30,17 +30,17 @@ namespace TiledImporter
                     throw new NotSupportedException("Importer only supports csv encoded data at the moment");
                 }
 
-                var map = ProcessMap(doc.Element("map"), assetPath);
+                var map = ProcessMap(doc.Element("map"));
                 Debug.Log($"{map.Metadata.Name} imported");
 
-                ctx.AddObjectToAsset(map.Metadata.Name, map, null);
+                ctx.AddObjectToAsset(map.Metadata.Name, map);
             }
         }
 
-        TiledMap ProcessMap(XElement map, string assetPath)
+        TiledMap ProcessMap(XElement map)
         {
             var enums = new TiledEnums();
-            var processedMap = TiledMap.from(map, enums, assetPath, onlyImportFlaggedLayers);
+            var processedMap = TiledMap.From(map, enums, assetPath, onlyImportFlaggedLayers);
             Debug.Log($"RootLayers: {processedMap.Layers.Count}");
             Debug.Log($"Groups: {processedMap.Groups.Count}");
             Debug.Log($"Layers: {processedMap.LayerNames()}");

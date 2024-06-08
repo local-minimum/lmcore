@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace LMCore.IO
         public SerializableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> elements)
         {
             foreach (var  element in elements) { 
-                this.Add(element.Key, element.Value);
+                Add(element.Key, element.Value);
             }
         }
 

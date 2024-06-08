@@ -19,10 +19,10 @@ namespace TiledImporter
             return (TiledLayer layer) => !filterLayerImport || (layer?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false);
         }
 
-        public static Func<XElement, TiledLayer> fromFactory(TiledEnums enums) { 
-            return (XElement layer) => from(layer, enums);
+        public static Func<XElement, TiledLayer> FromFactory(TiledEnums enums) { 
+            return (XElement layer) => From(layer, enums);
         }
-        public static TiledLayer from(XElement layer, TiledEnums enums)
+        public static TiledLayer From(XElement layer, TiledEnums enums)
         {
             if (layer == null) return null;
 
@@ -40,7 +40,7 @@ namespace TiledImporter
                 Name = layer.GetAttribute("name"),
                 LayerSize = layerSize,
                 Tiles = IntCSVParserUtil.Parse((string)data, layerSize),
-                CustomProperties = TiledCustomProperties.from(layer.Element("properties"), enums),
+                CustomProperties = TiledCustomProperties.From(layer.Element("properties"), enums),
             };
         }
 

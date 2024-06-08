@@ -11,7 +11,7 @@ namespace TiledImporter
 
         public override string ToString() => $"<TilesetMetadata firstGID={FirstGID} source=\"{Source}\" />";
 
-        public static TiledTilesetMetadata from(XElement tileset) => tileset == null ? null :
+        public static TiledTilesetMetadata From(XElement tileset) => tileset == null ? null :
             new TiledTilesetMetadata() { FirstGID = tileset.GetIntAttribute("firstgid"), Source = tileset.GetAttribute("source") };
     }
 }

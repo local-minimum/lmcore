@@ -61,7 +61,7 @@ namespace TiledImporter
 
             if (t == typeof(TiledCustomProperties))
             {
-                return (T)Convert.ChangeType(from(property.Element("properties"), enums), t);
+                return (T)Convert.ChangeType(From(property.Element("properties"), enums), t);
             }
 
             throw new NotImplementedException($"Custom properties of type {t} not supported");
@@ -77,7 +77,7 @@ namespace TiledImporter
                     .Select(property => new KeyValuePair<string, T>(property.GetAttribute("name"), Parse<T>(property, enums)))
             );
 
-        public static TiledCustomProperties from(XElement properties, TiledEnums enums) => properties == null ? new TiledCustomProperties() : new TiledCustomProperties()
+        public static TiledCustomProperties From(XElement properties, TiledEnums enums) => properties == null ? new TiledCustomProperties() : new TiledCustomProperties()
         {
             Strings = FromFilter<string>(properties, "string", enums, true),
             Ints = FromFilter<int>(properties, "int", enums),
@@ -87,14 +87,14 @@ namespace TiledImporter
             StringEnums = new SerializableDictionary<string, TiledEnum<string>>(
                 properties
                     .Elements()
-                    .Where(property => TiledEnums.IsStringEnumProperty(property))
-                    .Select(property => new KeyValuePair<string, TiledEnum<string>>(property.GetAttribute("name"), enums.parseStringEnum(property)))
+                    .Where(property => TiledEnums.IsStringEnum(property))
+                    .Select(property => new KeyValuePair<string, TiledEnum<string>>(property.GetAttribute("name"), enums.ParseStringEnum(property)))
             ),
             IntEnums = new SerializableDictionary<string, TiledEnum<int>>(
                 properties
                     .Elements()
-                    .Where(property => TiledEnums.IsIntEnumProperty(property))
-                    .Select(property => new KeyValuePair<string, TiledEnum<int>>(property.GetAttribute("name"), enums.parseIntEnum(property)))
+                    .Where(property => TiledEnums.IsIntEnum(property))
+                    .Select(property => new KeyValuePair<string, TiledEnum<int>>(property.GetAttribute("name"), enums.ParseIntEnum(property)))
             )
         };
     }
