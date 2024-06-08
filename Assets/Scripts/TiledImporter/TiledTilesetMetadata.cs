@@ -1,0 +1,17 @@
+﻿using System;
+using System.Xml.Linq;
+
+namespace TiledImporter
+{
+    [Serializable]
+    public class TiledTilesetMetadata
+    {
+        public string Source;
+        public int FirstGID;
+
+        public override string ToString() => $"<TilesetMetadata firstGID={FirstGID} source=\"{Source}\" />";
+
+        public static TiledTilesetMetadata from(XElement tileset) => tileset == null ? null :
+            new TiledTilesetMetadata() { FirstGID = tileset.GetIntAttribute("firstgid"), Source = tileset.GetAttribute("source") };
+    }
+}
