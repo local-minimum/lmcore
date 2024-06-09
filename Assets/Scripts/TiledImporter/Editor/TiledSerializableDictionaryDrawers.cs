@@ -9,7 +9,7 @@ namespace TiledImporter {
     public class SerializableIntTiledStringEnumDictionaryDrawer : GenericSerializableDictionaryDrawer<string, TiledEnum<int>> { };
 
     [CustomPropertyDrawer(typeof(SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>>))]
-    public class SerializableNestedStringTiledStringEnumDictionaryDrawer : GenericSerializableDictionaryDrawer<string, SerializableDictionary<string, TiledEnum<string>>> { };
+    public class SerializableNestedStringTiledStringEnumDictionaryDrawer : GenericSerializableDictionaryDrawer<string, SerializableDictionary<string, TiledEnum<string>>> {};
 
     [CustomPropertyDrawer(typeof(SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>>))]
     public class SerializableNestedIntTiledStringEnumDictionaryDrawer : GenericSerializableDictionaryDrawer<string, SerializableDictionary<int, TiledEnum<int>>> { };

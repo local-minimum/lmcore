@@ -32,18 +32,24 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        var keys = property.FindPropertyRelative("keys");
-        var h = EditorGUI.GetPropertyHeight(property);
-        
+        var selfHeight = EditorGUI.GetPropertyHeight(property);
         if (!property.isExpanded) return EditorGUI.GetPropertyHeight(property);
 
-        // +1 Title and Sometimes +1 Add new item row
-        var n = ValueTypeWithKnownDrawer() ? keys.arraySize + 2 : keys.arraySize + 1;
+        var childrenHeight = 0f;
+        var values = property.FindPropertyRelative("values");
+        for (var i = 0; i<values.arraySize; i++)
+        {
+            var child = values.GetArrayElementAtIndex(i);
+            childrenHeight += RowGap + Math.Max(selfHeight, EditorGUI.GetPropertyHeight(child, child.isExpanded));
+        }
 
-        return h * n + RowGap * (n - 1);
+        // +1 Title and Sometimes +1 Add new item row
+        var n = ValueTypeWithKnownDrawer() ? 2 : 1;
+
+        return selfHeight * n + childrenHeight + RowGap * (n - 1) ;
     }
 
-    bool ValueTypeWithKnownDrawer()
+    protected bool ValueTypeWithKnownDrawer()
     {
         var t = typeof(TValue);
 
@@ -275,15 +281,17 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         var removeButtonWidth = EditorStyles.miniButton.CalcSize(removeButtonContent).x;
         var middleArrowWidth = EditorStyles.label.CalcSize(arrowLabelContent).x;
 
-        var split = Mathf.Floor((position.width - middleArrowWidth - removeButtonWidth - 3 * RowItemGap) / 2);
+        var keyAndValueWidth = position.width - middleArrowWidth - removeButtonWidth - 3 * RowItemGap;
+        var keyWidth = Mathf.Floor(keyAndValueWidth / 3);
+        var valueWidth = keyAndValueWidth - keyWidth;
 
         bool addKeyUnique = true;
 
         var y = position.y + height + RowGap;
         for (var i = 0; i < keys.arraySize; i++) { 
-            var keyRect = new Rect(position.x, y, split, height);
+            var keyRect = new Rect(position.x, y, keyWidth, height);
             var arrowRect = new Rect(keyRect.xMax, y, middleArrowWidth, height);
-            var valueRect = new Rect(arrowRect.xMax + RowItemGap, y, split, height);
+            var valueRect = new Rect(arrowRect.xMax + RowItemGap, y, valueWidth, height);
             var removeButtonRect = new Rect(valueRect.xMax + RowItemGap, y, removeButtonWidth, height);
 
             var key = keys.GetArrayElementAtIndex(i);
@@ -295,22 +303,26 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
 
             EditorGUI.LabelField(keyRect, key.stringValue);
             EditorGUI.LabelField(arrowRect, arrowLabelContent, arrowLabelStyle);
-            if (valueHasKnownDrawer)
-            {
-                EditorGUI.PropertyField(valueRect, values.GetArrayElementAtIndex(i), GUIContent.none);
-            } else
+            // TODO: How to handle height?
+            var valueProp = values.GetArrayElementAtIndex(i);
+            var valueExpanded = EditorGUI.PropertyField(valueRect, valueProp, GUIContent.none);
+            // TODO: How to know if property field actually made anything?
+            /*
+            if (valueHasKnownDrawer) {
+            } else 
             {
                 //TODO: This does not actually print out the value of the serialized object at the array index
                 // See https://gist.github.com/douduck08/6d3e323b538a741466de00c30aa4b61f
                 EditorGUI.LabelField(valueRect, values.GetArrayElementAtIndex(i)?.serializedObject.targetObject.ToString().Truncate(50) ?? "[null]");
             }
+            */
 
             if (GUI.Button(removeButtonRect, removeButtonContent))
             {
                 keys.DeleteArrayElementAtIndex(i);
                 values.DeleteArrayElementAtIndex(i);
             }
-            y += height + RowGap;
+            y += EditorGUI.GetPropertyHeight(valueProp, valueExpanded) + RowGap;
         }
 
         if (valueHasKnownDrawer)

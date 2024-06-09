@@ -13,6 +13,8 @@ namespace TiledImporter
         public string Name;
         public int Id;
         public List<TiledLayer> Layers;
+        // TODO: Probably use same strategy as with SerializableDictionary to support nesting groups
+        // or if that doesn't work we can subclass to ahve some nesting levels should we really want them
         // public List<TiledGroup> Groups;
         public TiledCustomProperties CustomProperties;
 
