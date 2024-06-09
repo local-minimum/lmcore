@@ -22,6 +22,21 @@ public class SerializableStringGODictionaryDrawer : GenericSerializableDictionar
 [CustomPropertyDrawer(typeof(SerializableDictionary<string, Color>))]
 public class SerializableColorFloatDictionaryDrawer : GenericSerializableDictionaryDrawer<string, Color> {};
 
+
+public static class SerializableDictionarySerializedPropertyUtil
+{
+    public static bool IsEmptySerializableDictionary(SerializedProperty property)
+    {
+        var values = property.FindPropertyRelative("values");
+        var keys = property.FindPropertyRelative("keys");
+
+        return (values == null && keys == null)
+            || (
+                values.isArray && keys.isArray
+                && values.arraySize == 0 && keys.arraySize == 0);
+    }
+}
+
 public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer 
 {
     private static float RowGap = 2;
@@ -33,7 +48,8 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         var selfHeight = EditorGUI.GetPropertyHeight(property);
-        if (!property.isExpanded) return EditorGUI.GetPropertyHeight(property);
+
+        if (!property.isExpanded) return selfHeight;
 
         var childrenHeight = 0f;
         var values = property.FindPropertyRelative("values");
@@ -44,7 +60,7 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         }
 
         // +1 Title and Sometimes +1 Add new item row
-        var n = ValueTypeWithKnownDrawer() ? 2 : 1;
+        var n = ValueTypeWithKnownDrawer() && property.editable ? 2 : 1;
 
         return selfHeight * n + childrenHeight + RowGap * (n - 1) ;
     }
@@ -276,8 +292,8 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         var valueHasKnownDrawer = ValueTypeWithKnownDrawer();
 
         var indent = EditorGUI.indentLevel;
-
         EditorGUI.indentLevel = 0;
+
         var removeButtonWidth = EditorStyles.miniButton.CalcSize(removeButtonContent).x;
         var middleArrowWidth = EditorStyles.label.CalcSize(arrowLabelContent).x;
 
@@ -317,15 +333,19 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
             }
             */
 
-            if (GUI.Button(removeButtonRect, removeButtonContent))
+            if (property.editable)
             {
-                keys.DeleteArrayElementAtIndex(i);
-                values.DeleteArrayElementAtIndex(i);
+                if (GUI.Button(removeButtonRect, removeButtonContent))
+                {
+                    keys.DeleteArrayElementAtIndex(i);
+                    values.DeleteArrayElementAtIndex(i);
+                }
             }
+
             y += EditorGUI.GetPropertyHeight(valueProp, valueExpanded) + RowGap;
         }
 
-        if (valueHasKnownDrawer)
+        if (valueHasKnownDrawer && property.editable)
         {
             var keyLabelRect = new Rect(position.x, y, EditorStyles.label.CalcSize(keyLabelContent).x, height);
             EditorGUI.LabelField(keyLabelRect, keyLabelContent);
