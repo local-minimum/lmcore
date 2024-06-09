@@ -10,8 +10,13 @@ namespace LMCore.IO
         public SerializableDictionary() { }
         public SerializableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> elements)
         {
-            foreach (var  element in elements) { 
-                Add(element.Key, element.Value);
+            foreach (var (key, value) in elements) { 
+                if (key == null)
+                {
+                    Debug.LogError($"Illegal null-key for '{value}', skipping...");
+                    continue;
+                } 
+                Add(key, value);
             }
         }
 
@@ -44,5 +49,7 @@ namespace LMCore.IO
                 values.Add(value);
             }
         }
+
+        public override string ToString() => $"{{{string.Join(", ", this.Select(kvp => $"{kvp.Key}={kvp.Value}"))}}}";
     }
 }

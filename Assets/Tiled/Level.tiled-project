@@ -8,6 +8,8 @@
         ".",
         "Automapping"
     ],
+    "properties": [
+    ],
     "propertyTypes": [
         {
             "id": 7,
@@ -74,7 +76,7 @@
         {
             "id": 1,
             "name": "Direction",
-            "storageType": "int",
+            "storageType": "string",
             "type": "enum",
             "values": [
                 "None",
@@ -104,7 +106,7 @@
         {
             "id": 3,
             "name": "Orientation",
-            "storageType": "int",
+            "storageType": "string",
             "type": "enum",
             "values": [
                 "None",
@@ -128,7 +130,7 @@
         {
             "id": 4,
             "name": "Transition",
-            "storageType": "int",
+            "storageType": "string",
             "type": "enum",
             "values": [
                 "None",

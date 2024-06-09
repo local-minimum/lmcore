@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using UnityEngine;
+using LMCore.Extensions;
 
 namespace TiledImporter
 {
@@ -11,7 +13,7 @@ namespace TiledImporter
         public string Name;
         public int Id;
         public List<TiledLayer> Layers;
-        public List<TiledGroup> Groups;
+        // public List<TiledGroup> Groups;
         public TiledCustomProperties CustomProperties;
 
         public string LayerNames() => string.Join(", ", Layers.Select(layer => layer.Name));
@@ -29,13 +31,16 @@ namespace TiledImporter
         {
             if (group == null) return null;
 
+            var customProps = TiledCustomProperties.From(group.Element("properties"), enums);
+            Debug.Log(customProps.Bools);
+            
             return new TiledGroup()
             {
                 Id = group.GetIntAttribute("id"),
                 Name = group.GetAttribute("name"),
                 Layers = group.HydrateElementsByName("layer", TiledLayer.FromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
-                Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
-                CustomProperties = TiledCustomProperties.From(group.Element("properties"), enums),
+                // Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
+                CustomProperties = customProps,
             };
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using UnityEngine;
+using LMCore.Extensions;
 
 namespace TiledImporter
 {

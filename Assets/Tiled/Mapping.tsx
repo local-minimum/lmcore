@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="Mapping" tilewidth="32" tileheight="32" tilecount="128" columns="16">
+<tileset version="1.10" tiledversion="1.10.2" name="Mapping" tilewidth="32" tileheight="32" tilecount="128" columns="16">
  <image source="MappingSpriteSheet.png" width="512" height="256"/>
  <tile id="1" type="BaseTile">
   <properties>
@@ -402,7 +402,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Closed"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -416,7 +416,7 @@
  <tile id="34" type="Obstruction">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -431,7 +431,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Locked"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -445,7 +445,7 @@
  <tile id="36" type="Obstruction">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -460,7 +460,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Closed"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -475,7 +475,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -490,7 +490,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Locked"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -504,7 +504,7 @@
  <tile id="40" type="Obstruction">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
      <property name="Down" type="bool" value="true"/>
@@ -518,103 +518,103 @@
  <tile id="42" type="Ramp Up - Exit S -&gt; N">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="43" type="Ramp Up - Entry N -&gt; S">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="44" type="Ramp Up - Exit W -&gt; E">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="45" type="Ramp Up - Mid W -&gt; E">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="3"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="46" type="Ramp Up - Entry W -&gt; E">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="48" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="6"/>
-   <property name="Entry" type="int" propertytype="Direction" value="2"/>
+   <property name="Direction" propertytype="Direction" value="Down"/>
+   <property name="Entry" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="49" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="6"/>
-   <property name="Entry" type="int" propertytype="Direction" value="3"/>
+   <property name="Direction" propertytype="Direction" value="Down"/>
+   <property name="Entry" propertytype="Direction" value="West"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="50" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="6"/>
-   <property name="Entry" type="int" propertytype="Direction" value="1"/>
+   <property name="Direction" propertytype="Direction" value="Down"/>
+   <property name="Entry" propertytype="Direction" value="North"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="51" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="6"/>
-   <property name="Entry" type="int" propertytype="Direction" value="4"/>
+   <property name="Direction" propertytype="Direction" value="Down"/>
+   <property name="Entry" propertytype="Direction" value="East"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="52" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="5"/>
-   <property name="Entry" type="int" propertytype="Direction" value="2"/>
+   <property name="Direction" propertytype="Direction" value="Up"/>
+   <property name="Entry" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="53" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="5"/>
-   <property name="Entry" type="int" propertytype="Direction" value="3"/>
+   <property name="Direction" propertytype="Direction" value="Up"/>
+   <property name="Entry" propertytype="Direction" value="West"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="54" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="5"/>
-   <property name="Entry" type="int" propertytype="Direction" value="1"/>
+   <property name="Direction" propertytype="Direction" value="Up"/>
+   <property name="Entry" propertytype="Direction" value="North"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="55" type="Stairs">
   <properties>
-   <property name="Direction" type="int" propertytype="Direction" value="5"/>
-   <property name="Entry" type="int" propertytype="Direction" value="2"/>
+   <property name="Direction" propertytype="Direction" value="Up"/>
+   <property name="Entry" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
@@ -622,54 +622,54 @@
  <tile id="56" type="Trapdoor">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
  <tile id="57" type="Trapdoor">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
  <tile id="58" type="Ramp Up - Mid S -&gt; N">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="3"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="59" type="Ramp Up - Mid N -&gt; S">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="3"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="60" type="Ramp Up - Entry E -&gt; W">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="61" type="Ramp Up - Mid E -&gt; W">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="3"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="62" type="Ramp Up - Exit E -&gt; W">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="2"/>
-   <property name="Transition" type="int" propertytype="Transition" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
@@ -736,16 +736,16 @@
  <tile id="74" type="Ramp Up - Entry S -&gt; N">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="1"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="75" type="Ramp Up - Exit N -&gt; S">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Orientation" type="int" propertytype="Orientation" value="1"/>
-   <property name="Transition" type="int" propertytype="Transition" value="2"/>
+   <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
@@ -784,7 +784,7 @@
  </tile>
  <tile id="96" type="Hole">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="6"/>
+   <property name="Anchor" propertytype="Direction" value="Down"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
@@ -802,126 +802,126 @@
  </tile>
  <tile id="99" type="Button">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="4"/>
+   <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="100" type="Button">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="2"/>
+   <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="101" type="Button">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="3"/>
+   <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="102" type="Button">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="1"/>
+   <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="103" type="Teleporter">
   <properties>
-   <property name="Transition" type="int" propertytype="Transition" value="1"/>
+   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="104" type="Teleporter">
   <properties>
-   <property name="Transition" type="int" propertytype="Transition" value="4"/>
+   <property name="Transition" propertytype="Transition" value="EntryAndExit"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="105" type="Teleporter">
   <properties>
-   <property name="Transition" type="int" propertytype="Transition" value="2"/>
+   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="106" type="Pressureplate">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="6"/>
+   <property name="Anchor" propertytype="Direction" value="Down"/>
   </properties>
  </tile>
  <tile id="107" type="Ladder">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="1"/>
+   <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="108" type="Ladder">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="4"/>
+   <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="109" type="Ladder">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="2"/>
+   <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="110" type="Ladder">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="3"/>
+   <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
   </properties>
  </tile>
  <tile id="112" type="Spikes">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="6"/>
+   <property name="Anchor" propertytype="Direction" value="Down"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="113" type="Spikes">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="3"/>
+   <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="114" type="Spikes">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="1"/>
+   <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="115" type="Spikes">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="4"/>
+   <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="116" type="Spikes">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="2"/>
+   <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="117" type="Shooter">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="2"/>
+   <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="118" type="Shooter">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="3"/>
+   <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="119" type="Shooter">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="1"/>
+   <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="120" type="Shooter">
   <properties>
-   <property name="Anchor" type="int" propertytype="Direction" value="4"/>
+   <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>

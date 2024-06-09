@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml.Linq;
 using UnityEngine;
+using LMCore.Extensions;
 
 namespace TiledImporter
 {

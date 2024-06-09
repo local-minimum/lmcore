@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using System.Xml.Linq;
+using System.Collections.Generic;
 using UnityEditor.AssetImporters;
 using UnityEngine;
+using LMCore.Extensions;
 
 namespace TiledImporter
 {
-
     /// <summary>
     /// A bit inspired by SuperTiled2Unity https://github.com/Seanba/SuperTiled2Unity/
     /// </summary>

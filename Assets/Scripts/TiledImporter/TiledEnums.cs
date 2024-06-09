@@ -1,14 +1,15 @@
 ﻿using LMCore.IO;
+using System;
 using System.Xml.Linq;
-using UnityEngine;
+using LMCore.Extensions;
 
 namespace TiledImporter
 {
-    [SerializeField]
+    [Serializable]
     public class TiledEnums
     {
-        public SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>> StringEnums = new SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>>();
-        public SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>> IntEnums = new SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>>();
+        public SerializableDictionary<string, SerializableDictionary<string, TiledEnum<string>>> StringEnums = new ();
+        public SerializableDictionary<string, SerializableDictionary<int, TiledEnum<int>>> IntEnums = new ();
 
         public static bool IsEnumProperty(XElement property) => property.GetAttribute("propertytype") != null && property.Element("properties") == null;
 
@@ -21,7 +22,7 @@ namespace TiledImporter
 
             if (!IntEnums.ContainsKey(typeName))
             {
-                IntEnums.Add(typeName, new SerializableDictionary<int, TiledEnum<int>>());
+                IntEnums.Add(typeName, new ());
             }
 
             var intEnum = IntEnums[typeName];
@@ -33,7 +34,7 @@ namespace TiledImporter
                 intEnum.Add(intValue, new() { TypeName = typeName, Value = intValue });
             }
 
-            return intEnum[intValue];
+            return new() { TypeName = typeName, Value = intValue };
         }
 
         public TiledEnum<string> ParseStringEnum(XElement property)
@@ -42,7 +43,7 @@ namespace TiledImporter
 
             if (!StringEnums.ContainsKey(typeName))
             {
-                StringEnums.Add(typeName, new SerializableDictionary<string, TiledEnum<string>>());
+                StringEnums.Add(typeName, new ());
             }
 
             var stringEnum = StringEnums[typeName];
@@ -51,9 +52,9 @@ namespace TiledImporter
 
             if (!stringEnum.ContainsKey(stringValue))
             {
-                stringEnum.Add(stringValue, new TiledEnum<string>() { TypeName = typeName, Value = stringValue });
+                stringEnum.Add(stringValue, new () { TypeName = typeName, Value = stringValue });
             }
-            return stringEnum[stringValue];
+            return new () { TypeName = typeName, Value = stringValue };
         }
     }
 }

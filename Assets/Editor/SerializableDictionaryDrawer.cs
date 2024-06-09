@@ -1,13 +1,26 @@
 using LMCore.IO;
+using LMCore.Extensions;
 using System;
 using UnityEditor;
 using UnityEngine;
+
+[CustomPropertyDrawer(typeof(SerializableDictionary<string, float>))]
+public class SerializableStringFloatDictionaryDrawer : GenericSerializableDictionaryDrawer<string, float> {};
+
+[CustomPropertyDrawer(typeof(SerializableDictionary<string, bool>))]
+public class SerializableStringBoolDictionaryDrawer : GenericSerializableDictionaryDrawer<string, bool> {};
+
+[CustomPropertyDrawer(typeof(SerializableDictionary<string, string>))]
+public class SerializableStringStringDictionaryDrawer : GenericSerializableDictionaryDrawer<string, string> {};
 
 [CustomPropertyDrawer(typeof(SerializableDictionary<string, int>))]
 public class SerializableStringIntDictionaryDrawer : GenericSerializableDictionaryDrawer<string, int> {};
 
 [CustomPropertyDrawer(typeof(SerializableDictionary<string, GameObject>))]
 public class SerializableStringGODictionaryDrawer : GenericSerializableDictionaryDrawer<string, GameObject> {};
+
+[CustomPropertyDrawer(typeof(SerializableDictionary<string, Color>))]
+public class SerializableColorFloatDictionaryDrawer : GenericSerializableDictionaryDrawer<string, Color> {};
 
 public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer 
 {
@@ -24,7 +37,28 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         
         if (!property.isExpanded) return EditorGUI.GetPropertyHeight(property);
 
-        return h * (keys.arraySize + 2) + RowGap * (keys.arraySize + 1);
+        // +1 Title and Sometimes +1 Add new item row
+        var n = ValueTypeWithKnownDrawer() ? keys.arraySize + 2 : keys.arraySize + 1;
+
+        return h * n + RowGap * (n - 1);
+    }
+
+    bool ValueTypeWithKnownDrawer()
+    {
+        var t = typeof(TValue);
+
+        return t == typeof(string)
+            || t == typeof(int)
+            || t == typeof(bool)
+            || t == typeof(float)
+            || t == typeof(Rect)
+            || t == typeof(RectInt)
+            || t == typeof(Vector2)
+            || t == typeof(Vector2Int)
+            || t == typeof(Vector3)
+            || t == typeof(Vector3Int)
+            || t == typeof(Color)
+            || t == typeof(UnityEngine.Object);
     }
 
     bool KeyPropertyEquals(SerializedProperty property, TKey value)
@@ -39,13 +73,13 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         {
             return property.intValue == Convert.ToInt32(value);
         }
+        else if (t == typeof(bool))
+        {
+            return property.boolValue == Convert.ToBoolean(value);
+        }
         else if (t == typeof(float))
         {
             return property.floatValue == (float)Convert.ChangeType(value, typeof(float));
-        }
-        else if (t == typeof(Rect))
-        {
-            return property.rectValue == (Rect)Convert.ChangeType(value, typeof(Rect));
         }
         else if (t == typeof(Rect))
         {
@@ -73,9 +107,17 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         {
             return property.vector3IntValue == (Vector3Int)Convert.ChangeType(value, typeof(Vector3Int));
         }
+        else if (t == typeof(Color))
+        {
+            return property.colorValue == (Color)Convert.ChangeType(value, typeof(Color));
+        }
         else if (t == typeof(UnityEngine.Object))
         {
             return property.objectReferenceValue == (UnityEngine.Object)Convert.ChangeType(value, typeof(UnityEngine.Object));
+        } else if (t == typeof(object))
+        {
+            // TODO: It's uncertain how this should be done..
+            return true; 
         }
 
         throw new NotImplementedException($"Don't know how to compare {(value == null ? "NULL" : value)} ({t} / {value?.GetType()})");
@@ -101,6 +143,10 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
         {
             case int v when t == typeof(int):
                 property.intValue = v;
+                break;
+
+            case bool v when t == typeof(bool):
+                property.boolValue = v;
                 break;
 
             case float v when t == typeof(float):
@@ -131,6 +177,14 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
                 property.vector3IntValue = v;
                 break;
 
+            case Color v when t == typeof(Color):
+                property.colorValue = v;
+                break;
+
+            case object when t == typeof(object):
+                Debug.LogWarning("Can't handle assigning random objects");
+                break;
+
             default:
                 throw new NotImplementedException($"Don't know how to store {value} ({value?.GetType()})");
         }
@@ -155,6 +209,8 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
                 return (T) Convert.ChangeType(EditorGUI.IntField(rect, v), typeof(T));
             case float v when t == typeof(float):
                 return (T) Convert.ChangeType(EditorGUI.FloatField(rect, v), typeof(T));
+            case bool v when t == typeof(bool):
+                return (T) Convert.ChangeType(EditorGUI.Toggle(rect, v), typeof(T));
 
             case Rect v when t == typeof(Rect):
                 return (T) Convert.ChangeType(EditorGUI.RectField(rect, v), typeof(T));
@@ -171,8 +227,13 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
             case Vector3Int v when t == typeof(Vector3Int):
                 return (T) Convert.ChangeType(EditorGUI.Vector3IntField(rect, "", v), typeof(T));
 
+            case Color v when t == typeof(Color):
+                return (T) Convert.ChangeType(EditorGUI.ColorField(rect, v), typeof(T));
+
             default:
-                throw new NotImplementedException($"Support for {value?.GetType()} not implemented");
+                Debug.Log(value);
+                EditorGUI.LabelField(rect, value?.ToString().Truncate(50) ?? "");
+                return value;
         }
     }
 
@@ -206,6 +267,7 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
             EditorGUI.EndProperty();
             return;
         }
+        var valueHasKnownDrawer = ValueTypeWithKnownDrawer();
 
         var indent = EditorGUI.indentLevel;
 
@@ -233,7 +295,15 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
 
             EditorGUI.LabelField(keyRect, key.stringValue);
             EditorGUI.LabelField(arrowRect, arrowLabelContent, arrowLabelStyle);
-            EditorGUI.PropertyField(valueRect, values.GetArrayElementAtIndex(i), GUIContent.none);
+            if (valueHasKnownDrawer)
+            {
+                EditorGUI.PropertyField(valueRect, values.GetArrayElementAtIndex(i), GUIContent.none);
+            } else
+            {
+                //TODO: This does not actually print out the value of the serialized object at the array index
+                // See https://gist.github.com/douduck08/6d3e323b538a741466de00c30aa4b61f
+                EditorGUI.LabelField(valueRect, values.GetArrayElementAtIndex(i)?.serializedObject.targetObject.ToString().Truncate(50) ?? "[null]");
+            }
 
             if (GUI.Button(removeButtonRect, removeButtonContent))
             {
@@ -243,36 +313,39 @@ public class GenericSerializableDictionaryDrawer<TKey, TValue> : PropertyDrawer
             y += height + RowGap;
         }
 
-        var keyLabelRect = new Rect(position.x, y, EditorStyles.label.CalcSize(keyLabelContent).x , height);
-        EditorGUI.LabelField(keyLabelRect, keyLabelContent);
-
-        var valueLabelWidth = EditorStyles.label.CalcSize(valueLabelContent).x;
-
-        var addFieldWidth = (position.width - keyLabelRect.width - valueLabelWidth - removeButtonWidth - 4 * RowItemGap) / 2;
-        var addKeyRect = new Rect(keyLabelRect.xMax + RowItemGap, y, addFieldWidth, height);
-        addKey = DrawInputField(addKeyRect, addKey);
-
-        var valueLabelRect = new Rect(addKeyRect.xMax + RowItemGap, y, valueLabelWidth, height);
-        EditorGUI.LabelField(valueLabelRect, valueLabelContent);
-
-        var addValueRect = new Rect(valueLabelRect.xMax + RowItemGap, y, addFieldWidth, height);
-        addValue = DrawInputField(addValueRect, addValue);
-
-        var addButtonRect = new Rect(addValueRect.xMax + RowItemGap, y, EditorStyles.miniButton.CalcSize(addButtonContent).x, height);
-        GUI.enabled = addKeyUnique;
-        if (GUI.Button(addButtonRect, addButtonContent))
+        if (valueHasKnownDrawer)
         {
-            keys.arraySize++;
-            values.arraySize++;
+            var keyLabelRect = new Rect(position.x, y, EditorStyles.label.CalcSize(keyLabelContent).x, height);
+            EditorGUI.LabelField(keyLabelRect, keyLabelContent);
 
-            AssignPropertyValue(keys.GetArrayElementAtIndex(keys.arraySize - 1), addKey);
-            AssignPropertyValue(values.GetArrayElementAtIndex(values.arraySize - 1), addValue);
+            var valueLabelWidth = EditorStyles.label.CalcSize(valueLabelContent).x;
+
+            var addFieldWidth = (position.width - keyLabelRect.width - valueLabelWidth - removeButtonWidth - 4 * RowItemGap) / 2;
+            var addKeyRect = new Rect(keyLabelRect.xMax + RowItemGap, y, addFieldWidth, height);
+            addKey = DrawInputField(addKeyRect, addKey);
+
+            var valueLabelRect = new Rect(addKeyRect.xMax + RowItemGap, y, valueLabelWidth, height);
+            EditorGUI.LabelField(valueLabelRect, valueLabelContent);
+
+            var addValueRect = new Rect(valueLabelRect.xMax + RowItemGap, y, addFieldWidth, height);
+            addValue = DrawInputField(addValueRect, addValue);
+
+            var addButtonRect = new Rect(addValueRect.xMax + RowItemGap, y, EditorStyles.miniButton.CalcSize(addButtonContent).x, height);
+            GUI.enabled = addKeyUnique;
+            if (GUI.Button(addButtonRect, addButtonContent))
+            {
+                keys.arraySize++;
+                values.arraySize++;
+
+                AssignPropertyValue(keys.GetArrayElementAtIndex(keys.arraySize - 1), addKey);
+                AssignPropertyValue(values.GetArrayElementAtIndex(values.arraySize - 1), addValue);
 
 
-            addKey = default;
-            addValue = default;
+                addKey = default;
+                addValue = default;
+            }
+            GUI.enabled = true;
         }
-        GUI.enabled = true;
 
         EditorGUI.indentLevel = indent;
 
