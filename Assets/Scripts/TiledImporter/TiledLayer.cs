@@ -13,7 +13,8 @@ namespace TiledImporter
         public string Name;
         public int Id;
         public Vector2Int LayerSize;
-        public int[,] Tiles;
+        [SerializeField, HideInInspector]
+        private int[] Tiles;
         public TiledCustomProperties CustomProperties;
 
         public static Func<TiledLayer, bool> ShouldBeImported(bool filterLayerImport) {
@@ -23,6 +24,7 @@ namespace TiledImporter
         public static Func<XElement, TiledLayer> FromFactory(TiledEnums enums) { 
             return (XElement layer) => From(layer, enums);
         }
+
         public static TiledLayer From(XElement layer, TiledEnums enums)
         {
             if (layer == null) return null;
@@ -45,6 +47,10 @@ namespace TiledImporter
             };
         }
 
+
+        public int this[int row, int col] => Tiles[row * LayerSize.x + col];
+        public int this[Vector2Int coords] => Tiles[coords.y * LayerSize.x + coords.x];
+
         public string TilesAsASCII(int baseOrd = 64)
         {
             var builder = new StringBuilder();
@@ -53,7 +59,7 @@ namespace TiledImporter
             {
                 for (int col = 0; col < LayerSize.x; col++)
                 {
-                    var value = Tiles[row, col];
+                    var value = this[row, col];
                     if (baseOrd > 32 && value == 0)
                     {
                         builder.Append(" ");

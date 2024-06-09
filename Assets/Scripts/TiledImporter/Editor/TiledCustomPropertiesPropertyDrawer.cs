@@ -43,10 +43,6 @@ namespace TiledImporter
         {
             GUIStyle title = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
 
-            var indent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-
             EditorGUI.BeginProperty(position, label, property);
 
             var height = SelfHeight;
@@ -63,11 +59,6 @@ namespace TiledImporter
 
             if (!property.isExpanded)
             {
-                if (EditorGUI.EndChangeCheck())
-                {
-                    property.serializedObject.ApplyModifiedProperties();
-                }
-
                 EditorGUI.EndProperty();
                 return;
             }
@@ -86,8 +77,6 @@ namespace TiledImporter
 
                 y += EditorGUI.GetPropertyHeight(child, childExpanded) + RowGap;
             }
-
-            EditorGUI.indentLevel = indent;
 
             if (EditorGUI.EndChangeCheck())
             {

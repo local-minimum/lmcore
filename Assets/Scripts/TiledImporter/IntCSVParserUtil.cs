@@ -4,9 +4,9 @@ namespace TiledImporter
 {
     static class IntCSVParserUtil
     {
-        public static int[,] Parse(string text, Vector2Int size)
+        public static int[] Parse(string text, Vector2Int size)
         {
-            var output = new int[size.y, size.x];
+            int[] output = new int[size.x * size.y];
 
             var rowIdx = 0;
             foreach (var row in text.Trim().Split("\n"))
@@ -19,7 +19,7 @@ namespace TiledImporter
                     {
                         if (int.TryParse(value.Trim(), out int intValue))
                         {
-                            output[rowIdx, colIdx] = intValue;
+                            output[rowIdx * size.x + colIdx] = intValue;
                         }
                         else
                         {
