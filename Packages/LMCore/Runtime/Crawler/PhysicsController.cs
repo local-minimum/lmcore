@@ -11,7 +11,7 @@ namespace LMCore.Crawler
 
         public bool CanMoveTo(Movement movement, int length)
         {
-            var source = entity.Position2D.ToPositionFromXZPlane(scale: length) + Vector3.up * length * 0.5f;
+            var source = entity.Position.ToPosition(scale: length) + Vector3.up * length * 0.5f;
             var direction = entity.LookDirection.RelativeTranslation(movement).AsLookVector3D();
 
             if (Physics.Raycast(source, direction, out var hitInfo, length, WallMask, QueryTriggerInteraction.Ignore))

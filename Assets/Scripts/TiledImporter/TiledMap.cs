@@ -54,5 +54,48 @@ namespace TiledImporter
             return string.Join(", ", string.Join(", ", Layers.Select(l => l.Name)), string.Join(", ", Groups.Select(group => group.LayerNames())));
         }
 
+        private IEnumerable<TiledLayer> IterateLayers
+        {
+            get
+            {
+                foreach (var layer in Layers) yield return layer;
+                foreach (var group in Groups)
+                {
+                    foreach (var layer in group.Layers) yield return layer;
+                }
+            }
+        }
+
+        public IEnumerable<T> FindInLayers<T>(Func<TiledLayer, T> action) => 
+            IterateLayers.Select(action);
+
+        public IEnumerable<TiledLayer> FindLayers(Func<TiledLayer, bool> filter) => 
+            IterateLayers.Where(filter);
+
+        public TiledTilesetMetadata GetTilesetMetadataForTileId(int tileId) =>
+            Tilesets.OrderByDescending(t => t.FirstGID).FirstOrDefault(t => t.FirstGID < tileId);
+
+        public TiledTile GetTile(int tileId, TiledTileset[] tilesets)
+        {
+            var metadata = GetTilesetMetadataForTileId(tileId);
+            if (metadata == null) return null;
+            var tilesetTileId = tileId - metadata.FirstGID;
+
+            for (var i = 0; i < tilesets.Length; i++) { 
+                var tileset = tilesets[i];
+                if (tileset.Source.Contains(metadata.Source))
+                {
+                    var tile = tileset.Tiles.FirstOrDefault(t => t.Id == tilesetTileId);
+                    if (tile == null)
+                    {
+                        Debug.LogWarning($"Could not locate ID {tileId} in {tileset.Source}");
+                    }
+                    return tile;
+                }
+            }
+
+            Debug.LogWarning($"No tileset matched source {metadata.Source} ({string.Join(" | ", tilesets.Select(t => t.Source))})");
+            return null;
+        }
     }
 }

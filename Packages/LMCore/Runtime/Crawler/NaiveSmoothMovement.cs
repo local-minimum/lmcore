@@ -132,8 +132,8 @@ namespace LMCore.Crawler
                 activeStartPosition = transform.position;
                 activeEndPosition = gEntity.LookDirection
                     .RelativeTranslation(movement)
-                    .Translate(gEntity.Position2D)
-                    .ToPositionFromXZPlane();
+                    .Translate(gEntity.Position)
+                    .ToPosition();
             }
         }
 

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="1">
  <tileset firstgid="1" source="Mapping.tsx"/>
- <group id="9" name="Elevation 0">
+ <group id="9" name="Elevation 0" visible="0">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
-  <layer id="5" name="prototype" width="32" height="32">
+  <layer id="5" name="prototype1" width="32" height="32">
    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -41,7 +41,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
   </layer>
-  <layer id="11" name="dungeon" width="32" height="32">
+  <layer id="11" name="dungeon1" width="32" height="32">
    <properties>
     <property name="Elevation" type="int" value="0"/>
     <property name="Imported" type="bool" value="true"/>
@@ -122,14 +122,14 @@
 </data>
   </layer>
  </group>
- <group id="7" name="Elevation 1" opacity="0.3">
+ <group id="7" name="Elevation 1">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
-  <layer id="1" name="prototype1" width="32" height="32" opacity="0.42">
+  <layer id="1" name="prototype" width="32" height="32" opacity="0.42">
    <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,18,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,18,0,0,0,0,0,18,0,0,0,0,0,0,2,0,2,2,0,0,0,0,0,0,0,0,0,0,
 0,0,0,18,2,2,2,18,0,0,0,2,2,2,0,2,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,18,2,2,2,0,0,0,0,2,18,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -162,15 +162,15 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
   </layer>
-  <layer id="10" name="dungeon1" width="32" height="32">
+  <layer id="10" name="dungeon" width="32" height="32">
    <properties>
     <property name="Elevation" type="int" value="1"/>
     <property name="Imported" type="bool" value="true"/>
    </properties>
    <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,6,5,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,16,0,0,0,0,0,0,0,0,0,33,0,0,7,0,0,7,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,23,0,0,0,0,0,32,0,0,0,0,0,0,7,0,9,11,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,33,0,0,16,0,0,16,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,32,0,0,0,0,0,32,0,0,0,0,0,0,7,0,9,11,0,0,0,0,0,0,0,0,0,0,
 0,0,0,25,4,2,4,30,0,0,0,3,4,10,0,17,0,0,12,8,11,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,19,2,2,5,0,0,0,0,3,18,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,19,2,2,2,8,8,10,0,3,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
