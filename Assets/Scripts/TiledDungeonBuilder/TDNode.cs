@@ -1,5 +1,4 @@
 using LMCore.Extensions;
-using System.Collections;
 using System.Collections.Generic;
 using TiledImporter;
 using UnityEngine;
@@ -15,7 +14,7 @@ namespace TiledDungeon
 
     public class TDNode : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         TiledTile tile;
 
         [SerializeField]
@@ -45,6 +44,14 @@ namespace TiledDungeon
 
         [SerializeField]
         GameObject eastWall;
+
+        [SerializeField]
+        string WalkableKey;
+        public bool Walkable => string.IsNullOrEmpty(WalkableKey) ? true : tile.CustomProperties.Bools.GetValueOrDefault(WalkableKey);
+
+        [SerializeField]
+        string FlyableKey;
+        public bool Flyable=> string.IsNullOrEmpty(FlyableKey) ? true : tile.CustomProperties.Bools.GetValueOrDefault(FlyableKey);
 
         public bool HasFloor => floor != null && floor.activeSelf;
 

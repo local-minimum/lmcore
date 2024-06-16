@@ -7,7 +7,7 @@ using LMCore.Extensions;
 
 namespace TiledDungeon
 {
-    public class TiledDungeon : MonoBehaviour
+    public class TiledDungeon : MonoBehaviour, IGridSizeProvider
     {
         [Header("Settings")]
         [SerializeField, Range(0, 10)]
@@ -45,6 +45,8 @@ namespace TiledDungeon
         Dictionary<Vector3Int, TDNode> _nodes = new Dictionary<Vector3Int, TDNode>();
 
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
+
+        public float GridSize => scale;
 
         void SyncNodes()
         {

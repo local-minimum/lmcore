@@ -512,6 +512,8 @@ MonoBehaviour:
   southWall: {fileID: 1931692147636326694}
   westWall: {fileID: 5749814609764156370}
   eastWall: {fileID: 3790782286232831181}
+  WalkableKey: Walkability
+  FlyableKey: Flyability
 --- !u!1 &5749814609764156370
 GameObject:
   m_ObjectHideFlags: 0

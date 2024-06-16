@@ -6,9 +6,9 @@
     "activeFile": "DemoLevel.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        "Automapping",
+        "Rules",
         ".",
-        "Rules"
+        "Automapping"
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -24,14 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                9,
-                7
+                7,
+                9
             ],
-            "scale": 0.5,
-            "selectedLayer": 7,
+            "scale": 0.33,
+            "selectedLayer": 4,
             "viewCenter": {
-                "x": 501,
-                "y": 513
+                "x": 534.8484848484849,
+                "y": 546.9696969696969
             }
         },
         "Mapping.tsx": {

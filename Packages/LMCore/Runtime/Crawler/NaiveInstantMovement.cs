@@ -7,7 +7,7 @@ namespace LMCore.Crawler
     public class NaiveInstantMovement : MonoBehaviour
     {
         [SerializeField]
-        private int StepSize = 3;
+        IGridSizeProvider gridSizeProvider;
 
         [SerializeField]
         NodeShaker WallHitShakeTarget;
@@ -70,7 +70,7 @@ namespace LMCore.Crawler
             }
             else if (movement.IsTranslation())
             {
-                if (gController.CanMoveTo(movement, StepSize))
+                if (gController.CanMoveTo(movement, gridSizeProvider.GridSize))
                 {
                     gEntity.Translate(movement);
                 }

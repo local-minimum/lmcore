@@ -7,7 +7,7 @@ namespace LMCore.Crawler
     public class NaiveSmoothMovement : MonoBehaviour
     {
         [SerializeField]
-        private int StepSize = 3;
+        IGridSizeProvider gridSizeProvider;
 
         [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
         float turnDurationFactor = 1f;
@@ -128,7 +128,7 @@ namespace LMCore.Crawler
             }
             else if (movement != Movement.None)
             {
-                allowedTranslation = gController.CanMoveTo(movement, StepSize);
+                allowedTranslation = gController.CanMoveTo(movement, gridSizeProvider.GridSize);
                 activeStartPosition = transform.position;
                 activeEndPosition = gEntity.LookDirection
                     .RelativeTranslation(movement)

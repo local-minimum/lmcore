@@ -4,6 +4,6 @@ namespace LMCore.Crawler
 {
     public interface GridEntityController
     {
-        public bool CanMoveTo(Movement movement, int length);
+        public bool CanMoveTo(Movement movement, float length);
     }
 }
