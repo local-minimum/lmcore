@@ -2,6 +2,7 @@ using UnityEngine;
 using LMCore.Extensions;
 using LMCore.IO;
 using System;
+using LMCore.Juice;
 
 namespace LMCore.Crawler
 {
@@ -15,6 +16,9 @@ namespace LMCore.Crawler
 
         [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
         float turnDurationFactor = 1f;
+
+        [SerializeField]
+        NodeShaker WallHitShakeTarget;
 
         CrawlerInput cInput;
         GridEntity gEntity;
@@ -73,16 +77,22 @@ namespace LMCore.Crawler
             }
 
             cInput.OnMovement += CInput_OnMovement;
+
             ElasticGameClock.OnTickEnd += ElasticGameClock_OnTickEnd;
             ElasticGameClock.OnTickEndAdjustment += ElasticGameClock_OnTickEndAdjustment;
+
+            gEntity.OnLand.AddListener(OnLand);
         }
 
 
         private void OnDisable()
         {
             cInput.OnMovement -= CInput_OnMovement;
+
             ElasticGameClock.OnTickEnd -= ElasticGameClock_OnTickEnd;
             ElasticGameClock.OnTickEndAdjustment -= ElasticGameClock_OnTickEndAdjustment;
+
+            gEntity.OnLand.RemoveListener(OnLand);
         }
 
         private void ElasticGameClock_OnTickEndAdjustment(int tickId, float unadjustedProgress, float adjustedProgress, float endTime)
@@ -209,6 +219,10 @@ namespace LMCore.Crawler
             {
                 transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, 2 * bounceAtProgress - progress);
             }
+        }
+        public void OnLand()
+        {
+            WallHitShakeTarget?.Shake();
         }
     }
 }

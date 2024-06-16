@@ -308,6 +308,12 @@ namespace LMCore.Crawler
                 case Movement.StrafeRight:
                     return direction.RotateCW();
 
+                case Movement.Down:
+                    return Direction.Down; 
+
+                case Movement.Up:
+                    return Direction.Up;
+
                 default:
                     return direction;
             }

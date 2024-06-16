@@ -78,7 +78,16 @@ namespace TiledDungeon
             _nodes.Remove(node.Coordinates);
         }
 
-        TDNode GetNode(Vector3Int coordinates)
+        TDNode this[Vector3Int coordinates]
+        {
+            get
+            {
+                if (_nodes == null) SyncNodes();
+
+                return _nodes.GetValueOrDefault(coordinates);
+            }
+        }
+        TDNode GetOrCreateNode(Vector3Int coordinates)
         {
             if (_nodes == null) SyncNodes();
 
@@ -92,7 +101,7 @@ namespace TiledDungeon
         }
 
         // TODO: Support modifiers
-        void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers)
+        void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, bool topLayer)
         {
             var size = layer.LayerSize;
             for (int y = 0; y < size.y; y++)
@@ -105,14 +114,17 @@ namespace TiledDungeon
                     if (tile == null) continue;
 
                     var coordinates = new Vector3Int(x, elevation, size.y - y - 1);
-                    var node = GetNode(coordinates);
-
-                    var aboveNode = GetNode(node.Coordinates + Vector3Int.up);
+                    var node = GetOrCreateNode(coordinates);
+                    Debug.Log($"{layer.Name} {elevation} {topLayer}");
+                    var aboveNode = this[node.Coordinates + Vector3Int.up];
+                    var roofed = inferRoof ? 
+                        ((aboveNode?.HasFloor ?? !topLayer) ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet) 
+                        : TiledNodeRoofRule.CustomProps;
 
                     node.Configure(
                         coordinates,
                         tile,
-                        inferRoof ? ((aboveNode?.HasFloor ?? false) ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet) : TiledNodeRoofRule.CustomProps,
+                        roofed,
                         this
                     );
                 }
@@ -126,9 +138,11 @@ namespace TiledDungeon
 
             var elevations = map
                 .FindInLayers(layer => layer.CustomProperties.Ints[elevationProperty])
+                .ToHashSet()
                 .OrderByDescending(x => x)
                 .ToArray();
 
+            bool topLayer = true;
 
             foreach (var elevation in elevations)
             {
@@ -147,7 +161,9 @@ namespace TiledDungeon
 
                 var modificationLayers = layers.Where(l => l != layoutLayer).ToList();
 
-                GenerateLevel(layoutLayer, elevation, modificationLayers);
+                GenerateLevel(layoutLayer, elevation, modificationLayers, topLayer);
+
+                topLayer = false;
             }
 
             SyncNodes();
@@ -189,7 +205,7 @@ namespace TiledDungeon
 
         private void Mover_OnMoveEnd(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
         {
-            var node = GetNode(endPosition);
+            var node = this[endPosition];
             if (node == null) {
                 Debug.LogError($"Player is at {endPosition}, which is outside the map");
                 return;

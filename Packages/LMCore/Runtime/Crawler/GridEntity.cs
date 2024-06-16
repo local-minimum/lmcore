@@ -10,6 +10,7 @@ namespace LMCore.Crawler
     public class GridEntity : MonoBehaviour
     {
         public UnityEvent<bool> OnFall;
+        public UnityEvent ContinueFall;
         public UnityEvent OnLand;
 
         public TransportationMode transportationMode;
@@ -27,6 +28,9 @@ namespace LMCore.Crawler
                     {
                         OnLand?.Invoke();
                     }
+                } else if (value)
+                {
+                    ContinueFall?.Invoke();
                 }
                 falling = value;
             }

@@ -57,11 +57,13 @@ namespace LMCore.Crawler
                 cInput = GetComponent<CrawlerInput>();
             }
             cInput.OnMovement += CInput_OnMovement;
+            gEntity.OnLand.AddListener(OnLand);
         }
 
         private void OnDisable()
         {
             cInput.OnMovement -= CInput_OnMovement;
+            gEntity.OnLand.RemoveListener(OnLand);
         }
 
         private void CInput_OnMovement(int tickId, Movement movement, float duration)
@@ -128,5 +130,10 @@ namespace LMCore.Crawler
             }
             gEntity.Sync();
         }
-    }
+
+        public void OnLand()
+        {
+            WallHitShakeTarget?.Shake();
+        }
+    }    
 }

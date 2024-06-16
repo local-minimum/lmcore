@@ -57,6 +57,8 @@ namespace LMCore.Crawler
         [SerializeField, Range(0, 1)]
         float minResuseAfterTime = 0.35f;
 
+        GridEntity gEntity => GetComponent<GridEntity>();
+
         private bool ReadyToReuse(HeldButtonInfo press)
         {
             float referenceDuration = ElasticGameClock.instance.ClampedReferenceDuration;
@@ -165,8 +167,6 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickStart(int tickId, float expectedDuration)
         {
-            if (!inputEnabled) return;
-
             if (currentMovement != Movement.None)
             {
                 Debug.Log($"{tickId}: {currentMovement} ({expectedDuration})");
@@ -176,8 +176,6 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
-            if (!inputEnabled) return;
-
             ShiftQueue();
             if (currentMovement == Movement.None)
             {
@@ -210,6 +208,11 @@ namespace LMCore.Crawler
 
                 }
             }
+        }
+
+        public void CauseFall(bool clearInput = false)
+        {
+            EnqueueMovement(Movement.Down);
         }
 
         public void DisableInput(bool clearQueue)
