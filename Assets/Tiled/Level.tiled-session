@@ -31,7 +31,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 534.8484848484849,
-                "y": 546.9696969696969
+                "y": 543.9393939393939
             }
         },
         "Mapping.tsx": {
@@ -42,16 +42,16 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 512.1212121212122,
-                "y": 1533.3333333333335
+                "x": 513.6363636363637,
+                "y": 1534.8484848484848
             }
         },
         "Rules/ModernDungeonAutomapping.tmx": {
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 512,
-                "y": 512
+                "x": 511.3333333333333,
+                "y": 511.3333333333333
             }
         }
     },

@@ -111,10 +111,11 @@ namespace LMCore.Crawler
 
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
-            if (!inputEnabled) return;
 
             if (context.phase == InputActionPhase.Started)
             {
+                if (!inputEnabled) return;
+
                 var waitingButton = GetReplay();
                 if (waitingButton != null)
                 {
