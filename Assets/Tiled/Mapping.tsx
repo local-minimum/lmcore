@@ -413,7 +413,7 @@
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
- <tile id="34" type="Obstruction">
+ <tile id="34" type="Grate">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
@@ -471,7 +471,7 @@
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
- <tile id="38" type="Obstruction">
+ <tile id="38" type="Grate">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Interaction" propertytype="Interaction" value="Obstruction"/>

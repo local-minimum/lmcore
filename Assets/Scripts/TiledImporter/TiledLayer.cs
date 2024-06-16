@@ -51,6 +51,9 @@ namespace TiledImporter
         public int this[int row, int col] => Tiles[row * LayerSize.x + col];
         public int this[Vector2Int coords] => Tiles[coords.y * LayerSize.x + coords.x];
 
+        public bool InsideLayer(int row, int col) => row >= 0 && col >= 0 && row < LayerSize.y && col < LayerSize.x;
+        public bool InsideLayer(Vector2Int coords) => coords.x >= 0 && coords.y >= 0 && coords.x < LayerSize.x && coords.y < LayerSize.y;
+
         public string TilesAsASCII(int baseOrd = 64)
         {
             var builder = new StringBuilder();

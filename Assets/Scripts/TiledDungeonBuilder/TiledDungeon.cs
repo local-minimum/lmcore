@@ -4,10 +4,11 @@ using TiledImporter;
 using System.Linq;
 using LMCore.Crawler;
 using LMCore.Extensions;
+using System;
 
 namespace TiledDungeon
 {
-    public class TiledDungeon : MonoBehaviour, IGridSizeProvider
+    public partial class TiledDungeon : MonoBehaviour, IGridSizeProvider
     {
         [Header("Settings")]
         [SerializeField, Range(0, 10)]
@@ -100,32 +101,52 @@ namespace TiledDungeon
             return node;
         }
 
+        public Vector3Int AsUnityCoordinates(Vector2Int layerSize, int col, int row, int elevation) =>
+            new Vector3Int(col, elevation, layerSize.y - row - 1);
+
         // TODO: Support modifiers
         void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, bool topLayer)
         {
-            var size = layer.LayerSize;
-            for (int y = 0; y < size.y; y++)
+            var layerSize = layer.LayerSize;
+            for (int row = 0; row < layerSize.y; row++)
             {
-                for (int x = 0; x < size.x; x++)
+                for (int col = 0; col < layerSize.x; col++)
                 {
-                    var tileId = layer[y, x];
+                    var tileId = layer[row, col];
                     var tile = map.GetTile(tileId, tilesets);
 
                     if (tile == null) continue;
 
-                    var coordinates = new Vector3Int(x, elevation, size.y - y - 1);
+                    var coordinates = AsUnityCoordinates(layerSize, col, row, elevation);
+
                     var node = GetOrCreateNode(coordinates);
-                    Debug.Log($"{layer.Name} {elevation} {topLayer}");
                     var aboveNode = this[node.Coordinates + Vector3Int.up];
                     var roofed = inferRoof ? 
                         ((aboveNode?.HasFloor ?? !topLayer) ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet) 
                         : TiledNodeRoofRule.CustomProps;
 
+                    var modifications = modifiers
+                        .Select(modLayer =>
+                        {
+                            if (!modLayer.InsideLayer(row, col)) return null;
+
+                            var modId = modLayer[row, col];
+                            var tile = map.GetTile(modId, tilesets);
+
+                            if (tile == null) return null;
+
+                            Debug.Log($"Modification for {coordinates} {tile.Type}");
+                            return new TileModification() { Layer = modLayer.Name, LayerProperties = modLayer.CustomProperties, Tile = tile };
+                        })
+                        .Where(tm => tm != null)
+                        .ToArray();
+
                     node.Configure(
                         coordinates,
                         tile,
                         roofed,
-                        this
+                        this,
+                        modifications
                     );
                 }
             }
