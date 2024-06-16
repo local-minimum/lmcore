@@ -5,6 +5,10 @@ namespace LMCore.Crawler
     [Flags]
     public enum TransportationMode
     {
-        None, Swimming, Walking, Flying, Teleporting
+        None = 0, 
+        Swimming = 2, 
+        Walking = 4, 
+        Flying = 8, 
+        Teleporting = 16,
     }
 }
