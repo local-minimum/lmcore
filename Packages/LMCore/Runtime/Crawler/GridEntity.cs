@@ -3,17 +3,36 @@ using LMCore.Extensions;
 using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Events;
 
 namespace LMCore.Crawler
 {
     public class GridEntity : MonoBehaviour
     {
-        [SerializeField]
-        TransportationMode transportationMode;
+        public UnityEvent<bool> OnFall;
+        public UnityEvent OnLand;
 
-        [SerializeField]
-        Direction StartLookDirection;
+        public TransportationMode transportationMode;
 
+        private bool falling;
+        public bool Falling
+        {
+            get => falling;
+            set {
+                if (value != falling)
+                {
+                    if (value) {
+                        OnFall?.Invoke(true);
+                    } else
+                    {
+                        OnLand?.Invoke();
+                    }
+                }
+                falling = value;
+            }
+        }
+
+        #region Movers
         List<IEntityMover> movers;
         public IEnumerable<IEntityMover> Movers { 
             get { 
@@ -26,6 +45,7 @@ namespace LMCore.Crawler
         }
 
         public IEntityMover ActiveMover => movers.Where(m => m.Enabled).FirstOrDefault();
+        #endregion Movers
 
         /// <summary>
         /// Using XZ Plane, returns position in 2D
@@ -41,6 +61,10 @@ namespace LMCore.Crawler
             get => _Position;
             set => _Position = value;
         }
+
+        [SerializeField]
+        Direction StartLookDirection;
+
         public Direction LookDirection { get; set; }
 
         private void Start()

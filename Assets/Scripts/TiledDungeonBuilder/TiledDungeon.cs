@@ -42,14 +42,17 @@ namespace TiledDungeon
         [SerializeField]
         TDNode SpawnTile;
 
-        Dictionary<Vector3Int, TDNode> _nodes = new Dictionary<Vector3Int, TDNode>();
-
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
 
         public float GridSize => scale;
 
+        Dictionary<Vector3Int, TDNode> _nodes;
+
         void SyncNodes()
         {
+            if (_nodes == null)
+                _nodes = new Dictionary<Vector3Int, TDNode>();
+
             var instanced = instancedNodes.ToHashSet();
             var recordedNodes = _nodes.Values.ToHashSet();
 
@@ -70,11 +73,15 @@ namespace TiledDungeon
 
         public void RemoveNode(TDNode node)
         {
+            if (_nodes == null) SyncNodes();
+
             _nodes.Remove(node.Coordinates);
         }
 
         TDNode GetNode(Vector3Int coordinates)
         {
+            if (_nodes == null) SyncNodes();
+
             if (_nodes.ContainsKey(coordinates)) return _nodes[coordinates];
 
             var node = Instantiate(Prefab, levelParent);
@@ -100,7 +107,7 @@ namespace TiledDungeon
                     var coordinates = new Vector3Int(x, elevation, size.y - y - 1);
                     var node = GetNode(coordinates);
 
-                    var aboveNode = _nodes.GetValueOrDefault(node.Coordinates + Vector3Int.up);
+                    var aboveNode = GetNode(node.Coordinates + Vector3Int.up);
 
                     node.Configure(
                         coordinates,
@@ -182,6 +189,19 @@ namespace TiledDungeon
 
         private void Mover_OnMoveEnd(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
         {
+            var node = GetNode(endPosition);
+            if (node == null) {
+                Debug.LogError($"Player is at {endPosition}, which is outside the map");
+                return;
+            }
+
+            if (!entity.transportationMode.HasFlag(TransportationMode.Flying) && !node.HasFloor)
+            {
+                entity.Falling = true;
+            } else if (entity.Falling)
+            {
+                entity.Falling = false;
+            }
         }
 
     }

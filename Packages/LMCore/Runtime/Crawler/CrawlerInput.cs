@@ -10,6 +10,7 @@ namespace LMCore.Crawler
 
     public class CrawlerInput : MonoBehaviour
     {
+        bool inputEnabled = true;
         public event MovementEvent OnMovement;
 
         private class HeldButtonInfo
@@ -87,6 +88,12 @@ namespace LMCore.Crawler
             nextNextMovement = Movement.None;
         }
 
+        void ClearQueue()
+        {
+            nextMovement = Movement.None;
+            nextNextMovement = Movement.None;
+        }
+
         private HeldButtonInfo GetReplay(bool force = false)
         {
             var candidate = replayStack.LastOrDefault();
@@ -102,6 +109,8 @@ namespace LMCore.Crawler
 
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
+            if (!inputEnabled) return;
+
             if (context.phase == InputActionPhase.Started)
             {
                 var waitingButton = GetReplay();
@@ -156,6 +165,8 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickStart(int tickId, float expectedDuration)
         {
+            if (!inputEnabled) return;
+
             if (currentMovement != Movement.None)
             {
                 Debug.Log($"{tickId}: {currentMovement} ({expectedDuration})");
@@ -165,6 +176,8 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
+            if (!inputEnabled) return;
+
             ShiftQueue();
             if (currentMovement == Movement.None)
             {
@@ -181,11 +194,13 @@ namespace LMCore.Crawler
             }
         }
 
-        bool HasEmptyQueue => currentMovement == Movement.None || nextMovement == Movement.None || nextNextMovement == Movement.None;
+        bool HasEmptyQueue => currentMovement == Movement.None 
+            || nextMovement == Movement.None 
+            || nextNextMovement == Movement.None;
 
         private void Update()
         {
-            if (HasEmptyQueue)
+            if (inputEnabled && HasEmptyQueue)
             {
                 var replay = GetReplay();
                 if (replay != null)
@@ -195,6 +210,17 @@ namespace LMCore.Crawler
 
                 }
             }
+        }
+
+        public void DisableInput(bool clearQueue)
+        {
+            if (clearQueue) ClearQueue();
+            inputEnabled = false;
+        }
+
+        public void EnableInput()
+        {
+            inputEnabled = true;
         }
     }
 }
