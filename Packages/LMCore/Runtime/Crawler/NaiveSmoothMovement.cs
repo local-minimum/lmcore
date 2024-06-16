@@ -1,13 +1,17 @@
 using UnityEngine;
 using LMCore.Extensions;
 using LMCore.IO;
+using System;
 
 namespace LMCore.Crawler
 {
-    public class NaiveSmoothMovement : MonoBehaviour
+    public class NaiveSmoothMovement : MonoBehaviour, IEntityMover
     {
-        [SerializeField]
-        IGridSizeProvider gridSizeProvider;
+        public event EntityMovementEvent OnMoveStart;
+        public event EntityMovementEvent OnMoveEnd;
+        public bool Enabled => enabled && gameObject.activeSelf;
+
+        public IGridSizeProvider GridSizeProvider { get; set; }
 
         [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
         float turnDurationFactor = 1f;
@@ -125,20 +129,36 @@ namespace LMCore.Crawler
             {
                 activeStartRotation = transform.rotation;
                 activeEndRotation = gEntity.LookDirection.ApplyRotation(movement).AsQuaternion();
+                allowedTranslation = true;
             }
             else if (movement != Movement.None)
             {
-                allowedTranslation = gController.CanMoveTo(movement, gridSizeProvider.GridSize);
+                activeStartRotation = gEntity.LookDirection.AsQuaternion();
+                activeEndRotation = gEntity.LookDirection.AsQuaternion();
+                allowedTranslation = gController.CanMoveTo(movement, GridSizeProvider.GridSize);
                 activeStartPosition = transform.position;
                 activeEndPosition = gEntity.LookDirection
                     .RelativeTranslation(movement)
                     .Translate(gEntity.Position)
                     .ToPosition();
             }
+
+            OnMoveStart?.Invoke(
+                gEntity, 
+                Animation, 
+                gEntity.Position, 
+                gEntity.LookDirection,
+                gEntity.LookDirection.RelativeTranslation(Animation).Translate(gEntity.Position),
+                gEntity.LookDirection.ApplyRotation(Animation),
+                allowedTranslation
+            );
         }
 
         void EndAnimation()
         {
+            var startPosition = gEntity.Position;
+            var startLookDirection = gEntity.LookDirection;
+
             if (turning)
             {
                 gEntity.Rotate(Animation);
@@ -147,6 +167,16 @@ namespace LMCore.Crawler
             {
                 gEntity.Translate(Animation);
             }
+
+            OnMoveEnd?.Invoke(
+                gEntity, 
+                Animation, 
+                startPosition,
+                startLookDirection,
+                gEntity.Position,
+                gEntity.LookDirection,
+                allowedTranslation
+            );
 
             gEntity.Sync();
             Animation = Movement.None;

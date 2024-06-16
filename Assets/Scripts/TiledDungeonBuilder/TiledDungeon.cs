@@ -162,5 +162,27 @@ namespace TiledDungeon
         {
             Spawn();
         }
+
+        private void OnEnable()
+        {
+           foreach (var mover in Player.Movers)
+            {
+                mover.OnMoveEnd += Mover_OnMoveEnd;
+                mover.GridSizeProvider = this;
+            }
+        }
+
+        private void OnDisable()
+        {
+           foreach (var mover in Player.Movers)
+            {
+                mover.OnMoveEnd += Mover_OnMoveEnd;
+            }
+        }
+
+        private void Mover_OnMoveEnd(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
+        {
+        }
+
     }
 }

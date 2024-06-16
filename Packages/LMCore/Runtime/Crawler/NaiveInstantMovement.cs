@@ -4,10 +4,14 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
-    public class NaiveInstantMovement : MonoBehaviour
+    public class NaiveInstantMovement : MonoBehaviour, IEntityMover 
     {
-        [SerializeField]
-        IGridSizeProvider gridSizeProvider;
+        public event EntityMovementEvent OnMoveStart;
+        public event EntityMovementEvent OnMoveEnd;
+
+        public bool Enabled => enabled && gameObject.activeSelf;
+
+        public IGridSizeProvider GridSizeProvider { get; set; }
 
         [SerializeField]
         NodeShaker WallHitShakeTarget;
@@ -60,17 +64,49 @@ namespace LMCore.Crawler
             cInput.OnMovement -= CInput_OnMovement;
         }
 
-
-
         private void CInput_OnMovement(int tickId, Movement movement, float duration)
         {
+            var startPosition = gEntity.Position;
+            var startLookDirection = gEntity.LookDirection;
+
             if (movement.IsRotation())
             {
+                OnMoveStart?.Invoke(
+                    gEntity,
+                    movement,
+                    startPosition,
+                    startLookDirection,
+                    gEntity.Position,
+                    gEntity.LookDirection.ApplyRotation(movement),
+                    true
+                 );
+
                 gEntity.Rotate(movement);
+
+                OnMoveEnd?.Invoke(
+                    gEntity,
+                    movement,
+                    startPosition,
+                    startLookDirection,
+                    gEntity.Position,
+                    gEntity.LookDirection,
+                    true
+                );
             }
             else if (movement.IsTranslation())
             {
-                if (gController.CanMoveTo(movement, gridSizeProvider.GridSize))
+                var allowed = gController.CanMoveTo(movement, GridSizeProvider.GridSize);
+
+                OnMoveStart?.Invoke(
+                    gEntity,
+                    movement,
+                    startPosition,
+                    startLookDirection,
+                    gEntity.Position,
+                    gEntity.LookDirection.ApplyRotation(movement),
+                    allowed 
+                 );
+                if (allowed)
                 {
                     gEntity.Translate(movement);
                 }
@@ -79,6 +115,16 @@ namespace LMCore.Crawler
                     WallHitShakeTarget?.Shake();
                     Debug.Log($"Can't move {movement} because collides with wall");
                 }
+
+                OnMoveEnd?.Invoke(
+                    gEntity,
+                    movement,
+                    startPosition,
+                    startLookDirection,
+                    gEntity.Position,
+                    gEntity.LookDirection,
+                    allowed
+                );
             }
             gEntity.Sync();
         }

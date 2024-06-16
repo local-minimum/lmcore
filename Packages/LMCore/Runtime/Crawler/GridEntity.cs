@@ -1,13 +1,31 @@
 using UnityEngine;
 using LMCore.Extensions;
 using LMCore.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LMCore.Crawler
 {
     public class GridEntity : MonoBehaviour
     {
         [SerializeField]
+        TransportationMode transportationMode;
+
+        [SerializeField]
         Direction StartLookDirection;
+
+        List<IEntityMover> movers;
+        public IEnumerable<IEntityMover> Movers { 
+            get { 
+                if (movers == null)
+                {
+                    movers = GetComponents<IEntityMover>().ToList();
+                }
+                return movers; 
+            } 
+        }
+
+        public IEntityMover ActiveMover => movers.Where(m => m.Enabled).FirstOrDefault();
 
         /// <summary>
         /// Using XZ Plane, returns position in 2D
