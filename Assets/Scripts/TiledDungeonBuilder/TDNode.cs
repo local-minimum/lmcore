@@ -18,8 +18,24 @@ namespace TiledDungeon
         [SerializeField, HideInInspector]
         TiledTile tile;
 
-        [SerializeField]
-        TiledDungeon dungeon;
+        [SerializeField, HideInInspector]
+        TileModification[] modifications;
+        
+
+        TiledDungeon _dungeon;
+        public TiledDungeon Dungeon
+        {
+            get
+            {
+                if (_dungeon == null)
+                {
+                    _dungeon = GetComponentInParent<TiledDungeon>();
+                }
+                return _dungeon;
+            }
+
+            private set { _dungeon = value; }
+        }
 
         [SerializeField, HideInInspector]
         private Vector3Int _coordinates;
@@ -56,6 +72,14 @@ namespace TiledDungeon
         string GrateClass = "Grate";
 
         [SerializeField]
+        GameObject obstructionNS;
+
+        [SerializeField]
+        GameObject obstructionWE;
+
+        string ObstructionClass = "Obstruction";
+
+        [SerializeField]
         string OrientationClass = "Orientation";
 
         [SerializeField]
@@ -70,42 +94,66 @@ namespace TiledDungeon
 
         public bool Obstructed { get; set; }
 
-        public void ConfigureGrates(TileModification[] modifications)
+        void ConfigureOriented(
+            TileModification[] modifications,
+            GameObject vertical,
+            GameObject horizontal,
+            System.Func<TileModification, bool> modFilter,
+            bool obstructs
+        )
         {
-            var grates = modifications.Where(mod => mod.Tile.Type == GrateClass).ToList();
+            var grates = modifications.Where(modFilter).ToList();
 
-            grateNS?.SetActive(false);
-            grateWE?.SetActive(false);
+            vertical?.SetActive(false);
+            horizontal?.SetActive(false);
 
             if (grates.Count == 0)
             {
-                Obstructed = false;
+                if (obstructs) Obstructed = false;
                 return;
             }
 
             if (grates.Where(g => g.Tile.CustomProperties.StringEnums.GetValueOrDefault(OrientationClass).Value == "Vertical").Count() > 0) {
-                if (grateNS != null)
+                if (vertical != null)
                 {
-                    grateNS.SetActive(true);
+                    vertical.SetActive(true);
                 }
                 else
                 {
-                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support north<->south grates");
+                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support north<->south entity");
                 }
             }
 
             if (grates.Where(g => g.Tile.CustomProperties.StringEnums.GetValueOrDefault(OrientationClass).Value == "Horizontal").Count() > 0) {
-                if (grateWE != null)
+                if (horizontal != null)
                 {
-                    grateWE.SetActive(true);
+                    horizontal.SetActive(true);
                 } else
                 {
-                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support west<->east grates");
+                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support west<->east entity");
                 }
             }
 
-            Obstructed = true;
-        }
+            if (obstructs) Obstructed = true;
+        } 
+
+        void ConfigureGrates(TileModification[] modifications) =>
+            ConfigureOriented(
+                modifications,
+                grateNS,
+                grateWE,
+                mod => mod.Tile.Type == GrateClass,
+                true
+            );
+
+        void ConfigureObstructions(TileModification[] modifications) =>
+            ConfigureOriented(
+                modifications,
+                obstructionNS,
+                obstructionWE,
+                mod => mod.Tile.Type == ObstructionClass,
+                true
+            );
 
         public void Configure(
             Vector3Int coordinates, 
@@ -117,7 +165,8 @@ namespace TiledDungeon
         {
             _coordinates = coordinates;
             this.tile = tile;
-            this.dungeon = dungeon;
+            this.modifications = modifications;
+            Dungeon = dungeon;
 
             var sides = tile.CustomProperties.Classes[SidesClass];
             if (sides == null)
@@ -139,11 +188,12 @@ namespace TiledDungeon
             name = $"TileNode Elevation {coordinates.y} ({coordinates.x}, {coordinates.z})";
 
             ConfigureGrates(modifications);
+            ConfigureObstructions(modifications);
         }
 
         private void OnDestroy()
         {
-            dungeon?.RemoveNode(this);
+            Dungeon?.RemoveNode(this);
         }
     }   
 }

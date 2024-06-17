@@ -6,9 +6,9 @@
     "activeFile": "DemoLevel.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        "Rules",
         ".",
-        "Automapping"
+        "Automapping",
+        "Rules"
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -24,14 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
-                9
+                9,
+                7
             ],
-            "scale": 0.33,
-            "selectedLayer": 4,
+            "scale": 0.5,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 534.8484848484849,
-                "y": 543.9393939393939
+                "x": 474,
+                "y": 535
             }
         },
         "Mapping.tsx": {
@@ -42,16 +42,16 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 513.6363636363637,
-                "y": 1534.8484848484848
+                "x": 510.6060606060606,
+                "y": 1533.3333333333333
             }
         },
         "Rules/ModernDungeonAutomapping.tmx": {
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 511.3333333333333,
-                "y": 511.3333333333333
+                "x": 511.33333333333326,
+                "y": 512
             }
         }
     },
