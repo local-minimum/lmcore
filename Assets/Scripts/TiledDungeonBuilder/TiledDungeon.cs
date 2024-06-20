@@ -88,6 +88,7 @@ namespace TiledDungeon
                 return _nodes.GetValueOrDefault(coordinates);
             }
         }
+
         TDNode GetOrCreateNode(Vector3Int coordinates)
         {
             if (_nodes == null) SyncNodes();
@@ -152,7 +153,6 @@ namespace TiledDungeon
             }
         }
 
-        [ContextMenu("Generate")]
         public void GenerateMap()
         {
             SyncNodes();
@@ -193,6 +193,15 @@ namespace TiledDungeon
         [ContextMenu("Clean")]
         private void Clean() {
             transform.DestroyAllChildren(DestroyImmediate);
+        }
+
+        [ContextMenu("Regenerate")]
+        private void Regenerate()
+        {
+            var spawnCoordinates = SpawnTile.Coordinates;
+            Clean();
+            GenerateMap();
+            SpawnTile = this[spawnCoordinates];
         }
 
         [ContextMenu("Spawn")]

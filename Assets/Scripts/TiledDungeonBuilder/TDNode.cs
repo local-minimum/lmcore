@@ -77,7 +77,15 @@ namespace TiledDungeon
         [SerializeField]
         GameObject obstructionWE;
 
+        [SerializeField]
+        TDDoor doorNS;
+
+        [SerializeField]
+        TDDoor doorWE;
+
         string ObstructionClass = "Obstruction";
+
+        string DoorClass = "Door";
 
         [SerializeField]
         string OrientationClass = "Orientation";
@@ -155,6 +163,15 @@ namespace TiledDungeon
                 true
             );
 
+        void ConfigureDoors(TileModification[] modifications) =>
+            ConfigureOriented(
+                modifications,
+                doorNS.gameObject,
+                doorWE.gameObject,
+                mod => mod.Tile.Type == DoorClass,
+                true
+            );
+
         public void Configure(
             Vector3Int coordinates, 
             TiledTile tile, 
@@ -189,6 +206,7 @@ namespace TiledDungeon
 
             ConfigureGrates(modifications);
             ConfigureObstructions(modifications);
+            ConfigureDoors(modifications);
         }
 
         private void OnDestroy()
