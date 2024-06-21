@@ -1,14 +1,13 @@
 using LMCore.IO;
 using LMCore.Juice;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.Crawler
 {
     public class NaiveInstantMovement : MonoBehaviour, IEntityMover 
     {
-        public event EntityMovementEvent OnMoveStart;
-        public event EntityMovementEvent OnMoveEnd;
-
         public bool Enabled => enabled && gameObject.activeSelf;
 
         public IGridSizeProvider GridSizeProvider { get; set; }
@@ -20,6 +19,10 @@ namespace LMCore.Crawler
         GridEntity gEntity;
 
         private GridEntityController _gController;
+
+        public event EntityMovementEvent OnMoveStart;
+        public event EntityMovementEvent OnMoveEnd;
+
         private GridEntityController gController
         {
             get
@@ -43,6 +46,7 @@ namespace LMCore.Crawler
         private void OnDestroy()
         {
             GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
+            Movers.Deactivate(this);
         }
 
         private void InstantMovement_OnChange(bool value)
@@ -58,12 +62,16 @@ namespace LMCore.Crawler
             }
             cInput.OnMovement += CInput_OnMovement;
             gEntity.OnLand.AddListener(OnLand);
+
+            Movers.Activate(this);
         }
 
         private void OnDisable()
         {
             cInput.OnMovement -= CInput_OnMovement;
             gEntity.OnLand.RemoveListener(OnLand);
+
+            Movers.Deactivate(this);
         }
 
         private void CInput_OnMovement(int tickId, Movement movement, float duration)

@@ -13,7 +13,7 @@ namespace LMCore.Crawler
         bool allowed 
     );
 
-    public interface IEntityMover
+    public interface IEntityMover 
     {
         public event EntityMovementEvent OnMoveStart;
         public event EntityMovementEvent OnMoveEnd;

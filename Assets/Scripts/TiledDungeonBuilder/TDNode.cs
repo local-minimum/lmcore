@@ -163,14 +163,26 @@ namespace TiledDungeon
                 true
             );
 
-        void ConfigureDoors(TileModification[] modifications) =>
+        void ConfigureDoors(TileModification[] modifications)
+        {
+            System.Func<TileModification, bool> filter =
+                mod => mod.Tile.Type == DoorClass;
+
             ConfigureOriented(
                 modifications,
                 doorNS.gameObject,
                 doorWE.gameObject,
-                mod => mod.Tile.Type == DoorClass,
+                filter,
                 true
             );
+
+            foreach (TDDoor door in new[] { doorNS, doorWE })
+            {
+                if (door == null || !door.gameObject.activeSelf) continue;
+
+                door.Configure(Coordinates, modifications.Where(filter).ToArray());
+            }
+        }
 
         public void Configure(
             Vector3Int coordinates, 

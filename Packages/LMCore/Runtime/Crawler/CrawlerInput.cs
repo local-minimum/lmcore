@@ -57,7 +57,7 @@ namespace LMCore.Crawler
         [SerializeField, Range(0, 1)]
         float minResuseAfterTime = 0.35f;
 
-        GridEntity gEntity => GetComponent<GridEntity>();
+        public GridEntity gEntity => GetComponent<GridEntity>();
 
         private bool ReadyToReuse(HeldButtonInfo press)
         {
@@ -151,6 +151,14 @@ namespace LMCore.Crawler
 
         public void OnTurnCW(InputAction.CallbackContext context) =>
             HandleCall(context, Movement.TurnCW);
+
+        public void OnInteract(InputAction.CallbackContext context)
+        {
+            if (context.phase == InputActionPhase.Started)
+            {
+                gEntity.Interact();
+            }
+        }
 
 
         private void OnEnable()

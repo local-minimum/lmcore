@@ -558,9 +558,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Door: {fileID: 9083033144570563075}
+  maxSlide: 2.75
   DoorSliding:
     StartValue: 0
-    EndValue: 2.98
+    EndValue: 1
     fullEaseDuration: 1
     easing:
       serializedVersion: 2
@@ -586,6 +587,9 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  isOpen: 0
+  Position: {x: 0, y: 0, z: 0}
+  modifications: []
 --- !u!4 &4239642216158660119 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3aa1cfb13f6a4b24cac9323dc1c5d389,

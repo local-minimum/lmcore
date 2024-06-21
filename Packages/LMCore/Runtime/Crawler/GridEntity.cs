@@ -7,8 +7,12 @@ using UnityEngine.Events;
 
 namespace LMCore.Crawler
 {
+    public delegate void InteractEvent(GridEntity entity);
+
     public class GridEntity : MonoBehaviour
     {
+        public static event InteractEvent OnInteract;
+
         public UnityEvent<bool> OnFall;
         public UnityEvent ContinueFall;
         public UnityEvent OnLand;
@@ -91,6 +95,12 @@ namespace LMCore.Crawler
         public void Rotate(Movement movement)
         {
             LookDirection = LookDirection.ApplyRotation(movement);
+        }
+
+        public void Interact()
+        {
+            Debug.Log($"I, {name}, am interacting");
+            OnInteract?.Invoke(this);
         }
     }
 }

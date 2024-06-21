@@ -8,8 +8,6 @@ namespace LMCore.Crawler
 {
     public class NaiveSmoothMovement : MonoBehaviour, IEntityMover
     {
-        public event EntityMovementEvent OnMoveStart;
-        public event EntityMovementEvent OnMoveEnd;
         public bool Enabled => enabled && gameObject.activeSelf;
 
         public IGridSizeProvider GridSizeProvider { get; set; }
@@ -48,6 +46,8 @@ namespace LMCore.Crawler
         private void OnDestroy()
         {
             GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
+
+            Movers.Deactivate(this);
         }
 
         private void InstantMovement_OnChange(bool value)
@@ -82,6 +82,8 @@ namespace LMCore.Crawler
             ElasticGameClock.OnTickEndAdjustment += ElasticGameClock_OnTickEndAdjustment;
 
             gEntity.OnLand.AddListener(OnLand);
+
+            Movers.Activate(this);
         }
 
 
@@ -93,6 +95,8 @@ namespace LMCore.Crawler
             ElasticGameClock.OnTickEndAdjustment -= ElasticGameClock_OnTickEndAdjustment;
 
             gEntity.OnLand.RemoveListener(OnLand);
+
+            Movers.Deactivate(this);
         }
 
         private void ElasticGameClock_OnTickEndAdjustment(int tickId, float unadjustedProgress, float adjustedProgress, float endTime)
@@ -194,6 +198,9 @@ namespace LMCore.Crawler
 
         [SerializeField, Range(0, 0.5f)]
         float bounceAtProgress = 0.4f;
+
+        public event EntityMovementEvent OnMoveStart;
+        public event EntityMovementEvent OnMoveEnd;
 
         void Update()
         {

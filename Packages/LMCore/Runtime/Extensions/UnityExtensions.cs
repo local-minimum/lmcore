@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.Extensions
@@ -49,5 +50,28 @@ namespace LMCore.Extensions
 
             return size;
         }
+
+        // TODO: This doesn't seem to work
+        public static T[] FindObjectsByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) =>
+            MonoBehaviour
+                .FindObjectsByType<MonoBehaviour>(findObjectsInactive, sortMode)
+                .Where(c => typeof(T).IsAssignableFrom(c.GetType()) && typeof(IConvertible).IsAssignableFrom(c.GetType()))
+                .Select(c => (T) Convert.ChangeType(c, typeof(T)))
+                .ToArray();
+
+        public static T[] FindObjectsByInterface<T>(FindObjectsSortMode sortMode) =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, sortMode);
+
+        public static T[] FindObjectsByInterface<T>() =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+
+        public static T FindObjectByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) =>
+            FindObjectsByInterface<T>(findObjectsInactive, sortMode).First();
+
+        public static T FindObjectByInterface<T>(FindObjectsSortMode sortMode) =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, sortMode).First();
+
+        public static T FindObjectByInterface<T>() =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).First();
     }    
 }
