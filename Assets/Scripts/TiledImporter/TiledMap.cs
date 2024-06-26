@@ -15,6 +15,7 @@ namespace TiledImporter
         public TiledMapMetadata Metadata = new TiledMapMetadata();
         public List<TiledTilesetMetadata> Tilesets = new List<TiledTilesetMetadata>();
         public List<TiledLayer> Layers = new List<TiledLayer>();
+        public List<TiledObjectLayer> ObjectLayers = new List<TiledObjectLayer>();
         public List<TiledGroup> Groups = new List<TiledGroup>();
         public TiledCustomProperties CustomProperties;
 
@@ -36,6 +37,12 @@ namespace TiledImporter
                 "layer", 
                 TiledLayer.FromFactory(enums), 
                 TiledLayer.ShouldBeImported(filterImports)
+            ).ToList();
+
+            tiledMap.ObjectLayers = map.HydrateElementsByName(
+                "objectgroup",
+                TiledObjectLayer.FromFactory(enums),
+                TiledObjectLayer.ShouldBeImported(filterImports)
             ).ToList();
 
             tiledMap.Groups = map.HydrateElementsByName(

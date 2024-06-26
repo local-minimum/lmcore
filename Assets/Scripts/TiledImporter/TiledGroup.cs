@@ -13,6 +13,8 @@ namespace TiledImporter
         public string Name;
         public int Id;
         public List<TiledLayer> Layers;
+        public List<TiledObjectLayer> ObjectLayers;
+
         // TODO: Probably use same strategy as with SerializableDictionary to support nesting groups
         // or if that doesn't work we can subclass to ahve some nesting levels should we really want them
         // public List<TiledGroup> Groups;
@@ -41,6 +43,7 @@ namespace TiledImporter
                 Id = group.GetIntAttribute("id"),
                 Name = group.GetAttribute("name"),
                 Layers = group.HydrateElementsByName("layer", TiledLayer.FromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
+                ObjectLayers = group.HydrateElementsByName("objectgroup", TiledObjectLayer.FromFactory(enums), TiledObjectLayer.ShouldBeImported(filterImport)).ToList(),
                 // Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
                 CustomProperties = customProps,
             };

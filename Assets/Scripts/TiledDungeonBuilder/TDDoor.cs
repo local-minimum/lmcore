@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace TiledDungeon
 {
-    // TODO: Player hook up interact 
     // TODO: Use configuration to present lock and button
     // TODO: Align behaviour with configuration
     public class TDDoor : MonoBehaviour

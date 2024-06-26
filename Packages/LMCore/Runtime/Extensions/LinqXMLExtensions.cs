@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
@@ -20,8 +21,17 @@ namespace LMCore.Extensions
         public static int GetIntAttribute(this XElement element, string attributeName) =>
             int.Parse(element.GetAttribute(attributeName));
 
-        public static float GetFloatAttribute(this XElement element, string attributeName) =>
-            float.Parse(element.GetAttribute(attributeName));
+        public static float GetFloatAttribute(this XElement element, string attributeName)
+        {
+            try
+            {
+                return (float)Decimal.Parse(element.GetAttribute(attributeName));
+            } catch (FormatException)
+            {
+                var culture = new System.Globalization.CultureInfo("en-US");
+                return (float)Decimal.Parse(element.GetAttribute(attributeName), culture);
+            }
+        }
 
         public static Color GetColorAttribute(this XElement element, string attributeName)
         {

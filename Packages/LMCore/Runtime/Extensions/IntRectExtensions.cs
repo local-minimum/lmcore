@@ -4,6 +4,15 @@ namespace LMCore.Extensions
 {
     public static class IntRectExtensions
     {
+        /// <summary>
+        /// If other is completedly inside this rect
+        /// </summary>
+        public static bool Contains(this RectInt rect, RectInt other) => rect.Contains(other.min) && rect.Contains(other.max);
+
+        public static bool Contains(this RectInt rect, Rect other) => rect.Contains(other.min.FloorToInt()) && rect.Contains(other.max.CeilToInt());
+
+        public static bool Contains(this RectInt rect, Vector2 point) => rect.Contains(point.CeilToInt()) && rect.Contains(point.FloorToInt());
+        
         public static int Area(this RectInt rect) => rect.width * rect.height;
 
         /// <summary>
