@@ -52,7 +52,7 @@ namespace TiledImporter
             property.isExpanded = EditorGUI.Foldout(
                 foldOutRect, 
                 property.isExpanded, 
-                new GUIContent($"Custom Properties [{(property.isExpanded ? "collapse" : "expand")}]"), 
+                new GUIContent($"Custom [{(property.isExpanded ? "collapse" : "expand")}]"), 
                 true,
                 title
             );
