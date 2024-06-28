@@ -17,6 +17,9 @@ namespace TiledImporter
         [SerializeField, Tooltip("If only those levels with the custom boolean property 'Imported' set to true are imported")]
         bool onlyImportFlaggedLayers = true;
 
+        [SerializeField, Tooltip("If the dimensions and coordinates of objects should be scaled down by the tile size")]
+        bool scaleObjectCoordinates = false;
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
             XDocument doc = XDocument.Load(assetPath);
@@ -41,7 +44,7 @@ namespace TiledImporter
         TiledMap ProcessMap(XElement map)
         {
             var enums = new TiledEnums();
-            var processedMap = TiledMap.From(map, enums, assetPath, onlyImportFlaggedLayers);
+            var processedMap = TiledMap.From(map, enums, assetPath, onlyImportFlaggedLayers, scaleObjectCoordinates);
             Debug.Log($"RootLayers: {processedMap.Layers.Count}");
             Debug.Log($"Groups: {processedMap.Groups.Count}");
             Debug.Log($"Layers: {processedMap.LayerNames()}");

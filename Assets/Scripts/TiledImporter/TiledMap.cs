@@ -19,7 +19,7 @@ namespace TiledImporter
         public List<TiledGroup> Groups = new List<TiledGroup>();
         public TiledCustomProperties CustomProperties;
 
-        public static TiledMap From(XElement map, TiledEnums enums, string source, bool filterImports)
+        public static TiledMap From(XElement map, TiledEnums enums, string source, bool filterImports, bool scaleCoordinates)
         {
             var tiledMap = CreateInstance<TiledMap>();
             tiledMap.Enums = enums;
@@ -27,6 +27,8 @@ namespace TiledImporter
             if (map == null) return tiledMap;
 
             tiledMap.Metadata = TiledMapMetadata.From(map, enums, source);
+
+            var scaling = scaleCoordinates ? tiledMap.Metadata.TileSize : Vector2Int.zero;
 
             tiledMap.Tilesets = map.HydrateElementsByName(
                 "tileset",
@@ -41,13 +43,13 @@ namespace TiledImporter
 
             tiledMap.ObjectLayers = map.HydrateElementsByName(
                 "objectgroup",
-                TiledObjectLayer.FromFactory(enums),
+                TiledObjectLayer.FromFactory(enums, scaling),
                 TiledObjectLayer.ShouldBeImported(filterImports)
             ).ToList();
 
             tiledMap.Groups = map.HydrateElementsByName(
                 "group",
-                TiledGroup.FromFactory(enums, filterImports),
+                TiledGroup.FromFactory(enums, filterImports, scaling),
                 TiledGroup.ShouldBeImported(filterImports)
             ).ToList();
 
@@ -73,11 +75,26 @@ namespace TiledImporter
             }
         }
 
+        public IEnumerable<TiledObjectLayer> IterateObjectLayers
+        {
+            get
+            {
+                foreach (var layer in ObjectLayers) yield return layer;
+                foreach (var group in Groups)
+                {
+                    foreach (var layer in group.ObjectLayers) yield return layer;
+                }
+            }
+        }
+
         public IEnumerable<T> FindInLayers<T>(Func<TiledLayer, T> action) => 
             IterateLayers.Select(action);
 
         public IEnumerable<TiledLayer> FindLayers(Func<TiledLayer, bool> filter) => 
             IterateLayers.Where(filter);
+
+        public IEnumerable<TiledObjectLayer> FindObjectLayers(Func<TiledObjectLayer, bool> filer) =>
+            IterateObjectLayers.Where(filer);
 
         public TiledTilesetMetadata GetTilesetMetadataForTileId(int tileId) =>
             Tilesets.OrderByDescending(t => t.FirstGID).FirstOrDefault(t => t.FirstGID < tileId);

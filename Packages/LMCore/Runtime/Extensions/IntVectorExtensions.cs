@@ -341,5 +341,9 @@ namespace LMCore.Extensions
             return new Vector2Int(vector.x, vector.z);
         }
         #endregion
+
+        #region Rect
+        public static RectInt ToUnitRect(this Vector2Int vector) => new RectInt(vector, Vector2Int.one);
+        #endregion Rect
     }
 }

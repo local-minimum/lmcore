@@ -26,12 +26,12 @@ namespace TiledImporter
             return (TiledGroup group) => !filterLayerImport || (group?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false);
         }
 
-        public static Func<XElement, TiledGroup> FromFactory(TiledEnums enums, bool filterImport)
+        public static Func<XElement, TiledGroup> FromFactory(TiledEnums enums, bool filterImport, Vector2Int scaling)
         {
-            return (XElement group) => From(group, enums, filterImport);
+            return (XElement group) => From(group, enums, filterImport, scaling);
         }
 
-        public static TiledGroup From(XElement group, TiledEnums enums, bool filterImport)
+        public static TiledGroup From(XElement group, TiledEnums enums, bool filterImport, Vector2Int scaling)
         {
             if (group == null) return null;
 
@@ -43,7 +43,7 @@ namespace TiledImporter
                 Id = group.GetIntAttribute("id"),
                 Name = group.GetAttribute("name"),
                 Layers = group.HydrateElementsByName("layer", TiledLayer.FromFactory(enums), TiledLayer.ShouldBeImported(filterImport)).ToList(),
-                ObjectLayers = group.HydrateElementsByName("objectgroup", TiledObjectLayer.FromFactory(enums), TiledObjectLayer.ShouldBeImported(filterImport)).ToList(),
+                ObjectLayers = group.HydrateElementsByName("objectgroup", TiledObjectLayer.FromFactory(enums, scaling), TiledObjectLayer.ShouldBeImported(filterImport)).ToList(),
                 // Groups = group.HydrateElementsByName("group", FromFactory(enums, filterImport), ShouldBeImported(filterImport)).ToList(),
                 CustomProperties = customProps,
             };

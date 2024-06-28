@@ -4,6 +4,7 @@ using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using TiledImporter;
 
 namespace TiledDungeon
 {
@@ -32,6 +33,12 @@ namespace TiledDungeon
         [SerializeField, HideInInspector]
         TileModification[] modifications;
 
+        [SerializeField, HideInInspector]
+        TiledObjectLayer.Point[] Points;
+
+        [SerializeField, HideInInspector]
+        TiledObjectLayer.Rect[] Rects;
+
         bool isLocked;
 
         private void Start()
@@ -39,10 +46,13 @@ namespace TiledDungeon
             SyncDoor();
         }
 
-        public void Configure(Vector3Int position, TileModification[] modifications)
+        public void Configure(Vector3Int position, TileModification[] modifications, TiledObjectLayer.Point[] points, TiledObjectLayer.Rect[] rects)
         {
             Position = position;
             this.modifications = modifications;
+            Points = points;
+            Rects = rects;
+
             SyncDoor();
         }
 

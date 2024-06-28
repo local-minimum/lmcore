@@ -10,6 +10,7 @@ namespace TiledImporter
     public class TiledMapMetadata
     {
         public Vector2Int MapSize;
+        public Vector2Int TileSize;
         public string Class;
         public bool Infinite;
         public TiledCustomProperties CustomProperties;
@@ -23,6 +24,7 @@ namespace TiledImporter
             new TiledMapMetadata()
             {
                 MapSize = map.GetVector2IntAttribute("width", "height"),
+                TileSize = map.GetVector2IntAttribute("tilewidth", "tileheight"),
                 Class = map.GetAttribute("class"),
                 Infinite = map.GetBoolAttribute("infinite"),
                 CustomProperties = TiledCustomProperties.From(map.Element("properties"), enums),

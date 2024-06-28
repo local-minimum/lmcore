@@ -52,13 +52,13 @@ namespace TiledImporter
         {
             public UnityEngine.Rect Area;
 
-            public Rect(XElement tiledObject, TiledEnums enums) : base(tiledObject, enums)
+            public Rect(XElement tiledObject, TiledEnums enums, Vector2Int scaling) : base(tiledObject, enums)
             {
                 Area = new UnityEngine.Rect(
-                    tiledObject.GetFloatAttribute("x"),
-                    tiledObject.GetFloatAttribute("y"),
-                    tiledObject.GetFloatAttribute("width"),
-                    tiledObject.GetFloatAttribute("height")
+                    tiledObject.GetFloatAttribute("x") / scaling.x,
+                    tiledObject.GetFloatAttribute("y") / scaling.y,
+                    tiledObject.GetFloatAttribute("width") / scaling.x,
+                    tiledObject.GetFloatAttribute("height") / scaling.y
                 );
             }
 
@@ -75,11 +75,11 @@ namespace TiledImporter
         {
             public Vector2 Coordinates;
 
-            public Point(XElement tiledObject, TiledEnums enums) : base(tiledObject, enums)
+            public Point(XElement tiledObject, TiledEnums enums, Vector2Int scaling) : base(tiledObject, enums)
             {
                 Coordinates = new Vector2(
-                    tiledObject.GetFloatAttribute("x"),
-                    tiledObject.GetFloatAttribute("y")
+                    tiledObject.GetFloatAttribute("x") / scaling.x,
+                    tiledObject.GetFloatAttribute("y") / scaling.y
                 );
             }
 
@@ -97,11 +97,11 @@ namespace TiledImporter
             public int Width;
             public int Height;
 
-            public Ellipse(XElement tiledObject, TiledEnums enums) : base(tiledObject, enums)
+            public Ellipse(XElement tiledObject, TiledEnums enums, Vector2Int scaling) : base(tiledObject, enums)
             {
-                Center = new Vector2(tiledObject.GetFloatAttribute("x"), tiledObject.GetFloatAttribute("y"));
-                Width = tiledObject.GetIntAttribute("width");
-                Height = tiledObject.GetIntAttribute("height");
+                Center = new Vector2(tiledObject.GetFloatAttribute("x") / scaling.x, tiledObject.GetFloatAttribute("y") /scaling.y);
+                Width = tiledObject.GetIntAttribute("width") / scaling.x;
+                Height = tiledObject.GetIntAttribute("height") / scaling.y;
             }
 
             public override bool Applies(Vector2Int point) =>
@@ -123,11 +123,11 @@ namespace TiledImporter
             return (TiledObjectLayer objectLayer) => !filterLayerImport || (objectLayer?.CustomProperties?.Bools?.GetValueOrDefault("Imported") ?? false);
         }
 
-        public static Func<XElement, TiledObjectLayer> FromFactory(TiledEnums enums) { 
-            return (XElement objectLayer) => From(objectLayer, enums);
+        public static Func<XElement, TiledObjectLayer> FromFactory(TiledEnums enums, Vector2Int coordinatesScaling) { 
+            return (XElement objectLayer) => From(objectLayer, enums, coordinatesScaling);
         }
 
-        public static TiledObjectLayer From(XElement objectLayer, TiledEnums enums)
+        public static TiledObjectLayer From(XElement objectLayer, TiledEnums enums, Vector2Int scaling)
         {
             if (objectLayer == null) return null;
 
@@ -137,9 +137,9 @@ namespace TiledImporter
                 Id = objectLayer.GetIntAttribute("id"),
                 Name = objectLayer.GetAttribute("name"),
                 CustomProperties = TiledCustomProperties.From(objectLayer.Element("properties"), enums),
-                Points = TObject.Hydrate(objectLayer, Point.IsPoint, (el) => new Point(el, enums)).ToArray(),
-                Rects = TObject.Hydrate(objectLayer, Rect.IsRect, (el) => new Rect(el, enums)).ToArray(),
-                Ellipses = TObject.Hydrate(objectLayer, Ellipse.IsEllipse, (el) => new Ellipse(el, enums)).ToArray()
+                Points = TObject.Hydrate(objectLayer, Point.IsPoint, (el) => new Point(el, enums, scaling)).ToArray(),
+                Rects = TObject.Hydrate(objectLayer, Rect.IsRect, (el) => new Rect(el, enums, scaling)).ToArray(),
+                Ellipses = TObject.Hydrate(objectLayer, Ellipse.IsEllipse, (el) => new Ellipse(el, enums, scaling)).ToArray()
             };
         }
 

@@ -20,7 +20,12 @@ namespace TiledDungeon
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
-        
+
+        [SerializeField, HideInInspector]
+        TiledObjectLayer.Point[] Points;
+
+        [SerializeField, HideInInspector]
+        TiledObjectLayer.Rect[] Rects;
 
         TiledDungeon _dungeon;
         public TiledDungeon Dungeon
@@ -180,7 +185,12 @@ namespace TiledDungeon
             {
                 if (door == null || !door.gameObject.activeSelf) continue;
 
-                door.Configure(Coordinates, modifications.Where(filter).ToArray());
+                door.Configure(
+                    Coordinates, 
+                    modifications.Where(filter).ToArray(),
+                    Points,
+                    Rects
+                );
             }
         }
 
@@ -189,13 +199,18 @@ namespace TiledDungeon
             TiledTile tile, 
             TiledNodeRoofRule roofRule,
             TiledDungeon dungeon,
-            TileModification[] modifications
+            TileModification[] modifications,
+            TiledObjectLayer.Point[] points,
+            TiledObjectLayer.Rect[] rects
         )
         {
             _coordinates = coordinates;
             this.tile = tile;
             this.modifications = modifications;
             Dungeon = dungeon;
+            Points = points;
+            Rects = rects;
+
 
             var sides = tile.CustomProperties.Classes[SidesClass];
             if (sides == null)

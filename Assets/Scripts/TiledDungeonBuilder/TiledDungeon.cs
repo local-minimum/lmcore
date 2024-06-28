@@ -105,8 +105,7 @@ namespace TiledDungeon
         public Vector3Int AsUnityCoordinates(Vector2Int layerSize, int col, int row, int elevation) =>
             new Vector3Int(col, elevation, layerSize.y - row - 1);
 
-        // TODO: Support modifiers
-        void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, bool topLayer)
+        void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, List<TiledObjectLayer> objectLayers, bool topLayer)
         {
             var layerSize = layer.LayerSize;
             for (int row = 0; row < layerSize.y; row++)
@@ -142,12 +141,24 @@ namespace TiledDungeon
                         .Where(tm => tm != null)
                         .ToArray();
 
+                    var tileRect = coordinates.To2DInXZPlane().ToUnitRect();
+                    var points = objectLayers
+                        .SelectMany(l => l.Points)
+                        .Where(p => p.Applies(tileRect))
+                        .ToArray();
+                    var rects = objectLayers
+                        .SelectMany(l => l.Rects)
+                        .Where(r => r.Applies(tileRect))
+                        .ToArray();
+
                     node.Configure(
                         coordinates,
                         tile,
                         roofed,
                         this,
-                        modifications
+                        modifications,
+                        points,
+                        rects
                     );
                 }
             }
@@ -170,6 +181,10 @@ namespace TiledDungeon
                 var layers = map
                     .FindLayers(layer => layer.CustomProperties.Ints[elevationProperty] == elevation)
                     .ToList();
+                var objectLayers = map
+                    .FindObjectLayers(layer => layer.CustomProperties.Ints[elevationProperty] == elevation)
+                    .ToList();
+
                 var layoutLayer = layers.FirstOrDefault(l => l.Name.StartsWith(layoutLayerPrefix));
 
                 if (layoutLayer == null)
@@ -182,7 +197,7 @@ namespace TiledDungeon
 
                 var modificationLayers = layers.Where(l => l != layoutLayer).ToList();
 
-                GenerateLevel(layoutLayer, elevation, modificationLayers, topLayer);
+                GenerateLevel(layoutLayer, elevation, modificationLayers, objectLayers, topLayer);
 
                 topLayer = false;
             }
