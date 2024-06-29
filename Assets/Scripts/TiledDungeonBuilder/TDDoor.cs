@@ -1,6 +1,5 @@
 using LMCore.Crawler;
 using LMCore.Juice;
-using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,9 +8,12 @@ using TiledImporter;
 namespace TiledDungeon
 {
     // TODO: Use configuration to present lock and button
-    // TODO: Align behaviour with configuration
     public class TDDoor : MonoBehaviour
     {
+        static string LockName = "Lock";
+        static string KeyProperty = "Key";
+        static string ConsumesKeyProperty = "ConsumesKey";
+
         [SerializeField]
         Transform Door;
 
@@ -42,6 +44,7 @@ namespace TiledDungeon
         bool isLocked;
 
         string key;
+        bool consumesKey;
 
         private void Start()
         {
@@ -113,16 +116,29 @@ namespace TiledDungeon
             var onTheMove = activelyMovingEntities.Contains(entity);
             var validPosition = entity.LookDirection.Translate(entity.Position) == Position;
 
-            // Debug.Log($"onTheMove({onTheMove}) validPosition({validPosition}) {Position} vs {entity.Position}");
             if (!onTheMove && validPosition)
             {
                 Debug.Log("Attempting to open door");
 
                 if (isLocked)
                 {
-                    Debug.LogWarning($"Door requires key ({key})");
-                    return;
+                    var keyHolder = entity
+                        .GetComponentsInChildren<IInventory>()
+                        .FirstOrDefault(i => i.HasItem(KeyProperty, key));
+
+                    if (keyHolder == null)
+                    {
+                        Debug.LogWarning($"Door requires key ({keyHolder})");
+                        return;
+                    }
+
+                    if (consumesKey && !keyHolder.Consume(KeyProperty, key))
+                    {
+                        Debug.LogWarning($"Failed to consume key {key}");
+                    }
+                    isLocked = false;
                 }
+
                 Interact();
             }
         }
@@ -166,18 +182,20 @@ namespace TiledDungeon
                 mod => mod.Tile.CustomProperties.StringEnums.GetValueOrDefault("Interaction")?.Value == "Locked"
             );
 
-            key = Points
-                .FirstOrDefault(p => p.Name == "Lock")
+            var keyProperties = Points
+                .FirstOrDefault(p => p.Name == LockName)
                 ?.CustomProperties
-                .Strings
-                .GetValueOrDefault("Key")
                 ?? Rects
-                    .FirstOrDefault(r => r.Name == "Lock")
-                    ?.CustomProperties
-                    .Strings
-                    .GetValueOrDefault("Key");
+                    .FirstOrDefault(r => r.Name == LockName)
+                    ?.CustomProperties;
 
-            Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}) Open({isOpen})");
+            key = keyProperties
+                ?.Strings
+                .GetValueOrDefault(KeyProperty);
+
+            consumesKey = keyProperties?.Bools.GetValueOrDefault(ConsumesKeyProperty) ?? false;
+
+            Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen})");
         }
 
 
