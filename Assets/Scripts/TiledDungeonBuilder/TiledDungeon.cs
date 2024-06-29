@@ -108,6 +108,8 @@ namespace TiledDungeon
         void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, List<TiledObjectLayer> objectLayers, bool topLayer)
         {
             var layerSize = layer.LayerSize;
+            Func<Vector2Int, Vector2Int> inverseCoordinates = (Vector2Int v) => { return new Vector2Int(v.x, layerSize.y - v.y - 1); };
+
             for (int row = 0; row < layerSize.y; row++)
             {
                 for (int col = 0; col < layerSize.x; col++)
@@ -136,16 +138,24 @@ namespace TiledDungeon
                             if (tile == null) return null;
 
                             Debug.Log($"Modification for {coordinates} {tile.Type}");
-                            return new TileModification() { Layer = modLayer.Name, LayerProperties = modLayer.CustomProperties, Tile = tile };
+                            return new TileModification() { 
+                                Layer = modLayer.Name, 
+                                LayerProperties = modLayer.CustomProperties, 
+                                Tile = tile 
+                            };
                         })
                         .Where(tm => tm != null)
                         .ToArray();
 
-                    var tileRect = coordinates.To2DInXZPlane().ToUnitRect();
+                    
+                    var tileRect = inverseCoordinates(coordinates.To2DInXZPlane())
+                        .ToUnitRect();
+
                     var points = objectLayers
                         .SelectMany(l => l.Points)
                         .Where(p => p.Applies(tileRect))
                         .ToArray();
+
                     var rects = objectLayers
                         .SelectMany(l => l.Rects)
                         .Where(r => r.Applies(tileRect))

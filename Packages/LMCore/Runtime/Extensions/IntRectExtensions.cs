@@ -11,7 +11,7 @@ namespace LMCore.Extensions
 
         public static bool Contains(this RectInt rect, Rect other) => rect.Contains(other.min.FloorToInt()) && rect.Contains(other.max.CeilToInt());
 
-        public static bool Contains(this RectInt rect, Vector2 point) => rect.Contains(point.CeilToInt()) && rect.Contains(point.FloorToInt());
+        public static bool Contains(this RectInt rect, Vector2 point) => new Rect(rect.min, rect.size).Contains(point);
         
         public static int Area(this RectInt rect) => rect.width * rect.height;
 

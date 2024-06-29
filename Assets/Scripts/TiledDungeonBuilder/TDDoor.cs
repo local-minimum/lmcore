@@ -116,6 +116,13 @@ namespace TiledDungeon
             // Debug.Log($"onTheMove({onTheMove}) validPosition({validPosition}) {Position} vs {entity.Position}");
             if (!onTheMove && validPosition)
             {
+                Debug.Log("Attempting to open door");
+
+                if (isLocked)
+                {
+                    Debug.LogWarning($"Door requires key ({key})");
+                    return;
+                }
                 Interact();
             }
         }
