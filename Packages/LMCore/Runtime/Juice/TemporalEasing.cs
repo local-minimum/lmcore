@@ -25,24 +25,6 @@ namespace LMCore.Juice
         float progressEnd;
         float duration;
 
-        public bool AtEnd
-        {
-            get
-            {
-                var progress = Progress;
-                return (progress == 1 && progressEnd == 1) || (progress == 0 && progressStart == 1);
-            }
-        }
-
-        public bool AtStart
-        {
-            get
-            {
-                var progress = Progress;
-                return (progress == 1 && progressEnd == 0) || (progress == 0 && progressStart == 0);
-            }
-        }
-
         public void EaseStartToEnd()
         {
             if (IsEasing) { return; }
@@ -81,9 +63,9 @@ namespace LMCore.Juice
 
         public T Evaluate()
         {
-            if (!IsEasing) { return StartValue; }
-
             var progress = easing.Evaluate(Progress);
+
+            if (!IsEasing) { return progress == 1 ? EndValue : StartValue; }
 
             var t = typeof(T);
 

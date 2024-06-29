@@ -13,6 +13,9 @@ namespace TiledImporter
 
         public abstract class TObject
         {
+            public int Id;
+            public string Name;
+            
             // TODO: Does not support rotation
 
             /// <summary>
@@ -33,6 +36,9 @@ namespace TiledImporter
 
             public TObject(XElement tiledObject, TiledEnums enums)
             {
+                Id = tiledObject.GetIntAttribute("id");
+                Name = tiledObject.GetAttribute("name");
+
                 CustomProperties = TiledCustomProperties.From(tiledObject.Element("properties"), enums);
             }
 
