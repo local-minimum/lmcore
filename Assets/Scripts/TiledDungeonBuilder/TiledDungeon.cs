@@ -96,14 +96,28 @@ namespace TiledDungeon
             if (_nodes.ContainsKey(coordinates)) return _nodes[coordinates];
 
             var node = Instantiate(Prefab, levelParent);
+            node.Coordinates = coordinates;
 
             _nodes.Add(coordinates, node);
 
             return node;
         }
 
+        public int Size => _nodes.Count;
+
         public Vector3Int AsUnityCoordinates(Vector2Int layerSize, int col, int row, int elevation) =>
             new Vector3Int(col, elevation, layerSize.y - row - 1);
+
+        TiledNodeRoofRule Roofing(TDNode aboveNode, bool topLayer) {
+            if (!inferRoof) return TiledNodeRoofRule.CustomProps;
+
+            if (aboveNode == null)
+            {
+                return topLayer ? TiledNodeRoofRule.ForcedNotSet : TiledNodeRoofRule.ForcedSet;
+            }
+
+            return aboveNode.HasFloor ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet;
+        }
 
         void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, List<TiledObjectLayer> objectLayers, bool topLayer)
         {
@@ -123,9 +137,7 @@ namespace TiledDungeon
 
                     var node = GetOrCreateNode(coordinates);
                     var aboveNode = this[node.Coordinates + Vector3Int.up];
-                    var roofed = inferRoof ? 
-                        ((aboveNode?.HasFloor ?? !topLayer) ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet) 
-                        : TiledNodeRoofRule.CustomProps;
+                    var roofed = Roofing(aboveNode, topLayer);
 
                     var modifications = modifiers
                         .Select(modLayer =>
@@ -137,7 +149,7 @@ namespace TiledDungeon
 
                             if (tile == null) return null;
 
-                            Debug.Log($"Modification for {coordinates} {tile.Type}");
+                            Debug.Log($"Modification for {node.Coordinates} {tile.Type}");
                             return new TileModification() { 
                                 Layer = modLayer.Name, 
                                 LayerProperties = modLayer.CustomProperties, 
@@ -147,7 +159,6 @@ namespace TiledDungeon
                         .Where(tm => tm != null)
                         .ToArray();
 
-                    
                     var tileRect = inverseCoordinates(coordinates.To2DInXZPlane())
                         .ToUnitRect();
 
@@ -162,7 +173,6 @@ namespace TiledDungeon
                         .ToArray();
 
                     node.Configure(
-                        coordinates,
                         tile,
                         roofed,
                         this,

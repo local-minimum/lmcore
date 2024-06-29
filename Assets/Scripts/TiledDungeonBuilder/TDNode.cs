@@ -44,7 +44,11 @@ namespace TiledDungeon
 
         [SerializeField, HideInInspector]
         private Vector3Int _coordinates;
-        public Vector3Int Coordinates => _coordinates;
+        public Vector3Int Coordinates
+        {
+            get => _coordinates;
+            set => _coordinates = value;
+        }
 
         [SerializeField, Tooltip("Name of custom properties class that has boolean fields for Down, Up, North, West, East, South")]
         string SidesClass = "Sides";
@@ -92,6 +96,20 @@ namespace TiledDungeon
 
         string DoorClass = "Door";
 
+        [SerializeField]
+        GameObject ladderN;
+
+        [SerializeField]
+        GameObject ladderW;
+
+        [SerializeField]
+        GameObject ladderS;
+
+        [SerializeField]
+        GameObject ladderE;
+
+        string LadderClass = "Ladder";
+        
         [SerializeField]
         string OrientationClass = "Orientation";
 
@@ -194,8 +212,23 @@ namespace TiledDungeon
             }
         }
 
+        void ConfigureLadders(TileModification[] modifications)
+        {
+            System.Func<string, bool> hasLadder = direction =>
+                modifications.Length > 0 &&
+                modifications.Any(mod => 
+                    mod.Tile.Type == LadderClass 
+                    && mod.Tile.CustomProperties.StringEnums.GetValueOrDefault("Anchor")?.Value == direction
+                );
+
+            
+            ladderN.SetActive(hasLadder("North"));
+            ladderW.SetActive(hasLadder("West"));
+            ladderS.SetActive(hasLadder("South"));
+            ladderE.SetActive(hasLadder("East"));
+        }
+
         public void Configure(
-            Vector3Int coordinates, 
             TiledTile tile, 
             TiledNodeRoofRule roofRule,
             TiledDungeon dungeon,
@@ -204,7 +237,6 @@ namespace TiledDungeon
             TiledObjectLayer.Rect[] rects
         )
         {
-            _coordinates = coordinates;
             this.tile = tile;
             this.modifications = modifications;
             Dungeon = dungeon;
@@ -215,7 +247,7 @@ namespace TiledDungeon
             var sides = tile.CustomProperties.Classes[SidesClass];
             if (sides == null)
             {
-                Debug.LogError($"{tile} as {coordinates} lacks a sides class, can't be used for layouting");
+                Debug.LogError($"{tile} as {Coordinates} lacks a sides class, can't be used for layouting");
             } else
             {
                 floor.SetActive(sides.Bools.GetValueOrDefault("Down"));
@@ -228,12 +260,13 @@ namespace TiledDungeon
                 eastWall.SetActive(sides.Bools.GetValueOrDefault("East"));
             }
 
-            transform.localPosition = coordinates.ToPosition(dungeon.Scale);
-            name = $"TileNode Elevation {coordinates.y} ({coordinates.x}, {coordinates.z})";
+            transform.localPosition = Coordinates.ToPosition(dungeon.Scale);
+            name = $"TileNode Elevation {Coordinates.y} ({Coordinates.x}, {Coordinates.z})";
 
             ConfigureGrates(modifications);
             ConfigureObstructions(modifications);
             ConfigureDoors(modifications);
+            ConfigureLadders(modifications);
         }
 
         private void OnDestroy()
