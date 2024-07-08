@@ -39,10 +39,10 @@ public class TestDirection
     }
 
     [Test]
-    [TestCase(Direction.North, Direction.Up, Direction.West)]
-    [TestCase(Direction.North, Direction.Down, Direction.East)]
-    [TestCase(Direction.West, Direction.North, Direction.Down)]
-    [TestCase(Direction.South, Direction.East, Direction.Up)]
+    [TestCase(Direction.North, Direction.Up, Direction.East)]
+    [TestCase(Direction.North, Direction.Down, Direction.West)]
+    [TestCase(Direction.West, Direction.North, Direction.Up)]
+    [TestCase(Direction.South, Direction.East, Direction.Down)]
     public void TestRotate3DCCW(Direction from, Direction up, Direction to)
     {
         Assert.AreEqual(to, from.Rotate3DCCW(up));
@@ -59,10 +59,10 @@ public class TestDirection
     }
 
     [Test]
-    [TestCase(Direction.North, Direction.Up, Direction.East)]
-    [TestCase(Direction.North, Direction.Down, Direction.West)]
-    [TestCase(Direction.West, Direction.North, Direction.Up)]
-    [TestCase(Direction.South, Direction.East, Direction.Down)]
+    [TestCase(Direction.North, Direction.Up, Direction.West)]
+    [TestCase(Direction.North, Direction.Down, Direction.East)]
+    [TestCase(Direction.West, Direction.North, Direction.Down)]
+    [TestCase(Direction.South, Direction.East, Direction.Up)]
     public void TestRotate3DCW(Direction from, Direction down, Direction to)
     {
         Assert.AreEqual(to, from.Rotate3DCW(down));
@@ -154,8 +154,8 @@ public class TestDirection
     [TestCase(Direction.West, Movement.StrafeLeft, Direction.South)]
     [TestCase(Direction.West, Movement.StrafeRight, Direction.North)]
     // These are not translations
-    [TestCase(Direction.South, Movement.YawCCW, Direction.South)]
-    [TestCase(Direction.East, Movement.YawCW, Direction.East)]
+    [TestCase(Direction.South, Movement.YawCCW, Direction.None)]
+    [TestCase(Direction.East, Movement.YawCW, Direction.None)]
     public void TestRelativeTranslation(Direction direction, Movement movement, Direction expected)
     {
         Assert.AreEqual(expected, direction.RelativeTranslation(movement));

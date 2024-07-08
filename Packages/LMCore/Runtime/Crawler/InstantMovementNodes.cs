@@ -171,7 +171,7 @@ namespace LMCore.Crawler
                     rotationMovements.Add(Movement.YawCW);
                 } else if (!anchor.IsParallell(lookDirection))
                 {
-                    rotationMovements.Add(anchor.IsCWRotation(Direction.Down, lookDirection) ? Movement.YawCW : Movement.YawCCW);
+                    return false;
                 }
 
                 lookDirection = Direction.Up;
