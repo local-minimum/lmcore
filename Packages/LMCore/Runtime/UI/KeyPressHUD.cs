@@ -93,10 +93,10 @@ namespace LMCore.UI
                 case Movement.StrafeRight:
                     return StrafeRight;
 
-                case Movement.TurnCCW:
+                case Movement.YawCCW:
                     return RotateCCW;
 
-                case Movement.TurnCW:
+                case Movement.YawCW:
                     return RotateCW;
 
                 default:

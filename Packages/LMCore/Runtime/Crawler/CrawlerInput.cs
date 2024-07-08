@@ -147,10 +147,10 @@ namespace LMCore.Crawler
             HandleCall(context, Movement.StrafeRight);
 
         public void OnTurnCCW(InputAction.CallbackContext context) =>
-            HandleCall(context, Movement.TurnCCW);
+            HandleCall(context, Movement.YawCCW);
 
         public void OnTurnCW(InputAction.CallbackContext context) =>
-            HandleCall(context, Movement.TurnCW);
+            HandleCall(context, Movement.YawCW);
 
         public void OnInteract(InputAction.CallbackContext context)
         {
@@ -220,8 +220,9 @@ namespace LMCore.Crawler
         }
 
         public void CauseFall(bool clearInput = false)
-        {
+        {            
             EnqueueMovement(Movement.Down);
+            
         }
 
         public void DisableInput(bool clearQueue)
@@ -233,6 +234,13 @@ namespace LMCore.Crawler
         public void EnableInput()
         {
             inputEnabled = true;
+        }
+
+        public void ForceClimb()
+        {
+            // TODO: Handle climbing
+            // Up (Success -> Queue forward or repeat)
+            //    (Fail -> Retrace to wall center?)
         }
     }
 }

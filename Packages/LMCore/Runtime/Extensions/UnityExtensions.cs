@@ -73,5 +73,7 @@ namespace LMCore.Extensions
 
         public static T FindObjectByInterface<T>() =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).First();
+        public static T FindObjectByInterfaceOrDefault<T>() =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).FirstOrDefault();
     }    
 }

@@ -9,6 +9,16 @@ namespace LMCore.Crawler
         Swimming = 2, 
         Walking = 4, 
         Flying = 8, 
-        Teleporting = 16,
+        Climbing = 16,
+        Teleporting = 32,
+    }
+
+    public static class TransportationModeExtensions
+    {
+        public static TransportationMode RemoveFlag(this TransportationMode mode, TransportationMode flag) =>
+            mode & ~flag;
+
+        public static TransportationMode AddFlag(this TransportationMode mode, TransportationMode flag) =>
+            mode | flag;
     }
 }

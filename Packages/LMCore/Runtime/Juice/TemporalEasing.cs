@@ -61,15 +61,17 @@ namespace LMCore.Juice
         private float TimeProgress => Mathf.Clamp01((Time.timeSinceLevelLoad - easeStart) / duration);
         public float Progress => Mathf.Lerp(progressStart, progressEnd, TimeProgress);
 
-        public T Evaluate()
-        {
-            var progress = easing.Evaluate(Progress);
+        public T EvaluateEnd() => Evaluate(1);
 
-            if (!IsEasing) { return progress == 1 ? EndValue : StartValue; }
+        public T Evaluate() => Evaluate(Progress, true);
+
+        public T Evaluate(float p, bool canCompleteEase = false)
+        {
+            var progress = easing.Evaluate(p);
 
             var t = typeof(T);
 
-            if (TimeProgress == 1)
+            if (canCompleteEase && IsEasing && TimeProgress == 1)
             {
                 IsEasing = false;
                 OnEaseComplete?.Invoke(progress == 1);

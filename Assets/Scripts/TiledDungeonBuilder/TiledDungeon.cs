@@ -8,7 +8,7 @@ using System;
 
 namespace TiledDungeon
 {
-    public partial class TiledDungeon : MonoBehaviour, IGridSizeProvider
+    public partial class TiledDungeon : MonoBehaviour, IGridSizeProvider, IDungeon
     {
         [Header("Settings")]
         [SerializeField, Range(0, 10)]
@@ -48,12 +48,21 @@ namespace TiledDungeon
         public float GridSize => scale;
 
         Dictionary<Vector3Int, TDNode> _nodes;
+        Dictionary<Vector3Int, TDNode> nodes
+        {
+            get
+            {
+                if (_nodes == null) SyncNodes();
+                return _nodes;
+            }
+        }
 
         void SyncNodes()
         {
             if (_nodes == null)
+            {
                 _nodes = new Dictionary<Vector3Int, TDNode>();
-
+            }
             var instanced = instancedNodes.ToHashSet();
             var recordedNodes = _nodes.Values.ToHashSet();
 
@@ -74,36 +83,37 @@ namespace TiledDungeon
 
         public void RemoveNode(TDNode node)
         {
-            if (_nodes == null) SyncNodes();
-
-            _nodes.Remove(node.Coordinates);
+            nodes.Remove(node.Coordinates);
         }
 
         TDNode this[Vector3Int coordinates]
         {
             get
             {
-                if (_nodes == null) SyncNodes();
+                return nodes.GetValueOrDefault(coordinates);
+            }
+        }
 
-                return _nodes.GetValueOrDefault(coordinates);
+        IDungeonNode IDungeon.this[Vector3Int coordinates] { 
+            get
+            {
+                return this[coordinates];
             }
         }
 
         TDNode GetOrCreateNode(Vector3Int coordinates)
         {
-            if (_nodes == null) SyncNodes();
-
-            if (_nodes.ContainsKey(coordinates)) return _nodes[coordinates];
+            if (nodes.ContainsKey(coordinates)) return nodes[coordinates];
 
             var node = Instantiate(Prefab, levelParent);
             node.Coordinates = coordinates;
 
-            _nodes.Add(coordinates, node);
+            nodes.Add(coordinates, node);
 
             return node;
         }
 
-        public int Size => _nodes.Count;
+        public int Size => nodes.Count;
 
         public Vector3Int AsUnityCoordinates(Vector2Int layerSize, int col, int row, int elevation) =>
             new Vector3Int(col, elevation, layerSize.y - row - 1);
@@ -253,10 +263,12 @@ namespace TiledDungeon
 
         private void OnEnable()
         {
-           foreach (var mover in Player.Movers)
+            Player.GridSizeProvider = this; 
+            foreach (var mover in Player.Movers)
             {
                 mover.OnMoveEnd += Mover_OnMoveEnd;
                 mover.GridSizeProvider = this;
+                mover.Dungeon = this;
             }
         }
 
@@ -268,16 +280,27 @@ namespace TiledDungeon
             }
         }
 
-        private void Mover_OnMoveEnd(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
+        private void Mover_OnMoveEnd(
+            GridEntity entity, 
+            bool allowed
+        )
         {
-            var node = this[endPosition];
-            if (node == null) {
-                Debug.LogError($"Player is at {endPosition}, which is outside the map");
+            if (entity.transportationMode.HasFlag(TransportationMode.Flying) || entity.transportationMode.HasFlag(TransportationMode.Climbing))
+            {
+                entity.Falling = false;
                 return;
             }
 
-            if (!entity.transportationMode.HasFlag(TransportationMode.Flying) && !node.HasFloor)
+            var node = this[entity.Position];
+            if (node == null) {
+                Debug.LogWarning($"Player is at {entity.Position}, which is outside the map, assuming fall");
+                entity.Falling = true;
+                return;
+            }
+
+            if (!entity.transportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(entity, entity.Anchor))
             {
+                Debug.Log($"{entity.name} is standing in the air @ {entity.Position} Anchor({entity.Anchor}) Looking({entity.LookDirection})");
                 entity.Falling = true;
             } else if (entity.Falling)
             {
@@ -285,5 +308,6 @@ namespace TiledDungeon
             }
         }
 
+        public bool HasNodeAt(Vector3Int coordinates) => nodes.ContainsKey(coordinates);
     }
 }

@@ -3,22 +3,27 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
-    public delegate void EntityMovementEvent(
+    public delegate void EntityMovementStartEvent(
         GridEntity entity, 
         Movement movement, 
-        Vector3Int startPosition, 
-        Direction startDirection, 
         Vector3Int endPosition, 
-        Direction endDirection,
-        bool allowed 
+        Direction endLookDirection, 
+        Direction endAnchor,
+        bool allowed
+    );
+
+    public delegate void EntityMovementEndEvent(
+        GridEntity enity,
+        bool successful
     );
 
     public interface IEntityMover 
     {
-        public event EntityMovementEvent OnMoveStart;
-        public event EntityMovementEvent OnMoveEnd;
+        public event EntityMovementStartEvent OnMoveStart;
+        public event EntityMovementEndEvent OnMoveEnd;
 
         public IGridSizeProvider GridSizeProvider { set; }
+        public IDungeon Dungeon { set; }
         public bool Enabled { get; }
     }
 }

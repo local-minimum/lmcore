@@ -7,8 +7,8 @@
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
         "Automapping",
-        ".",
-        "Rules"
+        "Rules",
+        "."
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -24,13 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
+                9,
                 7
             ],
-            "scale": 1.5,
-            "selectedLayer": 8,
+            "scale": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 503.6666666666667,
-                "y": 279
+                "x": 547,
+                "y": 449.5
             }
         },
         "Mapping.tsx": {

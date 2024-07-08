@@ -213,9 +213,14 @@ namespace LMCore.Extensions
 
         #region Rotations
 
-        public static Quaternion AsQuaternion(this Vector2Int direction) => Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+        public static Quaternion AsQuaternion(this Vector2Int direction) => 
+            Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
 
-        public static Quaternion AsQuaternion(this Vector3Int direction) => Quaternion.LookRotation(new Vector3(direction.x, direction.y, direction.z));
+        public static Quaternion AsQuaternion(this Vector3Int direction) => 
+            Quaternion.LookRotation(new Vector3(direction.x, direction.y, direction.z));
+
+        public static Quaternion AsQuaternion(this Vector3Int direction, Vector3Int down) => 
+            Quaternion.LookRotation(new Vector3(direction.x, direction.y, direction.z), new Vector3(down.x, -down.y, down.z));
 
         public static Vector2Int RotateCCW(this Vector2Int direction) =>
             new Vector2Int(-direction.y, direction.x);

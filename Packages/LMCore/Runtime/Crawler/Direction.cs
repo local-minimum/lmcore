@@ -1,11 +1,15 @@
 using LMCore.Extensions;
 using LMCore.IO;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace LMCore.Crawler
 {
     public enum Direction
-    { North, South, West, East, Up, Down };
+    { North, South, West, East, Up, Down, None };
+
+    public enum DirectionAxis { NorthSouth, WestEast, UpDown };
 
     public static class DirectionExtensions
     {
@@ -80,12 +84,11 @@ namespace LMCore.Crawler
         /// Rotates counter clockwise a direction in 3D space given an up direction
         /// </summary>
         /// <exception cref="System.ArgumentException">If up is on the same axis as direction</exception>
-        public static Direction Rotate3DCCW(this Direction direction, Direction up)
+        public static Direction Rotate3DCCW(this Direction direction, Direction down)
         {
-            if (direction == up) throw new System.ArgumentException("Direction can't be same as up");
-            if (direction.Inverse() == up) throw new System.ArgumentException("Direction can't be inverse of up");
+            if (direction.IsParallell(down)) throw new System.ArgumentException("Direction can't be parallell to down");
 
-            return direction.AsLookVector3D().RotateCCW(up.AsLookVector3D()).AsDirection();
+            return direction.AsLookVector3D().RotateCCW(down.Inverse().AsLookVector3D()).AsDirection();
         }
 
         /// <summary>
@@ -116,15 +119,26 @@ namespace LMCore.Crawler
         }
 
         /// <summary>
-        /// Rotates clockwise a direction in 3D space given an up direction
+        /// Rotates clockwise a direction in 3D space given an down direction
         /// </summary>
         /// <exception cref="System.ArgumentException">If up is on the same axis as direction</exception>
-        public static Direction Rotate3DCW(this Direction direction, Direction up)
+        public static Direction Rotate3DCW(this Direction direction, Direction down)
         {
-            if (direction == up) throw new System.ArgumentException("Direction can't be same as up");
-            if (direction.Inverse() == up) throw new System.ArgumentException("Direction can't be inverse of up");
+            if (direction.IsParallell(down)) throw new System.ArgumentException("Direction can't be parallell to down");
 
-            return direction.AsLookVector3D().RotateCW(up.AsLookVector3D()).AsDirection();
+            return direction.AsLookVector3D().RotateCW(down.Inverse().AsLookVector3D()).AsDirection();
+        }
+
+        public static Direction PitchUp(this Direction lookDirection, Direction down, out Direction newDown)
+        {
+            newDown = lookDirection;
+            return down.Inverse();
+        }
+
+        public static Direction PitchDown(this Direction lookDirection, Direction down, out Direction newDown)
+        {
+            newDown = lookDirection.Inverse();
+            return down;
         }
 
         /// <summary>
@@ -265,27 +279,45 @@ namespace LMCore.Crawler
         /// <summary>
         /// World space rotation considering
         /// </summary>
-        public static Quaternion AsQuaternion(this Direction direction, bool is3DSpace = false) =>
-            is3DSpace ?
-            direction.AsLookVector3D().AsQuaternion() :
-            direction.AsLookVector().AsQuaternion();
+        public static Quaternion AsQuaternion(this Direction direction, Direction down, bool is3DSpace = false) {
+            if (is3DSpace)
+            {
+                return direction.AsLookVector3D().AsQuaternion(down.AsLookVector3D());
+            }
+
+            if (direction.IsParallell(Direction.Up))
+            {
+                return down.AsLookVector().AsQuaternion();
+            }
+
+            return direction.AsLookVector().AsQuaternion();
+        }
 
         /// <summary>
         /// Return resultant direction after application of rotational movements
         ///
         /// Note that translations returns input direction
         /// </summary>
-        public static Direction ApplyRotation(this Direction direction, Movement movement)
+        public static Direction ApplyRotation(this Direction direction, Direction down,  Movement movement, out Direction newDown)
         {
             switch (movement)
             {
-                case Movement.TurnCCW:
-                    return direction.RotateCCW();
+                case Movement.YawCCW:
+                    newDown = down;
+                    return direction.Rotate3DCCW(down);
 
-                case Movement.TurnCW:
-                    return direction.RotateCW();
+                case Movement.YawCW:
+                    newDown = down;
+                    return direction.Rotate3DCW(down);
+
+                case Movement.PitchUp:
+                    return direction.PitchUp(down, out newDown);
+
+                case Movement.PitchDown:
+                    return direction.PitchDown(down, out newDown);
 
                 default:
+                    newDown = down;
                     return direction;
             }
         }
@@ -299,6 +331,8 @@ namespace LMCore.Crawler
         {
             switch (movement)
             {
+                case Movement.Forward:
+                    return direction;
                 case Movement.Backward:
                     return direction.Inverse();
 
@@ -315,8 +349,111 @@ namespace LMCore.Crawler
                     return Direction.Up;
 
                 default:
-                    return direction;
+                    return Direction.None;
             }
+        }
+
+        /// <summary>
+        /// The direction of a movement using the direction as reference point.
+        ///
+        /// Note that rotaions returns input direction
+        /// </summary>
+        public static Direction RelativeTranslation3D(this Direction direction, Direction down, Movement movement)
+        {
+            switch (movement)
+            {
+                case Movement.Forward:
+                    return direction;
+                case Movement.Backward:
+                    return direction.Inverse();
+
+                case Movement.StrafeLeft:
+                    return direction.Rotate3DCCW(down);
+
+                case Movement.StrafeRight:
+                    return direction.Rotate3DCW(down);
+
+                case Movement.Down:
+                    return down; 
+
+                case Movement.Up:
+                    return down.Inverse();
+
+                default:
+                    return Direction.None;
+            }
+        }
+
+        public static DirectionAxis AsAxis(this Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North:
+                case Direction.South:
+                    return DirectionAxis.NorthSouth;
+                case Direction.East:
+                case Direction.West:
+                    return DirectionAxis.WestEast;
+                case Direction.Up:
+                case Direction.Down:
+                    return DirectionAxis.UpDown;
+                default:
+                    throw new System.ArgumentException("Not a real direction");
+            }
+        }
+
+        public static bool IsPlanarCardinal(this Direction direction)
+        {
+            return direction != Direction.Up && direction != Direction.Down;
+        }
+
+        public static bool IsParallell(this Direction down, Direction other) =>
+            down == other || down.Inverse() == other;
+
+        static List<Direction> CWCircleAroundNorth = new List<Direction> { Direction.Up, Direction.East, Direction.Down, Direction.West };
+        static List<Direction> CWCircleAroundWest = new List<Direction> { Direction.Up, Direction.North, Direction.Down, Direction.South };
+        static List<Direction> CWCircleAroundUp = new List<Direction> { Direction.North, Direction.West, Direction.South, Direction.East };
+
+        public static bool IsCWRotation(this Direction forward, Direction down, Direction other)
+        {
+            if (forward.IsParallell(other) || forward.IsParallell(down)) throw new System.ArgumentException(
+                $"Forward {forward}, down {down} and direction {other} does not have a clockwise rotation"
+            );
+
+            switch (forward)
+            {
+                case Direction.North:
+                case Direction.South:
+                    var idxDown = CWCircleAroundNorth.IndexOf(down);
+                    var idxOther = CWCircleAroundNorth.IndexOf(other);
+                    var isCWNorth = idxDown + 1 == idxOther || idxDown == 3 && idxOther == 0;
+                    return forward == Direction.North ? isCWNorth : !isCWNorth;
+                case Direction.West:
+                case Direction.East:
+                    idxDown = CWCircleAroundWest.IndexOf(down);
+                    idxOther = CWCircleAroundWest.IndexOf(other);
+                    var isCWWest = idxDown + 1 == idxOther || idxDown == 3 && idxOther == 0;
+                    return forward == Direction.West ? isCWWest: !isCWWest;
+                case Direction.Up:
+                case Direction.Down:
+                    idxDown = CWCircleAroundUp.IndexOf(down);
+                    idxOther = CWCircleAroundUp.IndexOf(other);
+                    var isCWUp = idxDown + 1 == idxOther || idxDown == 3 && idxOther == 0;
+                    return forward == Direction.West ? isCWUp: !isCWUp;
+            }
+
+            return false;
+        }
+
+        public static Movement RotationMovementFromCubeInsideDirections(this Direction lookDirection, Direction down, Direction movementDirection)
+        {
+            if (lookDirection == movementDirection) return Movement.PitchUp;
+            if (lookDirection == movementDirection.Inverse()) return Movement.PitchDown;
+            if (!down.IsParallell(movementDirection))
+            {
+                return IsCWRotation(lookDirection, down, movementDirection) ? Movement.RollCW : Movement.RollCCW;
+            }
+            return Movement.None;
         }
     }
 }

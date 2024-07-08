@@ -17,7 +17,12 @@ namespace LMCore.Crawler
         public UnityEvent ContinueFall;
         public UnityEvent OnLand;
 
+        public GridEntityType EntityType;
+        public IGridSizeProvider GridSizeProvider { get; set; }
+
         public TransportationMode transportationMode;
+        public Direction Anchor = Direction.Down;
+        public bool RotationRespectsAnchorDirection { get; set; } = false;
 
         private bool falling;
         public bool Falling
@@ -53,6 +58,8 @@ namespace LMCore.Crawler
         }
 
         public IEntityMover ActiveMover => movers.Where(m => m.Enabled).FirstOrDefault();
+        public CrawlerInput Input => GetComponent<CrawlerInput>();
+
         #endregion Movers
 
         /// <summary>
@@ -81,20 +88,55 @@ namespace LMCore.Crawler
             Sync();
         }
 
+        [SerializeField, Range(0, 1)]
+        float wallAnchorOffset = 0.95f;
+
+        [SerializeField, Range(0, 1)]
+        float ceilingAnchorOffset = 0.9f;
+
+        Vector3 AnchorOffset
+        {
+            get
+            {
+                if (Anchor == Direction.Down) return Vector3.zero;
+                if (Anchor.IsPlanarCardinal())
+                {
+                    return wallAnchorOffset * 0.5f * GridSizeProvider.GridSize * Anchor.AsLookVector3D().ToDirection()
+                        + Vector3.up * 0.5f * GridSizeProvider.GridSize;
+
+                }
+
+                return ceilingAnchorOffset * GridSizeProvider.GridSize * Anchor.AsLookVector3D().ToDirection();
+            }
+        }
+
         public void Sync()
         {
-            transform.position = Position.ToPosition();
-            transform.rotation = LookDirection.AsQuaternion();
+            if (GridSizeProvider == null)
+            {
+                Debug.LogError($"{name} have yet to recieve a grid size provider, ignoring sync");
+                return;
+            }
+
+            transform.position = Position.ToPosition(GridSizeProvider.GridSize) + AnchorOffset;
+            transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
         }
 
         public void Translate(Movement movement)
         {
-            Position = LookDirection.RelativeTranslation(movement).Translate(Position);
+            Position = LookDirection.RelativeTranslation3D(Anchor, movement).Translate(Position);
         }
 
         public void Rotate(Movement movement)
         {
-            LookDirection = LookDirection.ApplyRotation(movement);
+            LookDirection = LookDirection.ApplyRotation(Anchor, movement, out Anchor);
+            if (Anchor != Direction.Down)
+            {
+                transportationMode = transportationMode.AddFlag(TransportationMode.Climbing);
+            } else
+            {
+                transportationMode = transportationMode.RemoveFlag(TransportationMode.Climbing);
+            }
         }
 
         public void Interact()

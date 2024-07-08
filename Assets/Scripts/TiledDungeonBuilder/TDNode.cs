@@ -1,3 +1,4 @@
+using LMCore.Crawler;
 using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace TiledDungeon
         ForcedNotSet,
     }
 
-    public class TDNode : MonoBehaviour
+    public class TDNode : MonoBehaviour, ICollisionHandler, IDungeonNode
     {
         [SerializeField, HideInInspector]
         TiledTile tile;
@@ -41,6 +42,8 @@ namespace TiledDungeon
 
             private set { _dungeon = value; }
         }
+
+        IOccupationRules OccupationRules => TDOccupancyRules.instance;
 
         [SerializeField, HideInInspector]
         private Vector3Int _coordinates;
@@ -122,6 +125,7 @@ namespace TiledDungeon
         public bool Flyable => !Obstructed && string.IsNullOrEmpty(FlyableKey) ? true : tile.CustomProperties.StringEnums.GetValueOrDefault(FlyableKey).Value == "Always";
 
         public bool HasFloor => floor != null && floor.activeSelf;
+        public bool HasCeiling => roof != null && roof.activeSelf;
 
         public bool Obstructed { get; set; }
 
@@ -272,6 +276,199 @@ namespace TiledDungeon
         private void OnDestroy()
         {
             Dungeon?.RemoveNode(this);
+        }
+
+        bool HasLadder(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North: return ladderN.activeSelf;
+                case Direction.South: return ladderS.activeSelf;
+                case Direction.West: return ladderW.activeSelf;
+                case Direction.East: return ladderE.activeSelf;
+                default: return false;
+            }
+        }
+
+        bool HasWall(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North: return northWall.activeSelf;
+                case Direction.South: return southWall.activeSelf;
+                case Direction.West: return westWall.activeSelf;
+                case Direction.East: return eastWall.activeSelf;
+                default: return false;
+            }
+        }
+
+        public void Collision(GridEntity entity)
+        {
+            if (!HasLadder(entity.LookDirection)) return;
+
+            entity.Input.ForceClimb();
+            Debug.Log("Need climbing");
+        }
+
+        private MovementOutcome ExitOrFallback(Direction direction, MovementOutcome fallback)
+        {
+            if (direction == Direction.Up)
+            {
+                return HasCeiling ? fallback : MovementOutcome.NodeExit;
+            } else if (direction == Direction.Down)
+            {
+                return HasFloor ? fallback : MovementOutcome.NodeExit;
+            } else
+            {
+                return HasWall(direction) || HasLadder(direction) ? fallback: MovementOutcome.NodeExit;
+            }
+
+        }
+
+        MovementOutcome PlanarOutcome(Direction direction)
+        {
+            if (HasLadder(direction))
+            {
+                return MovementOutcome.NodeInternal;
+            }
+
+            if (HasWall(direction))
+            {
+                return MovementOutcome.Blocked;
+            }
+
+            return MovementOutcome.NodeExit;
+        }
+
+        public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
+        {
+            if (entity.transportationMode.HasFlag(TransportationMode.Flying))
+            {
+                return ExitOrFallback(direction, MovementOutcome.Blocked);
+            }
+
+            if (anchor == Direction.Down)
+            {
+                return PlanarOutcome(direction);
+            } 
+
+            if (anchor == Direction.Up)
+            {
+                return PlanarOutcome(direction.Inverse());
+            }
+
+            if (anchor.IsPlanarCardinal())
+            {
+                if (HasLadder(anchor))
+                {
+                    if (direction == Direction.Up)
+                    {
+                        if (HasCeiling)
+                        {
+                            return CanAnchorOn(entity, Direction.Up) ? MovementOutcome.NodeInternal : MovementOutcome.Blocked;
+                        }
+
+                        return MovementOutcome.NodeExit;
+                    }
+
+                    if (direction == Direction.Down)
+                    {
+                        if (HasFloor)
+                        {
+                            return CanAnchorOn(entity, Direction.Down) ? MovementOutcome.NodeInternal : MovementOutcome.Blocked;
+                        }
+                        return MovementOutcome.NodeExit;
+                    }
+
+                }
+
+                // TODO: Other types of wall actions
+                Debug.LogWarning($"{entity.name} is anchored on {anchor} wall but no implementation of movement {direction} at {Coordinates}");
+                return MovementOutcome.Refused;
+            }
+
+            Debug.LogWarning($"{entity.name} is anchored {anchor} and {Coordinates} doesn't know how to handle that");
+            return MovementOutcome.Refused;
+        }
+
+        public bool HasAnyObstruction() => grateNS.activeSelf || grateWE.activeSelf || obstructionNS.activeSelf || obstructionWE.activeSelf;
+
+        public bool HasBlockingDoor(Direction direction)
+        {
+            var axis = direction.AsAxis();
+
+            if (doorNS.gameObject.activeSelf)
+            {
+                if (axis != DirectionAxis.NorthSouth) return true;
+
+                return doorNS.BlockingPassage;
+            }
+
+            if (doorWE.gameObject.activeSelf)
+            {
+                if (axis != DirectionAxis.WestEast) return true;
+
+                return doorWE.BlockingPassage;
+            }
+
+            return false;
+        }
+
+        public bool AllowsEntryFrom(GridEntity entity, Direction direction)
+        {
+            if (HasWall(direction) || HasLadder(direction)) return false;
+
+            if (HasBlockingDoor(direction)) return false;
+
+            if (HasAnyObstruction()) return false;
+
+            if (_occupants.Count == 0) return true;
+
+            return OccupationRules.MayCoexist(entity, _occupants);
+
+        }
+
+        HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
+
+        public void AddOccupant(GridEntity entity)
+        {
+            OccupationRules.HandleMeeting(entity, _occupants);
+            _occupants.Add(entity);
+        }
+
+        public void RemoveOccupant(GridEntity entity)
+        {
+            _occupants.Remove(entity);
+            OccupationRules.HandleDeparture(entity, _occupants);
+        }
+
+        public bool AllowsRotating(GridEntity entity)
+        {
+            if (entity.Anchor.IsPlanarCardinal())
+            {
+                if (HasLadder(entity.Anchor)) return false;
+
+                Debug.LogWarning($"Unhandled wall situation for {entity.name} as {Coordinates}");
+            }
+            return true;
+        }
+
+        public bool CanAnchorOn(GridEntity entity, Direction anchor)
+        {
+            if (Obstructed) return false;
+
+            if (anchor == Direction.Down) return HasFloor;
+
+            if (anchor.IsPlanarCardinal())
+            {
+                return HasLadder(anchor);
+            }
+
+            Debug.LogWarning(
+                $"Can't allow {entity.name} to anchor on {anchor} @ {Coordinates} because no ladder"
+            );
+
+            return false;
         }
     }   
 }

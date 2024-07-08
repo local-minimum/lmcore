@@ -36,8 +36,8 @@ namespace LMCore.UI
             ApplySetting(Movement.Backward, backward);
             ApplySetting(Movement.StrafeLeft, left);
             ApplySetting(Movement.StrafeRight, right);
-            ApplySetting(Movement.TurnCW, turnCW);
-            ApplySetting(Movement.TurnCCW, turnCCW);
+            ApplySetting(Movement.YawCW, turnCW);
+            ApplySetting(Movement.YawCCW, turnCCW);
         }
     }
 }

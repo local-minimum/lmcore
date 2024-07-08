@@ -2,6 +2,7 @@ using LMCore.Crawler;
 using LMCore.IO;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class TestDirection
 {
@@ -62,9 +63,9 @@ public class TestDirection
     [TestCase(Direction.North, Direction.Down, Direction.West)]
     [TestCase(Direction.West, Direction.North, Direction.Up)]
     [TestCase(Direction.South, Direction.East, Direction.Down)]
-    public void TestRotate3DCW(Direction from, Direction up, Direction to)
+    public void TestRotate3DCW(Direction from, Direction down, Direction to)
     {
-        Assert.AreEqual(to, from.Rotate3DCW(up));
+        Assert.AreEqual(to, from.Rotate3DCW(down));
     }
 
     [Test]
@@ -126,22 +127,25 @@ public class TestDirection
     {
         Assert.AreEqual(
             Quaternion.LookRotation(new Vector3(x, y, z), Vector3.up),
-            direction.AsQuaternion()
+            direction.AsQuaternion(Direction.Down)
         );
     }
 
     [Test]
     // These are not rotations so nothing changes
-    [TestCase(Direction.West, Movement.Backward, Direction.West)]
-    [TestCase(Direction.South, Movement.Forward, Direction.South)]
-    [TestCase(Direction.East, Movement.StrafeRight, Direction.East)]
-    [TestCase(Direction.West, Movement.StrafeLeft, Direction.West)]
+    [TestCase(Direction.West, Movement.Backward, Direction.West, Direction.Down)]
+    [TestCase(Direction.South, Movement.Forward, Direction.South, Direction.Down)]
+    [TestCase(Direction.East, Movement.StrafeRight, Direction.East, Direction.Down)]
+    [TestCase(Direction.West, Movement.StrafeLeft, Direction.West, Direction.Down)]
     // These are rotations
-    [TestCase(Direction.North, Movement.TurnCW, Direction.East)]
-    [TestCase(Direction.North, Movement.TurnCCW, Direction.West)]
-    public void TestApplyRotation(Direction direction, Movement movement, Direction expected)
+    [TestCase(Direction.North, Movement.YawCW, Direction.East, Direction.Down)]
+    [TestCase(Direction.North, Movement.YawCCW, Direction.West, Direction.Down)]
+    [TestCase(Direction.North, Movement.PitchUp, Direction.Up, Direction.North)]
+    [TestCase(Direction.North, Movement.PitchDown, Direction.Down, Direction.South)]
+    public void TestApplyRotation(Direction direction, Movement movement, Direction expected, Direction expectedNewDown)
     {
-        Assert.AreEqual(expected, direction.ApplyRotation(movement));
+        Assert.AreEqual(expected, direction.ApplyRotation(Direction.Down, movement, out Direction newDown));
+        Assert.AreEqual(newDown, expectedNewDown);
     }
 
     [Test]
@@ -150,8 +154,8 @@ public class TestDirection
     [TestCase(Direction.West, Movement.StrafeLeft, Direction.South)]
     [TestCase(Direction.West, Movement.StrafeRight, Direction.North)]
     // These are not translations
-    [TestCase(Direction.South, Movement.TurnCCW, Direction.South)]
-    [TestCase(Direction.East, Movement.TurnCW, Direction.East)]
+    [TestCase(Direction.South, Movement.YawCCW, Direction.South)]
+    [TestCase(Direction.East, Movement.YawCW, Direction.East)]
     public void TestRelativeTranslation(Direction direction, Movement movement, Direction expected)
     {
         Assert.AreEqual(expected, direction.RelativeTranslation(movement));

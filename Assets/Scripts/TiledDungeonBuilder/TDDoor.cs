@@ -46,6 +46,21 @@ namespace TiledDungeon
         string key;
         bool consumesKey;
 
+        public bool BlockingPassage
+        {
+            get
+            {
+                if (!DoorSliding.IsEasing) return !isOpen;
+
+                if (DoorSliding.EvaluateEnd() == 1 && DoorSliding.Evaluate() > 0.25f)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         private void Start()
         {
             SyncDoor();
@@ -90,12 +105,16 @@ namespace TiledDungeon
 
         HashSet<GridEntity> activelyMovingEntities = new();
 
-        private void Mover_OnMoveStart(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
+        private void Mover_OnMoveStart(
+            GridEntity entity, 
+            LMCore.IO.Movement movement, 
+            Vector3Int endPosition, 
+            Direction endLookDirection, Direction endAnchor, bool allowed)
         {
             activelyMovingEntities.Add(entity);
         }
 
-        private void Mover_OnMoveEnd(GridEntity entity, LMCore.IO.Movement movement, Vector3Int startPosition, Direction startDirection, Vector3Int endPosition, Direction endDirection, bool allowed)
+        private void Mover_OnMoveEnd(GridEntity entity,  bool successful)
         {
             activelyMovingEntities.Remove(entity);
         }

@@ -11,6 +11,7 @@ namespace LMCore.Crawler
         public bool Enabled => enabled && gameObject.activeSelf;
 
         public IGridSizeProvider GridSizeProvider { get; set; }
+        public IDungeon Dungeon { get; set; }
 
         [SerializeField, Range(0, 1), Tooltip("Part of tick used for turns, should not be 0")]
         float turnDurationFactor = 1f;
@@ -38,9 +39,13 @@ namespace LMCore.Crawler
         {
             cInput = GetComponent<CrawlerInput>();
             gEntity = GetComponent<GridEntity>();
-            gEntity.Sync();
             GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
             enabled = !GameSettings.InstantMovement.Value;
+
+            if (enabled)
+            {
+                gEntity.Sync();
+            }
         }
 
         private void OnDestroy()
@@ -139,31 +144,36 @@ namespace LMCore.Crawler
             turning = movement.IsRotation();
             animationDuration = turning ? duration * turnDurationFactor : duration;
 
+            var endCoordinates = gEntity.Position;
+            var endLookDirection = gEntity.LookDirection;
+            var endAnchor = gEntity.Anchor;
+
+
             if (turning)
             {
                 activeStartRotation = transform.rotation;
-                activeEndRotation = gEntity.LookDirection.ApplyRotation(movement).AsQuaternion();
+                endLookDirection = gEntity.LookDirection.ApplyRotation(gEntity.Anchor, movement, out endAnchor);
+                activeEndRotation = endLookDirection.AsQuaternion(endAnchor, gEntity.RotationRespectsAnchorDirection);
                 allowedTranslation = true;
             }
             else if (movement != Movement.None)
             {
-                activeStartRotation = gEntity.LookDirection.AsQuaternion();
-                activeEndRotation = gEntity.LookDirection.AsQuaternion();
+                activeStartRotation = gEntity.LookDirection.AsQuaternion(endAnchor, gEntity.RotationRespectsAnchorDirection);
+                activeEndRotation = gEntity.LookDirection.AsQuaternion(endAnchor, gEntity.RotationRespectsAnchorDirection);
                 allowedTranslation = gController.CanMoveTo(movement, GridSizeProvider.GridSize);
                 activeStartPosition = transform.position;
-                activeEndPosition = gEntity.LookDirection
-                    .RelativeTranslation(movement)
-                    .Translate(gEntity.Position)
-                    .ToPosition();
+                endCoordinates = gEntity.LookDirection
+                    .RelativeTranslation3D(gEntity.Anchor, movement)
+                    .Translate(gEntity.Position);
+                activeEndPosition = endCoordinates.ToPosition();
             }
 
             OnMoveStart?.Invoke(
                 gEntity, 
                 Animation, 
-                gEntity.Position, 
-                gEntity.LookDirection,
-                gEntity.LookDirection.RelativeTranslation(Animation).Translate(gEntity.Position),
-                gEntity.LookDirection.ApplyRotation(Animation),
+                endCoordinates,
+                endLookDirection,
+                endAnchor,
                 allowedTranslation
             );
         }
@@ -184,11 +194,6 @@ namespace LMCore.Crawler
 
             OnMoveEnd?.Invoke(
                 gEntity, 
-                Animation, 
-                startPosition,
-                startLookDirection,
-                gEntity.Position,
-                gEntity.LookDirection,
                 allowedTranslation
             );
 
@@ -199,8 +204,8 @@ namespace LMCore.Crawler
         [SerializeField, Range(0, 0.5f)]
         float bounceAtProgress = 0.4f;
 
-        public event EntityMovementEvent OnMoveStart;
-        public event EntityMovementEvent OnMoveEnd;
+        public event EntityMovementStartEvent OnMoveStart;
+        public event EntityMovementEndEvent OnMoveEnd;
 
         void Update()
         {
@@ -227,6 +232,7 @@ namespace LMCore.Crawler
                 transform.position = Vector3.Lerp(activeStartPosition, activeEndPosition, 2 * bounceAtProgress - progress);
             }
         }
+
         public void OnLand()
         {
             WallHitShakeTarget?.Shake();
