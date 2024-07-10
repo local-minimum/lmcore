@@ -4,6 +4,7 @@ using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Events;
+using LMCore.AbstractClasses;
 
 namespace LMCore.Crawler
 {
@@ -20,7 +21,7 @@ namespace LMCore.Crawler
         public GridEntityType EntityType;
         public IGridSizeProvider GridSizeProvider { get; set; }
 
-        public TransportationMode transportationMode;
+        public TransportationMode TransportationMode;
         public Direction Anchor = Direction.Down;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
@@ -46,21 +47,19 @@ namespace LMCore.Crawler
         }
 
         #region Movers
-        List<IEntityMover> movers;
-        public IEnumerable<IEntityMover> Movers { 
-            get { 
-                if (movers == null)
-                {
-                    movers = GetComponents<IEntityMover>().ToList();
-                }
-                return movers; 
-            } 
+        public IEntityMovementInterpreter EntityMovementInterpreter => GetComponent<IEntityMovementInterpreter>();
+
+        public List<IEntityMover> Movers
+        {
+            get
+            {
+                return GetComponents<IEntityMover>().ToList();
+            }
         }
 
-        public IEntityMover ActiveMover => movers.Where(m => m.Enabled).FirstOrDefault();
-        public CrawlerInput Input => GetComponent<CrawlerInput>();
-
         #endregion Movers
+
+        public CrawlerInput Input => GetComponent<CrawlerInput>();
 
         /// <summary>
         /// Using XZ Plane, returns position in 2D
@@ -94,22 +93,27 @@ namespace LMCore.Crawler
         [SerializeField, Range(0, 1)]
         float ceilingAnchorOffset = 0.9f;
 
-        Vector3 AnchorOffset
+        public Vector3  CalculateAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
         {
-            get
+            // TODO: Respect when rotation respects anchor
+            if (rotationRespectsAnchorDirection)
             {
-                // TODO: Respect when rotation respects anchor
-                if (Anchor == Direction.Down) return Vector3.zero;
-                if (Anchor.IsPlanarCardinal())
-                {
-                    return wallAnchorOffset * 0.5f * GridSizeProvider.GridSize * Anchor.AsLookVector3D().ToDirection()
-                        + Vector3.up * 0.5f * GridSizeProvider.GridSize;
-
-                }
-
-                return ceilingAnchorOffset * GridSizeProvider.GridSize * Anchor.AsLookVector3D().ToDirection();
+                Debug.LogWarning("Anchor offset respecting rotation isn't implemented");
             }
+
+            if (anchor == Direction.Down) return Vector3.zero;
+            if (anchor.IsPlanarCardinal())
+            {
+                return wallAnchorOffset * 0.5f * GridSizeProvider.GridSize * anchor.AsLookVector3D().ToDirection()
+                    + Vector3.up * 0.5f * GridSizeProvider.GridSize;
+
+            }
+
+            return ceilingAnchorOffset * GridSizeProvider.GridSize * anchor.AsLookVector3D().ToDirection();
+
         }
+
+        Vector3 AnchorOffset => CalculateAnchorOffset(Anchor, RotationRespectsAnchorDirection);
 
         public void Sync()
         {
@@ -133,10 +137,10 @@ namespace LMCore.Crawler
             LookDirection = LookDirection.ApplyRotation(Anchor, movement, out Anchor);
             if (Anchor != Direction.Down)
             {
-                transportationMode = transportationMode.AddFlag(TransportationMode.Climbing);
+                TransportationMode = TransportationMode.AddFlag(TransportationMode.Climbing);
             } else
             {
-                transportationMode = transportationMode.RemoveFlag(TransportationMode.Climbing);
+                TransportationMode = TransportationMode.RemoveFlag(TransportationMode.Climbing);
             }
         }
 

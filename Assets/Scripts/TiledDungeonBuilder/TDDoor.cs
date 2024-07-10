@@ -103,16 +103,12 @@ namespace TiledDungeon
             Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
         }
 
-        HashSet<GridEntity> activelyMovingEntities = new();
-
-        private void Mover_OnMoveStart(
-            GridEntity entity, 
-            LMCore.IO.Movement movement, 
-            Vector3Int endPosition, 
-            Direction endLookDirection, Direction endAnchor, bool allowed)
+        private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions)
         {
             activelyMovingEntities.Add(entity);
         }
+
+        HashSet<GridEntity> activelyMovingEntities = new();
 
         private void Mover_OnMoveEnd(GridEntity entity,  bool successful)
         {

@@ -342,7 +342,7 @@ namespace TiledDungeon
 
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
-            if (entity.transportationMode.HasFlag(TransportationMode.Flying))
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
             {
                 return ExitOrFallback(direction, MovementOutcome.Blocked);
             }
@@ -457,7 +457,10 @@ namespace TiledDungeon
         {
             if (Obstructed) return false;
 
-            if (anchor == Direction.Down) return HasFloor;
+            if (anchor == Direction.Down) return HasFloor || entity.TransportationMode.HasFlag(TransportationMode.Flying);
+
+            // Can't fly on a walls
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return false;
 
             if (anchor.IsPlanarCardinal())
             {

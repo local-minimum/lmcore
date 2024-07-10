@@ -263,7 +263,10 @@ namespace TiledDungeon
 
         private void OnEnable()
         {
-            Player.GridSizeProvider = this; 
+            Player.GridSizeProvider = this;
+            var movementInterpreter = Player.EntityMovementInterpreter;
+            movementInterpreter.Dungeon = this;
+
             foreach (var mover in Player.Movers)
             {
                 mover.OnMoveEnd += Mover_OnMoveEnd;
@@ -276,7 +279,7 @@ namespace TiledDungeon
         {
            foreach (var mover in Player.Movers)
             {
-                mover.OnMoveEnd += Mover_OnMoveEnd;
+                mover.OnMoveEnd -= Mover_OnMoveEnd;
             }
         }
 
@@ -285,7 +288,7 @@ namespace TiledDungeon
             bool allowed
         )
         {
-            if (entity.transportationMode.HasFlag(TransportationMode.Flying) || entity.transportationMode.HasFlag(TransportationMode.Climbing))
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) || entity.TransportationMode.HasFlag(TransportationMode.Climbing))
             {
                 entity.Falling = false;
                 return;
@@ -298,7 +301,7 @@ namespace TiledDungeon
                 return;
             }
 
-            if (!entity.transportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(entity, entity.Anchor))
+            if (!entity.TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(entity, entity.Anchor))
             {
                 Debug.Log($"{entity.name} is standing in the air @ {entity.Position} Anchor({entity.Anchor}) Looking({entity.LookDirection})");
                 entity.Falling = true;

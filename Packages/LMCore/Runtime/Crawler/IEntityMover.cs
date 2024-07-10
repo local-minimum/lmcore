@@ -1,15 +1,11 @@
-using LMCore.IO;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.Crawler
 {
     public delegate void EntityMovementStartEvent(
         GridEntity entity, 
-        Movement movement, 
-        Vector3Int endPosition, 
-        Direction endLookDirection, 
-        Direction endAnchor,
-        bool allowed
+        List<Vector3Int> positions
     );
 
     public delegate void EntityMovementEndEvent(

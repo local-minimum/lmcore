@@ -6,7 +6,7 @@ using LMCore.Juice;
 
 namespace LMCore.Crawler
 {
-    public class NaiveSmoothMovement : MonoBehaviour, IEntityMover
+    public class NaiveSmoothMovement : MonoBehaviour
     {
         public bool Enabled => enabled && gameObject.activeSelf;
 
@@ -52,7 +52,7 @@ namespace LMCore.Crawler
         {
             GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
 
-            Movers.Deactivate(this);
+            // Movers.Deactivate(this);
         }
 
         private void InstantMovement_OnChange(bool value)
@@ -88,7 +88,7 @@ namespace LMCore.Crawler
 
             gEntity.OnLand.AddListener(OnLand);
 
-            Movers.Activate(this);
+            // Movers.Activate(this);
         }
 
 
@@ -101,7 +101,7 @@ namespace LMCore.Crawler
 
             gEntity.OnLand.RemoveListener(OnLand);
 
-            Movers.Deactivate(this);
+            // Movers.Deactivate(this);
         }
 
         private void ElasticGameClock_OnTickEndAdjustment(int tickId, float unadjustedProgress, float adjustedProgress, float endTime)
@@ -168,6 +168,7 @@ namespace LMCore.Crawler
                 activeEndPosition = endCoordinates.ToPosition();
             }
 
+            /*
             OnMoveStart?.Invoke(
                 gEntity, 
                 Animation, 
@@ -176,6 +177,7 @@ namespace LMCore.Crawler
                 endAnchor,
                 allowedTranslation
             );
+            */
         }
 
         void EndAnimation()
