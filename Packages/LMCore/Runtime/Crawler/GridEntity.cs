@@ -98,6 +98,7 @@ namespace LMCore.Crawler
         {
             get
             {
+                // TODO: Respect when rotation respects anchor
                 if (Anchor == Direction.Down) return Vector3.zero;
                 if (Anchor.IsPlanarCardinal())
                 {
