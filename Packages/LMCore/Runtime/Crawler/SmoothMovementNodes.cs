@@ -7,6 +7,33 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
+    public struct SmoothMovementCheckpoints
+    {
+        public Vector3 Position;
+        public Quaternion Rotation;
+
+        public SmoothMovementCheckpoints(GridEntity entity, EntityState state, float gridSize)
+        {
+            Position = state.Coordinates.ToPosition(gridSize) + 
+                entity.CalculateAnchorOffset(
+                    state.Anchor, 
+                    state.RotationRespectsAnchorDirection);
+
+            Rotation = state.LookDirection.AsQuaternion(
+                state.Anchor,
+                state.RotationRespectsAnchorDirection
+            );
+        }
+
+        public static SmoothMovementCheckpoints Lerp(SmoothMovementCheckpoints from, SmoothMovementCheckpoints to, float progress)
+        {
+            return new SmoothMovementCheckpoints { 
+                Position = Vector3.Lerp(from.Position, to.Position, progress), 
+                Rotation = Quaternion.Lerp(from.Rotation, to.Rotation, progress) 
+            };
+        }
+    }
+
     public class SmoothMovementNodes : MonoBehaviour, IEntityMover
     {
         public event EntityMovementStartEvent OnMoveStart;
@@ -91,7 +118,9 @@ namespace LMCore.Crawler
         float animationInterpolationStart;
         bool onlyTurning;
         bool animating = false;
-        List<EntityState> animationStates;
+        List<SmoothMovementCheckpoints> animationCheckpoints;
+        EntityState animationStart;
+        EntityState animationEnd;
 
         private void ElasticGameClock_OnTickEndAdjustment(int tickId, float unadjustedProgress, float adjustedProgress, float endTime)
         {
@@ -128,24 +157,21 @@ namespace LMCore.Crawler
 
             animating = false;
 
-            if (animationStates == null || animationStates.Count > 0)
+            var synchState = allowedAnimation ? animationEnd : animationStart;
+
+            gEntity.Position = synchState.Coordinates;
+            gEntity.Anchor = synchState.Anchor;
+            gEntity.LookDirection = synchState.LookDirection;
+            gEntity.RotationRespectsAnchorDirection = synchState.RotationRespectsAnchorDirection;
+            gEntity.TransportationMode = synchState.TransportationMode;
+            gEntity.Sync();
+
+            if (animationOutcome == MovementOutcome.Refused)
             {
-                var last = allowedAnimation ? animationStates.Last() : animationStates.First();
-                gEntity.Position = last.Coordinates;
-                gEntity.Anchor = last.Anchor;
-                gEntity.LookDirection = last.LookDirection;
-                gEntity.RotationRespectsAnchorDirection = last.RotationRespectsAnchorDirection;
-                gEntity.TransportationMode = last.TransportationMode;
-                gEntity.Sync();
-            } else if (animationOutcome == MovementOutcome.Refused)
-            {
-                gEntity.Sync();
                 WallHitShakeTarget?.Shake();
 
             }
 
-
-            Debug.Log("Smooth movement");
 
             OnMoveEnd?.Invoke(
                 gEntity, 
@@ -160,13 +186,37 @@ namespace LMCore.Crawler
         {
             if (entity != gEntity) return;
 
+            var completeStates = new List<SmoothMovementCheckpoints>();
+            if (animating)
+            {
+                var progress = AnimationProgress;
+                var fromState = GetAnimationTransition(progress, out var toState, out var partProgres);
+                completeStates.Add(SmoothMovementCheckpoints.Lerp(fromState, toState, partProgres));
+                completeStates.AddRange(
+                    animationCheckpoints.Skip(animationCheckpoints.FindIndex(s => s.Equals(toState)))
+                );
+                completeStates.AddRange(
+                    states.Skip(completeStates.Count > 0 ? 1 : 0).Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
+                );
+
+                EndAnimation();
+            } else
+            {
+                completeStates.AddRange(
+                    states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
+                );
+            }
+
             animationOutcome = outcome;
+            animationCheckpoints = completeStates;
 
-            var first = states.FirstOrDefault();
+            var first = completeStates.FirstOrDefault();
+            onlyTurning = completeStates.All(s => s.Position == first.Position);
 
-            animationStates = states;
-            onlyTurning = states.All(s => s.Coordinates == first.Coordinates);
             animating = true;
+
+            animationStart = states.FirstOrDefault();
+            animationEnd = states.LastOrDefault();
 
             animationStartTime = Time.timeSinceLevelLoad;
             animationInterpolationStart = 0;
@@ -179,9 +229,12 @@ namespace LMCore.Crawler
         bool allowedAnimation => 
             animationOutcome == MovementOutcome.NodeInternal || animationOutcome == MovementOutcome.NodeExit;
 
-        private EntityState GetAnimationTransition(float progress, out EntityState endState)
+        private SmoothMovementCheckpoints GetAnimationTransition(
+            float progress, 
+            out SmoothMovementCheckpoints endState, 
+            out float stateProgress)
         {
-            var n = animationStates.Count;
+            var n = animationCheckpoints.Count;
             var steps = n - 1;
 
             int startIdx = 0;
@@ -190,17 +243,21 @@ namespace LMCore.Crawler
             {
                 var partLength = 1f / steps;
                 startIdx = Mathf.FloorToInt(progress / partLength);
+                stateProgress = Mathf.Clamp01((progress - startIdx * partLength) / partLength);
                 // Debug.Log($"n {n} steps {steps} partLength {partLength} start {startIdx} progress {progress}");
+            } else
+            {
+                stateProgress = progress;
             }
 
             if (startIdx >= steps)
             {
-                endState = animationStates[steps + 1];
-                return animationStates[steps];
+                endState = animationCheckpoints[steps + 1];
+                return animationCheckpoints[steps];
             }
 
-            endState = animationStates[startIdx + 1];
-            return animationStates[startIdx];
+            endState = animationCheckpoints[startIdx + 1];
+            return animationCheckpoints[startIdx];
         }
 
         private void Update()
@@ -223,36 +280,19 @@ namespace LMCore.Crawler
                 return;
             }
         
-            var startState = GetAnimationTransition(progress, out var endState);
             var adjustedProgress = allowedAnimation ? progress : 2 * bounceAtProgress - progress;
+            var startState = GetAnimationTransition(adjustedProgress, out var endState, out var stateProgress);
 
             // Debug.Log($"{adjustedProgress} : {startState} -> {endState}");
 
-            if (
-                (startState.LookDirection != endState.LookDirection)
-                || startState.Anchor != endState.Anchor && (startState.RotationRespectsAnchorDirection || endState.RotationRespectsAnchorDirection)
-             )
+            if (startState.Rotation != endState.Rotation)
             {
-                var startRotation = startState.LookDirection.AsQuaternion(startState.Anchor, startState.RotationRespectsAnchorDirection);
-                var endRotation = endState.LookDirection.AsQuaternion(endState.Anchor, endState.RotationRespectsAnchorDirection);
-                transform.rotation = Quaternion.Lerp(startRotation, endRotation, adjustedProgress);
+                transform.rotation = Quaternion.Lerp(startState.Rotation, endState.Rotation, stateProgress);
             }
 
-            if (startState.Coordinates != endState.Coordinates || startState.Anchor != endState.Anchor)
+            if (startState.Position != endState.Position)
             {
-                // TODO: Lerping should not be diagonally!
-                var startPosition = startState.Coordinates.ToPosition(GridSizeProvider.GridSize) +
-                    gEntity.CalculateAnchorOffset(
-                        startState.Anchor, 
-                        startState.RotationRespectsAnchorDirection
-                    );
-                var endPosition = endState.Coordinates.ToPosition(GridSizeProvider.GridSize) + 
-                    gEntity.CalculateAnchorOffset(
-                        endState.Anchor, 
-                        endState.RotationRespectsAnchorDirection
-                    );
-
-                transform.position = Vector3.Lerp(startPosition, endPosition, adjustedProgress);
+                transform.position = Vector3.Lerp(startState.Position, endState.Position, stateProgress);
             }
 
         }

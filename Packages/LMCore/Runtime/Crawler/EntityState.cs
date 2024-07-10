@@ -56,5 +56,21 @@ namespace LMCore.Crawler
         }
 
         public override string ToString() => $"<{Coordinates} Looking({LookDirection}) Anchor({Anchor}) Respect({RotationRespectsAnchorDirection}) Mode({TransportationMode})>";
+
+        public override bool Equals(object obj)
+        {
+            if (obj != null && obj is not EntityState)
+            {
+                var other = (EntityState)obj;
+
+                return Coordinates == other.Coordinates
+                    && Anchor == other.Anchor
+                    && LookDirection == other.LookDirection
+                    && RotationRespectsAnchorDirection == other.RotationRespectsAnchorDirection
+                    && TransportationMode == other.TransportationMode;
+            }
+
+            return false;
+        }
     }
 }
