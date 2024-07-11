@@ -14,7 +14,7 @@ namespace TiledDungeon
         ForcedNotSet,
     }
 
-    public class TDNode : MonoBehaviour, ICollisionHandler, IDungeonNode
+    public class TDNode : MonoBehaviour, IDungeonNode
     {
         [SerializeField, HideInInspector]
         TiledTile tile;
@@ -300,14 +300,6 @@ namespace TiledDungeon
                 case Direction.East: return eastWall.activeSelf;
                 default: return false;
             }
-        }
-
-        public void Collision(GridEntity entity)
-        {
-            if (!HasLadder(entity.LookDirection)) return;
-
-            entity.Input.ForceClimb();
-            Debug.Log("Need climbing");
         }
 
         private MovementOutcome ExitOrFallback(Direction direction, MovementOutcome fallback)

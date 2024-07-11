@@ -245,12 +245,5 @@ namespace LMCore.Crawler
         {
             inputEnabled = true;
         }
-
-        public void ForceClimb()
-        {
-            // TODO: Handle climbing
-            // Up (Success -> Queue forward or repeat)
-            //    (Fail -> Retrace to wall center?)
-        }
     }
 }

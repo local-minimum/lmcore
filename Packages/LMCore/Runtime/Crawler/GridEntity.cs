@@ -33,9 +33,11 @@ namespace LMCore.Crawler
                 if (value != falling)
                 {
                     if (value) {
+                        Debug.Log($"{name} is falling");
                         OnFall?.Invoke(true);
                     } else
                     {
+                        Debug.Log($"{name} stopped falling");
                         OnLand?.Invoke();
                     }
                 } else if (value)
