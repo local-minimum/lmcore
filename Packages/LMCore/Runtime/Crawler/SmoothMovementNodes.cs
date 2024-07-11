@@ -199,9 +199,25 @@ namespace LMCore.Crawler
 
             animationOutcome = outcome;
             animationCheckpoints.Clear();
-            animationCheckpoints.AddRange(
-                states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
-            );
+            if (outcome == MovementOutcome.NodeInternal && states.Count == 2)
+            {
+                // Tweak node internal transition to go to node side inbetween rather than diagonal
+                var checkpoints = states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize)).ToList();
+                var initialDirection = states.Last().Anchor.AsLookVector3D();
+                var firstCP = checkpoints[0];
+                var lastCP = checkpoints[1];
+                var delta = lastCP.Position - firstCP.Position;
+                delta = new Vector3(delta.x * Mathf.Abs(initialDirection.x), delta.y * Mathf.Abs(initialDirection.y), delta.z * Mathf.Abs(initialDirection.z));
+                var intermediatCP = new SmoothMovementCheckpoints() { Position = firstCP.Position +  delta, Rotation = firstCP.Rotation };
+                animationCheckpoints.Add(firstCP);
+                animationCheckpoints.Add(intermediatCP);
+                animationCheckpoints.Add(lastCP);
+            } else
+            {
+                animationCheckpoints.AddRange(
+                    states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
+                );
+            }
 
             var first = animationCheckpoints.FirstOrDefault();
             onlyTurning = animationCheckpoints.All(s => s.Position == first.Position);
