@@ -90,14 +90,22 @@ namespace LMCore.Crawler
             nextNextMovement = Movement.None;
         }
 
-        void ClearQueue()
+        void ClearQueue(bool includingCurrent = false)
         {
+            if (includingCurrent)
+            {
+                currentMovement = Movement.None;
+            }
             nextMovement = Movement.None;
             nextNextMovement = Movement.None;
         }
 
+        private string QueueInfo => $"Queue {currentMovement} <- {nextMovement} <- {nextNextMovement}";
+
         private HeldButtonInfo GetReplay(bool force = false)
         {
+            if (!inputEnabled) return null;
+
             var candidate = replayStack.LastOrDefault();
 
             // Indication that the stack is empty or not yet passed enough time
@@ -160,7 +168,6 @@ namespace LMCore.Crawler
             }
         }
 
-
         private void OnEnable()
         {
             ElasticGameClock.OnTickEnd += ElasticGameClock_OnTickEnd;
@@ -188,7 +195,7 @@ namespace LMCore.Crawler
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
             ShiftQueue();
-            if (currentMovement == Movement.None)
+            if (currentMovement == Movement.None && inputEnabled)
             {
                 var replay = GetReplay(true);
                 if (replay != null)
@@ -209,15 +216,13 @@ namespace LMCore.Crawler
 
         private void Update()
         {
-            if (!inputEnabled) return;
-
             if (requestTick)
             {
                 ElasticGameClock.instance.RequestTick();
                 requestTick = false;
             }
 
-            if (HasEmptyQueue)
+            if (HasEmptyQueue && inputEnabled)
             {
                 var replay = GetReplay();
                 if (replay != null)
@@ -229,20 +234,32 @@ namespace LMCore.Crawler
             }
         }
 
-        public void CauseFall(bool clearInput = false)
-        {            
+        public void CauseFall(bool clearQueue)
+        {
+            Debug.Log($"{name}: Cause fall, clear queue: {clearQueue}");
+            inputEnabled = false; 
+            if (clearQueue) ClearQueue(true);
             EnqueueMovement(Movement.Down);
-            
+            Debug.Log($"Fall {QueueInfo}");
         }
 
         public void DisableInput(bool clearQueue)
         {
-            if (clearQueue) ClearQueue();
+            Debug.Log($"Disable input, clear queue:{clearQueue}");
             inputEnabled = false;
+            if (clearQueue) ClearQueue();
         }
 
         public void EnableInput()
         {
+            Debug.Log($"Enable input");
+            inputEnabled = true;
+        }
+
+        public void EndFall(bool clearQueue)
+        {
+            Debug.Log($"{name}: End fall, clear queue: {clearQueue}");
+            if (clearQueue) ClearQueue();
             inputEnabled = true;
         }
     }

@@ -102,8 +102,8 @@ namespace LMCore.UI
 
         public void DoInteract(InputAction.CallbackContext context)
         {
-            Debug.Log("Interact");
             if (!Navigational) return;
+            Debug.Log("Interact button clicked");
             Selected?.Click();
         }
 

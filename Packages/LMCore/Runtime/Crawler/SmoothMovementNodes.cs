@@ -117,8 +117,8 @@ namespace LMCore.Crawler
         float animationDuration;
         float animationInterpolationStart;
         bool onlyTurning;
-        bool animating = false;
-        List<SmoothMovementCheckpoints> animationCheckpoints;
+        public bool Animating { get; private set; } = false;
+        List<SmoothMovementCheckpoints> animationCheckpoints = new List<SmoothMovementCheckpoints>();
         EntityState animationStart;
         EntityState animationEnd;
 
@@ -151,11 +151,11 @@ namespace LMCore.Crawler
             }
         }
 
-        void EndAnimation()
+        public void EndAnimation(bool emitEndEvent = true)
         {
-            if (!animating) return;
+            if (!Animating) return;
 
-            animating = false;
+            Animating = false;
 
             var synchState = allowedAnimation ? animationEnd : animationStart;
 
@@ -169,14 +169,15 @@ namespace LMCore.Crawler
             if (animationOutcome == MovementOutcome.Refused)
             {
                 WallHitShakeTarget?.Shake();
-
             }
 
-
-            OnMoveEnd?.Invoke(
-                gEntity, 
-                allowedAnimation
-            );
+            if (emitEndEvent)
+            {
+                OnMoveEnd?.Invoke(
+                    gEntity,
+                    allowedAnimation
+                );
+            }
         }
 
         MovementOutcome animationOutcome;
@@ -186,26 +187,26 @@ namespace LMCore.Crawler
         {
             if (entity != gEntity) return;
 
-            animationTickId = tickId;
-
-            var completeStates = new List<SmoothMovementCheckpoints>();
-            if (animating)
+            if (Animating)
             {
-                Debug.LogWarning($"{name} should not have been animating at this point but were");
+                Debug.LogWarning(
+                    $"{name} should not have been animating at this point but were: Progress({AnimationProgress}) Outcome({animationOutcome})"
+                );
                 EndAnimation();
             }
 
-            completeStates.AddRange(
+            animationTickId = tickId;
+
+            animationOutcome = outcome;
+            animationCheckpoints.Clear();
+            animationCheckpoints.AddRange(
                 states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
             );
 
-            animationOutcome = outcome;
-            animationCheckpoints = completeStates;
+            var first = animationCheckpoints.FirstOrDefault();
+            onlyTurning = animationCheckpoints.All(s => s.Position == first.Position);
 
-            var first = completeStates.FirstOrDefault();
-            onlyTurning = completeStates.All(s => s.Position == first.Position);
-
-            animating = true;
+            Animating = true;
 
             animationStart = states.FirstOrDefault();
             animationEnd = states.LastOrDefault();
@@ -254,7 +255,7 @@ namespace LMCore.Crawler
 
         private void Update()
         {
-            if (!animating) return;
+            if (!Animating) return;
 
             if (animationOutcome == MovementOutcome.Refused)
             {

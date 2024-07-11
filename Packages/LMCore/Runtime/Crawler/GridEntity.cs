@@ -20,17 +20,18 @@ namespace LMCore.Crawler
 
         public GridEntityType EntityType;
         public IGridSizeProvider GridSizeProvider { get; set; }
+        public IDungeon Dungeon { get; set; }
 
         public TransportationMode TransportationMode;
         public Direction Anchor = Direction.Down;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
-        private bool falling;
+        private bool _falling;
         public bool Falling
         {
-            get => falling;
+            get => _falling;
             set {
-                if (value != falling)
+                if (value != _falling)
                 {
                     if (value) {
                         Debug.Log($"{name} is falling");
@@ -42,22 +43,28 @@ namespace LMCore.Crawler
                     }
                 } else if (value)
                 {
-                    ContinueFall?.Invoke();
+                     ContinueFall?.Invoke();
                 }
-                falling = value;
+                _falling = value;
             }
         }
 
         #region Movers
         public IEntityMovementInterpreter EntityMovementInterpreter => GetComponent<IEntityMovementInterpreter>();
 
+        private List<IEntityMover> _movers;
         public List<IEntityMover> Movers
         {
             get
             {
-                return GetComponents<IEntityMover>().ToList();
+                if (_movers == null )
+                {
+                    _movers = GetComponents<IEntityMover>().ToList();
+                }
+                return _movers;
             }
         }
+        public IEntityMover ActiveMover => Movers.Where(m => m.Enabled).FirstOrDefault();
 
         #endregion Movers
 
@@ -78,16 +85,7 @@ namespace LMCore.Crawler
             set => _Position = value;
         }
 
-        [SerializeField]
-        Direction StartLookDirection;
-
         public Direction LookDirection { get; set; }
-
-        private void Start()
-        {
-            LookDirection = StartLookDirection;
-            Sync();
-        }
 
         [SerializeField, Range(0, 1)]
         float wallAnchorOffset = 0.95f;
@@ -127,6 +125,8 @@ namespace LMCore.Crawler
 
             transform.position = Position.ToPosition(GridSizeProvider.GridSize) + AnchorOffset;
             transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
+
+            CheckFall();
         }
 
         public void Translate(Movement movement)
@@ -150,6 +150,33 @@ namespace LMCore.Crawler
         {
             Debug.Log($"I, {name}, am interacting");
             OnInteract?.Invoke(this);
+        }
+
+        public void CheckFall()
+        {
+            if (TransportationMode.HasFlag(TransportationMode.Flying) || TransportationMode.HasFlag(TransportationMode.Climbing))
+            {
+                Debug.Log($"{name} ended its fall due to tranportation mode");
+                Falling = false;
+                return;
+            }
+
+            var node = Dungeon[Position];
+            if (node == null) {
+                Debug.LogWarning($"Player is at {Position}, which is outside the map, assuming fall");
+                Falling = true;
+                return;
+            }
+
+            if (!TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(this, Anchor))
+            {
+                Debug.Log($"{name} is standing in the air @ {Position} Anchor({Anchor}) Looking({LookDirection}) -> fall");
+                Falling = true;
+            } else if (Falling)
+            {
+                Debug.Log($"{name} ended its fall");
+                Falling = false;
+            }
         }
     }
 }

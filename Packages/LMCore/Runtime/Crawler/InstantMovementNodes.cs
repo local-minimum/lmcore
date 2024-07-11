@@ -13,6 +13,8 @@ namespace LMCore.Crawler
 
         public bool Enabled => enabled && gameObject.activeSelf;
 
+        public bool Animating => false;
+
         public event EntityMovementStartEvent OnMoveStart;
         public event EntityMovementEndEvent OnMoveEnd;
 
@@ -97,6 +99,11 @@ namespace LMCore.Crawler
         public void OnLand()
         {
             RefusedMovementShaker?.Shake();
+        }
+
+        public void EndAnimation(bool emitEndEvent = true)
+        {
+            // Do nothing since where never animating
         }
     }
 }

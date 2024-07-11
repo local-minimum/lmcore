@@ -43,6 +43,9 @@ namespace TiledDungeon
         [SerializeField]
         TDNode SpawnTile;
 
+        [SerializeField]
+        Direction StartLookDirection;
+
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
 
         public float GridSize => scale;
@@ -253,6 +256,8 @@ namespace TiledDungeon
         private void Spawn()
         {
             Player.Position = SpawnTile.Coordinates;
+            Player.LookDirection = StartLookDirection;
+            Player.Anchor = Direction.Down;
             Player.Sync();
         }
 
@@ -264,50 +269,14 @@ namespace TiledDungeon
         private void OnEnable()
         {
             Player.GridSizeProvider = this;
+            Player.Dungeon = this;
             var movementInterpreter = Player.EntityMovementInterpreter;
             movementInterpreter.Dungeon = this;
 
             foreach (var mover in Player.Movers)
             {
-                mover.OnMoveEnd += Mover_OnMoveEnd;
                 mover.GridSizeProvider = this;
                 mover.Dungeon = this;
-            }
-        }
-
-        private void OnDisable()
-        {
-           foreach (var mover in Player.Movers)
-            {
-                mover.OnMoveEnd -= Mover_OnMoveEnd;
-            }
-        }
-
-        private void Mover_OnMoveEnd(
-            GridEntity entity, 
-            bool allowed
-        )
-        {
-            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) || entity.TransportationMode.HasFlag(TransportationMode.Climbing))
-            {
-                entity.Falling = false;
-                return;
-            }
-
-            var node = this[entity.Position];
-            if (node == null) {
-                Debug.LogWarning($"Player is at {entity.Position}, which is outside the map, assuming fall");
-                entity.Falling = true;
-                return;
-            }
-
-            if (!entity.TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(entity, entity.Anchor))
-            {
-                Debug.Log($"{entity.name} is standing in the air @ {entity.Position} Anchor({entity.Anchor}) Looking({entity.LookDirection})");
-                entity.Falling = true;
-            } else if (entity.Falling)
-            {
-                entity.Falling = false;
             }
         }
 

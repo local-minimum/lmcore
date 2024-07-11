@@ -22,14 +22,12 @@ namespace LMCore.Crawler
         private void OnEnable()
         {
             cInput.Value.OnMovement += CInput_OnMovement; ;
-            //gEntity.Value.OnLand.AddListener(OnLand);
 
         }
 
         public void OnDisable()
         {
             cInput.Value.OnMovement -= CInput_OnMovement;
-            // gEntity.Value.OnLand.RemoveListener(OnLand);
         }
 
         private void HandleRotation(int tickId, Movement movement, Vector3Int startPosition, float duration)
@@ -161,14 +159,14 @@ namespace LMCore.Crawler
                     var canAnchorOn = targetNode.CanAnchorOn(gEntity, anchor);
                     if (!allowEntry || !canAnchorOn)
                     {
-                        Debug.LogWarning(
+                        Debug.Log(
                             $"Trying to find ladder {position} -> {intermediary} -> {target} facing {anchor}: Allow entry from above ({allowEntry}) or Attaching to that wall ({canAnchorOn})"
                             );
                         return false;
                     }
 
                 } else {
-                    Debug.LogWarning($"Trying to find ladder {position} -> {intermediary} -> {target} facing {anchor}, but there's no node there");
+                    Debug.Log($"Trying to find ladder {position} -> {intermediary} -> {target} facing {anchor}, but there's no node there");
                     return false; 
                 }
 
@@ -199,8 +197,20 @@ namespace LMCore.Crawler
             return false;
         }
 
-        private void CInput_OnMovement(int tickId, IO.Movement movement, float duration)
+        private void CInput_OnMovement(int tickId, Movement movement, float duration)
         {
+            var mover = gEntity.Value.ActiveMover;
+            if (mover?.Animating == true)
+            {
+                Debug.LogWarning("Movement was ongoing need to end it");
+                mover.EndAnimation(true);
+                if (gEntity.Value.Falling && movement != Movement.Down)
+                {
+                    Debug.LogWarning("Overriding movement as fall");
+                    movement = Movement.Down;
+                }
+            }
+
             var startPosition = gEntity.Value.Position;
             var startLookDirection = gEntity.Value.LookDirection;
             var startAnchor = gEntity.Value.Anchor;

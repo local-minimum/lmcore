@@ -21,5 +21,7 @@ namespace LMCore.Crawler
         public IGridSizeProvider GridSizeProvider { set; }
         public IDungeon Dungeon { set; }
         public bool Enabled { get; }
+        public bool Animating { get; }
+        public void EndAnimation(bool emitEndEvent = true);
     }
 }
