@@ -274,8 +274,6 @@ namespace LMCore.Crawler
             var adjustedProgress = allowedAnimation || progress < bounceAtProgress ? progress : 2 * bounceAtProgress - progress;
             var startState = GetAnimationTransition(adjustedProgress, out var endState, out var stateProgress);
 
-            // Debug.Log($"{adjustedProgress} : {startState} -> {endState}");
-
             if (startState.Rotation != endState.Rotation)
             {
                 transform.rotation = Quaternion.Lerp(startState.Rotation, endState.Rotation, stateProgress);
