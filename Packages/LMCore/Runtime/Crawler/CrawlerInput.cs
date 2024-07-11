@@ -183,6 +183,8 @@ namespace LMCore.Crawler
             }
         }
 
+        bool requestTick = false;
+
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
             ShiftQueue();
@@ -197,7 +199,7 @@ namespace LMCore.Crawler
             }
             else
             {
-                ElasticGameClock.instance.RequestTick();
+                requestTick = true;
             }
         }
 
@@ -207,7 +209,15 @@ namespace LMCore.Crawler
 
         private void Update()
         {
-            if (inputEnabled && HasEmptyQueue)
+            if (!inputEnabled) return;
+
+            if (requestTick)
+            {
+                ElasticGameClock.instance.RequestTick();
+                requestTick = false;
+            }
+
+            if (HasEmptyQueue)
             {
                 var replay = GetReplay();
                 if (replay != null)

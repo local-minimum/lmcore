@@ -61,7 +61,7 @@ namespace LMCore.Crawler
             Movers.Deactivate(this);
         }
 
-        private void MovementInterpreter_OnEntityMovement(GridEntity entity, MovementOutcome outcome, List<EntityState> states, float duration)
+        private void MovementInterpreter_OnEntityMovement(int tickId, GridEntity entity, MovementOutcome outcome, List<EntityState> states, float duration)
         {
             if (entity != gEntity) return;
 

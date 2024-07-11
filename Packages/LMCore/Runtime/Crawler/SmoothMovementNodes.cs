@@ -182,30 +182,22 @@ namespace LMCore.Crawler
         MovementOutcome animationOutcome;
 
 
-        private void MovementInterpreter_OnEntityMovement(GridEntity entity, MovementOutcome outcome, List<EntityState> states, float duration)
+        private void MovementInterpreter_OnEntityMovement(int tickId, GridEntity entity, MovementOutcome outcome, List<EntityState> states, float duration)
         {
             if (entity != gEntity) return;
+
+            animationTickId = tickId;
 
             var completeStates = new List<SmoothMovementCheckpoints>();
             if (animating)
             {
-                var progress = AnimationProgress;
-                var fromState = GetAnimationTransition(progress, out var toState, out var partProgres);
-                completeStates.Add(SmoothMovementCheckpoints.Lerp(fromState, toState, partProgres));
-                completeStates.AddRange(
-                    animationCheckpoints.Skip(animationCheckpoints.FindIndex(s => s.Equals(toState)))
-                );
-                completeStates.AddRange(
-                    states.Skip(completeStates.Count > 0 ? 1 : 0).Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
-                );
-
+                Debug.LogWarning($"{name} should not have been animating at this point but were");
                 EndAnimation();
-            } else
-            {
-                completeStates.AddRange(
-                    states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
-                );
             }
+
+            completeStates.AddRange(
+                states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
+            );
 
             animationOutcome = outcome;
             animationCheckpoints = completeStates;
@@ -266,7 +258,6 @@ namespace LMCore.Crawler
 
             if (animationOutcome == MovementOutcome.Refused)
             {
-                Debug.Log("Refused");
                 EndAnimation();
                 return;
             }
@@ -275,12 +266,11 @@ namespace LMCore.Crawler
 
             if (progress == 1)
             {
-                Debug.Log("Completed");
                 EndAnimation();
                 return;
             }
         
-            var adjustedProgress = allowedAnimation ? progress : 2 * bounceAtProgress - progress;
+            var adjustedProgress = allowedAnimation || progress < bounceAtProgress ? progress : 2 * bounceAtProgress - progress;
             var startState = GetAnimationTransition(adjustedProgress, out var endState, out var stateProgress);
 
             // Debug.Log($"{adjustedProgress} : {startState} -> {endState}");

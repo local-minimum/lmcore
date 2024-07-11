@@ -32,11 +32,12 @@ namespace LMCore.Crawler
             // gEntity.Value.OnLand.RemoveListener(OnLand);
         }
 
-        private void HandleRotation(Movement movement, Vector3Int startPosition, float duration)
+        private void HandleRotation(int tickId, Movement movement, Vector3Int startPosition, float duration)
         {
             var endLookDirection = gEntity.Value.LookDirection.ApplyRotation(gEntity.Value.Anchor, movement, out var endAnchor);
 
             OnEntityMovement?.Invoke(
+                tickId,
                 gEntity.Value,
                 MovementOutcome.NodeInternal,
                 new List<EntityState>() {
@@ -46,9 +47,10 @@ namespace LMCore.Crawler
                 duration);
         }
 
-        private void HandleTranslation(Movement movement, Vector3Int target, Direction startLookDirection, float duration)
+        private void HandleTranslation(int tickId, Vector3Int target, Direction startLookDirection, float duration)
         {
             OnEntityMovement?.Invoke(
+                tickId,
                 gEntity.Value,
                 MovementOutcome.NodeExit,
                 new List<EntityState>()
@@ -60,7 +62,7 @@ namespace LMCore.Crawler
             );
         }
 
-        bool HandleSpecialTranslations(Movement movement, Vector3Int intermediary, float duration)
+        bool HandleSpecialTranslations(int tickId, Movement movement, Vector3Int intermediary, float duration)
         {
             // TODO: Allow letting go / walling down and catching wall further down?
 
@@ -106,6 +108,7 @@ namespace LMCore.Crawler
                     Debug.Log($"{gEntity.Value.name}: Exits wall climbing");
 
                     OnEntityMovement?.Invoke(
+                        tickId,
                         gEntity.Value,
                         MovementOutcome.NodeInternal,
                         new List<EntityState>() { 
@@ -172,6 +175,7 @@ namespace LMCore.Crawler
                 Debug.Log($"{gEntity.Value.name}: Enters wall climbing");
 
                 OnEntityMovement?.Invoke(
+                    tickId,
                     gEntity,
                     MovementOutcome.NodeExit,
                     new List<EntityState>()
@@ -214,6 +218,7 @@ namespace LMCore.Crawler
                     if (!node.AllowsRotating(gEntity))
                     {
                         OnEntityMovement?.Invoke(
+                            tickId,
                             gEntity,
                             MovementOutcome.Refused,
                             null,
@@ -224,7 +229,7 @@ namespace LMCore.Crawler
                     }
                 }
 
-                HandleRotation(movement, startPosition, duration);
+                HandleRotation(tickId, movement, startPosition, duration);
                 return;
 
             } else if (movement.IsTranslation())
@@ -232,7 +237,7 @@ namespace LMCore.Crawler
                 var direction = startLookDirection.RelativeTranslation3D(startAnchor, movement);
                 var target = direction.Translate(startPosition);
 
-                if (!HandleSpecialTranslations(movement, target, duration))
+                if (!HandleSpecialTranslations(tickId, movement, target, duration))
                 {
                     if (Dungeon.HasNodeAt(startPosition))
                     {
@@ -242,6 +247,7 @@ namespace LMCore.Crawler
                         if (outcome == MovementOutcome.Refused || outcome == MovementOutcome.Blocked)
                         {
                             OnEntityMovement?.Invoke(
+                                tickId,
                                 gEntity, 
                                 outcome, 
                                 new List<EntityState>() { 
@@ -260,7 +266,7 @@ namespace LMCore.Crawler
                             // Re-interpret movement as a rotation on the inside of a cube
                             movement = startLookDirection.RotationMovementFromCubeInsideDirections(startAnchor, direction);
 
-                            HandleRotation(movement, startPosition, duration);
+                            HandleRotation(tickId, movement, startPosition, duration);
                             return;
 
                         } else if (Dungeon.HasNodeAt(target))
@@ -269,6 +275,7 @@ namespace LMCore.Crawler
                             if (!targetNode.AllowsEntryFrom(gEntity, direction.Inverse()))
                             {
                                 OnEntityMovement?.Invoke(
+                                    tickId,
                                     gEntity,
                                     MovementOutcome.Blocked,
                                     new List<EntityState>()
@@ -284,7 +291,7 @@ namespace LMCore.Crawler
 
                             if (targetNode.CanAnchorOn(gEntity, startAnchor))
                             {
-                                HandleTranslation(movement, target, startLookDirection, duration);
+                                HandleTranslation(tickId, target, startLookDirection, duration);
                                 return;
 
                             }
@@ -292,12 +299,13 @@ namespace LMCore.Crawler
                             if (startAnchor == Direction.Down)
                             {
                                 // TODO: Fix how falling should be handled better
-                                HandleTranslation(movement, target, startLookDirection, duration);
+                                HandleTranslation(tickId, target, startLookDirection, duration);
                                 return;
                             }
 
                             Debug.LogWarning($"Blocked move {movement}, because could not anchor on {startAnchor}");
                             OnEntityMovement?.Invoke(
+                                tickId,
                                 gEntity,
                                 MovementOutcome.Blocked,
                                 new List<EntityState>()
@@ -310,11 +318,11 @@ namespace LMCore.Crawler
                             return;
                         }
 
-                        HandleTranslation(movement, target, startLookDirection, duration);
+                        HandleTranslation(tickId, target, startLookDirection, duration);
                         return;
                     } 
 
-                    HandleTranslation(movement, target, startLookDirection, duration);
+                    HandleTranslation(tickId, target, startLookDirection, duration);
                     return;
 
                 }
