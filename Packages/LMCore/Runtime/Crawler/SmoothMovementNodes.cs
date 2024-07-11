@@ -159,6 +159,11 @@ namespace LMCore.Crawler
 
             var synchState = allowedAnimation ? animationEnd : animationStart;
 
+            if (animationOutcome == MovementOutcome.NodeExit)
+            {
+                Dungeon[gEntity.Position]?.RemoveOccupant(gEntity);
+            }
+
             gEntity.Position = synchState.Coordinates;
             gEntity.Anchor = synchState.Anchor;
             gEntity.LookDirection = synchState.LookDirection;
@@ -166,9 +171,15 @@ namespace LMCore.Crawler
             gEntity.TransportationMode = synchState.TransportationMode;
             gEntity.Sync();
 
+            // This should happen after the sync just to be sure
             if (animationOutcome == MovementOutcome.Refused)
             {
                 WallHitShakeTarget?.Shake();
+            }
+
+            if (animationOutcome == MovementOutcome.NodeExit)
+            {
+                Dungeon[gEntity.Position]?.AddOccupant(gEntity);
             }
 
             if (emitEndEvent)
@@ -230,6 +241,11 @@ namespace LMCore.Crawler
             animationStartTime = Time.timeSinceLevelLoad;
             animationInterpolationStart = 0;
             animationDuration = onlyTurning ? duration * turnDurationFactor : duration;
+
+            if (outcome == MovementOutcome.NodeExit)
+            {
+                Dungeon[animationEnd.Coordinates]?.Reserve(entity);
+            }
         }
 
         float AnimationProgress =>

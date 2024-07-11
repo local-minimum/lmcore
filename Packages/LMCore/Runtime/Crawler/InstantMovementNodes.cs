@@ -80,7 +80,10 @@ namespace LMCore.Crawler
                 states.Select(s => s.Coordinates).ToList()
             );
 
-            Debug.Log("Instant movement");
+            if (outcome == MovementOutcome.NodeExit)
+            {
+                Dungeon[entity.Position]?.RemoveOccupant(entity);
+            }
 
             entity.Position = target.Coordinates;
             entity.Anchor = target.Anchor;
@@ -89,6 +92,10 @@ namespace LMCore.Crawler
             entity.TransportationMode = target.TransportationMode;
 
             entity.Sync();
+
+            if (outcome == MovementOutcome.NodeExit) { 
+                Dungeon[entity.Position]?.AddOccupant(entity);
+            }
 
             OnMoveEnd?.Invoke(
                 entity,

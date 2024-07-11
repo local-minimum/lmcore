@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="15" nextobjectid="10">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="15" nextobjectid="12">
  <tileset firstgid="1" source="Mapping.tsx"/>
- <group id="9" name="Elevation 0" tintcolor="#00aaff">
+ <group id="9" name="Elevation 0" opacity="0.42" tintcolor="#00aaff">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
@@ -100,7 +100,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,62,63,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -126,9 +126,15 @@
     <property name="Elevation" type="int" value="0"/>
     <property name="Imported" type="bool" value="true"/>
    </properties>
+   <object id="10" name="Teleporter" x="495" y="436">
+    <properties>
+     <property name="Wormhole" type="int" value="1"/>
+    </properties>
+    <point/>
+   </object>
   </objectgroup>
  </group>
- <group id="7" name="Elevation 1" opacity="0.3">
+ <group id="7" name="Elevation 1" opacity="0.74">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
@@ -227,7 +233,7 @@
 0,0,0,0,0,0,0,0,99,0,0,101,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,39,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,81,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -263,6 +269,12 @@
    <object id="9" name="Initial" x="368.333" y="274.667">
     <properties>
      <property name="Open" type="bool" value="true"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="11" name="Teleporter" x="463" y="434">
+    <properties>
+     <property name="Wormhole" type="int" value="1"/>
     </properties>
     <point/>
    </object>

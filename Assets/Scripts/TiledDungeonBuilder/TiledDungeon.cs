@@ -281,5 +281,19 @@ namespace TiledDungeon
         }
 
         public bool HasNodeAt(Vector3Int coordinates) => nodes.ContainsKey(coordinates);
+
+        public string TeleporterClass = "Teleporter";
+        public string TeleporterIdProperty = "Wormhole";
+
+        public List<IDungeonNode> FindTeleportersById(int id)
+        {
+            Func<TiledCustomProperties, bool> predicate = (props) => 
+                props.Ints.GetValueOrDefault(TeleporterIdProperty) == id;
+
+            return nodes.Values
+                .Where(n => n.HasObject(TeleporterClass, predicate))
+                .Select(n => (IDungeonNode)n)
+                .ToList();
+        }
     }
 }

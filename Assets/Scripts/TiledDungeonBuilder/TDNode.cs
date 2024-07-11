@@ -111,6 +111,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject ladderE;
 
+        [SerializeField]
+        GameObject teleporter;
+
         string LadderClass = "Ladder";
         
         [SerializeField]
@@ -232,6 +235,27 @@ namespace TiledDungeon
             ladderE.SetActive(hasLadder("East"));
         }
 
+        bool hasActiveTeleporter => teleporter?.activeSelf ?? false;
+
+        [SerializeField, HideInInspector]
+        int teleporterWormholdId;
+
+        void ConfigureTeleporter(TileModification[] modifications)
+        {
+            var hasTeleporter = modifications.Any(m => m.Tile.Type == Dungeon.TeleporterClass);
+        
+            teleporter?.SetActive(hasTeleporter && modifications.Any(m => {
+                var transition = m.Tile.CustomProperties.Transition();
+                return transition == TDEnumTransition.Entry || transition == TDEnumTransition.EntryAndExit;
+            }));
+
+            if (hasTeleporter)
+            {
+                teleporterWormholdId = FirstObjectValue(Dungeon.TeleporterClass, (props) => props == null ? 0 : props.Ints.GetValueOrDefault(Dungeon.TeleporterIdProperty));
+                Debug.Log($"{Coordinates} has teleporter Entry({hasActiveTeleporter}) Id({teleporterWormholdId})");
+            }
+        }
+
         public void Configure(
             TiledTile tile, 
             TiledNodeRoofRule roofRule,
@@ -271,6 +295,7 @@ namespace TiledDungeon
             ConfigureObstructions(modifications);
             ConfigureDoors(modifications);
             ConfigureLadders(modifications);
+            ConfigureTeleporter(modifications);
         }
 
         private void OnDestroy()
@@ -421,11 +446,52 @@ namespace TiledDungeon
         }
 
         HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
+        HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
 
         public void AddOccupant(GridEntity entity)
         {
+            Debug.Log($"Handle {Coordinates} occupancy of {entity.name}");
+
             OccupationRules.HandleMeeting(entity, _occupants);
-            _occupants.Add(entity);
+            _reservations.Remove(entity);
+            if (entity.TransportationMode.HasFlag(TransportationMode.Teleporting))
+            {
+                Debug.Log($"Ignoring teleportation because {entity.name} was already teleporting here");
+                entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Teleporting);
+                _occupants.Add(entity);
+            }
+            else if (hasActiveTeleporter)
+            {
+                var x = Dungeon
+                    .FindTeleportersById(teleporterWormholdId)
+                    .ToList();
+
+                Debug.Log(string.Join(", ", x.Select(x => x.Coordinates)));
+
+                var outlet = x
+                    .FirstOrDefault(n => n.Coordinates != Coordinates);
+
+                if (outlet == null)
+                {
+                    Debug.LogWarning($"{name} teleporter doesn't have a partner in their wormhole {teleporterWormholdId}; ignoring teleportation");
+                    _occupants.Add(entity);
+                } else
+                {
+                    Debug.Log($"Teleporting {entity.name} to {outlet.Coordinates}");
+                    entity.Position = outlet.Coordinates;
+                    entity.Anchor = Direction.Down;
+                    entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
+                    entity.Sync();
+                    outlet.AddOccupant(entity);
+                }
+            } else {
+                _occupants.Add(entity);
+            }
+        }
+
+        public void Reserve(GridEntity entity)
+        {
+            _reservations.Add(entity);
         }
 
         public void RemoveOccupant(GridEntity entity)
@@ -465,5 +531,28 @@ namespace TiledDungeon
 
             return false;
         }
+
+        public T FirstObjectPointValue<T>(string name, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(Points.FirstOrDefault(pt => pt.Name == name).CustomProperties);
+
+        public T FirstObjectRectValue<T>(string name, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(Rects.FirstOrDefault(pt => pt.Name == name).CustomProperties);
+
+        public T FirstObjectValue<T>(string name, System.Func<TiledCustomProperties, T> predicate)
+        {
+            return predicate(
+                Points.FirstOrDefault(pt => pt.Name == name)?.CustomProperties ??
+                    Rects.FirstOrDefault(pt => pt.Name == name)?.CustomProperties
+            );
+        }
+
+        public bool HasObjectPoint(string name, System.Func<TiledCustomProperties, bool> predicate) =>
+            Points.Any(pt => pt.Name == name && predicate(pt.CustomProperties));
+
+        public bool HasObjectRect(string name, System.Func<TiledCustomProperties, bool> predicate) =>
+            Rects.Any(pt => pt.Name == name && predicate(pt.CustomProperties));
+
+        public bool HasObject(string name, System.Func<TiledCustomProperties, bool> predicate) =>
+            HasObjectPoint(name, predicate) || HasObjectRect(name, predicate);
     }   
 }
