@@ -292,7 +292,7 @@ namespace TiledDungeon
         int teleporterWormholdId => 
             FirstObjectValue(
                 Dungeon.TeleporterClass, 
-                (props) => props == null ? 0 : props.Ints.GetValueOrDefault(Dungeon.TeleporterIdProperty)
+                (props) => props == null ? 0 : props.Int(Dungeon.TeleporterIdProperty)
             );
 
         void ConfigureTeleporter(TileModification[] modifications)
@@ -337,14 +337,54 @@ namespace TiledDungeon
                 Debug.LogError($"{tile} as {Coordinates} lacks a sides class, can't be used for layouting");
             } else
             {
-                floor.SetActive(sides.Bools.GetValueOrDefault("Down"));
-                roof.SetActive(
-                    roofRule == TiledNodeRoofRule.CustomProps ? sides.Bools.GetValueOrDefault("Up") : roofRule == TiledNodeRoofRule.ForcedSet
-                );
-                westWall.SetActive(sides.Bools.GetValueOrDefault("West"));
-                southWall.SetActive(sides.Bools.GetValueOrDefault("South"));
-                northWall.SetActive(sides.Bools.GetValueOrDefault("North"));
-                eastWall.SetActive(sides.Bools.GetValueOrDefault("East"));
+                if (sides.Bool("Down"))
+                {
+                    floor.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(floor);
+                    floor = null;
+                }
+                if (roofRule == TiledNodeRoofRule.CustomProps ? sides.Bool("Up") : roofRule == TiledNodeRoofRule.ForcedSet)
+                {
+                    roof.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(roof);
+                    roof = null;
+                }
+                if (sides.Bool("West"))
+                {
+                    westWall.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(westWall);
+                    westWall = null;
+                }
+                if (sides.Bool("South"))
+                {
+                    southWall.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(southWall);
+                    southWall = null;
+                }
+                if (sides.Bool("North"))
+                {
+                    northWall.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(northWall);
+                    northWall = null;
+                }
+                if (sides.Bool("East"))
+                {
+                    eastWall.SetActive(true);
+                } else
+                {
+                    DestroyImmediate(eastWall);
+                    eastWall = null;
+                }
             }
 
             transform.localPosition = Coordinates.ToPosition(dungeon.Scale);

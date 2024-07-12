@@ -20,6 +20,12 @@ namespace TiledImporter
         public SerializableDictionary<string, TiledEnum<string>> StringEnums;
         public SerializableDictionary<string, TiledEnum<int>> IntEnums;
 
+        public string String(string key) => Strings.GetValueOrDefault(key);
+        public int Int(string key) => Ints.GetValueOrDefault(key);
+        public float Float(string key) => Floats.GetValueOrDefault(key);
+        public bool Bool(string key) => Bools.GetValueOrDefault(key);
+        public Color Color(string key) => Colors.GetValueOrDefault(key);
+
         protected static T Parse<T>(XElement property)
         {
             var t = typeof(T);
