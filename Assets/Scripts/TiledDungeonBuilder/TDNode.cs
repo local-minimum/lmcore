@@ -81,9 +81,6 @@ namespace TiledDungeon
         GameObject grateWE;
 
         [SerializeField]
-        string GrateClass = "Grate";
-
-        [SerializeField]
         GameObject obstructionNS;
 
         [SerializeField]
@@ -94,10 +91,6 @@ namespace TiledDungeon
 
         [SerializeField]
         TDDoor doorWE;
-
-        string ObstructionClass = "Obstruction";
-
-        string DoorClass = "Door";
 
         [SerializeField]
         GameObject ladderN;
@@ -113,45 +106,39 @@ namespace TiledDungeon
 
         [SerializeField]
         GameObject teleporter;
-
-        string LadderClass = "Ladder";
         
-        [SerializeField]
-        string OrientationClass = "Orientation";
+        public bool Walkable => 
+            !Obstructed 
+            && tile.CustomProperties.Aspect(TiledConfiguration.instance.WalkabilityKey) == TDEnumAspect.Always;
 
-        [SerializeField]
-        string WalkableKey;
-        public bool Walkable => !Obstructed && string.IsNullOrEmpty(WalkableKey) ? true : tile.CustomProperties.StringEnums.GetValueOrDefault(WalkableKey).Value == "Always";
-
-        [SerializeField]
-        string FlyableKey;
-        public bool Flyable => !Obstructed && string.IsNullOrEmpty(FlyableKey) ? true : tile.CustomProperties.StringEnums.GetValueOrDefault(FlyableKey).Value == "Always";
+        public bool Flyable => 
+            !Obstructed 
+            && tile.CustomProperties.Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
         public bool HasFloor => floor != null && floor.activeSelf;
         public bool HasCeiling => roof != null && roof.activeSelf;
 
-        public bool Obstructed { get; set; }
+        public bool Obstructed => 
+            (grateNS != null && grateNS.activeSelf) || 
+            (grateWE != null && grateWE.activeSelf) || 
+            (obstructionNS != null && obstructionNS.activeSelf) ||
+            (obstructionWE != null && obstructionWE.activeSelf) ||
+            (doorNS != null && doorNS.BlockingPassage) ||
+            (doorWE != null && doorWE.BlockingPassage);
 
         void ConfigureOriented(
             TileModification[] modifications,
             GameObject vertical,
             GameObject horizontal,
-            System.Func<TileModification, bool> modFilter,
-            bool obstructs
+            System.Func<TileModification, bool> modFilter
         )
         {
-            var grates = modifications.Where(modFilter).ToList();
+            var featureMods = modifications.Where(modFilter).ToList();
 
             vertical?.SetActive(false);
             horizontal?.SetActive(false);
 
-            if (grates.Count == 0)
-            {
-                if (obstructs) Obstructed = false;
-                return;
-            }
-
-            if (grates.Where(g => g.Tile.CustomProperties.StringEnums.GetValueOrDefault(OrientationClass).Value == "Vertical").Count() > 0) {
+            if (featureMods.Where(g => g.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey) == TDEnumOrientation.Vertical).Count() > 0) {
                 if (vertical != null)
                 {
                     vertical.SetActive(true);
@@ -162,7 +149,7 @@ namespace TiledDungeon
                 }
             }
 
-            if (grates.Where(g => g.Tile.CustomProperties.StringEnums.GetValueOrDefault(OrientationClass).Value == "Horizontal").Count() > 0) {
+            if (featureMods.Where(g => g.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey) == TDEnumOrientation.Horizontal).Count() > 0) {
                 if (horizontal != null)
                 {
                     horizontal.SetActive(true);
@@ -171,40 +158,74 @@ namespace TiledDungeon
                     Debug.LogWarning($"Tile @ {Coordinates} doesn't support west<->east entity");
                 }
             }
+        }
 
-            if (obstructs) Obstructed = true;
-        } 
-
-        void ConfigureGrates(TileModification[] modifications) =>
+        void ConfigureGrates(TileModification[] modifications)
+        {
             ConfigureOriented(
                 modifications,
                 grateNS,
                 grateWE,
-                mod => mod.Tile.Type == GrateClass,
-                true
+                mod => mod.Tile.Type == TiledConfiguration.instance.GrateClass
             );
 
-        void ConfigureObstructions(TileModification[] modifications) =>
+            if (!grateNS.activeSelf)
+            {
+                DestroyImmediate(grateNS);
+                grateNS = null;
+            }
+
+            if (!grateWE.activeSelf)
+            {
+                DestroyImmediate(grateWE);
+                grateWE = null;
+            }
+        }
+
+        void ConfigureObstructions(TileModification[] modifications)
+        {
             ConfigureOriented(
                 modifications,
                 obstructionNS,
                 obstructionWE,
-                mod => mod.Tile.Type == ObstructionClass,
-                true
+                mod => mod.Tile.Type == TiledConfiguration.instance.ObstructionClass
             );
+
+            if (!obstructionNS.activeSelf)
+            {
+                DestroyImmediate(obstructionNS);
+                obstructionNS = null;
+            }
+            if (!obstructionWE.activeSelf)
+            {
+                DestroyImmediate(obstructionWE);
+                obstructionWE = null;
+            }
+        }
 
         void ConfigureDoors(TileModification[] modifications)
         {
             System.Func<TileModification, bool> filter =
-                mod => mod.Tile.Type == DoorClass;
+                mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
 
             ConfigureOriented(
                 modifications,
                 doorNS.gameObject,
                 doorWE.gameObject,
-                filter,
-                true
+                filter
             );
+
+            if (!doorNS.gameObject.activeSelf)
+            {
+                DestroyImmediate(doorNS.gameObject);
+                doorNS = null;
+            }
+
+            if (!doorWE.gameObject.activeSelf)
+            {
+                DestroyImmediate(doorWE.gameObject);
+                doorWE = null;
+            }
 
             foreach (TDDoor door in new[] { doorNS, doorWE })
             {
@@ -221,24 +242,58 @@ namespace TiledDungeon
 
         void ConfigureLadders(TileModification[] modifications)
         {
-            System.Func<string, bool> hasLadder = direction =>
+            System.Func<TDEnumDirection, bool> hasLadder = direction =>
                 modifications.Length > 0 &&
                 modifications.Any(mod => 
-                    mod.Tile.Type == LadderClass 
-                    && mod.Tile.CustomProperties.StringEnums.GetValueOrDefault("Anchor")?.Value == direction
+                    mod.Tile.Type == TiledConfiguration.instance.LadderClass 
+                    && mod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey) == direction
                 );
 
             
-            ladderN.SetActive(hasLadder("North"));
-            ladderW.SetActive(hasLadder("West"));
-            ladderS.SetActive(hasLadder("South"));
-            ladderE.SetActive(hasLadder("East"));
+            if (hasLadder(TDEnumDirection.North))
+            {
+                ladderN.SetActive(true);
+            } else
+            {
+                DestroyImmediate(ladderN);
+                ladderN = null;
+            }
+
+            if (hasLadder(TDEnumDirection.South))
+            {
+                ladderS.SetActive(true);
+            } else
+            {
+                DestroyImmediate(ladderS);
+                ladderS = null;
+            }
+
+            if (hasLadder(TDEnumDirection.West))
+            {
+                ladderW.SetActive(true);
+            } else
+            {
+                DestroyImmediate(ladderW);
+                ladderW = null;
+            }
+
+            if (hasLadder(TDEnumDirection.East))
+            {
+                ladderE.SetActive(true);
+            } else
+            {
+                DestroyImmediate(ladderE);
+                ladderE = null;
+            }
         }
 
-        bool hasActiveTeleporter => teleporter?.activeSelf ?? false;
+        bool HasActiveTeleporter => teleporter != null && teleporter.activeSelf;
 
-        [SerializeField, HideInInspector]
-        int teleporterWormholdId;
+        int teleporterWormholdId => 
+            FirstObjectValue(
+                Dungeon.TeleporterClass, 
+                (props) => props == null ? 0 : props.Ints.GetValueOrDefault(Dungeon.TeleporterIdProperty)
+            );
 
         void ConfigureTeleporter(TileModification[] modifications)
         {
@@ -251,8 +306,12 @@ namespace TiledDungeon
 
             if (hasTeleporter)
             {
-                teleporterWormholdId = FirstObjectValue(Dungeon.TeleporterClass, (props) => props == null ? 0 : props.Ints.GetValueOrDefault(Dungeon.TeleporterIdProperty));
-                Debug.Log($"{Coordinates} has teleporter Entry({hasActiveTeleporter}) Id({teleporterWormholdId})");
+                Debug.Log($"{Coordinates} has teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})");
+            }
+
+            if (!(teleporter?.activeSelf ?? true)) {
+                DestroyImmediate(teleporter);
+                teleporter = null;
             }
         }
 
@@ -307,10 +366,10 @@ namespace TiledDungeon
         {
             switch (direction)
             {
-                case Direction.North: return ladderN.activeSelf;
-                case Direction.South: return ladderS.activeSelf;
-                case Direction.West: return ladderW.activeSelf;
-                case Direction.East: return ladderE.activeSelf;
+                case Direction.North: return ladderN != null && ladderN.activeSelf;
+                case Direction.South: return ladderS != null && ladderS.activeSelf;
+                case Direction.West: return ladderW != null && ladderW.activeSelf;
+                case Direction.East: return ladderE != null && ladderE.activeSelf;
                 default: return false;
             }
         }
@@ -319,10 +378,10 @@ namespace TiledDungeon
         {
             switch (direction)
             {
-                case Direction.North: return northWall.activeSelf;
-                case Direction.South: return southWall.activeSelf;
-                case Direction.West: return westWall.activeSelf;
-                case Direction.East: return eastWall.activeSelf;
+                case Direction.North: return northWall != null && northWall.activeSelf;
+                case Direction.South: return southWall != null && southWall.activeSelf;
+                case Direction.West: return westWall != null && westWall.activeSelf;
+                case Direction.East: return eastWall != null && eastWall.activeSelf;
                 default: return false;
             }
         }
@@ -408,20 +467,18 @@ namespace TiledDungeon
             return MovementOutcome.Refused;
         }
 
-        public bool HasAnyObstruction() => grateNS.activeSelf || grateWE.activeSelf || obstructionNS.activeSelf || obstructionWE.activeSelf;
-
         public bool HasBlockingDoor(Direction direction)
         {
             var axis = direction.AsAxis();
 
-            if (doorNS.gameObject.activeSelf)
+            if (doorNS?.gameObject.activeSelf ?? false)
             {
                 if (axis != DirectionAxis.NorthSouth) return true;
 
                 return doorNS.BlockingPassage;
             }
 
-            if (doorWE.gameObject.activeSelf)
+            if (doorWE?.gameObject.activeSelf ?? false)
             {
                 if (axis != DirectionAxis.WestEast) return true;
 
@@ -437,7 +494,7 @@ namespace TiledDungeon
 
             if (HasBlockingDoor(direction)) return false;
 
-            if (HasAnyObstruction()) return false;
+            if (Obstructed) return false;
 
             if (_occupants.Count == 0) return true;
 
@@ -460,7 +517,7 @@ namespace TiledDungeon
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Teleporting);
                 _occupants.Add(entity);
             }
-            else if (hasActiveTeleporter)
+            else if (HasActiveTeleporter)
             {
                 var x = Dungeon
                     .FindTeleportersById(teleporterWormholdId)

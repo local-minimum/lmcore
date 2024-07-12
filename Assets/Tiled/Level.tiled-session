@@ -3,12 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "DemoLevel.tmx",
+    "activeFile": "Mapping.tsx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
         "Rules",
-        "Automapping",
-        "."
+        ".",
+        "Automapping"
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -24,14 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
-                9
+                9,
+                7
             ],
             "scale": 1,
             "selectedLayer": 8,
             "viewCenter": {
-                "x": 545,
-                "y": 447.5
+                "x": 544,
+                "y": 446.5
             }
         },
         "Mapping.tsx": {
@@ -68,10 +68,10 @@
     "project": "Level.tiled-project",
     "property.type": "int",
     "recentFiles": [
-        "Mapping.tsx",
-        "Rules/AutomappingDungeons.tmx",
-        "Rules/ModernDungeonAutomapping.tmx",
         "DemoLevel.tmx",
+        "Rules/ModernDungeonAutomapping.tmx",
+        "Rules/AutomappingDungeons.tmx",
+        "Mapping.tsx",
         "Automapping/AutomappingDungeons.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"

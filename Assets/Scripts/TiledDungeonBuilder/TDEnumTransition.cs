@@ -18,6 +18,12 @@ namespace TiledDungeon
     {
         public static TDEnumTransition Transition(this TiledCustomProperties props, string name = "Transition")
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.LogError("Cannot construct a Transition without specifying the enum key");
+                return TDEnumTransition.Unknown;
+            }
+
             if (!props.StringEnums.ContainsKey(name))
             {
                 Debug.LogError($"Attempting to access Transition enum on key {name}, but doesn't exist");
@@ -26,7 +32,7 @@ namespace TiledDungeon
 
             var stringEnum = props.StringEnums[name];
             if (stringEnum.TypeName != "Transition") {
-                Debug.Log($"Attempting to access Transition enum on key {name}, but it is of type {stringEnum.TypeName}");
+                Debug.LogError($"Attempting to access Transition enum on key {name}, but it is of type {stringEnum.TypeName}");
                 return TDEnumTransition.Unknown;
             }
 
@@ -43,6 +49,7 @@ namespace TiledDungeon
                 case "EntryAndExit":
                     return TDEnumTransition.EntryAndExit;
                 default:
+                    Debug.LogError($"'{stringEnum.Value}' is not a known Transition");
                     return TDEnumTransition.Unknown;
             }
         }
