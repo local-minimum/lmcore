@@ -617,7 +617,7 @@ namespace TiledDungeon
                 HandleSpinner(entity);
             }
 
-            if (target == null)
+            if (target == null || target == (IDungeonNode)this)
             {
                 _occupants.Add(entity);
             } else
