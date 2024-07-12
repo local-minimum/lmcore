@@ -1,7 +1,10 @@
+using LMCore.Crawler;
+using LMCore.IO;
 using System.Collections;
 using System.Collections.Generic;
 using TiledImporter;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace TiledDungeon
 {
@@ -46,6 +49,19 @@ namespace TiledDungeon
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Rotation");
                     return TDEnumRotation.Unknown;
+            }
+        }
+
+        public static Movement AsMovement(this TDEnumRotation rotation)
+        {
+            switch (rotation)
+            {
+                case TDEnumRotation.ClockWise:
+                    return Movement.YawCW;
+                case TDEnumRotation.CounterClockWise:
+                    return Movement.YawCCW;
+                default:
+                    return Movement.None;
             }
         }
     }

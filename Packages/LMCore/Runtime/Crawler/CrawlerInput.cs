@@ -67,12 +67,19 @@ namespace LMCore.Crawler
 
         void EnqueueMovement(Movement movement)
         {
+            // TODO: Investigate if we really should both request later if failed and put 
+            // movment on nextMovement with an end adjustment
             if (currentMovement == Movement.None)
             {
                 currentMovement = movement;
-                ElasticGameClock.instance.RequestTick();
+                requestTick = !ElasticGameClock.instance.RequestTick();
+                if (!requestTick)
+                {
+                    return;
+                }
             }
-            else if (nextMovement == Movement.None)
+
+            if (nextMovement == Movement.None)
             {
                 nextMovement = movement;
                 ElasticGameClock.instance.AdjustEndOfTick();
@@ -81,6 +88,12 @@ namespace LMCore.Crawler
             {
                 nextNextMovement = movement;
             }
+        }
+
+        public void InjectMovement(Movement movement)
+        {
+            ClearQueue(true);
+            EnqueueMovement(movement);
         }
 
         void ShiftQueue()
@@ -218,8 +231,7 @@ namespace LMCore.Crawler
         {
             if (requestTick)
             {
-                ElasticGameClock.instance.RequestTick();
-                requestTick = false;
+                requestTick = !ElasticGameClock.instance.RequestTick();
             }
 
             if (HasEmptyQueue && inputEnabled)

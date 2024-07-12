@@ -287,6 +287,11 @@ namespace TiledDungeon
             }
         }
 
+        bool IsSpinner => modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.SpinnerClass);
+
+        bool IsTrap => modifications.Any(m => m.Tile.CustomProperties.Bool(TiledConfiguration.instance.TrapKey));
+
+        bool IsTeleporter => modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
         bool HasActiveTeleporter => teleporter != null && teleporter.activeSelf;
 
         int teleporterWormholdId => 
@@ -545,19 +550,17 @@ namespace TiledDungeon
         HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
         HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
 
-        public void AddOccupant(GridEntity entity)
-        {
-            Debug.Log($"Handle {Coordinates} occupancy of {entity.name}");
 
-            OccupationRules.HandleMeeting(entity, _occupants);
-            _reservations.Remove(entity);
+        IDungeonNode HandleTeleporter(GridEntity entity)
+        {
             if (entity.TransportationMode.HasFlag(TransportationMode.Teleporting))
             {
                 Debug.Log($"Ignoring teleportation because {entity.name} was already teleporting here");
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Teleporting);
-                _occupants.Add(entity);
+                return null;
             }
-            else if (HasActiveTeleporter)
+
+            if (HasActiveTeleporter)
             {
                 var x = Dungeon
                     .FindTeleportersById(teleporterWormholdId)
@@ -571,16 +574,67 @@ namespace TiledDungeon
                 if (outlet == null)
                 {
                     Debug.LogWarning($"{name} teleporter doesn't have a partner in their wormhole {teleporterWormholdId}; ignoring teleportation");
-                    _occupants.Add(entity);
-                } else
-                {
-                    Debug.Log($"Teleporting {entity.name} to {outlet.Coordinates}");
-                    entity.Position = outlet.Coordinates;
-                    entity.Anchor = Direction.Down;
-                    entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
-                    entity.Sync();
-                    outlet.AddOccupant(entity);
+                    return null;
                 }
+
+                Debug.Log($"Teleporting {entity.name} to {outlet.Coordinates}");
+                entity.Position = outlet.Coordinates;
+                entity.Anchor = Direction.Down;
+                entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
+                entity.Sync();
+                return outlet;
+            }
+
+            return this;
+        }
+
+        void HandleSpinner(GridEntity entity)
+        {
+
+            var spinMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.SpinnerClass);
+
+            if (spinMod == null) { return; }
+
+            var movement = spinMod.Tile.CustomProperties.Rotation().AsMovement();
+            if (movement != LMCore.IO.Movement.None)
+            {
+                Debug.Log($"Spinning {entity.name} {movement}");
+                entity.Input.InjectMovement(movement);
+            }
+        }
+
+        void HandleTraps(GridEntity entity)
+        {
+            IDungeonNode target = null;
+
+            if (IsTeleporter)
+            {
+                target = HandleTeleporter(entity);
+            }
+
+            if (entity.Anchor == Direction.Down && IsSpinner)
+            {
+                HandleSpinner(entity);
+            }
+
+            if (target == null)
+            {
+                _occupants.Add(entity);
+            } else
+            {
+                target.AddOccupant(entity);
+            }
+        }
+
+        public void AddOccupant(GridEntity entity)
+        {
+            Debug.Log($"Handle {Coordinates} occupancy of {entity.name}");
+
+            OccupationRules.HandleMeeting(entity, _occupants);
+            _reservations.Remove(entity);
+
+            if (IsTrap) {
+                HandleTraps(entity);
             } else {
                 _occupants.Add(entity);
             }

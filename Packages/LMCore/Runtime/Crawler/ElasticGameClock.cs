@@ -83,7 +83,7 @@ namespace LMCore.Crawler
 
             TickId++;
 
-            OnTickStart.Invoke(TickId, currentTickInitialDuration);
+            OnTickStart?.Invoke(TickId, currentTickInitialDuration);
             return true;
         }
 
