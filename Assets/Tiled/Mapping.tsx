@@ -515,43 +515,48 @@
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
- <tile id="42" type="Ramp Up - Exit S -&gt; N">
+ <tile id="42" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="North"/>
+   <property name="Elevation" propertytype="Elevation" value="Low"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="43" type="Ramp Up - Entry N -&gt; S">
+ <tile id="43" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="South"/>
+   <property name="Elevation" propertytype="Elevation" value="High"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="44" type="Ramp Up - Exit W -&gt; E">
+ <tile id="44" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="West"/>
+   <property name="Elevation" propertytype="Elevation" value="Low"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="45" type="Ramp Up - Mid W -&gt; E">
+ <tile id="45" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="West"/>
+   <property name="Elevation" propertytype="Elevation" value="Middle"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="46" type="Ramp Up - Entry W -&gt; E">
+ <tile id="46" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="West"/>
+   <property name="Elevation" propertytype="Elevation" value="High"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
@@ -633,43 +638,48 @@
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
- <tile id="58" type="Ramp Up - Mid S -&gt; N">
+ <tile id="58" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="North"/>
+   <property name="Elevation" propertytype="Elevation" value="Middle"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="59" type="Ramp Up - Mid N -&gt; S">
+ <tile id="59" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="South"/>
+   <property name="Elevation" propertytype="Elevation" value="Middle"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="60" type="Ramp Up - Entry E -&gt; W">
+ <tile id="60" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="East"/>
+   <property name="Elevation" propertytype="Elevation" value="High"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="61" type="Ramp Up - Mid E -&gt; W">
+ <tile id="61" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="East"/>
+   <property name="Elevation" propertytype="Elevation" value="Middle"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Intermediary"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="62" type="Ramp Up - Exit E -&gt; W">
+ <tile id="62" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="East"/>
+   <property name="Elevation" propertytype="Elevation" value="Low"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
-   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
@@ -733,19 +743,21 @@
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
- <tile id="74" type="Ramp Up - Entry S -&gt; N">
+ <tile id="74" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="North"/>
+   <property name="Elevation" propertytype="Elevation" value="High"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Entry"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="75" type="Ramp Up - Exit N -&gt; S">
+ <tile id="75" type="Ramp">
   <properties>
+   <property name="DownDirection" propertytype="Direction" value="South"/>
+   <property name="Elevation" propertytype="Elevation" value="Low"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
-   <property name="Transition" propertytype="Transition" value="Exit"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>

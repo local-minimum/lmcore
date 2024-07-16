@@ -90,6 +90,18 @@
             "valuesAsFlags": false
         },
         {
+            "id": 9,
+            "name": "Elevation",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "Low",
+                "Middle",
+                "High"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "id": 6,
             "name": "Interaction",
             "storageType": "string",
