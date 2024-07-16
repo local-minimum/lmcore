@@ -104,9 +104,6 @@ namespace TiledDungeon
         [SerializeField]
         GameObject ladderE;
 
-        [SerializeField]
-        GameObject teleporter;
-        
         public bool Walkable => 
             !Obstructed 
             && tile.CustomProperties.Aspect(TiledConfiguration.instance.WalkabilityKey) == TDEnumAspect.Always;
@@ -292,31 +289,33 @@ namespace TiledDungeon
         bool IsTrap => modifications.Any(m => m.Tile.CustomProperties.Bool(TiledConfiguration.instance.TrapKey));
 
         bool IsTeleporter => modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
-        bool HasActiveTeleporter => teleporter != null && teleporter.activeSelf;
+
+        bool HasActiveTeleporter => modifications.Any(m => {
+            if (m.Tile.Type != TiledConfiguration.instance.TeleporterClass) return false;
+            var transition = m.Tile.CustomProperties.Transition();
+
+            return transition == TDEnumTransition.Entry || transition == TDEnumTransition.EntryAndExit;
+        });
 
         int teleporterWormholdId => 
             FirstObjectValue(
-                Dungeon.TeleporterClass, 
-                (props) => props == null ? 0 : props.Int(Dungeon.TeleporterIdProperty)
+                TiledConfiguration.instance.TeleporterClass, 
+                (props) => props == null ? 0 : props.Int(TiledConfiguration.instance.TeleporterIdProperty)
             );
 
-        void ConfigureTeleporter(TileModification[] modifications)
+        void ConfigureTeleporter()
         {
-            var hasTeleporter = modifications.Any(m => m.Tile.Type == Dungeon.TeleporterClass);
-        
-            teleporter?.SetActive(hasTeleporter && modifications.Any(m => {
-                var transition = m.Tile.CustomProperties.Transition();
-                return transition == TDEnumTransition.Entry || transition == TDEnumTransition.EntryAndExit;
-            }));
+            var teleporterMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
 
-            if (hasTeleporter)
+            if (teleporterMod != null)
             {
+                Dungeon.Style.Get(
+                    transform,
+                    TiledConfiguration.instance.TeleporterClass,
+                    teleporterMod.Tile.CustomProperties.Transition()
+                    );
+                
                 Debug.Log($"{Coordinates} has teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})");
-            }
-
-            if (!(teleporter?.activeSelf ?? true)) {
-                DestroyImmediate(teleporter);
-                teleporter = null;
             }
         }
 
@@ -399,7 +398,7 @@ namespace TiledDungeon
             ConfigureObstructions(modifications);
             ConfigureDoors(modifications);
             ConfigureLadders(modifications);
-            ConfigureTeleporter(modifications);
+            ConfigureTeleporter();
         }
 
         private void OnDestroy()

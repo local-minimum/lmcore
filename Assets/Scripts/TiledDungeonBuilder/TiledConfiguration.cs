@@ -28,5 +28,8 @@ namespace TiledDungeon
 
         [Header("Booleans")]
         public string TrapKey = "Trap";
+
+        [Header("Ints")]
+        public string TeleporterIdProperty = "Wormhole";
     }
 }

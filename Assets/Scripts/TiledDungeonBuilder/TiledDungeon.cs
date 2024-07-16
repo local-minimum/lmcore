@@ -46,6 +46,8 @@ namespace TiledDungeon
         [SerializeField]
         Direction StartLookDirection;
 
+        public DungeonStyle Style;
+
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
 
         public float GridSize => scale;
@@ -282,16 +284,14 @@ namespace TiledDungeon
 
         public bool HasNodeAt(Vector3Int coordinates) => nodes.ContainsKey(coordinates);
 
-        public string TeleporterClass = "Teleporter";
-        public string TeleporterIdProperty = "Wormhole";
 
         public List<IDungeonNode> FindTeleportersById(int id)
         {
             Func<TiledCustomProperties, bool> predicate = (props) => 
-                props.Ints.GetValueOrDefault(TeleporterIdProperty) == id;
+                props.Ints.GetValueOrDefault(TiledConfiguration.instance.TeleporterIdProperty) == id;
 
             return nodes.Values
-                .Where(n => n.HasObject(TeleporterClass, predicate))
+                .Where(n => n.HasObject(TiledConfiguration.instance.TeleporterClass , predicate))
                 .Select(n => (IDungeonNode)n)
                 .ToList();
         }
