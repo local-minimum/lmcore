@@ -92,18 +92,6 @@ namespace TiledDungeon
         [SerializeField]
         TDDoor doorWE;
 
-        [SerializeField]
-        GameObject ladderN;
-
-        [SerializeField]
-        GameObject ladderW;
-
-        [SerializeField]
-        GameObject ladderS;
-
-        [SerializeField]
-        GameObject ladderE;
-
         public bool Walkable => 
             !Obstructed 
             && tile.CustomProperties.Aspect(TiledConfiguration.instance.WalkabilityKey) == TDEnumAspect.Always;
@@ -237,50 +225,18 @@ namespace TiledDungeon
             }
         }
 
-        void ConfigureLadders(TileModification[] modifications)
+        void ConfigureLadders()
         {
-            System.Func<TDEnumDirection, bool> hasLadder = direction =>
-                modifications.Length > 0 &&
-                modifications.Any(mod => 
-                    mod.Tile.Type == TiledConfiguration.instance.LadderClass 
-                    && mod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey) == direction
+            foreach (var tdDirection in TDEnumDirectionExtensions.PlanarDirections)
+            {
+                var direction = tdDirection.AsDirection();
+                if (!HasLadder(direction)) continue;
+
+                Dungeon.Style.Get(
+                    transform,
+                    TiledConfiguration.instance.LadderClass,
+                    direction 
                 );
-
-            
-            if (hasLadder(TDEnumDirection.North))
-            {
-                ladderN.SetActive(true);
-            } else
-            {
-                DestroyImmediate(ladderN);
-                ladderN = null;
-            }
-
-            if (hasLadder(TDEnumDirection.South))
-            {
-                ladderS.SetActive(true);
-            } else
-            {
-                DestroyImmediate(ladderS);
-                ladderS = null;
-            }
-
-            if (hasLadder(TDEnumDirection.West))
-            {
-                ladderW.SetActive(true);
-            } else
-            {
-                DestroyImmediate(ladderW);
-                ladderW = null;
-            }
-
-            if (hasLadder(TDEnumDirection.East))
-            {
-                ladderE.SetActive(true);
-            } else
-            {
-                DestroyImmediate(ladderE);
-                ladderE = null;
             }
         }
 
@@ -397,7 +353,7 @@ namespace TiledDungeon
             ConfigureGrates(modifications);
             ConfigureObstructions(modifications);
             ConfigureDoors(modifications);
-            ConfigureLadders(modifications);
+            ConfigureLadders();
             ConfigureTeleporter();
         }
 
@@ -408,14 +364,12 @@ namespace TiledDungeon
 
         bool HasLadder(Direction direction)
         {
-            switch (direction)
-            {
-                case Direction.North: return ladderN != null && ladderN.activeSelf;
-                case Direction.South: return ladderS != null && ladderS.activeSelf;
-                case Direction.West: return ladderW != null && ladderW.activeSelf;
-                case Direction.East: return ladderE != null && ladderE.activeSelf;
-                default: return false;
-            }
+            var tdDirection = TDEnumDirectionExtensions.FromDirection(direction);
+
+            return modifications.Any(mod => 
+                    mod.Tile.Type == TiledConfiguration.instance.LadderClass 
+                    && mod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey) == tdDirection
+                );
         }
 
         bool HasWall(Direction direction)

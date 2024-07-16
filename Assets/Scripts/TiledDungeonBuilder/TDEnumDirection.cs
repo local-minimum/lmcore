@@ -1,3 +1,4 @@
+using LMCore.Crawler;
 using System.Collections;
 using System.Collections.Generic;
 using TiledImporter;
@@ -20,6 +21,57 @@ namespace TiledDungeon
 
     public static class TDEnumDirectionExtensions
     {
+        public static readonly TDEnumDirection[] PlanarDirections = new TDEnumDirection[] { 
+            TDEnumDirection.North,
+            TDEnumDirection.South,
+            TDEnumDirection.West,
+            TDEnumDirection.East,
+        };
+
+        public static Direction AsDirection(this TDEnumDirection direction)
+        {
+            switch (direction)
+            {
+                case TDEnumDirection.North:
+                    return LMCore.Crawler.Direction.North;
+                case TDEnumDirection.South:
+                    return LMCore.Crawler.Direction.South;
+                case TDEnumDirection.West:
+                    return LMCore.Crawler.Direction.West;
+                case TDEnumDirection.East:
+                    return LMCore.Crawler.Direction.East;
+                case TDEnumDirection.Up:
+                    return LMCore.Crawler.Direction.Up;
+                case TDEnumDirection.Down:
+                    return LMCore.Crawler.Direction.Down;
+                default:
+                    return LMCore.Crawler.Direction.None;
+            }
+        }
+
+        public static TDEnumDirection FromDirection(Direction direction)
+        {
+            switch (direction)
+            {
+                case LMCore.Crawler.Direction.South:
+                    return TDEnumDirection.South;
+                case LMCore.Crawler.Direction.West:
+                    return TDEnumDirection.West;
+                case LMCore.Crawler.Direction.East:
+                    return TDEnumDirection.East;
+                case LMCore.Crawler.Direction.North:
+                    return TDEnumDirection.North;
+                case LMCore.Crawler.Direction.Up:
+                    return TDEnumDirection.Up;
+                case LMCore.Crawler.Direction.Down:
+                    return TDEnumDirection.Down;
+                case LMCore.Crawler.Direction.None:
+                    return TDEnumDirection.None;
+                default:
+                    return TDEnumDirection.Unknown;
+            }
+        }
+
         public static TDEnumDirection Direction(this TiledCustomProperties props, string name = "Direction")
         {
             if (string.IsNullOrEmpty(name))
