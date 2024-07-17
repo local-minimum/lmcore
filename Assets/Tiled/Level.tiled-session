@@ -24,14 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
-                9
+                9,
+                7
             ],
             "scale": 1,
             "selectedLayer": 8,
             "viewCenter": {
-                "x": 541,
-                "y": 443.5
+                "x": 540,
+                "y": 442.5
             }
         },
         "Mapping.tsx": {
@@ -42,8 +42,8 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 510.6060606060606,
-                "y": 1533.3333333333333
+                "x": 509.09090909090924,
+                "y": 1528.787878787879
             }
         },
         "Rules/ModernDungeonAutomapping.tmx": {

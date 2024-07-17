@@ -36,7 +36,7 @@ namespace TiledDungeon
         public string TeleporterIdProperty = "Wormhole";
 
         [Header("Strings")]
-        public string KeyKey;
+        public string KeyKey = "Key";
 
         [Header("Classes")]
         [Tooltip("Name of custom properties class that has boolean fields for Down, Up, North, West, East, South")]

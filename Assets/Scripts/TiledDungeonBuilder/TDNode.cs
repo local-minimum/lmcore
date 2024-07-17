@@ -206,6 +206,20 @@ namespace TiledDungeon
             }
         }
 
+        void ConfigureRamps()
+        {
+            var ramp = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
+            if (ramp == null) return;
+
+            Dungeon.Style.Get(
+                transform, 
+                TiledConfiguration.instance.RampClass, 
+                ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey),
+                ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection()
+            );
+
+        }
+
         public void Configure(
             TiledTile tile, 
             TiledNodeRoofRule roofRule,
@@ -234,6 +248,7 @@ namespace TiledDungeon
             ConfigureDoors();
             ConfigureLadders();
             ConfigureTeleporter();
+            ConfigureRamps();
         }
 
         private void OnDestroy()

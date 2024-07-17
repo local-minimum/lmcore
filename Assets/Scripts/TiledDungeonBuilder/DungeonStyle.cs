@@ -126,15 +126,15 @@ namespace TiledDungeon
             return null;
         }
 
-        private GameObject InstantiateRamp(Transform parent, TDEnumLevel elevation)
+        private GameObject InstantiateRamp(Transform parent, TDEnumElevation elevation)
         {
             switch (elevation)
             {
-                case TDEnumLevel.Low:
+                case TDEnumElevation.Low:
                     return LowerRamp == null ? null : Instantiate(LowerRamp, parent);
-                case TDEnumLevel.Middle:
+                case TDEnumElevation.Middle:
                     return MiddleRamp == null ? null : Instantiate(MiddleRamp, parent);
-                case TDEnumLevel.High:
+                case TDEnumElevation.High:
                     return UpperRamp == null ? null : Instantiate(UpperRamp, parent);
             }
 
@@ -142,18 +142,18 @@ namespace TiledDungeon
             return null;
         }
 
-        private GameObject InstantiateRamp(Transform parent, TDEnumLevel elevation, Direction downDirection)
+        private GameObject InstantiateRamp(Transform parent, TDEnumElevation elevation, Direction downDirection)
         {
             var go = InstantiateRamp(parent, elevation);
             if (go == null) return go;
 
             if (downDirection == Direction.North) return go;
 
-            transform.rotation = downDirection.AsQuaternion(Direction.Down);
+            go.transform.rotation = downDirection.Inverse().AsQuaternion(Direction.Down);
             return go;
         }
 
-        public GameObject Get(Transform parent, string classId, TDEnumLevel elevation, Direction direction, string variant = null)
+        public GameObject Get(Transform parent, string classId, TDEnumElevation elevation, Direction direction, string variant = null)
         {
             if (classId == TiledConfiguration.instance.RampClass) return InstantiateRamp(parent, elevation, direction);
            
