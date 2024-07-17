@@ -416,6 +416,7 @@
  <tile id="34" type="Grate">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
@@ -445,6 +446,7 @@
  <tile id="36" type="Obstruction">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>
@@ -504,6 +506,7 @@
  <tile id="40" type="Obstruction">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
     <properties>

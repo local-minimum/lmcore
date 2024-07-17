@@ -25,6 +25,8 @@ namespace TiledDungeon
         public string RotationKey = "Rotation";
         public string ElevationKey = "Elevation";
         public string DownDirectionKey = "DownDirection";
+        public string InteractionKey = "Interaction";
+        public string TransitionKey = "Transition";
 
         [Header("Booleans")]
         public string TrapKey = "Trap";

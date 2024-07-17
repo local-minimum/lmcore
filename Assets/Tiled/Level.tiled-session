@@ -6,9 +6,9 @@
     "activeFile": "Mapping.tsx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        "Automapping",
+        ".",
         "Rules",
-        "."
+        "Automapping"
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -30,8 +30,8 @@
             "scale": 1,
             "selectedLayer": 8,
             "viewCenter": {
-                "x": 542,
-                "y": 444.5
+                "x": 541,
+                "y": 443.5
             }
         },
         "Mapping.tsx": {

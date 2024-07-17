@@ -16,6 +16,14 @@ namespace TiledDungeon
 
     public static class TDEnumTransitionExtensions
     {
+        public static bool HasEntry(this TDEnumTransition transition) =>
+            transition == TDEnumTransition.Entry ||
+            transition == TDEnumTransition.EntryAndExit;
+
+        public static bool HasExit(this TDEnumTransition transition) =>
+            transition == TDEnumTransition.Exit ||
+            transition == TDEnumTransition.EntryAndExit;
+
         public static TDEnumTransition Transition(this TiledCustomProperties props, string name = "Transition")
         {
             if (string.IsNullOrEmpty(name))
