@@ -217,6 +217,7 @@ namespace TiledDungeon
                 return ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) == TDEnumElevation.High;
             }
         }
+        public bool IsRamp => RampModification != null;
 
         void ConfigureRamps()
         {

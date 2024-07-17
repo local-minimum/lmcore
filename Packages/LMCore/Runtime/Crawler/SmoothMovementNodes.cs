@@ -25,6 +25,12 @@ namespace LMCore.Crawler
             );
         }
 
+        public SmoothMovementCheckpoints(SmoothMovementCheckpoints template, Vector3Int offset, float gridSize)
+        {
+            Position = template.Position + offset.ToDirection() * gridSize;
+            Rotation = template.Rotation;
+        }
+
         public static SmoothMovementCheckpoints Lerp(SmoothMovementCheckpoints from, SmoothMovementCheckpoints to, float progress)
         {
             return new SmoothMovementCheckpoints { 
@@ -223,6 +229,16 @@ namespace LMCore.Crawler
                 animationCheckpoints.Add(firstCP);
                 animationCheckpoints.Add(intermediatCP);
                 animationCheckpoints.Add(lastCP);
+            } else if (
+                outcome == MovementOutcome.Blocked && 
+                Dungeon.HasNodeAt(entity.Position) && 
+                Dungeon[entity.Position].IsRamp &&
+                states.Count == 2)
+            {
+                var firstCP = new SmoothMovementCheckpoints(Dungeon, states[0], GridSizeProvider.GridSize);
+
+                animationCheckpoints.Add(firstCP);
+                animationCheckpoints.Add(new SmoothMovementCheckpoints(firstCP, states[1].Coordinates - states[0].Coordinates, GridSizeProvider.GridSize));
             } else
             {
                 animationCheckpoints.AddRange(

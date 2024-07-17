@@ -22,5 +22,6 @@ namespace LMCore.Crawler
         public Vector3Int Neighbour(Direction direction);
 
         public bool IsHighRamp { get; }
+        public bool IsRamp { get; }
     }
 }
