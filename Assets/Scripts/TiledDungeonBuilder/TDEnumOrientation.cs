@@ -1,3 +1,4 @@
+using LMCore.Crawler;
 using System.Collections;
 using System.Collections.Generic;
 using TiledImporter;
@@ -15,6 +16,19 @@ namespace TiledDungeon
 
     public static class TDEnumOrientationExtensions
     {
+        public static DirectionAxis AsAxis(this TDEnumOrientation orientation)
+        {
+            switch (orientation)
+            {
+                case TDEnumOrientation.Vertical:
+                    return DirectionAxis.NorthSouth;
+                case TDEnumOrientation.Horizontal:
+                    return DirectionAxis.WestEast;
+                default:
+                    return DirectionAxis.None;
+            }
+        }
+
         public static TDEnumOrientation Orientation(this TiledCustomProperties props, string name = "Orientation")
         {
 

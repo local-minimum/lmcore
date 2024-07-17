@@ -9,10 +9,14 @@ namespace LMCore.Crawler
     public enum Direction
     { North, South, West, East, Up, Down, None };
 
-    public enum DirectionAxis { NorthSouth, WestEast, UpDown };
+    public enum DirectionAxis { NorthSouth, WestEast, UpDown, None };
 
     public static class DirectionExtensions
     {
+        public static Direction[] AllDirections = new Direction[] { 
+            Direction.North, Direction.South, Direction.West, Direction.East, Direction.Up, Direction.Down
+        };
+
         #region Making Directions
 
         /// <summary>

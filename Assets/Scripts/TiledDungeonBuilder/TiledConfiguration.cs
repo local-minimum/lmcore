@@ -30,8 +30,20 @@ namespace TiledDungeon
 
         [Header("Booleans")]
         public string TrapKey = "Trap";
+        public string ConusumesKeyKey = "ConsumesKey";
 
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";
+
+        [Header("Strings")]
+        public string KeyKey;
+
+        [Header("Classes")]
+        [Tooltip("Name of custom properties class that has boolean fields for Down, Up, North, West, East, South")]
+        public string SidesClassKey = "Sides";
+
+        [Header("Object Layer Items")]
+        public string LockItem = "Lock";
+
     }
 }

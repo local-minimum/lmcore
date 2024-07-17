@@ -10,10 +10,6 @@ namespace TiledDungeon
     // TODO: Use configuration to present lock and button
     public class TDDoor : MonoBehaviour
     {
-        static string LockName = "Lock";
-        static string KeyProperty = "Key";
-        static string ConsumesKeyProperty = "ConsumesKey";
-
         [SerializeField]
         Transform Door;
 
@@ -44,6 +40,7 @@ namespace TiledDungeon
         bool isLocked;
 
         string key;
+
         bool consumesKey;
 
         public bool BlockingPassage
@@ -61,12 +58,32 @@ namespace TiledDungeon
             }
         }
 
+        public DirectionAxis Axis
+        {
+            get
+            {
+                var mod = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass);
+                if (mod == null) return DirectionAxis.None;
+
+                return mod
+                    .Tile
+                    .CustomProperties
+                    .Orientation(TiledConfiguration.instance.OrientationKey)
+                    .AsAxis();
+            }
+        }
+
         private void Start()
         {
             SyncDoor();
         }
 
-        public void Configure(Vector3Int position, TileModification[] modifications, TiledObjectLayer.Point[] points, TiledObjectLayer.Rect[] rects)
+        public void Configure(
+            Vector3Int position, 
+            TileModification[] modifications, 
+            TiledObjectLayer.Point[] points, 
+            TiledObjectLayer.Rect[] rects
+        )
         {
             Position = position;
             this.modifications = modifications;
@@ -139,17 +156,17 @@ namespace TiledDungeon
                 {
                     var keyHolder = entity
                         .GetComponentsInChildren<IInventory>()
-                        .FirstOrDefault(i => i.HasItem(KeyProperty, key));
+                        .FirstOrDefault(i => i.HasItem(TiledConfiguration.instance.KeyKey, key));
 
                     if (keyHolder == null)
                     {
-                        Debug.LogWarning($"Door requires key ({keyHolder})");
+                        Debug.LogWarning($"Door requires key ({key})");
                         return;
                     }
 
-                    if (consumesKey && !keyHolder.Consume(KeyProperty, key))
+                    if (consumesKey && !keyHolder.Consume(TiledConfiguration.instance.KeyKey, key))
                     {
-                        Debug.LogWarning($"Failed to consume key {key}");
+                        Debug.LogWarning($"Failed to consume key {key} from {keyHolder}");
                     }
                     isLocked = false;
                 }
@@ -194,21 +211,21 @@ namespace TiledDungeon
 
             SyncOpenness = isOpen ? 1 : 0;
             isLocked = modifications.Any(
-                mod => mod.Tile.CustomProperties.StringEnums.GetValueOrDefault("Interaction")?.Value == "Locked"
+                mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked
             );
 
             var keyProperties = Points
-                .FirstOrDefault(p => p.Name == LockName)
+                .FirstOrDefault(p => p.Name == TiledConfiguration.instance.LockItem)
                 ?.CustomProperties
                 ?? Rects
-                    .FirstOrDefault(r => r.Name == LockName)
+                    .FirstOrDefault(r => r.Name == TiledConfiguration.instance.LockItem)
                     ?.CustomProperties;
 
-            key = keyProperties
-                ?.Strings
-                .GetValueOrDefault(KeyProperty);
-
-            consumesKey = keyProperties?.Bools.GetValueOrDefault(ConsumesKeyProperty) ?? false;
+            if (keyProperties != null )
+            {
+                key = keyProperties.String(TiledConfiguration.instance.KeyKey);
+                consumesKey = keyProperties.Bool(TiledConfiguration.instance.ConusumesKeyKey);
+            }
 
             Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen})");
         }

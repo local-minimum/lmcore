@@ -19,6 +19,9 @@ namespace TiledDungeon
         [SerializeField, HideInInspector]
         TiledTile tile;
 
+        [SerializeField]
+        TDSidesClass sides;
+
         [SerializeField, HideInInspector]
         TileModification[] modifications;
 
@@ -53,32 +56,18 @@ namespace TiledDungeon
             set => _coordinates = value;
         }
 
-        [SerializeField, Tooltip("Name of custom properties class that has boolean fields for Down, Up, North, West, East, South")]
-        string SidesClass = "Sides";
-
-        [SerializeField]
-        GameObject floor;
-
-        [SerializeField]
-        GameObject roof;
-
-        [SerializeField]
-        GameObject northWall;
-
-        [SerializeField]
-        GameObject southWall;
-
-        [SerializeField]
-        GameObject westWall;
-
-        [SerializeField]
-        GameObject eastWall;
-
-        [SerializeField]
-        TDDoor doorNS;
-
-        [SerializeField]
-        TDDoor doorWE;
+        TDDoor _door;
+        TDDoor door
+        {
+            get
+            {
+                if (_door == null)
+                {
+                    _door = GetComponentInChildren<TDDoor>();
+                }
+                return _door;
+            }
+        }
 
         public bool Walkable => 
             !Obstructed 
@@ -90,58 +79,18 @@ namespace TiledDungeon
             && tile.CustomProperties
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
-        public bool HasFloor => floor != null && floor.activeSelf;
-        public bool HasCeiling => roof != null && roof.activeSelf;
+        public bool HasFloor => sides.Down;
+        public bool HasCeiling => sides.Up;
 
-        public bool Obstructed => 
-            modifications.Any(mod => 
+        public bool Obstructed =>
+            modifications.Any(mod =>
             mod
             .Tile
             .CustomProperties
             .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
             .Obstructing()) ||
-            (doorNS != null && doorNS.BlockingPassage) ||
-            (doorWE != null && doorWE.BlockingPassage);
+            (door?.BlockingPassage == true);
 
-        void ConfigureOriented(
-            TileModification[] modifications,
-            GameObject vertical,
-            GameObject horizontal,
-            System.Func<TileModification, bool> modFilter
-        )
-        {
-            var featureMods = modifications.Where(modFilter).ToList();
-
-            vertical?.SetActive(false);
-            horizontal?.SetActive(false);
-
-            if (featureMods
-                .Where(g => g.Tile.CustomProperties
-                    .Orientation(TiledConfiguration.instance.OrientationKey) == TDEnumOrientation.Vertical
-                ).Count() > 0) {
-                if (vertical != null)
-                {
-                    vertical.SetActive(true);
-                }
-                else
-                {
-                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support north<->south entity");
-                }
-            }
-
-            if (featureMods
-                .Where(g => g.Tile.CustomProperties
-                .Orientation(TiledConfiguration.instance.OrientationKey) == TDEnumOrientation.Horizontal
-                ).Count() > 0) {
-                if (horizontal != null)
-                {
-                    horizontal.SetActive(true);
-                } else
-                {
-                    Debug.LogWarning($"Tile @ {Coordinates} doesn't support west<->east entity");
-                }
-            }
-        }
 
         void ConfigureGrates()
         {
@@ -167,41 +116,26 @@ namespace TiledDungeon
             );
         }
 
-        void ConfigureDoors(TileModification[] modifications)
+        void ConfigureDoors()
         {
-            System.Func<TileModification, bool> filter =
-                mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
+            System.Func<TileModification, bool> filter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
 
-            ConfigureOriented(
-                modifications,
-                doorNS.gameObject,
-                doorWE.gameObject,
-                filter
+            var doorInfo = modifications.FirstOrDefault(filter);
+            if (doorInfo == null) return;
+
+            Dungeon.Style.Get(
+                transform, 
+                TiledConfiguration.instance.DoorClass, 
+                doorInfo.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                doorInfo.Tile.CustomProperties.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Closed)
             );
 
-            if (!doorNS.gameObject.activeSelf)
-            {
-                DestroyImmediate(doorNS.gameObject);
-                doorNS = null;
-            }
-
-            if (!doorWE.gameObject.activeSelf)
-            {
-                DestroyImmediate(doorWE.gameObject);
-                doorWE = null;
-            }
-
-            foreach (TDDoor door in new[] { doorNS, doorWE })
-            {
-                if (door == null || !door.gameObject.activeSelf) continue;
-
-                door.Configure(
-                    Coordinates, 
-                    modifications.Where(filter).ToArray(),
-                    Points,
-                    Rects
-                );
-            }
+            door?.Configure(
+                Coordinates, 
+                modifications.Where(filter).ToArray(),
+                Points,
+                Rects
+            );
         }
 
         void ConfigureLadders()
@@ -255,6 +189,23 @@ namespace TiledDungeon
             }
         }
 
+        void ConfigureCube()
+        {
+            if (sides == null)
+            {
+                Debug.LogError($"{tile} as {Coordinates} lacks a sides class, can't be used for layouting");
+                return;
+            }
+
+            foreach (var direction in DirectionExtensions.AllDirections)
+            {
+                if (!sides.Has(direction)) continue;
+
+                var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction);
+                go.name = direction.ToString();
+            }
+        }
+
         public void Configure(
             TiledTile tile, 
             TiledNodeRoofRule roofRule,
@@ -269,70 +220,18 @@ namespace TiledDungeon
             Dungeon = dungeon;
             Points = points;
             Rects = rects;
-
-
-            var sides = tile.CustomProperties.Classes[SidesClass];
-            if (sides == null)
-            {
-                Debug.LogError($"{tile} as {Coordinates} lacks a sides class, can't be used for layouting");
-            } else
-            {
-                if (sides.Bool("Down"))
-                {
-                    floor.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(floor);
-                    floor = null;
-                }
-                if (roofRule == TiledNodeRoofRule.CustomProps ? sides.Bool("Up") : roofRule == TiledNodeRoofRule.ForcedSet)
-                {
-                    roof.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(roof);
-                    roof = null;
-                }
-                if (sides.Bool("West"))
-                {
-                    westWall.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(westWall);
-                    westWall = null;
-                }
-                if (sides.Bool("South"))
-                {
-                    southWall.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(southWall);
-                    southWall = null;
-                }
-                if (sides.Bool("North"))
-                {
-                    northWall.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(northWall);
-                    northWall = null;
-                }
-                if (sides.Bool("East"))
-                {
-                    eastWall.SetActive(true);
-                } else
-                {
-                    DestroyImmediate(eastWall);
-                    eastWall = null;
-                }
-            }
+            sides = TDSidesClass.From(
+                tile.CustomProperties.Classes[TiledConfiguration.instance.SidesClassKey],
+                roofRule
+            );
 
             transform.localPosition = Coordinates.ToPosition(dungeon.Scale);
             name = $"TileNode Elevation {Coordinates.y} ({Coordinates.x}, {Coordinates.z})";
 
+            ConfigureCube();
             ConfigureGrates();
             ConfigureObstructions();
-            ConfigureDoors(modifications);
+            ConfigureDoors();
             ConfigureLadders();
             ConfigureTeleporter();
         }
@@ -354,14 +253,8 @@ namespace TiledDungeon
 
         bool HasWall(Direction direction)
         {
-            switch (direction)
-            {
-                case Direction.North: return northWall != null && northWall.activeSelf;
-                case Direction.South: return southWall != null && southWall.activeSelf;
-                case Direction.West: return westWall != null && westWall.activeSelf;
-                case Direction.East: return eastWall != null && eastWall.activeSelf;
-                default: return false;
-            }
+            if (direction.IsPlanarCardinal()) return sides.Has(direction);
+            return false;
         }
 
         private MovementOutcome ExitOrFallback(Direction direction, MovementOutcome fallback)
@@ -447,23 +340,20 @@ namespace TiledDungeon
 
         public bool HasBlockingDoor(Direction direction)
         {
-            var axis = direction.AsAxis();
+            var door = this.door;
 
-            if (doorNS?.gameObject.activeSelf ?? false)
+            if (door == null) return false;
+
+            if (door.BlockingPassage) return true;
+
+            var doorAxis = door.Axis;
+
+            if (doorAxis == DirectionAxis.None)
             {
-                if (axis != DirectionAxis.NorthSouth) return true;
-
-                return doorNS.BlockingPassage;
+                Debug.LogWarning($"Door @ {Coordinates} lacks an axis");
+                return false;
             }
-
-            if (doorWE?.gameObject.activeSelf ?? false)
-            {
-                if (axis != DirectionAxis.WestEast) return true;
-
-                return doorWE.BlockingPassage;
-            }
-
-            return false;
+            return doorAxis != direction.AsAxis();
         }
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
