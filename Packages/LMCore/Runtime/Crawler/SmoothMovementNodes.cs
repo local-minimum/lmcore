@@ -12,12 +12,12 @@ namespace LMCore.Crawler
         public Vector3 Position;
         public Quaternion Rotation;
 
-        public SmoothMovementCheckpoints(GridEntity entity, EntityState state, float gridSize)
+        public SmoothMovementCheckpoints(IDungeon dungeon, EntityState state, float gridSize)
         {
-            Position = state.Coordinates.ToPosition(gridSize) + 
-                entity.CalculateAnchorOffset(
-                    state.Anchor, 
-                    state.RotationRespectsAnchorDirection);
+            Position = state.Coordinates.ToPosition(gridSize) +
+                (dungeon.HasNodeAt(state.Coordinates) ?
+                dungeon[state.Coordinates].AnchorOffset(state.Anchor, state.RotationRespectsAnchorDirection) :
+                dungeon.DefaultAnchorOffset(state.Anchor, state.RotationRespectsAnchorDirection));
 
             Rotation = state.LookDirection.AsQuaternion(
                 state.Anchor,
@@ -213,7 +213,7 @@ namespace LMCore.Crawler
             if (outcome == MovementOutcome.NodeInternal && states.Count == 2)
             {
                 // Tweak node internal transition to go to node side inbetween rather than diagonal
-                var checkpoints = states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize)).ToList();
+                var checkpoints = states.Select(s => new SmoothMovementCheckpoints(Dungeon, s, GridSizeProvider.GridSize)).ToList();
                 var initialDirection = states.Last().Anchor.AsLookVector3D();
                 var firstCP = checkpoints[0];
                 var lastCP = checkpoints[1];
@@ -226,7 +226,7 @@ namespace LMCore.Crawler
             } else
             {
                 animationCheckpoints.AddRange(
-                    states.Select(s => new SmoothMovementCheckpoints(entity, s, GridSizeProvider.GridSize))
+                    states.Select(s => new SmoothMovementCheckpoints(Dungeon, s, GridSizeProvider.GridSize))
                 );
             }
 

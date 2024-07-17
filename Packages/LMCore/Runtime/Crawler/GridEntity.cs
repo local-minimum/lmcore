@@ -4,7 +4,6 @@ using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Events;
-using LMCore.AbstractClasses;
 
 namespace LMCore.Crawler
 {
@@ -87,34 +86,6 @@ namespace LMCore.Crawler
 
         public Direction LookDirection { get; set; }
 
-        [SerializeField, Range(0, 1)]
-        float wallAnchorOffset = 0.95f;
-
-        [SerializeField, Range(0, 1)]
-        float ceilingAnchorOffset = 0.9f;
-
-        public Vector3  CalculateAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
-        {
-            // TODO: Respect when rotation respects anchor
-            if (rotationRespectsAnchorDirection)
-            {
-                Debug.LogWarning("Anchor offset respecting rotation isn't implemented");
-            }
-
-            if (anchor == Direction.Down) return Vector3.zero;
-            if (anchor.IsPlanarCardinal())
-            {
-                return wallAnchorOffset * 0.5f * GridSizeProvider.GridSize * anchor.AsLookVector3D().ToDirection()
-                    + Vector3.up * 0.5f * GridSizeProvider.GridSize;
-
-            }
-
-            return ceilingAnchorOffset * GridSizeProvider.GridSize * anchor.AsLookVector3D().ToDirection();
-
-        }
-
-        Vector3 AnchorOffset => CalculateAnchorOffset(Anchor, RotationRespectsAnchorDirection);
-
         public void Sync()
         {
             if (GridSizeProvider == null)
@@ -123,7 +94,11 @@ namespace LMCore.Crawler
                 return;
             }
 
-            transform.position = Position.ToPosition(GridSizeProvider.GridSize) + AnchorOffset;
+            transform.position = Position.ToPosition(GridSizeProvider.GridSize) + (
+                Dungeon.HasNodeAt(Position) ? 
+                Dungeon[Position].AnchorOffset(Anchor, RotationRespectsAnchorDirection) :
+                Dungeon.DefaultAnchorOffset(Anchor, RotationRespectsAnchorDirection)
+            );
             transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
 
             CheckFall();

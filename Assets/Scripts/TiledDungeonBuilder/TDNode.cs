@@ -206,9 +206,21 @@ namespace TiledDungeon
             }
         }
 
+        TileModification RampModification => modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
+        public bool IsHighRamp
+        {
+            get
+            {
+                var ramp = RampModification;
+                if (ramp == null) return false;
+
+                return ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) == TDEnumElevation.High;
+            }
+        }
+
         void ConfigureRamps()
         {
-            var ramp = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
+            var ramp = RampModification;
             if (ramp == null) return;
 
             Dungeon.Style.Get(
@@ -302,15 +314,43 @@ namespace TiledDungeon
             return MovementOutcome.NodeExit;
         }
 
+        bool RampOutcome(Direction direction, out MovementOutcome outcome)
+        {
+            if (!IsHighRamp) {
+                outcome = MovementOutcome.Refused;
+                return false;
+            }
+
+            var ramp = RampModification;
+            if (direction != ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection())
+            {
+                outcome = MovementOutcome.NodeExit;
+                return true;
+            }
+
+            outcome = MovementOutcome.Refused;
+            return false;
+        }
+
+
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
             {
+                if (RampOutcome(direction, out MovementOutcome outcome))
+                {
+                    return outcome;
+                }
+
                 return ExitOrFallback(direction, MovementOutcome.Blocked);
             }
 
             if (anchor == Direction.Down)
             {
+                if (RampOutcome(direction, out MovementOutcome outcome))
+                {
+                    return outcome;
+                }
                 return PlanarOutcome(direction);
             } 
 
@@ -378,6 +418,17 @@ namespace TiledDungeon
             if (HasBlockingDoor(direction)) return false;
 
             if (Obstructed) return false;
+
+            var ramp = RampModification;
+            if (ramp != null && direction.IsPlanarCardinal())
+            {
+                var axis = direction.AsAxis();
+                if (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) != TDEnumElevation.Low &&
+                    ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection().AsAxis() != axis)
+                {
+                    return false;
+                }
+            }
 
             if (_occupants.Count == 0) return true;
 
@@ -516,6 +567,47 @@ namespace TiledDungeon
             return false;
         }
 
+        public static Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection, float gridSize)
+        {
+            // TODO: Place magic number to be somewhat below ceiling somewhere 
+            if (anchor == Direction.Up) return rotationRespectsAnchorDirection ?
+                    Vector3.up * gridSize : Vector3.up * gridSize * 0.9f;
+
+
+            if (rotationRespectsAnchorDirection)
+            {
+                return Vector3.up * gridSize * 0.5f + anchor.AsLookVector3D().ToDirection() * gridSize;
+            }
+
+            // TODO: Place magic number to not get too close to wall somewhere
+            return Vector3.up * gridSize * 0.5f 
+                + anchor.AsLookVector3D().ToDirection() * gridSize * 0.95f;
+
+        }
+
+        public Vector3 AnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
+        {
+            if (anchor == Direction.Down)
+            {
+                var ramp = RampModification;
+                if (ramp == null) return Vector3.zero;
+
+                switch (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey))
+                {
+                    case TDEnumElevation.Low:
+                        return Vector3.up * Dungeon.GridSize / 6f;
+                    case TDEnumElevation.Middle:
+                        return Vector3.up * Dungeon.GridSize * 0.5f;
+                    case TDEnumElevation.High:
+                        return Vector3.up * Dungeon.GridSize * 5f / 6f;
+                    default:
+                        return Vector3.zero;
+                }
+            }
+
+            return DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, Dungeon.GridSize);
+        }
+
         public T FirstObjectPointValue<T>(string name, System.Func<TiledCustomProperties, T> predicate) =>
             predicate(Points.FirstOrDefault(pt => pt.Name == name).CustomProperties);
 
@@ -538,5 +630,22 @@ namespace TiledDungeon
 
         public bool HasObject(string name, System.Func<TiledCustomProperties, bool> predicate) =>
             HasObjectPoint(name, predicate) || HasObjectRect(name, predicate);
+
+        public Vector3Int Neighbour(Direction direction)
+        {
+            if (direction.IsPlanarCardinal() && IsHighRamp)
+            {
+                var downDirection = RampModification.Tile.CustomProperties
+                    .Direction(TiledConfiguration.instance.DownDirectionKey)
+                    .AsDirection();
+
+                if (downDirection != direction)
+                {
+                    return direction.Translate(Coordinates) + Vector3Int.up;
+                }
+            }
+
+            return direction.Translate(Coordinates);
+        }
     }   
 }

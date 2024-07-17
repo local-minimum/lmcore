@@ -60,7 +60,7 @@ namespace LMCore.Crawler
             );
         }
 
-        bool HandleSpecialTranslations(int tickId, Movement movement, Vector3Int intermediary, float duration)
+        bool HandleSpecialTranslations(int tickId, Movement movement, Vector3Int candidateTarget, float duration)
         {
             // TODO: Allow letting go / walling down and catching wall further down?
 
@@ -81,16 +81,16 @@ namespace LMCore.Crawler
                 Debug.LogWarning($"We are not on the map {position}");
             }
 
-            if (Dungeon.HasNodeAt(intermediary))
+            if (Dungeon.HasNodeAt(candidateTarget))
             {
-                if (Dungeon[intermediary].CanAnchorOn(gEntity, anchor)) return false;
+                if (Dungeon[candidateTarget].CanAnchorOn(gEntity, anchor)) return false;
             }
 
             // Getting up off a wall
             if (anchor.IsPlanarCardinal())
             {                
                 lookDirection = anchor;
-                var target = lookDirection.Translate(intermediary);
+                var target = Dungeon[candidateTarget].Neighbour(lookDirection);
                 if (Dungeon.HasNodeAt(target))
                 {
                     var targetNode = Dungeon[target];
@@ -98,7 +98,7 @@ namespace LMCore.Crawler
                     var canAnchorOn = targetNode.CanAnchorOn(gEntity, Direction.Down);
                     if (!allowEntry || !canAnchorOn)
                     {
-                        Debug.LogWarning($"Trying to go {position} -> {intermediary} -> {target}: Entry({allowEntry}) | Anchor floor({canAnchorOn})");
+                        Debug.LogWarning($"Trying to go {position} -> {candidateTarget} -> {target}: Entry({allowEntry}) | Anchor floor({canAnchorOn})");
                         return false;
                     }
 
@@ -112,7 +112,7 @@ namespace LMCore.Crawler
                         new List<EntityState>() { 
                             new EntityState(gEntity),
                             new EntityState(
-                                intermediary,
+                                candidateTarget,
                                 Direction.Down,
                                 lookDirection,
                                 gEntity
@@ -129,7 +129,7 @@ namespace LMCore.Crawler
                     );
                     return true;
                 }
-                Debug.LogWarning($"Trying to go {position} -> {intermediary} -> {target} but target is not on the map.");
+                Debug.LogWarning($"Trying to go {position} -> {candidateTarget} -> {target} but target is not on the map.");
                 return false;
 
             } else if (anchor == Direction.Down)
@@ -142,7 +142,7 @@ namespace LMCore.Crawler
                     return false;
                 }
                 var intermediaryState = new EntityState(
-                    intermediary,
+                    candidateTarget,
                     Direction.Down,
                     anchor,
                     gEntity.Value.RotationRespectsAnchorDirection,
@@ -150,7 +150,7 @@ namespace LMCore.Crawler
                 );
 
                 lookDirection = Direction.Up;
-                var target = Direction.Down.Translate(intermediary);
+                var target = Direction.Down.Translate(candidateTarget);
 
                 if (Dungeon.HasNodeAt(target))
                 {
@@ -160,13 +160,13 @@ namespace LMCore.Crawler
                     if (!allowEntry || !canAnchorOn)
                     {
                         Debug.Log(
-                            $"Trying to find ladder {position} -> {intermediary} -> {target} facing {anchor}: Allow entry from above ({allowEntry}) or Attaching to that wall ({canAnchorOn})"
+                            $"Trying to find ladder {position} -> {candidateTarget} -> {target} facing {anchor}: Allow entry from above ({allowEntry}) or Attaching to that wall ({canAnchorOn})"
                             );
                         return false;
                     }
 
                 } else {
-                    Debug.Log($"Trying to find ladder {position} -> {intermediary} -> {target} facing {anchor}, but there's no node there");
+                    Debug.Log($"Trying to find ladder {position} -> {candidateTarget} -> {target} facing {anchor}, but there's no node there");
                     return false; 
                 }
 
@@ -245,7 +245,7 @@ namespace LMCore.Crawler
             } else if (movement.IsTranslation())
             {
                 var direction = startLookDirection.RelativeTranslation3D(startAnchor, movement);
-                var target = direction.Translate(startPosition);
+                var target = Dungeon.HasNodeAt(startPosition) ? Dungeon[startPosition].Neighbour(direction) : direction.Translate(startPosition);
 
                 if (!HandleSpecialTranslations(tickId, movement, target, duration))
                 {

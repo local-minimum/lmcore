@@ -295,5 +295,10 @@ namespace TiledDungeon
                 .Select(n => (IDungeonNode)n)
                 .ToList();
         }
+
+        public Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
+        {
+            return TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize);
+        }
     }
 }
