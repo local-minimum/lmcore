@@ -20,5 +20,7 @@ namespace LMCore.Crawler
         public void RemoveOccupant(GridEntity entity);
 
         public Vector3Int Neighbour(Direction direction);
+
+        public bool IsHighRamp { get; }
     }
 }

@@ -309,6 +309,15 @@ namespace LMCore.Crawler
                             if (startAnchor == Direction.Down)
                             {
                                 // TODO: Fix how falling should be handled better
+                                var rampTarget = Direction.Down.Translate(target);
+                                if (Dungeon.HasNodeAt(rampTarget)) { 
+                                    var t = Dungeon[rampTarget];
+                                    if (t.AllowsEntryFrom(gEntity, Direction.Up) && t.IsHighRamp)
+                                    {
+                                        HandleTranslation(tickId, rampTarget, startLookDirection, duration);
+                                        return;
+                                    }
+                                }
                                 HandleTranslation(tickId, target, startLookDirection, duration);
                                 return;
                             }
