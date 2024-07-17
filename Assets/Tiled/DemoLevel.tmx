@@ -134,7 +134,7 @@
    </object>
   </objectgroup>
  </group>
- <group id="7" name="Elevation 1" visible="0" opacity="0.74">
+ <group id="7" name="Elevation 1" opacity="0.74">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>

@@ -577,12 +577,12 @@ namespace TiledDungeon
 
             if (rotationRespectsAnchorDirection)
             {
-                return Vector3.up * gridSize * 0.5f + anchor.AsLookVector3D().ToDirection() * gridSize;
+                return Vector3.up * gridSize * 0.5f + anchor.AsLookVector3D().ToDirection() * gridSize * 0.5f;
             }
 
             // TODO: Place magic number to not get too close to wall somewhere
-            return Vector3.up * gridSize * 0.5f 
-                + anchor.AsLookVector3D().ToDirection() * gridSize * 0.95f;
+            return Vector3.up * gridSize * 0.45f 
+                + anchor.AsLookVector3D().ToDirection() * gridSize * 0.45f;
 
         }
 
