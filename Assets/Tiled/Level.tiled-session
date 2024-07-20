@@ -6,9 +6,9 @@
     "activeFile": "Mapping.tsx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        ".",
+        "Automapping",
         "Rules",
-        "Automapping"
+        "."
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -28,14 +28,14 @@
                 7
             ],
             "scale": 1,
-            "selectedLayer": 8,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 540,
-                "y": 442.5
+                "x": 539,
+                "y": 336.5
             }
         },
         "Mapping.tsx": {
-            "scaleInDock": 2,
+            "scaleInDock": 1,
             "scaleInEditor": 2
         },
         "Rules/AutomappingDungeons.tmx": {
