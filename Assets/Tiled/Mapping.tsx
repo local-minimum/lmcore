@@ -410,6 +410,7 @@
      <property name="West" type="bool" value="true"/>
     </properties>
    </property>
+   <property name="TraversalAxis" propertytype="Orientation" value="Vertical"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
@@ -440,6 +441,7 @@
      <property name="West" type="bool" value="true"/>
     </properties>
    </property>
+   <property name="TraversalAxis" propertytype="Orientation" value="Vertical"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
@@ -470,6 +472,7 @@
      <property name="South" type="bool" value="true"/>
     </properties>
    </property>
+   <property name="TraversalAxis" propertytype="Orientation" value="Horizontal"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
@@ -500,6 +503,7 @@
      <property name="South" type="bool" value="true"/>
     </properties>
    </property>
+   <property name="TraversalAxis" propertytype="Orientation" value="Horizontal"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>

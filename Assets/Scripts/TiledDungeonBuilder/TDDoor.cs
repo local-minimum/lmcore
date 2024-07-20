@@ -12,24 +12,8 @@ namespace TiledDungeon
     // TODO: Use configuration to present lock and button
     public class TDDoor : MonoBehaviour
     {
-        /*
-        [SerializeField]
-        Transform Door;
-
-        [SerializeField]
-        float maxSlide = 2.75f;
-
-        [SerializeField]
-        TemporalEasing<float> DoorSliding;
-        */
-
         [SerializeField, HideInInspector]
         bool isOpen = false;
-
-        /*
-        bool hasSetReferencePosition;
-        Vector3 doorReferencePosition;
-        */
 
         [SerializeField, HideInInspector]
         Vector3Int Position;
@@ -59,8 +43,8 @@ namespace TiledDungeon
         {
             get
             {
-                if (OpenAction.IsEasing) return OpenAction;
-                if (CloseAction.IsEasing) return CloseAction;
+                if (OpenAction?.IsEasing == true) return OpenAction;
+                if (CloseAction?.IsEasing == true) return CloseAction;
                 return null;
             }
         }
@@ -69,14 +53,19 @@ namespace TiledDungeon
         {
             get
             {
-                if (ActiveAction == CloseAction) return true;
+                if (ActiveAction == CloseAction)
+                {
+                    Debug.Log($"Door at {Position} is closing");
+                    return true;
+                }
 
+                Debug.Log($"Door is open {isOpen}");
                 return !isOpen;
             }
         }
 
 
-        public DirectionAxis Axis
+        public DirectionAxis TraversalAxis
         {
             get
             {
@@ -86,7 +75,7 @@ namespace TiledDungeon
                 return mod
                     .Tile
                     .CustomProperties
-                    .Orientation(TiledConfiguration.instance.OrientationKey)
+                    .Orientation(TiledConfiguration.instance.TraversalAxisKey)
                     .AsAxis();
             }
         }
@@ -199,6 +188,7 @@ namespace TiledDungeon
             Debug.Log($"Toggling door at {Position} from Open({isOpen})");
             if (ActiveAction != null)
             {
+                Debug.Log("Resque from previous action");
                 var action =  ActiveAction;
                 action.Abandon();
                 (action == OpenAction ? CloseAction : OpenAction).PlayFromCurrentProgress(() => isOpen = action == CloseAction);
@@ -212,12 +202,12 @@ namespace TiledDungeon
         {
             if (isOpen)
             {
-                OpenAction.Play(null);
-                OpenAction.Finalise();
+                OpenAction?.Play(null);
+                OpenAction?.Finalise();
             } else
             {
-                CloseAction.Play(null);
-                CloseAction.Finalise();
+                CloseAction?.Play(null);
+                CloseAction?.Finalise();
             }
 
             isLocked = modifications.Any(

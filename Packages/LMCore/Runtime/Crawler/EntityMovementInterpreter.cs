@@ -295,7 +295,8 @@ namespace LMCore.Crawler
                                     },
                                     duration
                                 );
-                                Debug.LogWarning($"{name} attempted to enter map at {target} from {direction.Inverse()}, this should be blocked");
+
+                                Debug.Log($"{name} attempted to enter map at {target} from {direction.Inverse()} but was refused, hopefully a door there");
                                 return;
                             }
 

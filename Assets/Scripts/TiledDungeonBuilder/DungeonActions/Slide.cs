@@ -56,6 +56,7 @@ namespace TiledDungeon.Actions {
                 0.0001f
             );
 
+            abandonned = false;
             easing.EaseStartToEnd(startProgress);
         }
 

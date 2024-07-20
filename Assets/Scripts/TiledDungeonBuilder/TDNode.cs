@@ -89,8 +89,8 @@ namespace TiledDungeon
             .Tile
             .CustomProperties
             .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
-            .Obstructing()) ||
-            (door?.BlockingPassage == true);
+            .Obstructing()) && 
+            (door == null ? true : door.BlockingPassage);
 
 
         void ConfigureGrates()
@@ -403,14 +403,20 @@ namespace TiledDungeon
 
             if (door.BlockingPassage) return true;
 
-            var doorAxis = door.Axis;
+            var doorAxis = door.TraversalAxis;
 
             if (doorAxis == DirectionAxis.None)
             {
                 Debug.LogWarning($"Door @ {Coordinates} lacks an axis");
                 return false;
             }
-            return doorAxis != direction.AsAxis();
+            if (doorAxis != direction.AsAxis())
+            {
+                Debug.LogWarning($"Trying to enter door @ {Coordinates} by the wrong axis (door {doorAxis} trying to enter {direction.AsAxis()})");
+                return true;
+            }
+
+            return false;
         }
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
