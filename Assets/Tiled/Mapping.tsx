@@ -631,14 +631,14 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="56" type="Trapdoor">
+ <tile id="56" type="TrapDoor">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
- <tile id="57" type="Trapdoor">
+ <tile id="57" type="TrapDoor">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>

@@ -570,8 +570,10 @@ MonoBehaviour:
   modifications: []
   Points: []
   Rects: []
-  OpenAction: {fileID: 8640735260006286784}
-  CloseAction: {fileID: 1754075039314598951}
+  OpenActions:
+  - {fileID: 8640735260006286784}
+  CloseActions:
+  - {fileID: 1754075039314598951}
 --- !u!114 &8640735260006286784
 MonoBehaviour:
   m_ObjectHideFlags: 0

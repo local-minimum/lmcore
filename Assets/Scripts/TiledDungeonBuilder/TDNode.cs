@@ -80,7 +80,7 @@ namespace TiledDungeon
             && tile.CustomProperties
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
-        public bool HasFloor => sides.Down;
+        public bool HasFloor => sides.Down && (HasTrapDoor == false || door?.BlockingPassage == true);
         public bool HasCeiling => sides.Up;
 
         public bool Obstructed =>
@@ -198,10 +198,20 @@ namespace TiledDungeon
                 return;
             }
 
+            var hasTrapDoor = HasTrapDoor;
+            var aboveNode = Coordinates + Vector3Int.up;
             foreach (var direction in DirectionExtensions.AllDirections)
             {
+                if (hasTrapDoor && direction == Direction.Down)
+                {
+                    var trapdoor = Dungeon.Style.Get(transform, TiledConfiguration.instance.TrapDoorClass);
+                    trapdoor.name = $"TrapDoor ({direction})";
+                    continue;
+                }
+
                 if (!sides.Has(direction)) continue;
 
+                if (direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasTrapDoor) continue;
                 var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction);
                 go.name = direction.ToString();
             }
@@ -218,6 +228,7 @@ namespace TiledDungeon
                 return ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) == TDEnumElevation.High;
             }
         }
+
         public bool IsRamp => RampModification != null;
 
         void ConfigureRamps()
@@ -233,6 +244,11 @@ namespace TiledDungeon
             );
 
         }
+
+        TileModification TrapdoorModification =>
+            modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
+
+        public bool HasTrapDoor => TrapdoorModification != null;
 
         public void Configure(
             TiledTile tile, 
@@ -401,6 +417,11 @@ namespace TiledDungeon
 
             if (door == null) return false;
 
+            if (HasTrapDoor)
+            {
+                return direction == Direction.Down && door.BlockingPassage;
+            }
+
             if (door.BlockingPassage) return true;
 
             var doorAxis = door.TraversalAxis;
@@ -410,7 +431,8 @@ namespace TiledDungeon
                 Debug.LogWarning($"Door @ {Coordinates} lacks an axis");
                 return false;
             }
-            if (doorAxis != direction.AsAxis())
+
+            if (doorAxis != DirectionAxis.None && doorAxis != direction.AsAxis())
             {
                 Debug.LogWarning($"Trying to enter door @ {Coordinates} by the wrong axis (door {doorAxis} trying to enter {direction.AsAxis()})");
                 return true;

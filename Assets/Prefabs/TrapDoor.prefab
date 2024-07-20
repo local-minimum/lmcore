@@ -10,6 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 8835433359691586224}
   - component: {fileID: 3788067137837182473}
+  - component: {fileID: 7791902297767733154}
+  - component: {fileID: 2702676144830640488}
+  - component: {fileID: 4720943597205536078}
+  - component: {fileID: 7689729729252216670}
   m_Layer: 0
   m_Name: TrapDoor
   m_TagString: Untagged
@@ -50,8 +54,180 @@ MonoBehaviour:
   modifications: []
   Points: []
   Rects: []
-  OpenAction: {fileID: 0}
-  CloseAction: {fileID: 0}
+  OpenActions:
+  - {fileID: 7791902297767733154}
+  - {fileID: 4720943597205536078}
+  CloseActions:
+  - {fileID: 2702676144830640488}
+  - {fileID: 7689729729252216670}
+--- !u!114 &7791902297767733154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089690950944179305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6b8b369005b2a49aabeecbbfe435a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targets:
+  - {fileID: 6814253316808091483}
+  easing:
+    StartValue: {x: -90, y: -90, z: 90}
+    EndValue: {x: 2.8, y: -90, z: 90}
+    fullEaseDuration: 1
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+--- !u!114 &2702676144830640488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089690950944179305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6b8b369005b2a49aabeecbbfe435a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targets:
+  - {fileID: 6814253316808091483}
+  easing:
+    StartValue: {x: 2.8, y: -90, z: 90}
+    EndValue: {x: -90, y: -90, z: 90}
+    fullEaseDuration: 1
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+--- !u!114 &4720943597205536078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089690950944179305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6b8b369005b2a49aabeecbbfe435a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targets:
+  - {fileID: 2558532627714915588}
+  easing:
+    StartValue: {x: -90, y: 90, z: 90}
+    EndValue: {x: 2.8, y: 90, z: 90}
+    fullEaseDuration: 1
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+--- !u!114 &7689729729252216670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089690950944179305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6b8b369005b2a49aabeecbbfe435a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targets:
+  - {fileID: 2558532627714915588}
+  easing:
+    StartValue: {x: 2.8, y: 90, z: 90}
+    EndValue: {x: -90, y: 90, z: 90}
+    fullEaseDuration: 1
+    easing:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
 --- !u!1001 &8726662095149215720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -230,6 +406,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 510c36bf78737ce4b9555adbe8b5fd53, type: 3}
+--- !u!4 &2558532627714915588 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2694578445827075348, guid: 510c36bf78737ce4b9555adbe8b5fd53,
+    type: 3}
+  m_PrefabInstance: {fileID: 8726662095149215720}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6814253316808091483 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6374207859300529997, guid: 510c36bf78737ce4b9555adbe8b5fd53,
+    type: 3}
+  m_PrefabInstance: {fileID: 8726662095149215720}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &9120331914249586691 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 510c36bf78737ce4b9555adbe8b5fd53,

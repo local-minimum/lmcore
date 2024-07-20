@@ -6,12 +6,15 @@ using UnityEngine;
 using TiledImporter;
 using TiledDungeon.Integration;
 using TiledDungeon.Actions;
+using System.Diagnostics.Tracing;
 
 namespace TiledDungeon
 {
     // TODO: Use configuration to present lock and button
     public class TDDoor : MonoBehaviour
     {
+        private enum Transition { None, Opening, Closing };
+
         [SerializeField, HideInInspector]
         bool isOpen = false;
 
@@ -28,10 +31,10 @@ namespace TiledDungeon
         TiledObjectLayer.Rect[] Rects;
 
         [SerializeField]
-        AbstractDungeonAction OpenAction;
+        AbstractDungeonAction[] OpenActions;
 
         [SerializeField]
-        AbstractDungeonAction CloseAction;
+        AbstractDungeonAction[] CloseActions;
 
         bool isLocked;
 
@@ -39,13 +42,20 @@ namespace TiledDungeon
 
         bool consumesKey;
 
-        AbstractDungeonAction ActiveAction
+        Transition ActiveTransition
         {
             get
             {
-                if (OpenAction?.IsEasing == true) return OpenAction;
-                if (CloseAction?.IsEasing == true) return CloseAction;
-                return null;
+                for (int i = 0; i < OpenActions.Length; i++)
+                {
+                    if (OpenActions[i].IsEasing) return Transition.Opening;
+                }
+                for (int i = 0; i < CloseActions.Length; i++)
+                {
+                    if (CloseActions[i].IsEasing) return Transition.Closing;
+                }
+
+                return Transition.None;
             }
         }
 
@@ -53,7 +63,7 @@ namespace TiledDungeon
         {
             get
             {
-                if (ActiveAction == CloseAction)
+                if (ActiveTransition == Transition.Closing)
                 {
                     Debug.Log($"Door at {Position} is closing");
                     return true;
@@ -182,33 +192,42 @@ namespace TiledDungeon
             }
         }
 
+        void MapOverActions(
+            AbstractDungeonAction[] actions,
+            System.Action<AbstractDungeonAction> action
+        )
+        {
+            for (int i=0; i<actions.Length; i++)
+            {
+                action(actions[i]);
+            }
+        }
+
         [ContextMenu("Interact")]
         public void Interact()
         {
             Debug.Log($"Toggling door at {Position} from Open({isOpen})");
-            if (ActiveAction != null)
+            var transition = ActiveTransition;
+            if (transition != Transition.None)
             {
                 Debug.Log("Resque from previous action");
-                var action =  ActiveAction;
-                action.Abandon();
-                (action == OpenAction ? CloseAction : OpenAction).PlayFromCurrentProgress(() => isOpen = action == CloseAction);
+                MapOverActions(transition == Transition.Opening ? OpenActions : CloseActions, (action) => action.Abandon());
+                MapOverActions(transition == Transition.Opening ? CloseActions : OpenActions, (action) => action.PlayFromCurrentProgress(
+                    () => isOpen = transition == Transition.Closing));
+
             } else
             {
-                (isOpen ? CloseAction : OpenAction).Play(() => isOpen = !isOpen);
+                var endsOpen = !isOpen;
+                MapOverActions(isOpen ? CloseActions : OpenActions, (action) => action.Play(() => isOpen = endsOpen));
             }
         }
 
         void SyncDoor()
         {
-            if (isOpen)
-            {
-                OpenAction?.Play(null);
-                OpenAction?.Finalise();
-            } else
-            {
-                CloseAction?.Play(null);
-                CloseAction?.Finalise();
-            }
+            MapOverActions(isOpen ? OpenActions : CloseActions, (action) => {
+                action.Play(null);
+                action.Finalise();
+            });
 
             isLocked = modifications.Any(
                 mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked

@@ -16,6 +16,7 @@ namespace TiledDungeon
         public string TeleporterClass = "Teleporter";
         public string SpinnerClass = "Spinner";
         public string RampClass = "Ramp";
+        public string TrapDoorClass = "TrapDoor";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";

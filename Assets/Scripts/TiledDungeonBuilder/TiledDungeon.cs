@@ -91,7 +91,7 @@ namespace TiledDungeon
             nodes.Remove(node.Coordinates);
         }
 
-        TDNode this[Vector3Int coordinates]
+        public TDNode this[Vector3Int coordinates]
         {
             get
             {

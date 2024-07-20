@@ -30,6 +30,8 @@ namespace TiledDungeon.Actions {
             abandonned = true;
         }
 
+        System.Action OnDoneCallback;
+
         public override void Finalise()
         {
             easing.AbortEase();
@@ -37,8 +39,6 @@ namespace TiledDungeon.Actions {
             OnDoneCallback?.Invoke();
             OnDoneCallback = null;
         }
-
-        System.Action OnDoneCallback;
 
         public override void Play(System.Action onDoneCallback)
         {
