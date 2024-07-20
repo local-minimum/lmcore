@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TiledImporter;
 using UnityEngine;
 
-namespace TiledDungeon
+namespace TiledDungeon.Integration
 {
     public enum TDEnumInteraction 
     {

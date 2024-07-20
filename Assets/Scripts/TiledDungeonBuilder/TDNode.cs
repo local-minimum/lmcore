@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TiledImporter;
 using UnityEngine;
+using TiledDungeon.Integration;
 
 namespace TiledDungeon
 {

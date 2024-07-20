@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using TiledImporter;
+using TiledDungeon.Integration;
+using TiledDungeon.Actions;
 
 namespace TiledDungeon
 {
     // TODO: Use configuration to present lock and button
     public class TDDoor : MonoBehaviour
     {
+        /*
         [SerializeField]
         Transform Door;
 
@@ -18,12 +21,15 @@ namespace TiledDungeon
 
         [SerializeField]
         TemporalEasing<float> DoorSliding;
+        */
 
         [SerializeField, HideInInspector]
         bool isOpen = false;
 
+        /*
         bool hasSetReferencePosition;
         Vector3 doorReferencePosition;
+        */
 
         [SerializeField, HideInInspector]
         Vector3Int Position;
@@ -37,26 +43,38 @@ namespace TiledDungeon
         [SerializeField, HideInInspector]
         TiledObjectLayer.Rect[] Rects;
 
+        [SerializeField]
+        AbstractDungeonAction OpenAction;
+
+        [SerializeField]
+        AbstractDungeonAction CloseAction;
+
         bool isLocked;
 
         string key;
 
         bool consumesKey;
 
+        AbstractDungeonAction ActiveAction
+        {
+            get
+            {
+                if (OpenAction.IsEasing) return OpenAction;
+                if (CloseAction.IsEasing) return CloseAction;
+                return null;
+            }
+        }
+
         public bool BlockingPassage
         {
             get
             {
-                if (!DoorSliding.IsEasing) return !isOpen;
+                if (ActiveAction == CloseAction) return true;
 
-                if (DoorSliding.EvaluateEnd() == 1 && DoorSliding.Evaluate() > 0.25f)
-                {
-                    return false;
-                }
-
-                return true;
+                return !isOpen;
             }
         }
+
 
         public DirectionAxis Axis
         {
@@ -178,38 +196,30 @@ namespace TiledDungeon
         [ContextMenu("Interact")]
         public void Interact()
         {
-            if (Door == null) { return; }
-
             Debug.Log($"Toggling door at {Position} from Open({isOpen})");
-
-            if (DoorSliding.IsEasing)
+            if (ActiveAction != null)
             {
-                DoorSliding.AbortEase();
-            } else if (isOpen)
+                var action =  ActiveAction;
+                action.Abandon();
+                (action == OpenAction ? CloseAction : OpenAction).PlayFromCurrentProgress(() => isOpen = action == CloseAction);
+            } else
             {
-                DoorSliding.EaseEndToStart();
-            } else 
-            {
-                DoorSliding.EaseStartToEnd();
-            }
-        }
-
-        float SyncOpenness
-        {
-            set
-            {
-                Door.transform.position = doorReferencePosition + Door.transform.right * Mathf.Clamp01(value) * -maxSlide;
+                (isOpen ? CloseAction : OpenAction).Play(() => isOpen = !isOpen);
             }
         }
 
         void SyncDoor()
         {
-            if (!hasSetReferencePosition) { 
-                doorReferencePosition = Door.position;
-                hasSetReferencePosition = true;
+            if (isOpen)
+            {
+                OpenAction.Play(null);
+                OpenAction.Finalise();
+            } else
+            {
+                CloseAction.Play(null);
+                CloseAction.Finalise();
             }
 
-            SyncOpenness = isOpen ? 1 : 0;
             isLocked = modifications.Any(
                 mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked
             );
@@ -228,19 +238,6 @@ namespace TiledDungeon
             }
 
             Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen})");
-        }
-
-
-        private void Update()
-        {
-            if (DoorSliding.IsEasing)
-            {
-                SyncOpenness = DoorSliding.Evaluate();
-                if (!DoorSliding.IsEasing)
-                {
-                    isOpen = DoorSliding.Evaluate() == 1;
-                }
-            }
         }
     }
 }

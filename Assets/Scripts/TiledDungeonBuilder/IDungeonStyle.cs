@@ -1,5 +1,6 @@
 using LMCore.Crawler;
 using UnityEngine;
+using TiledDungeon.Integration;
 
 namespace TiledDungeon {
     public interface IDungeonStyle

@@ -2,6 +2,7 @@ using LMCore.Crawler;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TiledDungeon.Integration;
 
 namespace TiledDungeon
 {

@@ -47,7 +47,26 @@ namespace LMCore.Juice
             duration = fullEaseDuration;
         }
 
+        public void EaseStartToEnd(float startProgress)
+        {
+            if (IsEasing) { return; }
+
+            progressStart = startProgress;
+            progressEnd = 1;
+            easeStart = Time.timeSinceLevelLoad;
+            IsEasing = true;
+            duration = fullEaseDuration - progressStart * duration;
+        }
+
+        
         public void AbortEase()
+        {
+            if (!IsEasing) { return; }
+            easeStart = Time.timeSinceLevelLoad - duration;
+            IsEasing = false;
+        }
+
+        public void ReverseEase()
         {
             if (!IsEasing) { return; }
 
@@ -83,6 +102,15 @@ namespace LMCore.Juice
                     Vector2.Lerp(
                     (Vector2)Convert.ChangeType(StartValue, t),
                     (Vector2)Convert.ChangeType(EndValue, t),
+                    progress
+                ), t);
+            }
+            if (t == typeof(Vector3))
+            {
+                return (T)Convert.ChangeType(
+                    Vector3.Lerp(
+                    (Vector3)Convert.ChangeType(StartValue, t),
+                    (Vector3)Convert.ChangeType(EndValue, t),
                     progress
                 ), t);
             }

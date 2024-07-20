@@ -30,7 +30,7 @@ namespace LMCore.UI
             }
             else
             {
-                easing.AbortEase();
+                easing.ReverseEase();
             }
         }
 
@@ -42,7 +42,7 @@ namespace LMCore.UI
             }
             else
             {
-                easing.AbortEase();
+                easing.ReverseEase();
             }
         }
 

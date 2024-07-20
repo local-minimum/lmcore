@@ -1,12 +1,9 @@
-using LMCore.Crawler;
 using LMCore.IO;
-using System.Collections;
 using System.Collections.Generic;
 using TiledImporter;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-namespace TiledDungeon
+namespace TiledDungeon.Integration
 {
     public enum TDEnumRotation 
     {

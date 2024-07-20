@@ -124,8 +124,8 @@ public class PullUIToTarget : MonoBehaviour
             mb.enabled = true; 
         }
 
-        rotationEasing.AbortEase();
-        positionEasing.AbortEase();
+        rotationEasing.ReverseEase();
+        positionEasing.ReverseEase();
 
         toggledBehaviours.Clear();
 
