@@ -205,7 +205,11 @@ namespace TiledDungeon
             {
                 if (hasTrapDoor && direction == Direction.Down)
                 {
-                    var trapdoor = Dungeon.Style.Get(transform, TiledConfiguration.instance.TrapDoorClass);
+                    var trapdoor = Dungeon.Style.Get(
+                        transform, 
+                        TiledConfiguration.instance.TrapDoorClass,
+                        TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey)
+                    );
                     trapdoor.name = $"TrapDoor ({direction})";
 
                     var door = trapdoor.GetComponent<TDDoor>();

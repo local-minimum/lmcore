@@ -53,11 +53,6 @@ namespace TiledDungeon
 
         public GameObject Get(Transform parent, string classId, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.TrapDoorClass)
-            {
-                return Instantiate(TrapDoor, parent);
-            }
-
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
         }
@@ -109,6 +104,7 @@ namespace TiledDungeon
         {
             if (classId == TiledConfiguration.instance.GrateClass) return InstantiateWithOrientation(parent, Grate, orientation);
             if (classId == TiledConfiguration.instance.ObstructionClass) return InstantiateWithOrientation(parent, Obstruction, orientation);
+            if (classId == TiledConfiguration.instance.TrapDoorClass) return InstantiateWithOrientation(parent, TrapDoor, orientation);
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
