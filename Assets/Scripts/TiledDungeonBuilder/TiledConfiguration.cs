@@ -46,8 +46,10 @@ namespace TiledDungeon
         public string SidesClassKey = "Sides";
 
         [Header("Object Layer Items")]
-        public string LockItemClass = "Lock";
-        public string InitialClass = "Initial";
-
+        public string ObjLockItemClass = "Lock";
+        public string ObjInitialClass = "Initial";
+        public string ObjToggleGroupClass = "ToggleGroup";
+        public string ObjVariantStyleKey = "Style";
+        public string ObjGroupKey = "Group";
     }
 }

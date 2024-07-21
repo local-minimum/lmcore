@@ -1,12 +1,10 @@
 using LMCore.Crawler;
-using LMCore.Juice;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using TiledImporter;
 using TiledDungeon.Integration;
 using TiledDungeon.Actions;
-using System.Diagnostics.Tracing;
 
 namespace TiledDungeon
 {
@@ -24,11 +22,9 @@ namespace TiledDungeon
         [SerializeField, HideInInspector]
         TileModification[] modifications;
 
-        [SerializeField, HideInInspector]
-        TiledObjectLayer.Point[] Points;
 
         [SerializeField, HideInInspector]
-        TiledObjectLayer.Rect[] Rects;
+        TDNode node;
 
         [SerializeField]
         AbstractDungeonAction[] OpenActions;
@@ -92,20 +88,18 @@ namespace TiledDungeon
 
         private void Start()
         {
-            SyncDoor();
+            if (node != null) SyncDoor();
         }
 
         public void Configure(
+            TDNode node,
             Vector3Int position, 
-            TileModification[] modifications, 
-            TiledObjectLayer.Point[] points, 
-            TiledObjectLayer.Rect[] rects
+            TileModification[] modifications
         )
         {
             Position = position;
             this.modifications = modifications;
-            Points = points;
-            Rects = rects;
+            this.node = node;
 
             SyncDoor();
         }
@@ -224,17 +218,20 @@ namespace TiledDungeon
 
         void SyncDoor()
         {
-            var openProperties = Points
-                .FirstOrDefault(p => p.Type == TiledConfiguration.instance.InitialClass)
-                ?.CustomProperties
-                ?? Rects
-                    .FirstOrDefault(p => p.Type == TiledConfiguration.instance.InitialClass)
-                    ?.CustomProperties;
+            var toggleGroup = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjToggleGroupClass,
+                props => props?.Int(TiledConfiguration.instance.ObjGroupKey) ?? -1
+            );
 
-            if (openProperties != null)
+            if (toggleGroup > 0)
             {
-                isOpen = openProperties.Bool(TiledConfiguration.instance.OpenKey);
+                ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
             }
+
+            isOpen = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjInitialClass,
+                props => props == null ? false : props.Bool(TiledConfiguration.instance.OpenKey)
+            );
 
             MapOverActions(isOpen ? OpenActions : CloseActions, (action) => {
                 action.Play(null);
@@ -245,18 +242,14 @@ namespace TiledDungeon
                 mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked
             );
 
-            var keyProperties = Points
-                .FirstOrDefault(p => p.Type == TiledConfiguration.instance.LockItemClass)
-                ?.CustomProperties
-                ?? Rects
-                    .FirstOrDefault(r => r.Type == TiledConfiguration.instance.LockItemClass)
-                    ?.CustomProperties;
-
-            if (keyProperties != null )
-            {
-                key = keyProperties.String(TiledConfiguration.instance.KeyKey);
-                consumesKey = keyProperties.Bool(TiledConfiguration.instance.ConusumesKeyKey);
-            }
+            key = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjLockItemClass,
+                props => props?.String(TiledConfiguration.instance.KeyKey)
+            );
+            consumesKey = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjLockItemClass,
+                props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
+            );
 
             Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen})");
         }

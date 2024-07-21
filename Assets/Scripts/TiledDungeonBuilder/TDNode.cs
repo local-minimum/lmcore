@@ -93,6 +93,10 @@ namespace TiledDungeon
             (door == null ? true : door.BlockingPassage);
 
 
+        string NodeStyle => 
+            Points.Select(pt => pt.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null) ??
+            Rects.Select(r => r.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null);
+
         void ConfigureGrates()
         {
             var grate = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.GrateClass);
@@ -101,7 +105,8 @@ namespace TiledDungeon
             Dungeon.Style.Get(
                 transform, 
                 TiledConfiguration.instance.GrateClass, 
-                grate.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey)
+                grate.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                NodeStyle
             );
         }
 
@@ -113,7 +118,8 @@ namespace TiledDungeon
             Dungeon.Style.Get(
                 transform, 
                 TiledConfiguration.instance.ObstructionClass, 
-                obstruction.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey)
+                obstruction.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                NodeStyle
             );
         }
 
@@ -129,14 +135,14 @@ namespace TiledDungeon
                 transform, 
                 TiledConfiguration.instance.DoorClass, 
                 doorInfo.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                doorInfo.Tile.CustomProperties.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Closed)
+                doorInfo.Tile.CustomProperties.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Closed),
+                NodeStyle
             );
 
             door?.Configure(
+                this,
                 Coordinates, 
-                modifications.Where(doorFilter).ToArray(),
-                Points,
-                Rects
+                modifications.Where(doorFilter).ToArray()
             );
         }
 
@@ -150,7 +156,8 @@ namespace TiledDungeon
                 Dungeon.Style.Get(
                     transform,
                     TiledConfiguration.instance.LadderClass,
-                    direction 
+                    direction,
+                    NodeStyle
                 );
             }
         }
@@ -184,7 +191,8 @@ namespace TiledDungeon
                 Dungeon.Style.Get(
                     transform,
                     TiledConfiguration.instance.TeleporterClass,
-                    teleporterMod.Tile.CustomProperties.Transition(TiledConfiguration.instance.TransitionKey)
+                    teleporterMod.Tile.CustomProperties.Transition(TiledConfiguration.instance.TransitionKey),
+                    NodeStyle
                     );
                 
                 Debug.Log($"{Coordinates} has teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})");
@@ -208,17 +216,17 @@ namespace TiledDungeon
                     var trapdoor = Dungeon.Style.Get(
                         transform, 
                         TiledConfiguration.instance.TrapDoorClass,
-                        TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey)
+                        TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                        NodeStyle
                     );
                     trapdoor.name = $"TrapDoor ({direction})";
 
                     var door = trapdoor.GetComponent<TDDoor>();
 
                     door?.Configure(
+                        this,
                         Coordinates, 
-                        modifications.Where(doorFilter).ToArray(),
-                        Points,
-                        Rects
+                        modifications.Where(doorFilter).ToArray()
                     );
                     continue;
                 }
@@ -226,7 +234,7 @@ namespace TiledDungeon
                 if (!sides.Has(direction)) continue;
 
                 if (direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasTrapDoor) continue;
-                var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction);
+                var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction, NodeStyle);
                 go.name = direction.ToString();
             }
         }
@@ -254,7 +262,8 @@ namespace TiledDungeon
                 transform, 
                 TiledConfiguration.instance.RampClass, 
                 ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey),
-                ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection()
+                ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection(),
+                NodeStyle
             );
 
         }
@@ -660,9 +669,14 @@ namespace TiledDungeon
 
         public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate)
         {
+            if (Points == null || Rects == null)
+            {
+                Debug.LogWarning($"Node {Coordinates} has Points null ({Points == null}) / Rects null ({Rects == null})");
+            }
+
             return predicate(
-                Points.FirstOrDefault(pt => pt.Type == type)?.CustomProperties ??
-                    Rects.FirstOrDefault(pt => pt.Type == type)?.CustomProperties
+                Points?.FirstOrDefault(pt => pt.Type == type)?.CustomProperties ??
+                    Rects?.FirstOrDefault(pt => pt.Type == type)?.CustomProperties
             );
         }
 
