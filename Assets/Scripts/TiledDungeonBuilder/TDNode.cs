@@ -117,11 +117,12 @@ namespace TiledDungeon
             );
         }
 
+        static System.Func<TileModification, bool> doorFilter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
+
         void ConfigureDoors()
         {
-            System.Func<TileModification, bool> filter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
 
-            var doorInfo = modifications.FirstOrDefault(filter);
+            var doorInfo = modifications.FirstOrDefault(doorFilter);
             if (doorInfo == null) return;
 
             Dungeon.Style.Get(
@@ -133,7 +134,7 @@ namespace TiledDungeon
 
             door?.Configure(
                 Coordinates, 
-                modifications.Where(filter).ToArray(),
+                modifications.Where(doorFilter).ToArray(),
                 Points,
                 Rects
             );
@@ -206,6 +207,15 @@ namespace TiledDungeon
                 {
                     var trapdoor = Dungeon.Style.Get(transform, TiledConfiguration.instance.TrapDoorClass);
                     trapdoor.name = $"TrapDoor ({direction})";
+
+                    var door = trapdoor.GetComponent<TDDoor>();
+
+                    door?.Configure(
+                        Coordinates, 
+                        modifications.Where(doorFilter).ToArray(),
+                        Points,
+                        Rects
+                    );
                     continue;
                 }
 
@@ -638,28 +648,28 @@ namespace TiledDungeon
             return DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, Dungeon.GridSize);
         }
 
-        public T FirstObjectPointValue<T>(string name, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(Points.FirstOrDefault(pt => pt.Name == name).CustomProperties);
+        public T FirstObjectPointValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(Points.FirstOrDefault(pt => pt.Type == type).CustomProperties);
 
-        public T FirstObjectRectValue<T>(string name, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(Rects.FirstOrDefault(pt => pt.Name == name).CustomProperties);
+        public T FirstObjectRectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(Rects.FirstOrDefault(pt => pt.Type == type).CustomProperties);
 
-        public T FirstObjectValue<T>(string name, System.Func<TiledCustomProperties, T> predicate)
+        public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate)
         {
             return predicate(
-                Points.FirstOrDefault(pt => pt.Name == name)?.CustomProperties ??
-                    Rects.FirstOrDefault(pt => pt.Name == name)?.CustomProperties
+                Points.FirstOrDefault(pt => pt.Type == type)?.CustomProperties ??
+                    Rects.FirstOrDefault(pt => pt.Type == type)?.CustomProperties
             );
         }
 
-        public bool HasObjectPoint(string name, System.Func<TiledCustomProperties, bool> predicate) =>
-            Points.Any(pt => pt.Name == name && predicate(pt.CustomProperties));
+        public bool HasObjectPoint(string type, System.Func<TiledCustomProperties, bool> predicate) =>
+            Points.Any(pt => pt.Type == type && predicate(pt.CustomProperties));
 
-        public bool HasObjectRect(string name, System.Func<TiledCustomProperties, bool> predicate) =>
-            Rects.Any(pt => pt.Name == name && predicate(pt.CustomProperties));
+        public bool HasObjectRect(string type, System.Func<TiledCustomProperties, bool> predicate) =>
+            Rects.Any(pt => pt.Type == type && predicate(pt.CustomProperties));
 
-        public bool HasObject(string name, System.Func<TiledCustomProperties, bool> predicate) =>
-            HasObjectPoint(name, predicate) || HasObjectRect(name, predicate);
+        public bool HasObject(string type, System.Func<TiledCustomProperties, bool> predicate) =>
+            HasObjectPoint(type, predicate) || HasObjectRect(type, predicate);
 
         public Vector3Int Neighbour(Direction direction)
         {

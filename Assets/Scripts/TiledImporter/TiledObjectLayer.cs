@@ -15,6 +15,7 @@ namespace TiledImporter
         {
             public int Id;
             public string Name;
+            public string Type;
             
             // TODO: Does not support rotation
 
@@ -38,7 +39,7 @@ namespace TiledImporter
             {
                 Id = tiledObject.GetIntAttribute("id");
                 Name = tiledObject.GetAttribute("name");
-
+                Type = tiledObject.GetAttribute("type");
                 CustomProperties = TiledCustomProperties.From(tiledObject.Element("properties"), enums);
             }
 

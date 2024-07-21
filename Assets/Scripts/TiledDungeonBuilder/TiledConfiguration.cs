@@ -33,6 +33,7 @@ namespace TiledDungeon
         [Header("Booleans")]
         public string TrapKey = "Trap";
         public string ConusumesKeyKey = "ConsumesKey";
+        public string OpenKey = "Open";
 
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";
@@ -45,7 +46,8 @@ namespace TiledDungeon
         public string SidesClassKey = "Sides";
 
         [Header("Object Layer Items")]
-        public string LockItem = "Lock";
+        public string LockItemClass = "Lock";
+        public string InitialClass = "Initial";
 
     }
 }

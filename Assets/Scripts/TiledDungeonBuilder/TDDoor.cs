@@ -224,6 +224,18 @@ namespace TiledDungeon
 
         void SyncDoor()
         {
+            var openProperties = Points
+                .FirstOrDefault(p => p.Type == TiledConfiguration.instance.InitialClass)
+                ?.CustomProperties
+                ?? Rects
+                    .FirstOrDefault(p => p.Type == TiledConfiguration.instance.InitialClass)
+                    ?.CustomProperties;
+
+            if (openProperties != null)
+            {
+                isOpen = openProperties.Bool(TiledConfiguration.instance.OpenKey);
+            }
+
             MapOverActions(isOpen ? OpenActions : CloseActions, (action) => {
                 action.Play(null);
                 action.Finalise();
@@ -234,10 +246,10 @@ namespace TiledDungeon
             );
 
             var keyProperties = Points
-                .FirstOrDefault(p => p.Name == TiledConfiguration.instance.LockItem)
+                .FirstOrDefault(p => p.Type == TiledConfiguration.instance.LockItemClass)
                 ?.CustomProperties
                 ?? Rects
-                    .FirstOrDefault(r => r.Name == TiledConfiguration.instance.LockItem)
+                    .FirstOrDefault(r => r.Type == TiledConfiguration.instance.LockItemClass)
                     ?.CustomProperties;
 
             if (keyProperties != null )
