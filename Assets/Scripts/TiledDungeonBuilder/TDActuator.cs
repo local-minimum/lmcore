@@ -34,11 +34,6 @@ public class TDActuator : MonoBehaviour
             .ToHashSet()
             .ToArray();
 
-        foreach (var prop in props)
-        {
-            Debug.Log($"Actuator: {prop.Int(TiledConfiguration.instance.ObjGroupKey)}");
-        }
-
         repeatable = props
             .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
 
@@ -62,7 +57,7 @@ public class TDActuator : MonoBehaviour
 
         foreach (var group in groups) {
             ToggleGroup.instance.Toggle(group);
-            Debug.Log($"Toggling group {group}");
+            Debug.Log($"Actuator {name} @ {Coordinates} is toggling group: {group}");
         }
 
         foreach (var action in pressActions)
@@ -71,7 +66,7 @@ public class TDActuator : MonoBehaviour
         }
 
         active = repeatable;
-        Debug.Log($"After press we are {active}");
+        Debug.Log($"Actuator {name} @ {Coordinates} is {(active ? "active" : "inactive")} after interaction");
     }
 
 }

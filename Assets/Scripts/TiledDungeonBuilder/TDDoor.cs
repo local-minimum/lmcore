@@ -218,12 +218,15 @@ namespace TiledDungeon
 
         void SyncDoor()
         {
-            var toggleGroup = node.FirstObjectValue(
-                TiledConfiguration.instance.ObjToggleGroupClass,
-                props => props?.Int(TiledConfiguration.instance.ObjGroupKey) ?? -1
-            );
+            var toggleGroups = node
+                .GetObjectValues(
+                    TiledConfiguration.instance.ObjToggleGroupClass,
+                    props => props.Int(TiledConfiguration.instance.ObjGroupKey)
+                )
+                .Where(group => group > 0)
+                .ToHashSet();
 
-            if (toggleGroup > 0)
+            foreach (var toggleGroup in toggleGroups)
             {
                 ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
             }
