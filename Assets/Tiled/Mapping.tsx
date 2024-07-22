@@ -690,26 +690,30 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="64" type="Alcove - Face S">
+ <tile id="64" type="Alcove">
   <properties>
+   <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
- <tile id="65" type="Alcove - Face W">
+ <tile id="65" type="Alcove">
   <properties>
+   <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
- <tile id="66" type="Alcove - Face N">
+ <tile id="66" type="Alcove">
   <properties>
+   <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
- <tile id="67" type="Alcove - Face E">
+ <tile id="67" type="Alcove">
   <properties>
+   <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
