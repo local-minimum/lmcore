@@ -27,7 +27,12 @@ namespace TiledDungeon.Actions {
 
         public override void Abandon()
         {
+            if (abandonned) return;
+
             abandonned = true;
+
+            easing.AbortEase();
+            SyncSlide();
         }
 
         System.Action OnDoneCallback;

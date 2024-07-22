@@ -27,11 +27,11 @@
                 9,
                 7
             ],
-            "scale": 2,
-            "selectedLayer": 8,
+            "scale": 1.5,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 301.5,
-                "y": 277.25
+                "x": 428.66666666666663,
+                "y": 249.66666666666666
             }
         },
         "Mapping.tsx": {
@@ -68,10 +68,10 @@
     "project": "Level.tiled-project",
     "property.type": "bool",
     "recentFiles": [
+        "DemoLevel.tmx",
         "Mapping.tsx",
         "Rules/AutomappingDungeons.tmx",
         "Rules/ModernDungeonAutomapping.tmx",
-        "DemoLevel.tmx",
         "Automapping/AutomappingDungeons.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"

@@ -262,6 +262,11 @@ namespace LMCore.Crawler
             {
                 Dungeon[animationEnd.Coordinates]?.Reserve(entity);
             }
+
+            OnMoveStart?.Invoke(
+                entity,
+                states.Select(s => s.Coordinates).ToList()
+            );
         }
 
         float AnimationProgress =>

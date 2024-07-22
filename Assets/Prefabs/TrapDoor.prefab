@@ -52,14 +52,14 @@ MonoBehaviour:
   isOpen: 0
   Position: {x: 0, y: 0, z: 0}
   modifications: []
-  Points: []
-  Rects: []
+  node: {fileID: 0}
   OpenActions:
   - {fileID: 7791902297767733154}
   - {fileID: 4720943597205536078}
   CloseActions:
   - {fileID: 2702676144830640488}
   - {fileID: 7689729729252216670}
+  autoCloseTime: 1
 --- !u!114 &7791902297767733154
 MonoBehaviour:
   m_ObjectHideFlags: 0

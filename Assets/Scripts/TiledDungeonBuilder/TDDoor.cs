@@ -38,6 +38,12 @@ namespace TiledDungeon
 
         bool consumesKey;
 
+        bool automatic;
+        GridEntity trapTriggeringEntity;
+
+        [SerializeField]
+        float autoCloseTime = 0.5f;
+
         Transition ActiveTransition
         {
             get
@@ -65,7 +71,6 @@ namespace TiledDungeon
                     return true;
                 }
 
-                Debug.Log($"Door is open {isOpen}");
                 return !isOpen;
             }
         }
@@ -131,8 +136,42 @@ namespace TiledDungeon
             Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
         }
 
+        bool AutomaticTrapdoorAction(GridEntity entity, List<Vector3Int> positions) =>
+            automatic
+                && !entity.TransportationMode.HasFlag(TransportationMode.Climbing)
+                && !entity.TransportationMode.HasFlag(TransportationMode.Flying)
+                && positions.Contains(Position);
+
+        IEnumerator<WaitForSeconds> AutoClose(string logMessage)
+        {
+            yield return new WaitForSeconds(autoCloseTime);
+            if (isOpen || ActiveTransition == Transition.Opening)
+            {
+                Interact();
+                if (!string.IsNullOrEmpty(logMessage)) Debug.Log(logMessage);
+            }
+            trapTriggeringEntity = null;
+        }
+
         private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions)
         {
+            if (AutomaticTrapdoorAction(entity, positions))
+            {
+                if ((isOpen || ActiveTransition == Transition.Opening) && entity == trapTriggeringEntity && positions.Last() != Position)
+                {
+                    StartCoroutine(AutoClose($"Door @ {Position} automatically closes after {entity.name}"));
+                }
+                else if (!isOpen && positions.First() != Position && positions.Last() == Position)
+                {
+                    Interact();
+                    trapTriggeringEntity = entity;
+                    Debug.Log($"Door @ {Position} automatically opens for {entity.name}");
+                }
+                else {
+                    Debug.Log($"No door action for Open({isOpen}) door");
+                }
+            }
+
             activelyMovingEntities.Add(entity);
         }
 
@@ -141,6 +180,13 @@ namespace TiledDungeon
         private void Mover_OnMoveEnd(GridEntity entity,  bool successful)
         {
             activelyMovingEntities.Remove(entity);
+            if (successful && AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Position }))
+            {
+                entity.Falling = true; 
+            } else if (!successful && trapTriggeringEntity == entity)
+            {
+                StartCoroutine(AutoClose("Door closed because move failed"));
+            }
         }
         private void Movers_OnDeactivateMover(IEntityMover mover)
         {
@@ -200,7 +246,7 @@ namespace TiledDungeon
         [ContextMenu("Interact")]
         public void Interact()
         {
-            Debug.Log($"Toggling door at {Position} from Open({isOpen})");
+            Debug.Log($"Toggling door at {Position} from Open({isOpen} / {ActiveTransition})");
             var transition = ActiveTransition;
             if (transition != Transition.None)
             {
@@ -231,6 +277,11 @@ namespace TiledDungeon
                 ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
             }
 
+            automatic = node.GetObjectValues(
+                TiledConfiguration.instance.TrapDoorClass,
+                props => props.Bool(TiledConfiguration.instance.ObjAutomaticKey)
+            ).Any();
+
             isOpen = node.FirstObjectValue(
                 TiledConfiguration.instance.ObjInitialClass,
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.OpenKey)
@@ -254,7 +305,9 @@ namespace TiledDungeon
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
             );
 
-            Debug.Log($"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen})");
+            Debug.Log(
+                $"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automatic})"
+            );
         }
     }
 }

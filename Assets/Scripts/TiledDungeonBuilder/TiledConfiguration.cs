@@ -54,5 +54,6 @@ namespace TiledDungeon
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
         public string ObjRepeatableKey = "Repeatable";
+        public string ObjAutomaticKey = "Automatic";
     }
 }
