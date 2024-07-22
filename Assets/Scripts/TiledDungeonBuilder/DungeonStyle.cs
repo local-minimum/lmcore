@@ -18,6 +18,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject Celing;
 
+        [SerializeField]
+        GameObject Alcove;
+
         [SerializeField, Tooltip("Replacing a floor")]
         GameObject TrapDoor;
 
@@ -87,6 +90,7 @@ namespace TiledDungeon
             if (classId == TiledConfiguration.instance.BaseTileClass) return InstantiateCubeSide(parent, direction);
             if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
             if (classId == TiledConfiguration.instance.WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
+            if (classId == TiledConfiguration.instance.AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

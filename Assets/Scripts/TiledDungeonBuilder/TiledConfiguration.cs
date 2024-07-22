@@ -18,6 +18,7 @@ namespace TiledDungeon
         public string RampClass = "Ramp";
         public string TrapDoorClass = "TrapDoor";
         public string WallButtonClass = "Button";
+        public string AlcoveClass = "Alcove";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";

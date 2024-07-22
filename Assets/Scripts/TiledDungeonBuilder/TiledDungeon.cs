@@ -139,6 +139,29 @@ namespace TiledDungeon
             var layerSize = layer.LayerSize;
             Func<Vector2Int, Vector2Int> inverseCoordinates = (Vector2Int v) => { return new Vector2Int(v.x, layerSize.y - v.y - 1); };
 
+            Func<int, int, IEnumerable<TileModification>> getModsTiledCoords = (row, col) =>
+                modifiers
+                    .Select(modLayer =>
+                    {
+                        if (!modLayer.InsideLayer(row, col)) return null;
+
+                        var modId = modLayer[row, col];
+                        var tile = map.GetTile(modId, tilesets);
+
+                        if (tile == null) return null;
+
+                        return new TileModification()
+                        {
+                            Layer = modLayer.Name,
+                            LayerProperties = modLayer.CustomProperties,
+                            Tile = tile
+                        };
+                    })
+                    .Where(tm => tm != null);
+
+            Func<Vector3Int, IEnumerable<TileModification>> getModifications = (coords) =>
+                coords.y == elevation ? getModsTiledCoords(layerSize.y - coords.z - 1, coords.x) : null;
+
             for (int row = 0; row < layerSize.y; row++)
             {
                 for (int col = 0; col < layerSize.x; col++)
@@ -154,25 +177,7 @@ namespace TiledDungeon
                     var aboveNode = this[node.Coordinates + Vector3Int.up];
                     var roofed = Roofing(aboveNode, topLayer);
 
-                    var modifications = modifiers
-                        .Select(modLayer =>
-                        {
-                            if (!modLayer.InsideLayer(row, col)) return null;
-
-                            var modId = modLayer[row, col];
-                            var tile = map.GetTile(modId, tilesets);
-
-                            if (tile == null) return null;
-
-                            Debug.Log($"Modification for {node.Coordinates} {tile.Type}");
-                            return new TileModification() { 
-                                Layer = modLayer.Name, 
-                                LayerProperties = modLayer.CustomProperties, 
-                                Tile = tile 
-                            };
-                        })
-                        .Where(tm => tm != null)
-                        .ToArray();
+                    var modifications = getModsTiledCoords(row, col).ToArray();
 
                     var tileRect = inverseCoordinates(coordinates.To2DInXZPlane())
                         .ToUnitRect();
@@ -193,7 +198,8 @@ namespace TiledDungeon
                         this,
                         modifications,
                         points,
-                        rects
+                        rects,
+                        getModifications
                     );
                 }
             }
@@ -248,10 +254,13 @@ namespace TiledDungeon
         [ContextMenu("Regenerate")]
         private void Regenerate()
         {
-            var spawnCoordinates = SpawnTile.Coordinates;
+            var spawnCoordinates = SpawnTile?.Coordinates;
             Clean();
             GenerateMap();
-            SpawnTile = this[spawnCoordinates];
+            if (spawnCoordinates != null)
+            {
+                SpawnTile = this[(Vector3Int)spawnCoordinates];
+            }
         }
 
         [ContextMenu("Spawn")]

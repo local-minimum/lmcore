@@ -199,7 +199,9 @@ namespace TiledDungeon
             }
         }
 
-        void ConfigureCube()
+        void ConfigureCube(
+            System.Func<Vector3Int, IEnumerable<TileModification>> getModifications
+        )
         {
             if (sides == null)
             {
@@ -234,6 +236,24 @@ namespace TiledDungeon
                 if (!sides.Has(direction)) continue;
 
                 if (direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasTrapDoor) continue;
+
+                if (direction.IsPlanarCardinal())
+                {
+                    var neighbour = direction.Translate(Coordinates);
+                    var hasAlcove = getModifications(neighbour)
+                        .Any(nMod => 
+                            nMod.Tile.Type == TiledConfiguration.instance.AlcoveClass
+                            && nMod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() == direction.Inverse()
+                        );
+
+                    if (hasAlcove)
+                    {
+                        // TODO: Possibly it should get its styling from the neighbour tile rather than this
+                        var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
+                        alcove.name = direction.ToString();
+                        continue;
+                    }
+                }
                 var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction, NodeStyle);
                 go.name = direction.ToString();
             }
@@ -297,7 +317,8 @@ namespace TiledDungeon
             TiledDungeon dungeon,
             TileModification[] modifications,
             TiledObjectLayer.Point[] points,
-            TiledObjectLayer.Rect[] rects
+            TiledObjectLayer.Rect[] rects,
+            System.Func<Vector3Int, IEnumerable<TileModification>> getModifications
         )
         {
             this.tile = tile;
@@ -313,7 +334,7 @@ namespace TiledDungeon
             transform.localPosition = Coordinates.ToPosition(dungeon.Scale);
             name = $"TileNode Elevation {Coordinates.y} ({Coordinates.x}, {Coordinates.z})";
 
-            ConfigureCube();
+            ConfigureCube(getModifications);
             ConfigureGrates();
             ConfigureObstructions();
             ConfigureDoors();
