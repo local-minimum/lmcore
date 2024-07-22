@@ -283,6 +283,10 @@
     <point/>
    </object>
    <object id="12" name="Toggle Button Group 1" type="Actuator" x="365.5" y="337">
+    <properties>
+     <property name="Group" type="int" value="1"/>
+     <property name="Repeatable" type="bool" value="true"/>
+    </properties>
     <point/>
    </object>
   </objectgroup>

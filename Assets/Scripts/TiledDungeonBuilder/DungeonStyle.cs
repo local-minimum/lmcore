@@ -51,6 +51,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject UpperRamp;
 
+        [SerializeField]
+        GameObject WallButton;
+
         public GameObject Get(Transform parent, string classId, string variant = null)
         {
             Debug.LogError($"Don't know what a '{classId}' is.");
@@ -83,6 +86,7 @@ namespace TiledDungeon
         {
             if (classId == TiledConfiguration.instance.BaseTileClass) return InstantiateCubeSide(parent, direction);
             if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
+            if (classId == TiledConfiguration.instance.WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

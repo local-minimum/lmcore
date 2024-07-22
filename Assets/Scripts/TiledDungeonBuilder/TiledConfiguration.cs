@@ -17,6 +17,7 @@ namespace TiledDungeon
         public string SpinnerClass = "Spinner";
         public string RampClass = "Ramp";
         public string TrapDoorClass = "TrapDoor";
+        public string WallButtonClass = "Button";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";
@@ -49,7 +50,9 @@ namespace TiledDungeon
         public string ObjLockItemClass = "Lock";
         public string ObjInitialClass = "Initial";
         public string ObjToggleGroupClass = "ToggleGroup";
+        public string ObjActuatorClass = "Actuator";
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
+        public string ObjRepeatableKey = "Repeatable";
     }
 }

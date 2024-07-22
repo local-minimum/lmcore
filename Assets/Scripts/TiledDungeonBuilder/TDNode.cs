@@ -268,6 +268,24 @@ namespace TiledDungeon
 
         }
 
+        void ConfigureWallButtons()
+        {
+            var button = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallButtonClass);
+
+            if (button == null) return;
+
+            var go = Dungeon.Style.Get(
+                transform,
+                TiledConfiguration.instance.WallButtonClass,
+                button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection(),
+                NodeStyle
+            );
+
+            if (go == null) return;
+
+            go.GetComponent<TDActuator>()?.Configure(this);
+        }
+
         TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
@@ -302,6 +320,7 @@ namespace TiledDungeon
             ConfigureLadders();
             ConfigureTeleporter();
             ConfigureRamps();
+            ConfigureWallButtons();
         }
 
         private void OnDestroy()
@@ -667,18 +686,27 @@ namespace TiledDungeon
         public T FirstObjectRectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
             predicate(Rects.FirstOrDefault(pt => pt.Type == type).CustomProperties);
 
-        public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate)
-        {
-            if (Points == null || Rects == null)
-            {
-                Debug.LogWarning($"Node {Coordinates} has Points null ({Points == null}) / Rects null ({Rects == null})");
-            }
+        IEnumerable<TiledObjectLayer.TObject> TObjects => 
+            Points.Select(pt => (TiledObjectLayer.TObject)pt).Concat(Rects);
 
-            return predicate(
-                Points?.FirstOrDefault(pt => pt.Type == type)?.CustomProperties ??
-                    Rects?.FirstOrDefault(pt => pt.Type == type)?.CustomProperties
-            );
+        public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(TObjects.FirstOrDefault(o => o.Type == type)?.CustomProperties);
+
+        public T FirstObjectValue<T>(System.Func<TiledObjectLayer.TObject, bool> filter, System.Func<TiledCustomProperties, T> predicate) =>
+            predicate(TObjects.FirstOrDefault(filter)?.CustomProperties);
+
+        public TiledCustomProperties FirstObjectProps(System.Func<TiledObjectLayer.TObject, bool> filter) =>
+            TObjects.FirstOrDefault(filter)?.CustomProperties;
+
+        public IEnumerable<T> GetObjectValues<T>(string type, System.Func<TiledCustomProperties, T> predicate)
+        {
+            return TObjects
+                .Where(pt => pt.Type == type)
+                .Select(pt => predicate(pt.CustomProperties));
         }
+
+        public IEnumerable<TiledCustomProperties> GetObjectProps(System.Func<TiledObjectLayer.TObject, bool> filter) =>
+            TObjects.Where(filter).Select(o => o.CustomProperties);
 
         public bool HasObjectPoint(string type, System.Func<TiledCustomProperties, bool> predicate) =>
             Points.Any(pt => pt.Type == type && predicate(pt.CustomProperties));
