@@ -145,8 +145,11 @@ namespace LMCore.Crawler
 
             if (!TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(this, Anchor))
             {
-                Debug.Log($"{name} is standing in the air @ {Position} Anchor({Anchor}) Looking({LookDirection}) -> fall");
-                Falling = true;
+                if (!node.HasFloor)
+                {
+                    Debug.Log($"{name} is standing in the air @ {Position} Anchor({Anchor}) Looking({LookDirection}) -> fall");
+                    Falling = true;
+                }
             } else if (Falling)
             {
                 Debug.Log($"{name} ended its fall");

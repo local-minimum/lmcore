@@ -251,7 +251,7 @@ namespace LMCore.Crawler
             Debug.Log($"{name}: Cause fall, clear queue: {clearQueue}");
             inputEnabled = false; 
             if (clearQueue) ClearQueue();
-            EnqueueMovement(Movement.Down);
+            EnqueueMovement(Movement.AbsDown);
             Debug.Log($"Fall {QueueInfo}");
         }
 

@@ -204,10 +204,10 @@ namespace LMCore.Crawler
             {
                 Debug.LogWarning("Movement was ongoing need to end it");
                 mover.EndAnimation(true);
-                if (gEntity.Value.Falling && movement != Movement.Down)
+                if (gEntity.Value.Falling && movement != Movement.AbsDown)
                 {
                     Debug.LogWarning("Overriding movement as fall");
-                    movement = Movement.Down;
+                    movement = Movement.AbsDown;
                 }
             }
 

@@ -23,5 +23,7 @@ namespace LMCore.Crawler
 
         public bool IsHighRamp { get; }
         public bool IsRamp { get; }
+
+        public bool HasFloor { get; }
     }
 }

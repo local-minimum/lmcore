@@ -147,7 +147,7 @@ namespace TiledDungeon
 
             foreach (var occupant in node.Occupants)
             {
-                var movement = push.AsMovement(occupant.LookDirection, occupant.Anchor);
+                var movement = push.AsMovement();
                 Debug.Log($"Spikes @ {position}: Push {occupant.name} {push} using {movement}");
                 occupant.Input.InjectMovement(movement);
             }

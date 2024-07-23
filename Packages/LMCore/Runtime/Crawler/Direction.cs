@@ -383,6 +383,24 @@ namespace LMCore.Crawler
                 case Movement.Up:
                     return down.Inverse();
 
+                case Movement.AbsNorth:
+                    return Direction.North;
+
+                case Movement.AbsSouth:
+                    return Direction.South;
+
+                case Movement.AbsWest:
+                    return Direction.West;
+
+                case Movement.AbsEast:
+                    return Direction.East;
+
+                case Movement.AbsUp: 
+                    return Direction.Up;
+
+                case Movement.AbsDown:
+                    return Direction.Down;
+
                 default:
                     return Direction.None;
             }
@@ -416,6 +434,26 @@ namespace LMCore.Crawler
             if (direction.PitchDown(down, out Direction _) == direction) return Movement.Down;
             if (direction.PitchUp(down, out Direction _) == direction) return Movement.Up;
             return Movement.None;
+        }
+
+        public static Movement AsMovement(this Direction direction) { 
+            switch (direction)
+            {
+                case Direction.North:
+                    return Movement.AbsNorth;
+                case Direction.South:
+                    return Movement.AbsSouth;
+                case Direction.West:
+                    return Movement.AbsWest;
+                case Direction.East:
+                    return Movement.AbsEast;
+                case Direction.Up:
+                    return Movement.AbsUp;
+                case Direction.Down:
+                    return Movement.AbsDown;
+                default:
+                    return Movement.None;
+            }
         }
 
         public static bool IsPlanarCardinal(this Direction direction)
