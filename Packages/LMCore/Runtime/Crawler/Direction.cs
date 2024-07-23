@@ -410,8 +410,9 @@ namespace LMCore.Crawler
         {
             if (direction == lookDirection) return Movement.Forward;
             if (direction.Inverse() == lookDirection) return Movement.Backward;
-            if (direction.Rotate3DCW(down) == direction) return Movement.StrafeRight;
-            if (direction.Rotate3DCCW(down) == direction) return Movement.StrafeLeft;
+            var strafeLeft = lookDirection.Rotate3DCCW(down);
+            if (strafeLeft == direction) return Movement.StrafeLeft;
+            if (strafeLeft.Inverse() == direction) return Movement.StrafeRight;
             if (direction.PitchDown(down, out Direction _) == direction) return Movement.Down;
             if (direction.PitchUp(down, out Direction _) == direction) return Movement.Up;
             return Movement.None;
