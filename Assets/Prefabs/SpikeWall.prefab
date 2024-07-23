@@ -68,6 +68,9 @@ MonoBehaviour:
   - {fileID: 5914518495523094446}
   - {fileID: 2968930400162440303}
   Spikeless: 0
+  retractedTime: 2
+  extendedTime: 0.4
+  animator: {fileID: 7346744609538441152}
 --- !u!95 &7346744609538441152
 Animator:
   serializedVersion: 5
