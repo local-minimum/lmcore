@@ -406,6 +406,17 @@ namespace LMCore.Crawler
             }
         }
 
+        public static Movement AsMovement(this Direction direction, Direction lookDirection, Direction down)
+        {
+            if (direction == lookDirection) return Movement.Forward;
+            if (direction.Inverse() == lookDirection) return Movement.Backward;
+            if (direction.Rotate3DCW(down) == direction) return Movement.StrafeRight;
+            if (direction.Rotate3DCCW(down) == direction) return Movement.StrafeLeft;
+            if (direction.PitchDown(down, out Direction _) == direction) return Movement.Down;
+            if (direction.PitchUp(down, out Direction _) == direction) return Movement.Up;
+            return Movement.None;
+        }
+
         public static bool IsPlanarCardinal(this Direction direction)
         {
             return direction != Direction.Up && direction != Direction.Down;

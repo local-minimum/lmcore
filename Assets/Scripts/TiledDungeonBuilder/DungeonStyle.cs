@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TiledDungeon.Integration;
+using UnityEngine.Tilemaps;
 
 namespace TiledDungeon
 {
@@ -23,6 +24,9 @@ namespace TiledDungeon
 
         [SerializeField, Tooltip("Replacing a floor")]
         GameObject TrapDoor;
+
+        [SerializeField]
+        GameObject WallSpikes;
 
         [Header("Objects")]
         [SerializeField]
@@ -91,6 +95,12 @@ namespace TiledDungeon
             if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
             if (classId == TiledConfiguration.instance.WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
             if (classId == TiledConfiguration.instance.AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
+            if (classId == TiledConfiguration.instance.SpikeTrapClass)
+            {
+                if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, WallSpikes, direction);
+                Debug.LogWarning($"Don't know how to instantiate {direction} spikes");
+                return null;
+            }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

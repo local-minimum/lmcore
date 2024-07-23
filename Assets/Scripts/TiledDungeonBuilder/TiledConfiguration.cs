@@ -19,6 +19,7 @@ namespace TiledDungeon
         public string TrapDoorClass = "TrapDoor";
         public string WallButtonClass = "Button";
         public string AlcoveClass = "Alcove";
+        public string SpikeTrapClass = "Spikes";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";
@@ -56,5 +57,6 @@ namespace TiledDungeon
         public string ObjGroupKey = "Group";
         public string ObjRepeatableKey = "Repeatable";
         public string ObjAutomaticKey = "Automatic";
+        public string ObjSpikelessKey = "Spikeless";
     }
 }

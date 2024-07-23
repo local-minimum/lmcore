@@ -70,6 +70,19 @@ namespace TiledDungeon
             }
         }
 
+        TDSpikeTrap _spikes;
+        TDSpikeTrap spikes
+        {
+            get
+            {
+                if (_spikes == null)
+                {
+                    _spikes = GetComponentInChildren<TDSpikeTrap>();
+                }
+                return _spikes;
+            }
+        }
+
         public bool Walkable => 
             !Obstructed 
             && tile.CustomProperties
@@ -90,7 +103,8 @@ namespace TiledDungeon
             .CustomProperties
             .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
             .Obstructing()) && 
-            (door == null ? true : door.BlockingPassage);
+            (door == null ? true : door.BlockingPassage) || 
+            (spikes == null ? false : spikes.BlockingEntry);
 
 
         string NodeStyle => 
@@ -252,6 +266,9 @@ namespace TiledDungeon
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
                         continue;
+                    } else if (ConfigureSpike(direction))
+                    {
+                        continue;
                     }
                 }
                 var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction, NodeStyle);
@@ -304,6 +321,26 @@ namespace TiledDungeon
             if (go == null) return;
 
             go.GetComponent<TDActuator>()?.Configure(this);
+        }
+
+        bool ConfigureSpike(Direction directection)
+        {
+            var spikes = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.SpikeTrapClass);
+
+            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != directection) return false; 
+
+            var go = Dungeon.Style.Get(
+                transform,
+                TiledConfiguration.instance.SpikeTrapClass,
+                directection,
+                NodeStyle
+            );
+
+            if (go == null) return false;
+
+            go.GetComponent<TDSpikeTrap>()?.Configure(this, Coordinates, modifications);
+
+            return true;
         }
 
         TileModification TrapdoorModification =>
@@ -616,6 +653,8 @@ namespace TiledDungeon
                 _occupants.Add(entity);
             }
         }
+
+        public IEnumerable<GridEntity> Occupants => _occupants;
 
         public void Reserve(GridEntity entity)
         {
