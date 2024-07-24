@@ -38,8 +38,7 @@ namespace TiledDungeon
 
         bool consumesKey;
 
-        bool automatic;
-        GridEntity trapTriggeringEntity;
+        bool automaticTrapDoor;
 
         [SerializeField]
         float autoCloseTime = 0.5f;
@@ -136,56 +135,72 @@ namespace TiledDungeon
             Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
         }
 
-        bool AutomaticTrapdoorAction(GridEntity entity, List<Vector3Int> positions) =>
-            automatic
+        bool AutomaticTrapdoorAction(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors, out bool endsOnTrap)
+        {
+            var states = positions
+                .Zip(anchors, (pos, anch) => new { pos, anch })
+                .Select(state => state.pos == Position && state.anch == Direction.Down)
+                .ToArray();
+
+            endsOnTrap = states.LastOrDefault();
+            
+            return automaticTrapDoor
                 && !entity.TransportationMode.HasFlag(TransportationMode.Climbing)
                 && !entity.TransportationMode.HasFlag(TransportationMode.Flying)
-                && positions.Contains(Position);
+                && states.Any(b => b);
+        }
+
+        HashSet<GridEntity> trapTriggeringEntities = new HashSet<GridEntity>();
 
         IEnumerator<WaitForSeconds> AutoClose(string logMessage)
         {
             yield return new WaitForSeconds(autoCloseTime);
             if (isOpen || ActiveTransition == Transition.Opening)
             {
-                Interact();
+                CloseDoor();
                 if (!string.IsNullOrEmpty(logMessage)) Debug.Log(logMessage);
             }
-            trapTriggeringEntity = null;
         }
 
         private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors)
         {
-            if (AutomaticTrapdoorAction(entity, positions))
+            activelyMovingEntities.Add(entity);
+
+            if (AutomaticTrapdoorAction(entity, positions, anchors, out bool endsOnTrap))
             {
-                if ((isOpen || ActiveTransition == Transition.Opening) && entity == trapTriggeringEntity && positions.Last() != Position)
+                if (endsOnTrap)
+                {
+                    trapTriggeringEntities.Add(entity);
+                } else
+                {
+                    trapTriggeringEntities.Remove(entity);
+                }
+
+                if (isOpen || ActiveTransition == Transition.Opening)
                 {
                     StartCoroutine(AutoClose($"Door @ {Position} automatically closes after {entity.name}"));
                 }
-                else if (!isOpen && positions.First() != Position && positions.Last() == Position)
+                else if (endsOnTrap)
                 {
-                    Interact();
-                    trapTriggeringEntity = entity;
+                    OpenDoor();
                     Debug.Log($"Door @ {Position} automatically opens for {entity.name}");
                 }
                 else {
-                    Debug.Log($"No door action for Open({isOpen}) door");
+                    Debug.Log($"No door action for Open({isOpen}) ActiveTransition({ActiveTransition}) door");
+                    return;
                 }
-            }
 
-            activelyMovingEntities.Add(entity);
+            }
         }
 
         HashSet<GridEntity> activelyMovingEntities = new();
 
-        private void Mover_OnMoveEnd(GridEntity entity,  bool successful)
+        private void Mover_OnMoveEnd(GridEntity entity, bool successful)
         {
             activelyMovingEntities.Remove(entity);
-            if (successful && AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Position }))
+            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Position }, new List<Direction> { entity.Anchor }, out bool _))
             {
                 entity.Falling = true; 
-            } else if (!successful && trapTriggeringEntity == entity)
-            {
-                StartCoroutine(AutoClose("Door closed because move failed"));
             }
         }
         private void Movers_OnDeactivateMover(IEntityMover mover)
@@ -243,22 +258,60 @@ namespace TiledDungeon
             }
         }
 
+        void CloseDoor()
+        {
+            var transition = ActiveTransition;
+            if (transition == Transition.Closing) return;
+
+            if (transition == Transition.Opening)
+            {
+                MapOverActions(OpenActions, (action) => action.Abandon());
+                MapOverActions(CloseActions, (action) => action.PlayFromCurrentProgress(() => isOpen = false));
+            } else
+            {
+                MapOverActions(CloseActions, (action) => action.Play(() => isOpen = false));
+            }
+        }
+
+        void OpenDoor()
+        {
+            var transition = ActiveTransition;
+            if (transition == Transition.Opening) return;
+
+            if (transition == Transition.Closing)
+            {
+                MapOverActions(CloseActions, (action) => action.Abandon());
+                MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(() => isOpen = true));
+            } else
+            {
+                MapOverActions(OpenActions, (action) => action.Play(() => isOpen = true));
+            }
+        }
+
         [ContextMenu("Interact")]
         public void Interact()
         {
             Debug.Log($"Toggling door at {Position} from Open({isOpen} / {ActiveTransition})");
-            var transition = ActiveTransition;
-            if (transition != Transition.None)
+            switch (ActiveTransition)
             {
-                Debug.Log("Resque from previous action");
-                MapOverActions(transition == Transition.Opening ? OpenActions : CloseActions, (action) => action.Abandon());
-                MapOverActions(transition == Transition.Opening ? CloseActions : OpenActions, (action) => action.PlayFromCurrentProgress(
-                    () => isOpen = transition == Transition.Closing));
-
-            } else
-            {
-                var endsOpen = !isOpen;
-                MapOverActions(isOpen ? CloseActions : OpenActions, (action) => action.Play(() => isOpen = endsOpen));
+                case Transition.None:
+                    if (isOpen)
+                    {
+                        CloseDoor();
+                    } else
+                    {
+                        OpenDoor();
+                    }
+                    break;
+                case Transition.Opening:
+                    CloseDoor();
+                    break;
+                case Transition.Closing:
+                    OpenDoor();
+                    break;
+                default:
+                    Debug.LogError($"Door at {Position} has unhandled transition: {ActiveTransition}");
+                    break;
             }
         }
 
@@ -277,9 +330,9 @@ namespace TiledDungeon
                 ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
             }
 
-            automatic = node.GetObjectValues(
+            automaticTrapDoor = node.GetObjectValues(
                 TiledConfiguration.instance.TrapDoorClass,
-                props => props.Bool(TiledConfiguration.instance.ObjAutomaticKey)
+                props => props.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Automatic
             ).Any();
 
             isOpen = node.FirstObjectValue(
@@ -306,7 +359,7 @@ namespace TiledDungeon
             );
 
             Debug.Log(
-                $"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automatic})"
+                $"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automaticTrapDoor})"
             );
         }
     }

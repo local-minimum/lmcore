@@ -112,7 +112,7 @@ public class TDActuator : MonoBehaviour
     }
 
 
-    GridEntity occupant;
+    HashSet<GridEntity> occupants = new HashSet<GridEntity>();
     private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors)
     {
         if (!active) return;
@@ -121,9 +121,12 @@ public class TDActuator : MonoBehaviour
             .Skip(1)
             .Any(state => state.pos == Coordinates && state.anch == anchor);
 
-        if (passesPlate && (automaticallyResets || !lastActionWasPress))
+        if (passesPlate)
         {
-            occupant = entity;
+            bool wasEmpty = occupants.Count == 0;
+            occupants.Add(entity);
+
+            if (automaticallyResets || (!lastActionWasPress && wasEmpty))
             Press();
         }
     }
@@ -131,10 +134,14 @@ public class TDActuator : MonoBehaviour
     private void Mover_OnMoveEnd(GridEntity enity, bool successful)
     {
         if (!active) return;
-        if (occupant != null && lastActionWasPress && (enity.Position != Coordinates || enity.Anchor != anchor))
+        if (occupants.Contains(enity) && (enity.Position != Coordinates || enity.Anchor != anchor))
         {
-            Depress();
-            occupant = null;
+            occupants.Remove(enity);
+
+            if (lastActionWasPress)
+            {
+                Depress();
+            }
         }
     }
 
