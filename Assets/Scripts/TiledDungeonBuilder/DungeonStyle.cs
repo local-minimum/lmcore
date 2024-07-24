@@ -28,6 +28,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject WallSpikes;
 
+        [SerializeField]
+        GameObject PressurePlate;
+
         [Header("Objects")]
         [SerializeField]
         GameObject Ladder;
@@ -60,9 +63,10 @@ namespace TiledDungeon
 
         [SerializeField]
         GameObject WallButton;
-
+        
         public GameObject Get(Transform parent, string classId, string variant = null)
         {
+            if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
         }

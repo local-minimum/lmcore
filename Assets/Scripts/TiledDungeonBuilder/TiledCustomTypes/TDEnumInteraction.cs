@@ -12,6 +12,7 @@ namespace TiledDungeon.Integration
         Interactable,
         Locked,
         Obstruction,
+        Automatic,
         Unknown
     }
 
@@ -61,6 +62,8 @@ namespace TiledDungeon.Integration
                     return TDEnumInteraction.Locked;
                 case "Obstruction":
                     return TDEnumInteraction.Obstruction;
+                case "Automatic":
+                    return TDEnumInteraction.Automatic;
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Interaction");
                     return TDEnumInteraction.Unknown;

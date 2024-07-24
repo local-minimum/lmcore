@@ -5,6 +5,9 @@ using System.Linq;
 using LMCore.Crawler;
 using LMCore.Extensions;
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace TiledDungeon
 {
@@ -248,7 +251,10 @@ namespace TiledDungeon
 
         [ContextMenu("Clean")]
         private void Clean() {
-            transform.DestroyAllChildren(DestroyImmediate);
+            levelParent.DestroyAllChildren(DestroyImmediate);
+#if UNITY_EDITOR
+            Undo.RegisterFullObjectHierarchyUndo(levelParent, "Clean level");
+#endif
         }
 
         [ContextMenu("Regenerate")]
@@ -261,6 +267,10 @@ namespace TiledDungeon
             {
                 SpawnTile = this[(Vector3Int)spawnCoordinates];
             }
+
+#if UNITY_EDITOR
+            Undo.RegisterFullObjectHierarchyUndo(levelParent, "Regenerate level");
+#endif
         }
 
         [ContextMenu("Spawn")]

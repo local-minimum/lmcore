@@ -227,25 +227,49 @@ namespace TiledDungeon
             var aboveNode = Coordinates + Vector3Int.up;
             foreach (var direction in DirectionExtensions.AllDirections)
             {
-                if (hasTrapDoor && direction == Direction.Down)
+                if (direction == Direction.Down)
                 {
-                    var trapdoor = Dungeon.Style.Get(
-                        transform, 
-                        TiledConfiguration.instance.TrapDoorClass,
-                        TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                        NodeStyle
-                    );
-                    trapdoor.name = $"TrapDoor ({direction})";
+                    if (hasTrapDoor)
+                    {
+                        var trapdoor = Dungeon.Style.Get(
+                            transform,
+                            TiledConfiguration.instance.TrapDoorClass,
+                            TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                            NodeStyle
+                        );
+                        if (trapdoor != null)
+                        {
+                            trapdoor.name = $"TrapDoor ({direction})";
 
-                    var door = trapdoor.GetComponent<TDDoor>();
+                            var door = trapdoor.GetComponent<TDDoor>();
 
-                    door?.Configure(
-                        this,
-                        Coordinates, 
-                        modifications.Where(doorFilter).ToArray()
-                    );
-                    continue;
+                            door?.Configure(
+                                this,
+                                Coordinates,
+                                modifications.Where(doorFilter).ToArray()
+                            );
+                            continue;
+                        }
+                    }
+                    else if (hasPressurePlate) {
+                        var plate = Dungeon.Style.Get(
+                            transform,
+                            TiledConfiguration.instance.PressurePlateClass,
+                            NodeStyle
+                        );
+
+                        if (plate != null)
+                        {
+                            plate.name = $"Pressure Plate ({direction})";
+
+                            var pressurePlate = plate.GetComponent<TDActuator>();
+
+                            pressurePlate?.Configure(this);
+                            continue;
+                        }
+                    }
                 }
+
 
                 if (!sides.Has(direction)) continue;
 
@@ -347,6 +371,11 @@ namespace TiledDungeon
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
         public bool HasTrapDoor => TrapdoorModification != null;
+
+        TileModification PressurePlateModification =>
+            modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.PressurePlateClass);
+
+        public bool hasPressurePlate => PressurePlateModification != null;
 
         public void Configure(
             TiledTile tile, 

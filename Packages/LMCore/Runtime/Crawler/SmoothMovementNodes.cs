@@ -265,7 +265,8 @@ namespace LMCore.Crawler
 
             OnMoveStart?.Invoke(
                 entity,
-                states.Select(s => s.Coordinates).ToList()
+                states.Select(s => s.Coordinates).ToList(),
+                states.Select(s => s.Anchor).ToList()
             );
         }
 

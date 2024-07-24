@@ -1,6 +1,4 @@
 using LMCore.AbstractClasses;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace TiledDungeon
@@ -20,6 +18,7 @@ namespace TiledDungeon
         public string WallButtonClass = "Button";
         public string AlcoveClass = "Alcove";
         public string SpikeTrapClass = "Spikes";
+        public string PressurePlateClass = "PressurePlate";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";

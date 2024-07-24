@@ -153,7 +153,7 @@ namespace TiledDungeon
             trapTriggeringEntity = null;
         }
 
-        private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions)
+        private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors)
         {
             if (AutomaticTrapdoorAction(entity, positions))
             {

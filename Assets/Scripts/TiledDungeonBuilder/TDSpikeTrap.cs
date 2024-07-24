@@ -1,5 +1,4 @@
 using LMCore.Crawler;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TiledDungeon.Integration;
@@ -9,7 +8,7 @@ namespace TiledDungeon
 {
     public class TDSpikeTrap : MonoBehaviour
     {
-        private enum SpikePhase { Retracted, Extending, Extended, Retracting };
+        private enum SpikePhase { Retracted, Extending, Extended, Retracting, Waiting };
 
         [SerializeField]
         GameObject[] Spikes;
@@ -28,7 +27,7 @@ namespace TiledDungeon
         [SerializeField]
         Animator animator;
 
-        float nextPhase;
+        float nextPhaseTime;
 
         [SerializeField, HideInInspector]
         Direction anchor;
@@ -41,6 +40,16 @@ namespace TiledDungeon
 
         [SerializeField]
         string RetractTrigger = "Retract";
+
+        HashSet<int> ToggleGroups => node
+            .GetObjectValues(
+                TiledConfiguration.instance.ObjToggleGroupClass,
+                props => props.Int(TiledConfiguration.instance.ObjGroupKey)
+            )
+            .Where(group => group > 0)
+            .ToHashSet();
+
+        bool managed;
 
         TDNode _node;
         TDNode node
@@ -58,7 +67,7 @@ namespace TiledDungeon
         void Start()
         {
             Synch();
-            nextPhase = Time.timeSinceLevelLoad + retractedTime;
+            SetNextPhaseTime();
         }
 
         public void Configure(
@@ -81,6 +90,8 @@ namespace TiledDungeon
                 Debug.LogError($"Spikes @ {position} lacks anchor direction");
             }
 
+            Debug.Log($"Spike Trap @ {position}: Spikeless({Spikeless}) Anchor({anchor}) Groups([{string.Join(", ", ToggleGroups)}])");
+
             Synch();
         }
 
@@ -93,6 +104,16 @@ namespace TiledDungeon
                     spike.SetActive(false);
                 }
             }
+
+            var toggleGroups = ToggleGroups;
+            foreach (var toggleGroup in toggleGroups)
+            {
+                ToggleGroup.instance.RegisterReciever(toggleGroup, Extend);
+            }
+
+            managed = toggleGroups.Count > 0;
+
+            phase = managed ? SpikePhase.Waiting : SpikePhase.Retracted;
         }
 
         bool blockingEntry;
@@ -109,18 +130,30 @@ namespace TiledDungeon
         {
             if (phase == SpikePhase.Extending)
             {
-                nextPhase = Time.timeSinceLevelLoad + extendedTime;
                 phase = SpikePhase.Extended;
-            } else if (phase == SpikePhase.Retracting)
+            } else if (phase == SpikePhase.Retracting && !managed)
             {
-                nextPhase = Time.timeSinceLevelLoad + retractedTime;
                 phase = SpikePhase.Retracted;
             } else
             {
-                phase = SpikePhase.Retracted;
+                phase = SpikePhase.Waiting;
             }
+            SetNextPhaseTime();
         }
 
+        void SetNextPhaseTime()
+        {
+
+            switch (phase)
+            {
+                case SpikePhase.Retracted:
+                    nextPhaseTime = Time.timeSinceLevelLoad + retractedTime;
+                    break;
+                case SpikePhase.Extended:
+                    nextPhaseTime = Time.timeSinceLevelLoad + extendedTime;
+                    break;
+            }
+        }
         public void HandleBlockEntry()
         {
             blockingEntry = true;
@@ -153,19 +186,28 @@ namespace TiledDungeon
             }
         }
 
+        void Extend()
+        {
+            phase = SpikePhase.Extending;
+            animator.SetTrigger(ExtendTrigger);
+        }
+
+        void Retract()
+        {
+            phase = SpikePhase.Retracting;
+            animator.SetTrigger(RetractTrigger);
+        }
         private void Update()
         {
-            if (Time.timeSinceLevelLoad > nextPhase)
+            if (Time.timeSinceLevelLoad > nextPhaseTime)
             {
                 switch (phase)
                 {
                     case SpikePhase.Retracted:
-                        phase = SpikePhase.Extending;
-                        animator.SetTrigger(ExtendTrigger);
+                        Extend();
                         break;
                     case SpikePhase.Extended:
-                        phase = SpikePhase.Retracting;
-                        animator.SetTrigger(RetractTrigger);
+                        Retract();
                         break;
                 }
             }

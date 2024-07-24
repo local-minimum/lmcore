@@ -5,7 +5,8 @@ namespace LMCore.Crawler
 {
     public delegate void EntityMovementStartEvent(
         GridEntity entity, 
-        List<Vector3Int> positions
+        List<Vector3Int> positions,
+        List<Direction> anchors
     );
 
     public delegate void EntityMovementEndEvent(

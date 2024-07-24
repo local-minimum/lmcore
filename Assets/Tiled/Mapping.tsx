@@ -865,7 +865,7 @@
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
- <tile id="106" type="Pressureplate">
+ <tile id="106" type="PressurePlate">
   <properties>
    <property name="Anchor" propertytype="Direction" value="Down"/>
   </properties>
