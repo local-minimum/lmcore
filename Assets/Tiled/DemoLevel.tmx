@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="16">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="19">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0" tintcolor="#00aaff">
   <properties>
@@ -230,8 +230,8 @@
 0,0,0,0,0,0,0,0,0,0,0,0,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,99,0,0,101,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,113,99,0,0,101,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,113,113,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,39,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -348,6 +348,34 @@
    <object id="15" name="Manged Spikes" type="ToggleGroup" x="663" y="118" rotation="90">
     <properties>
      <property name="Group" type="int" value="2"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="16" name="Spike 1" type="Sequence" x="238.333" y="341.333">
+    <properties>
+     <property name="Delay" type="float" value="0.5"/>
+     <property name="Group" type="int" value="1"/>
+     <property name="NextPhase" type="int" value="2"/>
+     <property name="Phase" type="int" value="1"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="17" name="Spike 2" type="Sequence" x="239.333" y="372.667">
+    <properties>
+     <property name="Delay" type="float" value="0.5"/>
+     <property name="Group" type="int" value="1"/>
+     <property name="NextPhase" type="int" value="3"/>
+     <property name="Phase" type="int" value="2"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="18" name="Spike 3" type="Sequence" x="272.333" y="372.667">
+    <properties>
+     <property name="Delay" type="float" value="0.5"/>
+     <property name="Group" type="int" value="1"/>
+     <property name="NextPhase" type="int" value="1"/>
+     <property name="Phase" type="int" value="3"/>
+     <property name="Start" type="bool" value="true"/>
     </properties>
     <point/>
    </object>

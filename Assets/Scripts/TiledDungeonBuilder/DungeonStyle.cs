@@ -31,6 +31,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject PressurePlate;
 
+        [SerializeField]
+        GameObject Spikes;
+
         [Header("Objects")]
         [SerializeField]
         GameObject Ladder;
@@ -75,7 +78,7 @@ namespace TiledDungeon
         {
             if (prefab == null) return null;
             var go = Instantiate(prefab, parent);
-            go.transform.rotation = direction.AsQuaternion(Direction.Down);
+            go.transform.rotation = direction.AsQuaternion(Direction.Down, true);
             return go;
         }
 
@@ -88,7 +91,7 @@ namespace TiledDungeon
 
             if (direction == Direction.Up && Celing != null) { return Instantiate(Celing, parent); }
             if (direction == Direction.Down && Floor != null) { return Instantiate(Floor, parent); }
-
+            
             return null;
         }
 
@@ -99,12 +102,13 @@ namespace TiledDungeon
             if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
             if (classId == TiledConfiguration.instance.WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
             if (classId == TiledConfiguration.instance.AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
-            if (classId == TiledConfiguration.instance.SpikeTrapClass)
+            if (classId == TiledConfiguration.instance.WallSpikeTrapClass)
             {
                 if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, WallSpikes, direction);
                 Debug.LogWarning($"Don't know how to instantiate {direction} spikes");
                 return null;
             }
+            if (classId == TiledConfiguration.instance.SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

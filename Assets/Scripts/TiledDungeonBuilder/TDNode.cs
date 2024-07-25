@@ -196,6 +196,11 @@ namespace TiledDungeon
                 (props) => props == null ? 0 : props.Int(TiledConfiguration.instance.TeleporterIdProperty)
             );
 
+        bool HasSpikes(Direction direction) =>
+            modifications.Any(m => 
+                m.Tile.Type == TiledConfiguration.instance.SpikeTrapClass && 
+                m.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() == direction);
+
         void ConfigureTeleporter()
         {
             var teleporterMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
@@ -273,6 +278,24 @@ namespace TiledDungeon
 
                 if (!sides.Has(direction)) continue;
 
+                if (HasSpikes(direction))
+                {
+                    var spikes = Dungeon.Style.Get(
+                        transform,
+                        TiledConfiguration.instance.SpikeTrapClass,
+                        direction,
+                        NodeStyle
+                    );
+
+                    if (spikes != null)
+                    {
+                        spikes.name = $"Spikes ({direction})";
+
+                        spikes.GetComponent<TDSpikeTrap>()?.Configure(this, Coordinates, modifications);
+                        continue;
+                    }
+                }
+
                 if (direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasTrapDoor) continue;
 
                 if (direction.IsPlanarCardinal())
@@ -290,7 +313,7 @@ namespace TiledDungeon
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
                         continue;
-                    } else if (ConfigureSpike(direction))
+                    } else if (ConfigureWallSpike(direction))
                     {
                         continue;
                     }
@@ -347,15 +370,15 @@ namespace TiledDungeon
             go.GetComponent<TDActuator>()?.Configure(this);
         }
 
-        bool ConfigureSpike(Direction directection)
+        bool ConfigureWallSpike(Direction directection)
         {
-            var spikes = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.SpikeTrapClass);
+            var spikes = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallSpikeTrapClass);
 
             if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != directection) return false; 
 
             var go = Dungeon.Style.Get(
                 transform,
-                TiledConfiguration.instance.SpikeTrapClass,
+                TiledConfiguration.instance.WallSpikeTrapClass,
                 directection,
                 NodeStyle
             );

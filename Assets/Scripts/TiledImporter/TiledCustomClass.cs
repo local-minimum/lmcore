@@ -21,10 +21,19 @@ namespace TiledImporter
         public SerializableDictionary<string, TiledEnum<int>> IntEnums;
 
         public string String(string key) => Strings.GetValueOrDefault(key);
+        public string String(string key, string defaultValue) => Strings.ContainsKey(key) ? Strings[key] : defaultValue;
+
         public int Int(string key) => Ints.GetValueOrDefault(key);
+        public int Int(string key, int defaultValue) => Ints.ContainsKey(key) ? Ints[key] : defaultValue;
+
         public float Float(string key) => Floats.GetValueOrDefault(key);
+        public float Float(string key, float defaultValue) => Floats.ContainsKey(key) ? Floats[key] : defaultValue;
+
         public bool Bool(string key) => Bools.GetValueOrDefault(key);
+        public bool Bool(string key, bool defaultValue) => Bools.ContainsKey(key) ? Bools[key] : defaultValue;
+
         public Color Color(string key) => Colors.GetValueOrDefault(key);
+        public Color Color(string key, Color defaultValue) => Colors.ContainsKey(key) ? Colors[key] : defaultValue;
 
         protected static T Parse<T>(XElement property)
         {

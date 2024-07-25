@@ -2,12 +2,15 @@ using LMCore.Crawler;
 using System.Collections.Generic;
 using System.Linq;
 using TiledDungeon.Integration;
+using TiledImporter;
 using UnityEngine;
 
 namespace TiledDungeon
 {
     public class TDSpikeTrap : MonoBehaviour
     {
+        enum Management { Automatic, ToggleGroup, Sequencer };
+
         private enum SpikePhase { Retracted, Extending, Extended, Retracting, Waiting };
 
         [SerializeField]
@@ -49,7 +52,18 @@ namespace TiledDungeon
             .Where(group => group > 0)
             .ToHashSet();
 
-        bool managed;
+        TiledCustomProperties SequenceGroupProps => node
+            .FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjSequencerGroupClass);
+
+        [SerializeField, HideInInspector]
+        Management management;
+
+        int sequenceId;
+        int sequenceNextPhaseId;
+
+        bool startSequence;
+
+        bool managed => management != Management.Automatic;
 
         TDNode _node;
         TDNode node
@@ -77,11 +91,11 @@ namespace TiledDungeon
         )
         {
             this.position = position;
-            Spikeless = node.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.SpikeTrapClass)
+            Spikeless = node.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.WallSpikeTrapClass)
                 ?.Bool(TiledConfiguration.instance.ObjSpikelessKey) ?? false;
             
             anchor = modifications.FirstOrDefault(mod =>
-                mod.Tile.Type == TiledConfiguration.instance.SpikeTrapClass)?.Tile
+                mod.Tile.Type == TiledConfiguration.instance.WallSpikeTrapClass)?.Tile
                     .CustomProperties
                     .Direction(TiledConfiguration.instance.AnchorKey).AsDirection() ?? Direction.None;
 
@@ -90,7 +104,8 @@ namespace TiledDungeon
                 Debug.LogError($"Spikes @ {position} lacks anchor direction");
             }
 
-            Debug.Log($"Spike Trap @ {position}: Spikeless({Spikeless}) Anchor({anchor}) Groups([{string.Join(", ", ToggleGroups)}])");
+            // TODO: Improve this logging
+            Debug.Log($"Spike Trap @ {position}: Spikeless({Spikeless}) Anchor({anchor})");
 
             Synch();
         }
@@ -106,12 +121,30 @@ namespace TiledDungeon
             }
 
             var toggleGroups = ToggleGroups;
-            foreach (var toggleGroup in toggleGroups)
-            {
-                ToggleGroup.instance.RegisterReciever(toggleGroup, Extend);
-            }
+            var sequenceGroup = SequenceGroupProps;
 
-            managed = toggleGroups.Count > 0;
+            if (toggleGroups.Count > 0)
+            {
+                management = Management.ToggleGroup;
+                foreach (var toggleGroup in toggleGroups)
+                {
+                    ToggleGroup.instance.RegisterReciever(toggleGroup, Extend);
+                }
+            } else if (sequenceGroup != null)
+            {
+                management = Management.Sequencer;
+                sequenceId = sequenceGroup.Int(TiledConfiguration.instance.ObjGroupKey);
+                var phaseId = sequenceGroup.Int(TiledConfiguration.instance.ObjPhaseKey);
+
+                Sequencer.instance.RegisterReciever(sequenceId, phaseId, Ready);
+                startSequence = sequenceGroup.Bool(TiledConfiguration.instance.ObjSequenceStarter);
+
+                sequenceNextPhaseId = sequenceGroup.Int(TiledConfiguration.instance.ObjNextPhaseKey, -1);
+                retractedTime = sequenceGroup.Float(TiledConfiguration.instance.ObjDelayTimeKey, retractedTime);
+            } else
+            {
+                management = Management.Automatic;
+            }
 
             phase = managed ? SpikePhase.Waiting : SpikePhase.Retracted;
         }
@@ -133,10 +166,15 @@ namespace TiledDungeon
                 phase = SpikePhase.Extended;
             } else if (phase == SpikePhase.Retracting && !managed)
             {
-                phase = SpikePhase.Retracted;
+                Ready();
             } else
             {
                 phase = SpikePhase.Waiting;
+
+                if (management == Management.Sequencer && sequenceNextPhaseId >= 0)
+                {
+                    Sequencer.instance.Invoke(sequenceId, sequenceNextPhaseId);
+                }
             }
             SetNextPhaseTime();
         }
@@ -186,6 +224,13 @@ namespace TiledDungeon
             }
         }
 
+        void Ready()
+        {
+            phase = SpikePhase.Retracted;
+            SetNextPhaseTime();
+            Debug.Log($"Spikes @ {position} are now ready and will extend");
+        }
+
         void Extend()
         {
             phase = SpikePhase.Extending;
@@ -199,6 +244,12 @@ namespace TiledDungeon
         }
         private void Update()
         {
+            if (management == Management.Sequencer && startSequence)
+            {
+                Sequencer.instance.Invoke(sequenceId, sequenceNextPhaseId);
+                startSequence = false;
+            }
+
             if (Time.timeSinceLevelLoad > nextPhaseTime)
             {
                 switch (phase)

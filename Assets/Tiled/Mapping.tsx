@@ -900,25 +900,25 @@
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
- <tile id="113" type="Spikes">
+ <tile id="113" type="WallSpikes">
   <properties>
    <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
- <tile id="114" type="Spikes">
+ <tile id="114" type="WallSpikes">
   <properties>
    <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
- <tile id="115" type="Spikes">
+ <tile id="115" type="WallSpikes">
   <properties>
    <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Trap" type="bool" value="true"/>
   </properties>
  </tile>
- <tile id="116" type="Spikes">
+ <tile id="116" type="WallSpikes">
   <properties>
    <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Trap" type="bool" value="true"/>

@@ -17,6 +17,7 @@ namespace TiledDungeon
         public string TrapDoorClass = "TrapDoor";
         public string WallButtonClass = "Button";
         public string AlcoveClass = "Alcove";
+        public string WallSpikeTrapClass = "WallSpikes";
         public string SpikeTrapClass = "Spikes";
         public string PressurePlateClass = "PressurePlate";
 
@@ -51,11 +52,16 @@ namespace TiledDungeon
         public string ObjLockItemClass = "Lock";
         public string ObjInitialClass = "Initial";
         public string ObjToggleGroupClass = "ToggleGroup";
+        public string ObjSequencerGroupClass = "Sequence";
         public string ObjActuatorClass = "Actuator";
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
+        public string ObjPhaseKey = "Phase";
+        public string ObjSequenceStarter = "Start";
+        public string ObjNextPhaseKey = "NextPhase";
         public string ObjRepeatableKey = "Repeatable";
         public string ObjAutomaticKey = "Automatic";
         public string ObjSpikelessKey = "Spikeless";
+        public string ObjDelayTimeKey = "Delay";
     }
 }
