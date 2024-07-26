@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="19">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="20">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0" tintcolor="#00aaff">
   <properties>
@@ -376,6 +376,12 @@
      <property name="NextPhase" type="int" value="1"/>
      <property name="Phase" type="int" value="3"/>
      <property name="Start" type="bool" value="true"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="19" name="Chest" type="Chest" x="494" y="496">
+    <properties>
+     <property name="Direction" propertytype="Direction" value="West"/>
     </properties>
     <point/>
    </object>

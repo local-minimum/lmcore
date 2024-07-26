@@ -5,6 +5,7 @@ using System.Linq;
 using TiledImporter;
 using UnityEngine;
 using TiledDungeon.Integration;
+using UnityEngine.UIElements;
 
 namespace TiledDungeon
 {
@@ -57,6 +58,19 @@ namespace TiledDungeon
             set => _coordinates = value;
         }
 
+        TDChest _chest;
+        TDChest chest 
+        {
+            get
+            {
+                if (_chest == null)
+                {
+                    _chest = GetComponentInChildren<TDChest>();
+                }
+                return _chest;
+            }
+        }
+
         TDDoor _door;
         TDDoor door
         {
@@ -104,7 +118,8 @@ namespace TiledDungeon
             .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
             .Obstructing()) && 
             (door == null ? true : door.BlockingPassage) || 
-            (spikes == null ? false : spikes.BlockingEntry);
+            (spikes == null ? false : spikes.BlockingEntry) ||
+            (chest == null ? false : chest.BlockingPassage);
 
 
         string NodeStyle => 
@@ -391,11 +406,11 @@ namespace TiledDungeon
         }
 
 
-        GameObject ConfigurePotentiallyRotated(string className)
+        GameObject ConfigurePotentiallyRotated(string className, out Direction direction)
         {
             if (modifications.Any(mod => mod.Tile.Type == className))
             {
-                var direction = FirstObjectValue(
+                direction = FirstObjectValue(
                     className, 
                     props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
                 );
@@ -417,11 +432,26 @@ namespace TiledDungeon
                 }
             }
 
+            direction = Direction.None;
             return null;
         }
 
-        void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass);
-        void ConfigurePedistal() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass);
+        void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass, out Direction _);
+        void ConfigurePedistal() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass, out Direction _);
+
+        void ConfigureChest()
+        {
+            var chest = ConfigurePotentiallyRotated(
+                TiledConfiguration.instance.ChestClass, 
+                out Direction direction)?.GetComponent<TDChest>();
+
+            if (chest == null) {
+                if (direction != Direction.None) Debug.LogError($"Chest @ {Coordinates}: Lacks script to configure");
+                return;
+            };
+
+            chest.Configure(this, Coordinates, direction, modifications);
+        }
 
         TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
@@ -466,6 +496,7 @@ namespace TiledDungeon
             ConfigureWallButtons();
             ConfigurePillar();
             ConfigurePedistal();
+            ConfigureChest();
         }
 
         private void OnDestroy()

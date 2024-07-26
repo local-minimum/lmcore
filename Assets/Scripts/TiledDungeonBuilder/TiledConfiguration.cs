@@ -22,6 +22,7 @@ namespace TiledDungeon
         public string PressurePlateClass = "PressurePlate";
         public string PillarClass = "Pillar";
         public string PedistalClass = "Pedistal";
+        public string ChestClass = "Chest";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";

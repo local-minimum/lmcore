@@ -232,13 +232,13 @@ namespace TiledDungeon
 
                     if (keyHolder == null)
                     {
-                        Debug.LogWarning($"Door requires key ({key})");
+                        Debug.LogWarning($"Door @ {Position}: requires key ({key})");
                         return;
                     }
 
                     if (consumesKey && !keyHolder.Consume(TiledConfiguration.instance.KeyKey, key))
                     {
-                        Debug.LogWarning($"Failed to consume key {key} from {keyHolder}");
+                        Debug.LogWarning($"Chest @ {Position}: Failed to consume key {key} from {keyHolder}");
                     }
                     isLocked = false;
                 }

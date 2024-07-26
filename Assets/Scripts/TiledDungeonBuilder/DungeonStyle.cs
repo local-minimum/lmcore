@@ -41,6 +41,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject Teleporter;
 
+        [SerializeField]
+        GameObject Chest;
+
         [Header("Doors and Obstructions")]
         [SerializeField]
         GameObject ButtonDoor;
@@ -78,6 +81,7 @@ namespace TiledDungeon
             if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
             if (classId == TiledConfiguration.instance.PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
             if (classId == TiledConfiguration.instance.PedistalClass && Pedistal != null) { return Instantiate(Pedistal, parent); }
+            if (classId == TiledConfiguration.instance.ChestClass && Chest != null) { return Instantiate(Chest, parent); }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
@@ -120,6 +124,7 @@ namespace TiledDungeon
             if (classId == TiledConfiguration.instance.SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
             if (classId == TiledConfiguration.instance.PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
             if (classId == TiledConfiguration.instance.PedistalClass) { return InstantiateWithRotation(parent, Pedistal, direction); }
+            if (classId == TiledConfiguration.instance.ChestClass) { return InstantiateWithRotation(parent, Chest, direction); }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

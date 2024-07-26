@@ -29,25 +29,28 @@ namespace TiledDungeon.Integration
             return props.Interaction(name);
         }
 
-        public static TDEnumInteraction Interaction(this TiledCustomProperties props, string name = "Interaction")
+        public static TDEnumInteraction Interaction(this TiledCustomProperties props, string name = "Interaction") =>
+            props.Interaction(name, TDEnumInteraction.Unknown);
+
+        public static TDEnumInteraction Interaction(this TiledCustomProperties props, string name, TDEnumInteraction defaultValue)
         {
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("Cannot construct a Interaction without specifying the enum key");
-                return TDEnumInteraction.Unknown;
+                return defaultValue;
             }
 
             if (!props.StringEnums.ContainsKey(name))
             {
                 Debug.LogError($"Attempting to access Interaction enum on key {name}, but it doesn't exist");
-                return TDEnumInteraction.Unknown;
+                return defaultValue;
             }
 
             var stringEnum = props.StringEnums[name];
             if (stringEnum.TypeName != "Interaction")
             {
                 Debug.LogError($"Attempting to access Interaction enum on key {name}, but it is {stringEnum.TypeName}");
-                return TDEnumInteraction.Unknown;
+                return defaultValue;
             }
 
             switch (stringEnum.Value)
@@ -66,9 +69,10 @@ namespace TiledDungeon.Integration
                     return TDEnumInteraction.Automatic;
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Interaction");
-                    return TDEnumInteraction.Unknown;
+                    return defaultValue;
             }
         }
+
     }
 
 }
