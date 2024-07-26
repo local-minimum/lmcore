@@ -57,6 +57,9 @@ namespace TiledDungeon
         [SerializeField]
         GameObject Pillar;
 
+        [SerializeField]
+        GameObject Pedistal;
+
         [Header("Ramps")]
         [SerializeField]
         GameObject LowerRamp;
@@ -74,6 +77,7 @@ namespace TiledDungeon
         {
             if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
             if (classId == TiledConfiguration.instance.PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
+            if (classId == TiledConfiguration.instance.PedistalClass && Pedistal != null) { return Instantiate(Pedistal, parent); }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
@@ -115,6 +119,7 @@ namespace TiledDungeon
             }
             if (classId == TiledConfiguration.instance.SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
             if (classId == TiledConfiguration.instance.PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
+            if (classId == TiledConfiguration.instance.PedistalClass) { return InstantiateWithRotation(parent, Pedistal, direction); }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;

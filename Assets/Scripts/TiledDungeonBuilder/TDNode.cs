@@ -390,32 +390,38 @@ namespace TiledDungeon
             return true;
         }
 
-        void ConfigurePillar()
+
+        GameObject ConfigurePotentiallyRotated(string className)
         {
-            if (modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.PillarClass))
+            if (modifications.Any(mod => mod.Tile.Type == className))
             {
                 var direction = FirstObjectValue(
-                    TiledConfiguration.instance.PillarClass, 
+                    className, 
                     props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
                 );
 
                 if (direction == Direction.None)
                 {
-                    Dungeon.Style.Get(
+                    return Dungeon.Style.Get(
                         transform,
-                        TiledConfiguration.instance.PillarClass,
+                        className,
                         NodeStyle);
                 } else
                 {
-                    Dungeon.Style.Get(
+                    return Dungeon.Style.Get(
                         transform,
-                        TiledConfiguration.instance.PillarClass,
+                        className,
                         direction,
                         NodeStyle);
 
                 }
             }
+
+            return null;
         }
+
+        void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass);
+        void ConfigurePedistal() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass);
 
         TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
@@ -459,6 +465,7 @@ namespace TiledDungeon
             ConfigureRamps();
             ConfigureWallButtons();
             ConfigurePillar();
+            ConfigurePedistal();
         }
 
         private void OnDestroy()
