@@ -41,7 +41,7 @@ namespace TiledDungeon
         [SerializeField]
         GameObject Teleporter;
 
-        [Header("Doors etc.")]
+        [Header("Doors and Obstructions")]
         [SerializeField]
         GameObject ButtonDoor;
 
@@ -53,6 +53,9 @@ namespace TiledDungeon
 
         [SerializeField]
         GameObject Obstruction;
+
+        [SerializeField]
+        GameObject Pillar;
 
         [Header("Ramps")]
         [SerializeField]
@@ -70,6 +73,8 @@ namespace TiledDungeon
         public GameObject Get(Transform parent, string classId, string variant = null)
         {
             if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
+            if (classId == TiledConfiguration.instance.PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
+
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
         }

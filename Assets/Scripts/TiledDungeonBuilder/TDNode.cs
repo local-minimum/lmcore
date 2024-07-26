@@ -390,6 +390,17 @@ namespace TiledDungeon
             return true;
         }
 
+        void ConfigurePillar()
+        {
+            if (modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.PillarClass))
+            {
+                Dungeon.Style.Get(
+                    transform,
+                    TiledConfiguration.instance.PillarClass,
+                    NodeStyle);
+            }
+        }
+
         TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
@@ -431,6 +442,7 @@ namespace TiledDungeon
             ConfigureTeleporter();
             ConfigureRamps();
             ConfigureWallButtons();
+            ConfigurePillar();
         }
 
         private void OnDestroy()

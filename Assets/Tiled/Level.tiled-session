@@ -66,7 +66,7 @@
         "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "float",
+    "property.type": "Interaction",
     "recentFiles": [
         "Mapping.tsx",
         "Rules/AutomappingDungeons.tmx",

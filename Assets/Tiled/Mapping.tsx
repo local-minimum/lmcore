@@ -721,12 +721,14 @@
  <tile id="68" type="Pillar">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
  <tile id="69" type="Pedistal">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
