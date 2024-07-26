@@ -28,6 +28,7 @@ namespace TiledDungeon
         public string WalkabilityKey = "Walkability";
         public string FlyabilityKey = "Flyability";
         public string AnchorKey = "Anchor";
+        public string DirectionKey = "Direction";
         public string RotationKey = "Rotation";
         public string ElevationKey = "Elevation";
         public string DownDirectionKey = "DownDirection";

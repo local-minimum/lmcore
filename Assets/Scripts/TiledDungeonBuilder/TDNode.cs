@@ -394,10 +394,26 @@ namespace TiledDungeon
         {
             if (modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.PillarClass))
             {
-                Dungeon.Style.Get(
-                    transform,
-                    TiledConfiguration.instance.PillarClass,
-                    NodeStyle);
+                var direction = FirstObjectValue(
+                    TiledConfiguration.instance.PillarClass, 
+                    props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
+                );
+
+                if (direction == Direction.None)
+                {
+                    Dungeon.Style.Get(
+                        transform,
+                        TiledConfiguration.instance.PillarClass,
+                        NodeStyle);
+                } else
+                {
+                    Dungeon.Style.Get(
+                        transform,
+                        TiledConfiguration.instance.PillarClass,
+                        direction,
+                        NodeStyle);
+
+                }
             }
         }
 

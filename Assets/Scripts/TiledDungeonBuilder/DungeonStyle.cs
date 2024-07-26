@@ -114,6 +114,7 @@ namespace TiledDungeon
                 return null;
             }
             if (classId == TiledConfiguration.instance.SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
+            if (classId == TiledConfiguration.instance.PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
 
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
