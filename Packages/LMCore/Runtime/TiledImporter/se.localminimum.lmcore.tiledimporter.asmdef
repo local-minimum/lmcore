@@ -1,0 +1,17 @@
+{
+    "name": "se.localminimum.lmcore.tiledimporter",
+    "rootNamespace": "LMCore.TiledImporter",
+    "references": [
+        "GUID:a6ba967b6a68f194f972ab61941a5ac3",
+        "GUID:7133380fdf0a2554eb38dd774526b441"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

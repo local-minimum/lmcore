@@ -1,0 +1,21 @@
+{
+    "name": "se.localminimum.lmcore.ui",
+    "rootNamespace": "LMCore.UI",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:7133380fdf0a2554eb38dd774526b441",
+        "GUID:1ef3e91b45f837b4189fe933aed1adb3",
+        "GUID:a6ba967b6a68f194f972ab61941a5ac3",
+        "GUID:902e4f93cc5fb0d408a2d17a3a33dac4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

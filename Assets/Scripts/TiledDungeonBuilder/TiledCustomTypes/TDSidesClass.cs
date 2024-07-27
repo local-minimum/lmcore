@@ -1,6 +1,5 @@
 using LMCore.Crawler;
-using System.Collections.Generic;
-using TiledImporter;
+using LMCore.TiledImporter;
 
 namespace TiledDungeon.Integration
 {

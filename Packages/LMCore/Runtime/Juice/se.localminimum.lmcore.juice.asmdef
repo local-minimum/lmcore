@@ -1,0 +1,14 @@
+{
+    "name": "se.localminimum.lmcore.juice",
+    "rootNamespace": "LMCore.Juice",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

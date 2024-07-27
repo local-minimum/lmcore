@@ -128,7 +128,7 @@ namespace TiledDungeon
         void HandleUnlock(GridEntity entity)
         {
             var keyHolder = entity
-                .GetComponentsInChildren<IInventory>()
+                .GetComponentsInChildren<AbsInventory>()
                 .FirstOrDefault(i => i.HasItem(TiledConfiguration.instance.KeyKey, key));
 
             if (keyHolder == null) {

@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 
 namespace TiledDungeon
 {
-    public class DungeonStyle : MonoBehaviour, IDungeonStyle
+    public class DungeonStyle : AbsDungeonStyle
     {
         [Header("Cube Side")]
         [SerializeField]
@@ -76,7 +76,7 @@ namespace TiledDungeon
         [SerializeField]
         GameObject WallButton;
         
-        public GameObject Get(Transform parent, string classId, string variant = null)
+        public override GameObject Get(Transform parent, string classId, string variant = null)
         {
             if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
             if (classId == TiledConfiguration.instance.PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
@@ -109,7 +109,7 @@ namespace TiledDungeon
         }
 
 
-        public GameObject Get(Transform parent, string classId, Direction direction, string variant = null)
+        public override GameObject Get(Transform parent, string classId, Direction direction, string variant = null)
         {
             if (classId == TiledConfiguration.instance.BaseTileClass) return InstantiateCubeSide(parent, direction);
             if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
@@ -142,7 +142,7 @@ namespace TiledDungeon
             return go;
         }
 
-        public GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, string variant = null)
+        public override GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, string variant = null)
         {
             if (classId == TiledConfiguration.instance.GrateClass) return InstantiateWithOrientation(parent, Grate, orientation);
             if (classId == TiledConfiguration.instance.ObstructionClass) return InstantiateWithOrientation(parent, Obstruction, orientation);
@@ -151,7 +151,7 @@ namespace TiledDungeon
             Debug.LogError($"Don't know what a '{classId}' is.");
             return null;
         }
-        public GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, TDEnumInteraction interaction, string variant = null)
+        public override GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, TDEnumInteraction interaction, string variant = null)
         {
             if (classId == TiledConfiguration.instance.DoorClass)
             {
@@ -200,7 +200,7 @@ namespace TiledDungeon
             return go;
         }
 
-        public GameObject Get(Transform parent, string classId, TDEnumElevation elevation, Direction direction, string variant = null)
+        public override GameObject Get(Transform parent, string classId, TDEnumElevation elevation, Direction direction, string variant = null)
         {
             if (classId == TiledConfiguration.instance.RampClass) return InstantiateRamp(parent, elevation, direction);
            
@@ -209,7 +209,7 @@ namespace TiledDungeon
         }
 
 
-        public GameObject Get(Transform parent, string classId, TDEnumTransition transition, string variant = null)
+        public override GameObject Get(Transform parent, string classId, TDEnumTransition transition, string variant = null)
         {
             if (classId == TiledConfiguration.instance.TeleporterClass)
             {

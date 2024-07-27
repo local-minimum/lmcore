@@ -1,4 +1,4 @@
-﻿using TiledImporter;
+﻿using LMCore.TiledImporter;
 using System;
 
 namespace TiledDungeon

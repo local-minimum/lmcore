@@ -2,7 +2,6 @@ using LMCore.Crawler;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using TiledImporter;
 using TiledDungeon.Integration;
 using TiledDungeon.Actions;
 
@@ -227,7 +226,7 @@ namespace TiledDungeon
                 if (isLocked)
                 {
                     var keyHolder = entity
-                        .GetComponentsInChildren<IInventory>()
+                        .GetComponentsInChildren<AbsInventory>()
                         .FirstOrDefault(i => i.HasItem(TiledConfiguration.instance.KeyKey, key));
 
                     if (keyHolder == null)

@@ -1,0 +1,14 @@
+{
+    "name": "se.localminimum.lmcore.abstractclasses",
+    "rootNamespace": "LMCore.AbstractClasses",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

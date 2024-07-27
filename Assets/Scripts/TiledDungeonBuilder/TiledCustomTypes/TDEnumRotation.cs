@@ -1,6 +1,5 @@
 using LMCore.IO;
-using System.Collections.Generic;
-using TiledImporter;
+using LMCore.TiledImporter;
 using UnityEngine;
 
 namespace TiledDungeon.Integration
