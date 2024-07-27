@@ -127,14 +127,14 @@ namespace LMCore.TiledDungeon
         {
             var keyHolder = entity
                 .GetComponentsInChildren<AbsInventory>()
-                .FirstOrDefault(i => i.HasItem(TiledConfiguration.instance.KeyKey, key));
+                .FirstOrDefault(i => i.HasItem(key));
 
             if (keyHolder == null) {
                 Debug.LogWarning($"Chest @ {Position}: requires key ({key})");
                 return;
             }
             
-            if (consumesKey && !keyHolder.Consume(TiledConfiguration.instance.KeyKey, key))
+            if (consumesKey && !keyHolder.Consume(key, out string _))
             {
                 Debug.LogWarning($"Chest @ {Position}: Failed to consume {key} from {keyHolder}");
             }

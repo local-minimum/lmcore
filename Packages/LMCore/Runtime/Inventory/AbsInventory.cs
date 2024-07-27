@@ -1,14 +1,34 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.Inventory
 {
-    [System.Serializable]
+
+    public delegate void ItemChangeEvent(AbsItem item);
+
     public abstract class AbsInventory : MonoBehaviour
     {
-        public abstract bool HasItem(string item);
-        public abstract bool HasItem(string item, string identifier);
+        public event ItemChangeEvent OnAddItem;
+        public event ItemChangeEvent OnRemoveItem;
 
-        public abstract bool Consume(string item);
-        public abstract bool Consume(string item, string identifier);
+        public AbsInventory Parent;
+
+        public abstract string Id { get; }
+        public abstract string FullId { get; }
+
+        public abstract int Capacity { get; }
+        public abstract int Used { get; }
+
+        public abstract bool HasItem(string itemId);
+
+        public abstract bool Consume(string itemId, out string origin);
+
+        public abstract bool Remove(string itemId, out AbsItem item);
+
+        public abstract bool Add(AbsItem item);
+
+        protected void EmitAdded(AbsItem item) => OnAddItem?.Invoke(item);
+
+        protected void EmitRemoved(AbsItem item) => OnRemoveItem?.Invoke(item); 
     }
 }

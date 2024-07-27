@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="20">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="24">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0" tintcolor="#00aaff">
   <properties>
@@ -301,7 +301,7 @@
    </properties>
    <object id="1" name="Locked" type="Lock" x="303.667" y="210">
     <properties>
-     <property name="Key" value="Gold"/>
+     <property name="Key" value="GoldKey"/>
     </properties>
     <point/>
    </object>
@@ -381,7 +381,42 @@
    </object>
    <object id="19" name="Chest" type="Chest" x="494" y="496">
     <properties>
+     <property name="Capacity" type="int" value="10"/>
      <property name="Direction" propertytype="Direction" value="West"/>
+     <property name="Id" value="Chest1"/>
+     <property name="Item0" value="Apple"/>
+     <property name="Item1" value="Brick"/>
+     <property name="Item1-StackSize" type="int" value="4"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="20" name="Pillar" type="Container" x="590.667" y="52">
+    <properties>
+     <property name="Capacity" type="int" value="1"/>
+     <property name="Id" value="Pillar0"/>
+     <property name="Item0" value="VaseOfInfinitMisfortune"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="21" name="Alcove" type="Container" x="346.667" y="176.667">
+    <properties>
+     <property name="Capacity" type="int" value="1"/>
+     <property name="Id" value="Alcove1"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="22" name="Pillar" type="Container" x="624.667" y="180">
+    <properties>
+     <property name="Capacity" type="int" value="1"/>
+     <property name="Id" value="Pillar1"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="23" name="Alcove" type="Container" x="452" y="148">
+    <properties>
+     <property name="Capacity" type="int" value="1"/>
+     <property name="Id" value="Alcove0"/>
+     <property name="Item0" value="GoldKey"/>
     </properties>
     <point/>
    </object>
