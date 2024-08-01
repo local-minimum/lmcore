@@ -7,8 +7,8 @@ namespace LMCore.Inventory
         public abstract string Id { get; }
         public abstract string Origin { get; }
 
-        public bool Stackable { get; }
-        public int StackSizeLimit { get; }
+        public abstract bool Stackable { get; }
+        public abstract int StackSizeLimit { get; }
 
         public abstract RectTransform UIRoot { get; }
 
