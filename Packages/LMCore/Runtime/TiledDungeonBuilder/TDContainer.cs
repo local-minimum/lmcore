@@ -204,9 +204,19 @@ namespace LMCore.TiledDungeon
             GridEntity.OnInteract -= GridEntity_OnInteract;
         }
 
+        private bool AllowInteractBy(GridEntity entity)
+        {
+            if (direction == Direction.None)
+            {
+                return entity.Position == Position;
+            }
+
+            return direction.Inverse().Translate(entity.Position) == Position;
+        }
+
         private void GridEntity_OnInteract(GridEntity entity)
         {
-            if (direction.Inverse().Translate(entity.Position) == Position)
+            if  (AllowInteractBy(entity))
             {
                 if (phase == ContainerPhase.Locked)
                 {
