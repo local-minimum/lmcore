@@ -85,7 +85,8 @@ namespace LMCore.TiledDungeon
                 return mod
                     .Tile
                     .CustomProperties
-                    .Orientation(TiledConfiguration.instance.TraversalAxisKey)
+                    .Orientation(TiledConfiguration.instance.OrientationKey)
+                    .Inverse()
                     .AsAxis();
             }
         }

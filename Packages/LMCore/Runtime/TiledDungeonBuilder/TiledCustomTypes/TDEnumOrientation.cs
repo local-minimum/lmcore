@@ -14,6 +14,19 @@ namespace LMCore.TiledDungeon.Integration
 
     public static class TDEnumOrientationExtensions
     {
+        public static TDEnumOrientation Inverse(this TDEnumOrientation orientation)
+        {
+            switch (orientation)
+            {
+                case TDEnumOrientation.Vertical:
+                    return TDEnumOrientation.Horizontal;
+                case TDEnumOrientation.Horizontal:
+                    return TDEnumOrientation.Vertical;
+                default:
+                    return orientation;
+            }
+        }
+
         public static DirectionAxis AsAxis(this TDEnumOrientation orientation)
         {
             switch (orientation)
@@ -27,25 +40,23 @@ namespace LMCore.TiledDungeon.Integration
             }
         }
 
-        public static TDEnumOrientation Orientation(this TiledCustomProperties props, string name = "Orientation")
+        public static TDEnumOrientation Orientation(this TiledCustomProperties props, string name, TDEnumOrientation defaultValue)
         {
-
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("Cannot construct a Orientation without specifying the enum key");
-                return TDEnumOrientation.Unknown;
+                return defaultValue;
             }
 
             if (!props.StringEnums.ContainsKey(name))
             {
-                Debug.LogError($"Attempting to access Orientation enum on key {name}, but doesn't exist");
-                return TDEnumOrientation.Unknown;
+                return defaultValue;
             }
 
             var stringEnum = props.StringEnums[name];
             if (stringEnum.TypeName != "Orientation") {
                 Debug.LogError($"Attempting to access Orientation enum on key {name}, but it is of type {stringEnum.TypeName}");
-                return TDEnumOrientation.Unknown;
+                return defaultValue;
             }
 
             switch (stringEnum.Value)
@@ -58,8 +69,20 @@ namespace LMCore.TiledDungeon.Integration
                     return TDEnumOrientation.Horizontal;
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Orientation");
-                    return TDEnumOrientation.Unknown;
+                    return defaultValue;
             }
+
+        }
+
+        public static TDEnumOrientation Orientation(this TiledCustomProperties props, string name = "Orientation")
+        {
+            var orientation = Orientation(props, name, TDEnumOrientation.Unknown);
+
+            if (orientation == TDEnumOrientation.Unknown)
+            {
+                Debug.LogError($"Attempting to access Orientation enum on key {name}, but probably doesn't exist");
+            }
+            return orientation;
         }
     }
 }

@@ -63,16 +63,16 @@ namespace LMCore.TiledDungeon
             set => _coordinates = value;
         }
 
-        TDContainer _chest;
-        TDContainer chest 
+        TDContainer _container;
+        TDContainer container 
         {
             get
             {
-                if (_chest == null)
+                if (_container == null)
                 {
-                    _chest = GetComponentInChildren<TDContainer>();
+                    _container = GetComponentInChildren<TDContainer>();
                 }
-                return _chest;
+                return _container;
             }
         }
 
@@ -124,7 +124,7 @@ namespace LMCore.TiledDungeon
             .Obstructing()) && 
             (door == null ? true : door.BlockingPassage) || 
             (spikes == null ? false : spikes.BlockingEntry) ||
-            (chest == null ? false : chest.BlockingPassage);
+            (container == null ? false : container.BlockingPassage);
 
 
         string NodeStyle => 
@@ -334,7 +334,7 @@ namespace LMCore.TiledDungeon
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
 
-                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass, neighbourConfig);
+                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
 
                         continue;
                     } else if (ConfigureWallSpike(direction))
@@ -415,23 +415,32 @@ namespace LMCore.TiledDungeon
         }
 
 
-        GameObject ConfigurePotentiallyRotated(string className, out Direction direction)
+        GameObject ConfigurePotentiallyRotated(string className, string rotationClassName, TDNodeConfig config, out Direction direction)
         {
-            if (modifications.Any(mod => mod.Tile.Type == className))
+            if (config.Modifications.Any(mod => mod.Tile.Type == className))
             {
-                direction = Config.FirstObjectValue(
-                    className, 
+                direction = config.FirstObjectValue(
+                    rotationClassName, 
                     props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
                 );
+                if (direction == Direction.None)
+                {
+                    direction = config.FirstObjectValue(
+                        className, 
+                        props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
+                    );
+                }
 
                 if (direction == Direction.None)
                 {
+                    Debug.Log($"Node @ {Coordinates}: Getting Un-Rotated version of {className}");
                     return Dungeon.Style.Get(
                         transform,
                         className,
                         NodeStyle);
                 } else
                 {
+                    Debug.Log($"Node @ {Coordinates}: Getting Rotated {direction} version of {className}");
                     return Dungeon.Style.Get(
                         transform,
                         className,
@@ -445,24 +454,35 @@ namespace LMCore.TiledDungeon
             return null;
         }
 
-        void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass, out Direction _);
+        void ConfigurePillar(TDNodeConfig config) => ConfigurePotentiallyRotated(
+            TiledConfiguration.instance.PillarClass, 
+            TiledConfiguration.instance.PillarClass, 
+            config, 
+            out Direction _);
 
         void ConfigurePedistal(TDNodeConfig nodeConfig)
         {
-            var pedistal = ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass, out Direction direction);
-            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass, nodeConfig);
+            var pedistal = ConfigurePotentiallyRotated(
+                TiledConfiguration.instance.PedistalClass, 
+                TiledConfiguration.instance.ObjContainerClass,
+                nodeConfig, 
+                out Direction direction
+            );
+            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass, nodeConfig, true);
         }
 
         void ConfigureChest(TDNodeConfig nodeConfig)
         {
             var chest = ConfigurePotentiallyRotated(
                 TiledConfiguration.instance.ChestClass,
+                TiledConfiguration.instance.ObjContainerClass,
+                nodeConfig,
                 out Direction direction);
 
-            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass, nodeConfig);
+            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass, nodeConfig, true);
         }
 
-        void ConfigureContainer(GameObject tile, Direction direction, string containerClass, TDNodeConfig nodeConfig)
+        void ConfigureContainer(GameObject tile, Direction direction, string containerClass, TDNodeConfig nodeConfig, bool blockingPassage)
         {
             if (tile == null) return;
 
@@ -474,7 +494,7 @@ namespace LMCore.TiledDungeon
                 return;
             };
 
-            container.Configure(nodeConfig, Coordinates, direction, containerClass, modifications);
+            container.Configure(nodeConfig, Coordinates, direction, containerClass, modifications, blockingPassage);
 
         }
 
@@ -516,7 +536,7 @@ namespace LMCore.TiledDungeon
             ConfigureTeleporter();
             ConfigureRamps();
             ConfigureWallButtons();
-            ConfigurePillar();
+            ConfigurePillar(config);
             ConfigurePedistal(config);
             ConfigureChest(config);
 

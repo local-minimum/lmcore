@@ -4,6 +4,7 @@ using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
+using LMCore.Extensions;
 
 namespace LMCore.TiledDungeon
 {
@@ -55,16 +56,21 @@ namespace LMCore.TiledDungeon
         [SerializeField, HideInInspector]
         AbsInventory inventory;
 
-        public bool BlockingPassage => true;
+        [SerializeField, HideInInspector]
+        bool blockingPassage;
+
+        public bool BlockingPassage => blockingPassage;
 
         public void Configure(
             TDNodeConfig nodeConfig,
             Vector3Int position,
             Direction direction,
             string containerClass,
-            TileModification[] modifications
+            TileModification[] modifications,
+            bool blockingPassage
             )
         {
+            this.blockingPassage = blockingPassage;
             Position = position;
 
             var tileProps = modifications.FirstOrDefault(mod =>
@@ -208,7 +214,8 @@ namespace LMCore.TiledDungeon
         {
             if (direction == Direction.None)
             {
-                return entity.Position == Position;
+                // TODO: Doesn't account for thin walls...
+                return entity.Position.y == Position.y && entity.Position.ManhattanDistance(Position) == 1;
             }
 
             return direction.Inverse().Translate(entity.Position) == Position;
