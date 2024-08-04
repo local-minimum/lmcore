@@ -29,19 +29,19 @@ namespace LMCore.Inventory
 
             var instruction = Instructions.First(i => i.ItemId == itemId);
 
-            var simpleItem = Instantiate(instruction.Prefab);
-            simpleItem.Configure(itemId, originId, instruction.StackSize);
+            item = Instantiate(instruction.Prefab);
 
-            if (simpleItem.WorldRoot != null)
+            ((SimpleItem) item).Configure(itemId, originId, instruction.StackSize);
+
+            if (item.WorldRoot != null)
             {
-                simpleItem.WorldRoot.gameObject.SetActive(false);
+                item.WorldRoot.gameObject.SetActive(false);
             }
-            if (simpleItem.UIRoot != null)
+            if (item.UIRoot != null)
             {
-                simpleItem.UIRoot.gameObject.SetActive(false);
+                item.UIRoot.gameObject.SetActive(false);
             }
 
-            item = simpleItem;
             return true;
         }
     }

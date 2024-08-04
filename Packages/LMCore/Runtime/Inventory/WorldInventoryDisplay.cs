@@ -49,7 +49,7 @@ namespace LMCore.Inventory
             {
                 item.WorldRoot.SetParent(Target);
 
-                item.WorldRoot.transform.position = Vector3.zero;
+                item.WorldRoot.transform.localPosition = Vector3.zero;
                 item.WorldRoot.transform.localRotation = Quaternion.identity;
 
                 item.WorldRoot.gameObject.SetActive(true);

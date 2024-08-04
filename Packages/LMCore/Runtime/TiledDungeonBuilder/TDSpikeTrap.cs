@@ -45,6 +45,7 @@ namespace LMCore.TiledDungeon
         string RetractTrigger = "Retract";
 
         HashSet<int> ToggleGroups => node
+            .Config
             .GetObjectValues(
                 TiledConfiguration.instance.ObjToggleGroupClass,
                 props => props.Int(TiledConfiguration.instance.ObjGroupKey)
@@ -53,6 +54,7 @@ namespace LMCore.TiledDungeon
             .ToHashSet();
 
         TiledCustomProperties SequenceGroupProps => node
+            .Config
             .FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjSequencerGroupClass);
 
         [SerializeField, HideInInspector]
@@ -91,7 +93,7 @@ namespace LMCore.TiledDungeon
         )
         {
             this.position = position;
-            Spikeless = node.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.WallSpikeTrapClass)
+            Spikeless = node.Config.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.WallSpikeTrapClass)
                 ?.Bool(TiledConfiguration.instance.ObjSpikelessKey) ?? false;
             
             anchor = modifications.FirstOrDefault(mod =>
@@ -101,7 +103,8 @@ namespace LMCore.TiledDungeon
 
             if (anchor == Direction.None)
             {
-                Debug.LogError($"Spikes @ {position} lacks anchor direction");
+                Debug.LogWarning($"Spikes @ {position} lacks anchor direction, assuming down");
+                anchor = Direction.Down;
             }
 
             // TODO: Improve this logging

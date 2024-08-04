@@ -317,7 +317,10 @@ namespace LMCore.TiledDungeon
 
         void SyncDoor()
         {
-            var toggleGroups = node
+            var config = node.Config;
+
+
+            var toggleGroups = config 
                 .GetObjectValues(
                     TiledConfiguration.instance.ObjToggleGroupClass,
                     props => props.Int(TiledConfiguration.instance.ObjGroupKey)
@@ -330,12 +333,12 @@ namespace LMCore.TiledDungeon
                 ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
             }
 
-            automaticTrapDoor = node.GetObjectValues(
+            automaticTrapDoor = config.GetObjectValues(
                 TiledConfiguration.instance.TrapDoorClass,
                 props => props.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Automatic
             ).Any();
 
-            isOpen = node.FirstObjectValue(
+            isOpen = config.FirstObjectValue(
                 TiledConfiguration.instance.ObjInitialClass,
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.OpenKey)
             );
@@ -349,11 +352,11 @@ namespace LMCore.TiledDungeon
                 mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked
             );
 
-            key = node.FirstObjectValue(
+            key = config.FirstObjectValue(
                 TiledConfiguration.instance.ObjLockItemClass,
                 props => props?.String(TiledConfiguration.instance.KeyKey)
             );
-            consumesKey = node.FirstObjectValue(
+            consumesKey = config.FirstObjectValue(
                 TiledConfiguration.instance.ObjLockItemClass,
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
             );

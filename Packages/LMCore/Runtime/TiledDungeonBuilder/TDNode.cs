@@ -26,6 +26,18 @@ namespace LMCore.TiledDungeon
         [SerializeField, HideInInspector]
         TiledObjectLayer.Rect[] Rects;
 
+        TDNodeConfig _config;
+        public TDNodeConfig Config { 
+            get { 
+                if (_config == null)
+                {
+                    _config = new TDNodeConfig(modifications, Points, Rects);
+                }
+
+                return _config; 
+            } 
+        }
+
         TiledDungeon _dungeon;
         public TiledDungeon Dungeon
         {
@@ -199,7 +211,8 @@ namespace LMCore.TiledDungeon
         });
 
         int teleporterWormholdId => 
-            FirstObjectValue(
+            Config
+            .FirstObjectValue(
                 TiledConfiguration.instance.TeleporterClass, 
                 (props) => props == null ? 0 : props.Int(TiledConfiguration.instance.TeleporterIdProperty)
             );
@@ -226,9 +239,7 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        void ConfigureCube(
-            System.Func<Vector3Int, IEnumerable<TileModification>> getModifications
-        )
+        void ConfigureCube()
         {
             if (sides == null)
             {
@@ -309,18 +320,21 @@ namespace LMCore.TiledDungeon
                 if (direction.IsPlanarCardinal())
                 {
                     var neighbour = direction.Translate(Coordinates);
-                    var hasAlcove = getModifications(neighbour)
+                    var neighbourConfig = Dungeon.GetNodeConfig(neighbour);
+                    var hasAlcove = neighbourConfig 
+                        ?.Modifications
                         .Any(nMod => 
                             nMod.Tile.Type == TiledConfiguration.instance.AlcoveClass
                             && nMod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() == direction.Inverse()
-                        );
+                        ) ?? false;
 
                     if (hasAlcove)
                     {
                         // TODO: Possibly it should get its styling from the neighbour tile rather than this
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
-                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass);
+
+                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass, neighbourConfig);
 
                         continue;
                     } else if (ConfigureWallSpike(direction))
@@ -405,7 +419,7 @@ namespace LMCore.TiledDungeon
         {
             if (modifications.Any(mod => mod.Tile.Type == className))
             {
-                direction = FirstObjectValue(
+                direction = Config.FirstObjectValue(
                     className, 
                     props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
                 );
@@ -433,22 +447,22 @@ namespace LMCore.TiledDungeon
 
         void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass, out Direction _);
 
-        void ConfigurePedistal()
+        void ConfigurePedistal(TDNodeConfig nodeConfig)
         {
             var pedistal = ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass, out Direction direction);
-            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass);
+            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass, nodeConfig);
         }
 
-        void ConfigureChest()
+        void ConfigureChest(TDNodeConfig nodeConfig)
         {
             var chest = ConfigurePotentiallyRotated(
                 TiledConfiguration.instance.ChestClass,
                 out Direction direction);
 
-            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass);
+            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass, nodeConfig);
         }
 
-        void ConfigureContainer(GameObject tile, Direction direction, string containerClass)
+        void ConfigureContainer(GameObject tile, Direction direction, string containerClass, TDNodeConfig nodeConfig)
         {
             if (tile == null) return;
 
@@ -460,7 +474,7 @@ namespace LMCore.TiledDungeon
                 return;
             };
 
-            container.Configure(this, Coordinates, direction, containerClass, modifications);
+            container.Configure(nodeConfig, Coordinates, direction, containerClass, modifications);
 
         }
 
@@ -476,28 +490,25 @@ namespace LMCore.TiledDungeon
 
         public void Configure(
             TiledTile tile, 
-            TiledNodeRoofRule roofRule,
-            TiledDungeon dungeon,
-            TileModification[] modifications,
-            TiledObjectLayer.Point[] points,
-            TiledObjectLayer.Rect[] rects,
-            System.Func<Vector3Int, IEnumerable<TileModification>> getModifications
+            TDNodeConfig config,
+            TiledDungeon dungeon
         )
         {
             this.tile = tile;
-            this.modifications = modifications;
+            modifications = config.Modifications;
+            Points = config.Points;
+            Rects = config.Rects;
+
             Dungeon = dungeon;
-            Points = points;
-            Rects = rects;
             sides = TDSidesClass.From(
                 tile.CustomProperties.Classes[TiledConfiguration.instance.SidesClassKey],
-                roofRule
+                config.RoofRule 
             );
 
             transform.localPosition = Coordinates.ToPosition(dungeon.Scale);
             name = $"TileNode Elevation {Coordinates.y} ({Coordinates.x}, {Coordinates.z})";
 
-            ConfigureCube(getModifications);
+            ConfigureCube();
             ConfigureGrates();
             ConfigureObstructions();
             ConfigureDoors();
@@ -506,8 +517,10 @@ namespace LMCore.TiledDungeon
             ConfigureRamps();
             ConfigureWallButtons();
             ConfigurePillar();
-            ConfigurePedistal();
-            ConfigureChest();
+            ConfigurePedistal(config);
+            ConfigureChest(config);
+
+            Debug.Log($"Node @ {Coordinates}: Generated");
         }
 
         private void OnDestroy()
@@ -739,7 +752,7 @@ namespace LMCore.TiledDungeon
             if (spinMod == null) { return; }
 
             var movement = spinMod.Tile.CustomProperties.Rotation().AsMovement();
-            if (movement != LMCore.IO.Movement.None)
+            if (movement != IO.Movement.None)
             {
                 Debug.Log($"Spinning {entity.name} {movement}");
                 entity.Input.InjectMovement(movement);
@@ -868,43 +881,6 @@ namespace LMCore.TiledDungeon
 
             return DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, Dungeon.GridSize);
         }
-
-        public T FirstObjectPointValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(Points.FirstOrDefault(pt => pt.Type == type).CustomProperties);
-
-        public T FirstObjectRectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(Rects.FirstOrDefault(pt => pt.Type == type).CustomProperties);
-
-        IEnumerable<TiledObjectLayer.TObject> TObjects => 
-            Points.Select(pt => (TiledObjectLayer.TObject)pt).Concat(Rects);
-
-        public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(TObjects.FirstOrDefault(o => o.Type == type)?.CustomProperties);
-
-        public T FirstObjectValue<T>(System.Func<TiledObjectLayer.TObject, bool> filter, System.Func<TiledCustomProperties, T> predicate) =>
-            predicate(TObjects.FirstOrDefault(filter)?.CustomProperties);
-
-        public TiledCustomProperties FirstObjectProps(System.Func<TiledObjectLayer.TObject, bool> filter) =>
-            TObjects.FirstOrDefault(filter)?.CustomProperties;
-
-        public IEnumerable<T> GetObjectValues<T>(string type, System.Func<TiledCustomProperties, T> predicate)
-        {
-            return TObjects
-                .Where(pt => pt.Type == type)
-                .Select(pt => predicate(pt.CustomProperties));
-        }
-
-        public IEnumerable<TiledCustomProperties> GetObjectProps(System.Func<TiledObjectLayer.TObject, bool> filter) =>
-            TObjects.Where(filter).Select(o => o.CustomProperties);
-
-        public bool HasObjectPoint(string type, System.Func<TiledCustomProperties, bool> predicate) =>
-            Points.Any(pt => pt.Type == type && predicate(pt.CustomProperties));
-
-        public bool HasObjectRect(string type, System.Func<TiledCustomProperties, bool> predicate) =>
-            Rects.Any(pt => pt.Type == type && predicate(pt.CustomProperties));
-
-        public bool HasObject(string type, System.Func<TiledCustomProperties, bool> predicate) =>
-            HasObjectPoint(type, predicate) || HasObjectRect(type, predicate);
 
         public Vector3Int Neighbour(Direction direction)
         {

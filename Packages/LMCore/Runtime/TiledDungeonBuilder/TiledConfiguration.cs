@@ -44,6 +44,7 @@ namespace LMCore.TiledDungeon
 
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";
+        public string LayerElevationKey = "Elevation";
 
         [Header("Strings")]
         public string KeyKey = "Key";
@@ -72,5 +73,8 @@ namespace LMCore.TiledDungeon
         public string ObjCapacityKey = "Capacity";
         public string ObjItemPatternKey = "Item%";
         public string ObjItemStackSizePatternKey = "Item%-StackSize";
+
+        [Header("Other")]
+        public string LayoutLayerPrefix = "dungeon";
     }
 }

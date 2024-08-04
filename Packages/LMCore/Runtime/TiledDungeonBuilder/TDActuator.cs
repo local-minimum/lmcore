@@ -37,6 +37,7 @@ namespace LMCore.TiledDungeon
         public void Configure(TDNode node)
         {
             var props = node
+                .Config
                 .GetObjectProps(o =>
                     o.Type == TiledConfiguration.instance.ObjActuatorClass &&
                     o.CustomProperties.Int(TiledConfiguration.instance.ObjGroupKey) > 0)

@@ -694,6 +694,7 @@
   <properties>
    <property name="Anchor" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Open"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
@@ -701,6 +702,7 @@
   <properties>
    <property name="Anchor" propertytype="Direction" value="West"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Open"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
@@ -708,6 +710,7 @@
   <properties>
    <property name="Anchor" propertytype="Direction" value="North"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Open"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
@@ -715,6 +718,7 @@
   <properties>
    <property name="Anchor" propertytype="Direction" value="East"/>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
+   <property name="Interaction" propertytype="Interaction" value="Open"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
@@ -728,7 +732,7 @@
  <tile id="69" type="Pedistal">
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Never"/>
-   <property name="Interaction" propertytype="Interaction" value="Obstruction"/>
+   <property name="Interaction" propertytype="Interaction" value="Closed"/>
    <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>

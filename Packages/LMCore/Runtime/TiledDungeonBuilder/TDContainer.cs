@@ -52,23 +52,13 @@ namespace LMCore.TiledDungeon
         [SerializeField, HideInInspector]
         bool consumesKey;
 
-        TDNode _node;
-        TDNode node
-        {
-            get
-            {
-                if (_node == null)
-                {
-                    _node = GetComponentInParent<TDNode>();
-                }
-                return _node;
-            }
-        }
+        [SerializeField, HideInInspector]
+        AbsInventory inventory;
 
         public bool BlockingPassage => true;
 
         public void Configure(
-            TDNode node,
+            TDNodeConfig nodeConfig,
             Vector3Int position,
             Direction direction,
             string containerClass,
@@ -77,11 +67,16 @@ namespace LMCore.TiledDungeon
         {
             Position = position;
 
-            var props = modifications.FirstOrDefault(mod =>
+            var tileProps = modifications.FirstOrDefault(mod =>
                 mod.Tile.Type == containerClass)?.Tile
                 .CustomProperties;
 
-            var interaction = props == null ? TDEnumInteraction.Open : props.Interaction(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Open);
+            var prop = nodeConfig?.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjContainerClass);
+
+            var interaction = 
+                prop?.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, 
+                prop?.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Open) ?? TDEnumInteraction.Open) ?? TDEnumInteraction.Open;
+
             switch (interaction)
             {
                 case TDEnumInteraction.Open:
@@ -93,6 +88,9 @@ namespace LMCore.TiledDungeon
                 case TDEnumInteraction.Closed:
                     phase = ContainerPhase.Closed;
                     break;
+                case TDEnumInteraction.Obstruction:
+                    phase = ContainerPhase.DisplayCage;
+                    break;
                 default:
                     Debug.LogError($"Container @ {Position}: Recieved interaction {interaction} which it doesn't know how to do");
                     phase = ContainerPhase.Closed;
@@ -101,29 +99,36 @@ namespace LMCore.TiledDungeon
 
             this.direction = direction;
 
-            key = node.FirstObjectValue(
+            key = nodeConfig?.FirstObjectValue(
                 TiledConfiguration.instance.ObjLockItemClass,
                 props => props?.String(TiledConfiguration.instance.KeyKey)
             );
 
-            consumesKey = node.FirstObjectValue(
+            consumesKey = nodeConfig?.FirstObjectValue(
                 TiledConfiguration.instance.ObjLockItemClass,
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
-            );
+            ) ?? false;
 
-            ConfigureInventory(node);
+            if (nodeConfig != null)
+            {
+                ConfigureInventory(nodeConfig);
+            } else
+            {
+                Debug.LogError($"Container @ {Position}: Got no node!");
+            }
+
+            Debug.Log($"Container @ {Position}: Phase({phase}) Key({key}) Direction({direction}) Capacity({inventory?.Capacity}) Items({inventory?.Used})");
         }
 
-        void ConfigureInventory(TDNode node)
+        void ConfigureInventory(TDNodeConfig nodeConfig)
         {
             var factory = SimpleItemFactory.instance;
-            var items = new List<AbsItem>();
 
             // TODO: Any reason to support multiple containers in one location?
-            var inventory = GetComponentInChildren<AbsInventory>();
+            inventory = GetComponentInChildren<AbsInventory>();
             if (inventory != null)
             {
-                var prop = node.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjContainerClass);
+                var prop = nodeConfig.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjContainerClass);
                 if (prop != null)
                 {
                     var capacity = prop.Int(TiledConfiguration.instance.ObjCapacityKey, 0);
@@ -134,6 +139,7 @@ namespace LMCore.TiledDungeon
                         capacity
                     );
 
+                    Debug.Log($"Container @ {Position}: Inventory Capacity({inventory.Capacity})");
                     for (int i  = 0; i < capacity; i++)
                     {
                         var itemIdKey = TiledConfiguration.instance.ObjItemPatternKey.Replace("%", i.ToString());
@@ -154,7 +160,13 @@ namespace LMCore.TiledDungeon
                         {
                             if (factory.Create(itemId, inventory.FullId, out AbsItem item))
                             {
-                                items.Add(item);
+                                inventory.Add(item);
+                                item.transform.SetParent(transform);
+
+                                if (item.UIRoot != null) item.UIRoot.gameObject.SetActive(false);
+                                if (item.WorldRoot != null) item.WorldRoot.gameObject.SetActive(false);
+                                
+
                                 Debug.Log($"Container {name} @ {Position}: Got an '{itemId}'");
                             }
                             else
@@ -163,20 +175,21 @@ namespace LMCore.TiledDungeon
                             }
                         }
                     }
-                }
+                } else
+                {
+                    Debug.LogWarning($"Container @ {Position}: Inventory has no configuration, removing it");
+                    DestroyImmediate(inventory);
+                    inventory = null;
+                } 
+            } else
+            {
+                    Debug.LogWarning($"Container @ {Position}: Lacking inventory");
             }
 
             var displayInventory = GetComponent<WorldInventoryDisplay>();
             if (displayInventory != null)
             {
                 displayInventory.Sync();
-            } else
-            {
-                foreach (var item in items)
-                {
-                    item.UIRoot?.gameObject.SetActive(false);
-                    item.WorldRoot?.gameObject.SetActive(false);
-                }
             }
         }
 

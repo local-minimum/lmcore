@@ -12,6 +12,7 @@ namespace LMCore.Inventory
         public event ItemChangeEvent OnAddItem;
         public event ItemChangeEvent OnRemoveItem;
 
+        [HideInInspector]
         public AbsInventory Parent;
 
         public abstract string Id { get; }

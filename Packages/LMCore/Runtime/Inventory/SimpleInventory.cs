@@ -6,17 +6,17 @@ namespace LMCore.Inventory
 {
     public class SimpleInventory : AbsInventory
     {       
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private string _Id;
         public override string Id => _Id; 
 
         public override string FullId => Parent == null ? Id : $"{Parent.FullId}-{Id}";
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         int _Capacity;
         public override int Capacity => _Capacity;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         List<AbsItem> items = new List<AbsItem>();
 
         public override IEnumerable<AbsItem> Items => items;

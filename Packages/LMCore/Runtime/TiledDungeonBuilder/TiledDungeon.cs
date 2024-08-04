@@ -6,27 +6,36 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using System;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace LMCore.TiledDungeon
 {
-    public partial class TiledDungeon : MonoBehaviour, IGridSizeProvider, IDungeon
+    public class TiledDungeon : MonoBehaviour, IGridSizeProvider, IDungeon
     {
+        [Serializable]
+        class GenerationBackupSettings
+        {
+            public Vector3Int SpawnCoordinates;
+
+            public GenerationBackupSettings(TiledDungeon dungeon)
+            {
+                SpawnCoordinates = dungeon.SpawnTile?.Coordinates ?? dungeon?.backupSettings.SpawnCoordinates ?? Vector3Int.zero;
+            }
+        }
+
+        [SerializeField, HideInInspector]
+        GenerationBackupSettings backupSettings;
+
         [Header("Settings")]
         [SerializeField, Range(0, 10)]
         float scale = 3f;
         public float Scale => scale;
 
-        [SerializeField, Tooltip("Elevation Property, needs to be a custom int property")]
-        string elevationProperty = "Elevation";
-
         [SerializeField]
         bool inferRoof = true;
-
-        [SerializeField, Tooltip("Layers that start with this will be identified as primary layer for dungeon layout")]
-        string layoutLayerPrefix = "dungeon";
 
         [SerializeField]
         TDNode Prefab;
@@ -124,9 +133,6 @@ namespace LMCore.TiledDungeon
 
         public int Size => nodes.Count;
 
-        public Vector3Int AsUnityCoordinates(Vector2Int layerSize, int col, int row, int elevation) =>
-            new Vector3Int(col, elevation, layerSize.y - row - 1);
-
         TiledNodeRoofRule Roofing(TDNode aboveNode, bool topLayer) {
             if (!inferRoof) return TiledNodeRoofRule.CustomProps;
 
@@ -138,113 +144,76 @@ namespace LMCore.TiledDungeon
             return aboveNode.HasFloor ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet;
         }
 
-        void GenerateLevel(TiledLayer layer, int elevation, List<TiledLayer> modifiers, List<TiledObjectLayer> objectLayers, bool topLayer)
+        Dictionary<int, TDLayerConfig> layerConfigs = new Dictionary<int, TDLayerConfig>();
+
+        TDLayerConfig GetLayerConfig(int elevation)
         {
-            var layerSize = layer.LayerSize;
-            Func<Vector2Int, Vector2Int> inverseCoordinates = (Vector2Int v) => { return new Vector2Int(v.x, layerSize.y - v.y - 1); };
+            if (layerConfigs.ContainsKey(elevation)) return layerConfigs[elevation];
 
-            Func<int, int, IEnumerable<TileModification>> getModsTiledCoords = (row, col) =>
-                modifiers
-                    .Select(modLayer =>
-                    {
-                        if (!modLayer.InsideLayer(row, col)) return null;
+            var topLayer = elevations.Max() == elevation;
+            var config = new TDLayerConfig(map, tilesets, elevation, topLayer);
+            layerConfigs[elevation] = config;
 
-                        var modId = modLayer[row, col];
-                        var tile = map.GetTile(modId, tilesets);
+            return config;
+        }
 
-                        if (tile == null) return null;
+        void GenerateNode(Vector3Int coordinates)
+        {
+            var layerConfig = GetLayerConfig(coordinates.y);
+            var tile = layerConfig.GetTile(coordinates);
 
-                        return new TileModification()
-                        {
-                            Layer = modLayer.Name,
-                            LayerProperties = modLayer.CustomProperties,
-                            Tile = tile
-                        };
-                    })
-                    .Where(tm => tm != null);
+            if (tile == null) return;
 
-            Func<Vector3Int, IEnumerable<TileModification>> getModifications = (coords) =>
-                coords.y == elevation ? getModsTiledCoords(layerSize.y - coords.z - 1, coords.x) : null;
+            if (nodes.ContainsKey(coordinates)) return;
 
-            for (int row = 0; row < layerSize.y; row++)
+            var node = GetOrCreateNode(coordinates);
+
+            var nodeConfig = GetNodeConfig(coordinates);
+
+            node.Configure(tile, nodeConfig, this);
+
+        }
+
+        Dictionary<Vector3Int, TDNodeConfig> nodeConfigurations = new Dictionary<Vector3Int, TDNodeConfig>();
+
+        public TDNodeConfig GetNodeConfig(Vector3Int coordinates)
+        {
+            if (nodeConfigurations.ContainsKey(coordinates)) return nodeConfigurations[coordinates];
+
+            var layerConfig = GetLayerConfig(coordinates.y);
+
+            var aboveNode = this[coordinates + Vector3Int.up];
+            var roofed = Roofing(aboveNode, layerConfig.TopLayer);
+            var config = new TDNodeConfig(layerConfig, coordinates, roofed);
+            nodeConfigurations[coordinates] = config;
+            return config;
+        }
+
+        void GenerateLevel(int elevation)
+        {
+            var layerConfig = GetLayerConfig(elevation);
+
+            for (int row = 0; row < layerConfig.LayerSize.y; row++)
             {
-                for (int col = 0; col < layerSize.x; col++)
+                for (int col = 0; col < layerConfig.LayerSize.x; col++)
                 {
-                    var tileId = layer[row, col];
-                    var tile = map.GetTile(tileId, tilesets);
-
-                    if (tile == null) continue;
-
-                    var coordinates = AsUnityCoordinates(layerSize, col, row, elevation);
-
-                    var node = GetOrCreateNode(coordinates);
-                    var aboveNode = this[node.Coordinates + Vector3Int.up];
-                    var roofed = Roofing(aboveNode, topLayer);
-
-                    var modifications = getModsTiledCoords(row, col).ToArray();
-
-                    var tileRect = inverseCoordinates(coordinates.To2DInXZPlane())
-                        .ToUnitRect();
-
-                    var points = objectLayers
-                        .SelectMany(l => l.Points)
-                        .Where(p => p.Applies(tileRect))
-                        .ToArray();
-
-                    var rects = objectLayers
-                        .SelectMany(l => l.Rects)
-                        .Where(r => r.Applies(tileRect))
-                        .ToArray();
-
-                    node.Configure(
-                        tile,
-                        roofed,
-                        this,
-                        modifications,
-                        points,
-                        rects,
-                        getModifications
-                    );
+                    GenerateNode(layerConfig.AsUnityCoordinates(col, row));
                 }
             }
         }
+
+        IEnumerable<int> elevations => map
+            .FindInLayers(layer => layer.CustomProperties.Ints[TiledConfiguration.instance.LayerElevationKey])
+            .ToHashSet()
+            .OrderByDescending(x => x);
 
         public void GenerateMap()
         {
             SyncNodes();
 
-            var elevations = map
-                .FindInLayers(layer => layer.CustomProperties.Ints[elevationProperty])
-                .ToHashSet()
-                .OrderByDescending(x => x)
-                .ToArray();
-
-            bool topLayer = true;
-
             foreach (var elevation in elevations)
             {
-                var layers = map
-                    .FindLayers(layer => layer.CustomProperties.Ints[elevationProperty] == elevation)
-                    .ToList();
-                var objectLayers = map
-                    .FindObjectLayers(layer => layer.CustomProperties.Ints[elevationProperty] == elevation)
-                    .ToList();
-
-                var layoutLayer = layers.FirstOrDefault(l => l.Name.StartsWith(layoutLayerPrefix));
-
-                if (layoutLayer == null)
-                {
-                    Debug.LogError(
-                        $"No layout layer found for elevation {elevation} ({string.Join(", ", layers.Select(l => l.Name))})"
-                    );
-                    continue;
-                }
-
-                var modificationLayers = layers.Where(l => l != layoutLayer).ToList();
-
-                GenerateLevel(layoutLayer, elevation, modificationLayers, objectLayers, topLayer);
-
-                topLayer = false;
+                GenerateLevel(elevation);
             }
 
             SyncNodes();
@@ -261,13 +230,12 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Regenerate")]
         private void Regenerate()
         {
-            var spawnCoordinates = SpawnTile?.Coordinates;
+            backupSettings = new GenerationBackupSettings(this);
+
             Clean();
             GenerateMap();
-            if (spawnCoordinates != null)
-            {
-                SpawnTile = this[(Vector3Int)spawnCoordinates];
-            }
+
+            SpawnTile = this[backupSettings.SpawnCoordinates];
 
 #if UNITY_EDITOR
             Undo.RegisterFullObjectHierarchyUndo(levelParent, "Regenerate level");
@@ -311,7 +279,7 @@ namespace LMCore.TiledDungeon
                 props.Ints.GetValueOrDefault(TiledConfiguration.instance.TeleporterIdProperty) == id;
 
             return nodes.Values
-                .Where(n => n.HasObject(TiledConfiguration.instance.TeleporterClass , predicate))
+                .Where(n => n.Config.HasObject(TiledConfiguration.instance.TeleporterClass , predicate))
                 .Select(n => (IDungeonNode)n)
                 .ToList();
         }
