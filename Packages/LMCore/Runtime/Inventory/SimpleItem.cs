@@ -6,13 +6,13 @@ namespace LMCore.Inventory
 {
     public class SimpleItem : AbsItem
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         int _StackSizeLimit = 1;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         string _Id;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         string _Origin;
 
         [SerializeField]

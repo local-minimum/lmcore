@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8220607148104913985
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9098235652108066218}
+  - component: {fileID: 2867663244629971619}
+  m_Layer: 0
+  m_Name: ItemSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9098235652108066218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8220607148104913985}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2867663244629971619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8220607148104913985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d719e9baf065d94f8c157ee15cfedaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Instructions:
+  - ItemId: Apple
+    Prefab: {fileID: 3968028856587736789, guid: a0b1831422a019847a8a89a322392d38,
+      type: 3}
+    StackSize: 6
+  - ItemId: Brick
+    Prefab: {fileID: 2144041760271753179, guid: 9ea1915b965bc6a48849cac936b52d72,
+      type: 3}
+    StackSize: 1
+  - ItemId: GoldKey
+    Prefab: {fileID: 2340473655334439745, guid: 40c5f720e7931184f9a9370c8316c9c0,
+      type: 3}
+    StackSize: 1
+  - ItemId: VaseOfInfiniteMisfortune
+    Prefab: {fileID: 445481507089077673, guid: a2cfe1b12f4bae04fa6ac50ee20c7edf, type: 3}
+    StackSize: 1

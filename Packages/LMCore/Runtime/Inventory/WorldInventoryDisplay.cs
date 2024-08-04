@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace LMCore.Inventory
 {
@@ -7,9 +9,16 @@ namespace LMCore.Inventory
         [SerializeField]
         Transform target;
 
+        [SerializeField, HideInInspector]
+        HashSet<AbsItem> items = new ();
+
+        IEnumerable<AbsInventory> inventories => GetComponentsInChildren<AbsInventory>(true);
+
+        Transform Target => target == null ? transform : target;
+
         private void OnEnable()
         {
-            foreach (var inventory in GetComponentsInChildren<AbsInventory>(true))
+            foreach (var inventory in inventories)
             {
                 inventory.OnAddItem += Inventory_OnAddItem;
                 inventory.OnRemoveItem += Inventory_OnRemoveItem;
@@ -18,27 +27,66 @@ namespace LMCore.Inventory
 
         private void OnDisable()
         {
-            foreach (var inventory in GetComponentsInChildren<AbsInventory>(true))
+            foreach (var inventory in inventories)
             {
                 inventory.OnAddItem -= Inventory_OnAddItem;
                 inventory.OnRemoveItem -= Inventory_OnRemoveItem;
             }
         }
 
-        private void Inventory_OnAddItem(AbsItem item)
+        private void Inventory_OnAddItem(AbsItem item) => DisplayItem(item);
+
+        private void Inventory_OnRemoveItem(AbsItem item) => RemoveItem(item);
+
+        void DisplayItem(AbsItem item)
         {
-            item.WorldRoot.SetParent(target);
+            if (item.UIRoot != null)
+            {
+                item.UIRoot.gameObject.SetActive(false);
+            }
 
-            item.WorldRoot.transform.position = Vector3.zero;
-            item.WorldRoot.transform.localRotation = Quaternion.identity;
+            if (item.WorldRoot != null)
+            {
+                item.WorldRoot.SetParent(Target);
 
-            item.WorldRoot.gameObject.SetActive(true);
+                item.WorldRoot.transform.position = Vector3.zero;
+                item.WorldRoot.transform.localRotation = Quaternion.identity;
+
+                item.WorldRoot.gameObject.SetActive(true);
+            }
+
+            items.Add(item);
         }
 
-        private void Inventory_OnRemoveItem(AbsItem item)
+        void RemoveItem(AbsItem item)
         {
-            item.WorldRoot.gameObject.SetActive(false);
-            item.WorldRoot.SetParent(item.transform);
+            if (item.WorldRoot != null)
+            {
+                item.WorldRoot.gameObject.SetActive(false);
+                item.WorldRoot.SetParent(item.transform);
+            }
+
+            items.Remove(item);
+        }
+
+        public void Sync()
+        {
+            HashSet<AbsItem> current = new HashSet<AbsItem>();
+
+            foreach (var item in inventories.SelectMany(inv => inv.Items))
+            {
+                current.Add(item);
+
+                if (items.Contains(item)) continue;
+
+                DisplayItem(item);
+            }
+
+            var removals = items.Except(current).ToList();
+            foreach (var item in removals)
+            {
+                RemoveItem(item);
+            }
         }
     }
 }

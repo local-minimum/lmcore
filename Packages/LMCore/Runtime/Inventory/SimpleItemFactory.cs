@@ -8,7 +8,7 @@ namespace LMCore.Inventory
     public class SimpleItemFactory : AbsItemFactory
     {
         [System.Serializable]
-        struct ItemInstruction
+        class ItemInstruction
         {
             public string ItemId;
             public SimpleItem Prefab;
@@ -22,6 +22,7 @@ namespace LMCore.Inventory
         {
             if (!Instructions.Any(i => i.ItemId == itemId))
             {
+                Debug.LogWarning($"No instruction found for '{itemId}'");
                 item = null;
                 return false;
             }
@@ -30,6 +31,15 @@ namespace LMCore.Inventory
 
             var simpleItem = Instantiate(instruction.Prefab);
             simpleItem.Configure(itemId, originId, instruction.StackSize);
+
+            if (simpleItem.WorldRoot != null)
+            {
+                simpleItem.WorldRoot.gameObject.SetActive(false);
+            }
+            if (simpleItem.UIRoot != null)
+            {
+                simpleItem.UIRoot.gameObject.SetActive(false);
+            }
 
             item = simpleItem;
             return true;

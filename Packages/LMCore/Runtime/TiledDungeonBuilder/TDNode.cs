@@ -51,14 +51,14 @@ namespace LMCore.TiledDungeon
             set => _coordinates = value;
         }
 
-        TDChest _chest;
-        TDChest chest 
+        TDContainer _chest;
+        TDContainer chest 
         {
             get
             {
                 if (_chest == null)
                 {
-                    _chest = GetComponentInChildren<TDChest>();
+                    _chest = GetComponentInChildren<TDContainer>();
                 }
                 return _chest;
             }
@@ -320,6 +320,8 @@ namespace LMCore.TiledDungeon
                         // TODO: Possibly it should get its styling from the neighbour tile rather than this
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
+                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass);
+
                         continue;
                     } else if (ConfigureWallSpike(direction))
                     {
@@ -430,20 +432,36 @@ namespace LMCore.TiledDungeon
         }
 
         void ConfigurePillar() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PillarClass, out Direction _);
-        void ConfigurePedistal() => ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass, out Direction _);
+
+        void ConfigurePedistal()
+        {
+            var pedistal = ConfigurePotentiallyRotated(TiledConfiguration.instance.PedistalClass, out Direction direction);
+            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass);
+        }
 
         void ConfigureChest()
         {
             var chest = ConfigurePotentiallyRotated(
-                TiledConfiguration.instance.ChestClass, 
-                out Direction direction)?.GetComponent<TDChest>();
+                TiledConfiguration.instance.ChestClass,
+                out Direction direction);
 
-            if (chest == null) {
+            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass);
+        }
+
+        void ConfigureContainer(GameObject tile, Direction direction, string containerClass)
+        {
+            if (tile == null) return;
+
+            var container = tile.GetComponent<TDContainer>();
+
+            if (container == null) {
+                // Only error if it seems Tiled assumes there should be a chest
                 if (direction != Direction.None) Debug.LogError($"Chest @ {Coordinates}: Lacks script to configure");
                 return;
             };
 
-            chest.Configure(this, Coordinates, direction, modifications);
+            container.Configure(this, Coordinates, direction, containerClass, modifications);
+
         }
 
         TileModification TrapdoorModification =>

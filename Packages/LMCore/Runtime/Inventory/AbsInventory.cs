@@ -1,3 +1,4 @@
+using Codice.CM.Common.Purge;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,5 +31,9 @@ namespace LMCore.Inventory
         protected void EmitAdded(AbsItem item) => OnAddItem?.Invoke(item);
 
         protected void EmitRemoved(AbsItem item) => OnRemoveItem?.Invoke(item); 
+
+        public abstract IEnumerable<AbsItem> Items { get; }
+
+        public abstract void Configure(string id, AbsInventory parent, int capacity);
     }
 }

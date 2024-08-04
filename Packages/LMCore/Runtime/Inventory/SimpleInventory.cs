@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -20,12 +19,15 @@ namespace LMCore.Inventory
         [SerializeField]
         List<AbsItem> items = new List<AbsItem>();
 
+        public override IEnumerable<AbsItem> Items => items;
+
         public override int Used => items.Count;
 
-        public void Configure(string id, int capacity)
+        public override void Configure(string id, AbsInventory parent, int capacity)
         {
             _Id = id;
             _Capacity = capacity;
+            Parent = parent;
         }
 
         public override bool Add(AbsItem item)

@@ -1,0 +1,237 @@
+using System.Linq;
+using UnityEngine;
+using LMCore.Crawler;
+using LMCore.Inventory;
+using LMCore.TiledDungeon.Integration;
+using System.Collections.Generic;
+
+namespace LMCore.TiledDungeon
+{
+    public class TDContainer : MonoBehaviour
+    {       
+        enum ContainerPhase { 
+            /// <summary>
+            /// Requires a key to open
+            /// </summary>
+            Locked, 
+            /// <summary>
+            /// Requires interaction to open
+            /// </summary>
+            Closed,
+            /// <summary>
+            /// Requires interaction to close
+            /// </summary>
+            Opened,
+            /// <summary>
+            /// Doesn't allow interaction, just displays something
+            /// </summary>
+            DisplayCage 
+        };
+
+        [SerializeField]
+        Animator animator;
+
+        [SerializeField]
+        string UnlockOpenTrigger;
+
+        [SerializeField]
+        string OpenTrigger;
+
+        [SerializeField, HideInInspector]
+        Vector3Int Position;
+
+        [SerializeField, HideInInspector]
+        ContainerPhase phase;
+
+        [SerializeField, HideInInspector]
+        Direction direction;
+
+        [SerializeField, HideInInspector]
+        string key;
+
+        [SerializeField, HideInInspector]
+        bool consumesKey;
+
+        TDNode _node;
+        TDNode node
+        {
+            get
+            {
+                if (_node == null)
+                {
+                    _node = GetComponentInParent<TDNode>();
+                }
+                return _node;
+            }
+        }
+
+        public bool BlockingPassage => true;
+
+        public void Configure(
+            TDNode node,
+            Vector3Int position,
+            Direction direction,
+            string containerClass,
+            TileModification[] modifications
+            )
+        {
+            Position = position;
+
+            var props = modifications.FirstOrDefault(mod =>
+                mod.Tile.Type == containerClass)?.Tile
+                .CustomProperties;
+
+            var interaction = props == null ? TDEnumInteraction.Open : props.Interaction(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Open);
+            switch (interaction)
+            {
+                case TDEnumInteraction.Open:
+                    phase = ContainerPhase.Opened; 
+                    break;
+                case TDEnumInteraction.Locked: 
+                    phase = ContainerPhase.Locked; 
+                    break;
+                case TDEnumInteraction.Closed:
+                    phase = ContainerPhase.Closed;
+                    break;
+                default:
+                    Debug.LogError($"Container @ {Position}: Recieved interaction {interaction} which it doesn't know how to do");
+                    phase = ContainerPhase.Closed;
+                    break;
+            }
+
+            this.direction = direction;
+
+            key = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjLockItemClass,
+                props => props?.String(TiledConfiguration.instance.KeyKey)
+            );
+
+            consumesKey = node.FirstObjectValue(
+                TiledConfiguration.instance.ObjLockItemClass,
+                props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
+            );
+
+            ConfigureInventory(node);
+        }
+
+        void ConfigureInventory(TDNode node)
+        {
+            var factory = SimpleItemFactory.instance;
+            var items = new List<AbsItem>();
+
+            // TODO: Any reason to support multiple containers in one location?
+            var inventory = GetComponentInChildren<AbsInventory>();
+            if (inventory != null)
+            {
+                var prop = node.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjContainerClass);
+                if (prop != null)
+                {
+                    var capacity = prop.Int(TiledConfiguration.instance.ObjCapacityKey, 0);
+
+                    inventory.Configure(
+                        prop.String(TiledConfiguration.instance.ObjContainerIdKey),
+                        transform.parent?.GetComponentInParent<AbsInventory>(true),
+                        capacity
+                    );
+
+                    for (int i  = 0; i < capacity; i++)
+                    {
+                        var itemIdKey = TiledConfiguration.instance.ObjItemPatternKey.Replace("%", i.ToString());
+                        var itemId = prop.String(itemIdKey);
+
+                        if (itemId == null) continue;
+
+                        if (itemId == string.Empty)
+                        {
+                            Debug.LogWarning($"Container {name} @ {Position}: Item {i} configured but without id value");
+                            continue;
+                        }
+
+                        var stackSizeKey = TiledConfiguration.instance.ObjItemStackSizePatternKey.Replace("%", i.ToString());
+                        var stackSize = prop.Int(stackSizeKey, 1);
+
+                        for (int n = 0; n < stackSize; n++)
+                        {
+                            if (factory.Create(itemId, inventory.FullId, out AbsItem item))
+                            {
+                                items.Add(item);
+                                Debug.Log($"Container {name} @ {Position}: Got an '{itemId}'");
+                            }
+                            else
+                            {
+                                Debug.LogError($"Container {name} @ {Position}: Could not instantiate a '{itemId}'");
+                            }
+                        }
+                    }
+                }
+            }
+
+            var displayInventory = GetComponent<WorldInventoryDisplay>();
+            if (displayInventory != null)
+            {
+                displayInventory.Sync();
+            } else
+            {
+                foreach (var item in items)
+                {
+                    item.UIRoot?.gameObject.SetActive(false);
+                    item.WorldRoot?.gameObject.SetActive(false);
+                }
+            }
+        }
+
+
+        private void OnEnable()
+        {
+            GridEntity.OnInteract += GridEntity_OnInteract;
+        }
+
+        private void OnDisable()
+        {
+            GridEntity.OnInteract -= GridEntity_OnInteract;
+        }
+
+        private void GridEntity_OnInteract(GridEntity entity)
+        {
+            if (direction.Inverse().Translate(entity.Position) == Position)
+            {
+                if (phase == ContainerPhase.Locked)
+                {
+                    HandleUnlock(entity);
+                } else if (phase == ContainerPhase.Closed)
+                {
+                    animator?.SetTrigger(OpenTrigger);
+                    phase = ContainerPhase.Opened;
+                } else
+                {
+                    HandleLoot(entity);
+                }
+            }
+        }
+
+        void HandleUnlock(GridEntity entity)
+        {
+            var keyHolder = entity
+                .GetComponentsInChildren<AbsInventory>()
+                .FirstOrDefault(i => i.HasItem(key));
+
+            if (keyHolder == null) {
+                Debug.LogWarning($"Chest @ {Position}: requires key ({key})");
+                return;
+            }
+            
+            if (consumesKey && !keyHolder.Consume(key, out string _))
+            {
+                Debug.LogWarning($"Chest @ {Position}: Failed to consume {key} from {keyHolder}");
+            }
+
+            animator?.SetTrigger(UnlockOpenTrigger);
+            phase = ContainerPhase.Opened;
+        }
+
+        void HandleLoot(GridEntity entity)
+        {
+            // TODO: Handle looting
+        }
+    }
+}

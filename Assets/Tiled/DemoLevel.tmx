@@ -379,7 +379,7 @@
     </properties>
     <point/>
    </object>
-   <object id="19" name="Chest" type="Chest" x="494" y="496">
+   <object id="19" name="Chest" type="Container" x="494" y="496">
     <properties>
      <property name="Capacity" type="int" value="10"/>
      <property name="Direction" propertytype="Direction" value="West"/>
@@ -387,6 +387,7 @@
      <property name="Item0" value="Apple"/>
      <property name="Item1" value="Brick"/>
      <property name="Item1-StackSize" type="int" value="4"/>
+     <property name="Phase" propertytype="Interaction" value="Closed"/>
     </properties>
     <point/>
    </object>

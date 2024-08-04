@@ -58,6 +58,7 @@ namespace LMCore.TiledDungeon
         public string ObjToggleGroupClass = "ToggleGroup";
         public string ObjSequencerGroupClass = "Sequence";
         public string ObjActuatorClass = "Actuator";
+        public string ObjContainerClass = "Container";
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
         public string ObjPhaseKey = "Phase";
@@ -67,5 +68,9 @@ namespace LMCore.TiledDungeon
         public string ObjAutomaticKey = "Automatic";
         public string ObjSpikelessKey = "Spikeless";
         public string ObjDelayTimeKey = "Delay";
+        public string ObjContainerIdKey = "Id";
+        public string ObjCapacityKey = "Capacity";
+        public string ObjItemPatternKey = "Item%";
+        public string ObjItemStackSizePatternKey = "Item%-StackSize";
     }
 }

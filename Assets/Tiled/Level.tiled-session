@@ -6,9 +6,9 @@
     "activeFile": "DemoLevel.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        "Rules",
+        "Automapping",
         ".",
-        "Automapping"
+        "Rules"
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -30,8 +30,8 @@
             "scale": 1.5,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": 552,
-                "y": 451
+                "x": 494,
+                "y": 195.66666666666666
             }
         },
         "Mapping.tsx": {
@@ -66,7 +66,7 @@
         "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "string",
+    "property.type": "Interaction",
     "recentFiles": [
         "Mapping.tsx",
         "Rules/AutomappingDungeons.tmx",
