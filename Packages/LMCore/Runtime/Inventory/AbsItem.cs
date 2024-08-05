@@ -7,6 +7,8 @@ namespace LMCore.Inventory
         public abstract string Id { get; }
         public abstract string Origin { get; }
 
+        public string FullId => $"{Origin}-{Id}";
+
         public abstract bool Stackable { get; }
         public abstract int StackSizeLimit { get; }
 

@@ -61,6 +61,8 @@ namespace LMCore.TiledDungeon
 
         public bool BlockingPassage => blockingPassage;
 
+        private string PrefixLogMessage(string message) => $"Container {name} @ {Position}: {message}";
+
         public void Configure(
             TDNodeConfig nodeConfig,
             Vector3Int position,
@@ -98,7 +100,7 @@ namespace LMCore.TiledDungeon
                     phase = ContainerPhase.DisplayCage;
                     break;
                 default:
-                    Debug.LogError($"Container @ {Position}: Recieved interaction {interaction} which it doesn't know how to do");
+                    Debug.LogError(PrefixLogMessage($"Recieved interaction {interaction} which it doesn't know how to do"));
                     phase = ContainerPhase.Closed;
                     break;
             }
@@ -120,10 +122,10 @@ namespace LMCore.TiledDungeon
                 ConfigureInventory(nodeConfig);
             } else
             {
-                Debug.LogError($"Container @ {Position}: Got no node!");
+                Debug.LogError(PrefixLogMessage("Got no node!"));
             }
 
-            Debug.Log($"Container @ {Position}: Phase({phase}) Key({key}) Direction({direction}) Capacity({inventory?.Capacity}) Items({inventory?.Used})");
+            Debug.Log(PrefixLogMessage($"Phase({phase}) Key({key}) Direction({direction}) Capacity({inventory?.Capacity}) Items({inventory?.Used})"));
         }
 
         void ConfigureInventory(TDNodeConfig nodeConfig)
@@ -145,7 +147,7 @@ namespace LMCore.TiledDungeon
                         capacity
                     );
 
-                    Debug.Log($"Container @ {Position}: Inventory Capacity({inventory.Capacity})");
+                    Debug.Log(PrefixLogMessage($"Inventory Capacity({inventory.Capacity})"));
                     for (int i  = 0; i < capacity; i++)
                     {
                         var itemIdKey = TiledConfiguration.instance.ObjItemPatternKey.Replace("%", i.ToString());
@@ -155,12 +157,14 @@ namespace LMCore.TiledDungeon
 
                         if (itemId == string.Empty)
                         {
-                            Debug.LogWarning($"Container {name} @ {Position}: Item {i} configured but without id value");
+                            Debug.LogWarning(PrefixLogMessage($"Item {i} configured but without id value"));
                             continue;
                         }
 
                         var stackSizeKey = TiledConfiguration.instance.ObjItemStackSizePatternKey.Replace("%", i.ToString());
                         var stackSize = prop.Int(stackSizeKey, 1);
+
+                        Debug.Log(PrefixLogMessage($"Requesting {stackSize} {itemId} (count from {stackSizeKey})"));
 
                         for (int n = 0; n < stackSize; n++)
                         {
@@ -173,23 +177,23 @@ namespace LMCore.TiledDungeon
                                 if (item.WorldRoot != null) item.WorldRoot.gameObject.SetActive(false);
                                 
 
-                                Debug.Log($"Container {name} @ {Position}: Got an '{itemId}'");
+                                Debug.Log(PrefixLogMessage($"Got an '{itemId}'"));
                             }
                             else
                             {
-                                Debug.LogError($"Container {name} @ {Position}: Could not instantiate a '{itemId}'");
+                                Debug.LogError(PrefixLogMessage($"Could not instantiate a '{itemId}'"));
                             }
                         }
                     }
                 } else
                 {
-                    Debug.LogWarning($"Container @ {Position}: Inventory has no configuration, removing it");
+                    Debug.LogWarning(PrefixLogMessage("Inventory has no configuration, removing it"));
                     DestroyImmediate(inventory);
                     inventory = null;
                 } 
             } else
             {
-                    Debug.LogWarning($"Container @ {Position}: Lacking inventory");
+                    Debug.LogWarning(PrefixLogMessage("Lacking inventory"));
             }
 
             var displayInventory = GetComponent<WorldInventoryDisplay>();
@@ -229,11 +233,11 @@ namespace LMCore.TiledDungeon
             {
                 if (phase == ContainerPhase.Locked)
                 {
-                    Debug.Log($"Container @ {Position}: {entity.name} is unlocking me");
+                    Debug.Log(PrefixLogMessage($"{entity.name} is unlocking me"));
                     HandleUnlock(entity);
                 } else if (phase == ContainerPhase.Closed)
                 {
-                    Debug.Log($"Container @ {Position}: {entity.name} is opening me");
+                    Debug.Log(PrefixLogMessage($"{entity.name} is opening me"));
                     animator?.SetTrigger(OpenTrigger);
                     phase = ContainerPhase.Opened;
                 } else if (phase == ContainerPhase.Opened)
@@ -241,7 +245,6 @@ namespace LMCore.TiledDungeon
                     HandleLoot(entity);
                 } else
                 {
-                    Debug.Log($"Container @ {Position}: {entity.name} attempted to interact with me but I'm a display cage");
                 }
             }
         }
@@ -253,13 +256,13 @@ namespace LMCore.TiledDungeon
                 .FirstOrDefault(i => i.HasItem(key));
 
             if (keyHolder == null) {
-                Debug.LogWarning($"Chest @ {Position}: requires key ({key})");
+                Debug.LogWarning(PrefixLogMessage($"requires key ({key})"));
                 return;
             }
             
             if (consumesKey && !keyHolder.Consume(key, out string _))
             {
-                Debug.LogWarning($"Chest @ {Position}: Failed to consume {key} from {keyHolder}");
+                Debug.LogWarning(PrefixLogMessage($"Failed to consume {key} from {keyHolder}"));
             }
 
             animator?.SetTrigger(UnlockOpenTrigger);
@@ -270,14 +273,14 @@ namespace LMCore.TiledDungeon
         bool autoLoot = true;
         void HandleLoot(GridEntity entity)
         {
-            Debug.Log($"Container @ {Position}: Being looted by {entity.name}");
+            Debug.Log(PrefixLogMessage($"Being looted by {entity.name}, inventory has items in {inventory.Used} stacks"));
             if (autoLoot)
             {
                 // TODO: Should have a main inventory really...
                 var entityInventory = entity.GetComponent<AbsInventory>();
                 if (entityInventory == null)
                 {
-                    Debug.LogWarning($"{entity.name} doesn't have an inventory");
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} doesn't have an inventory"));
                     return;
                 }
 
@@ -288,11 +291,14 @@ namespace LMCore.TiledDungeon
                     {
                         if (!inventory.Remove(item))
                         {
-                            Debug.LogWarning($"Container @ {Position}: Failed to remove {item.Id}/{item.Origin}");
+                            Debug.LogWarning(PrefixLogMessage($"Failed to remove {item.FullId}"));
                         } else
                         {
-                            Debug.Log($"Container @ {Position}: {entity.name} looted {item.Id}/{item.Origin}");
+                            Debug.Log(PrefixLogMessage($"{entity.name} looted {item.FullId}"));
                         }
+                    } else
+                    {
+                        Debug.Log(PrefixLogMessage($"Entity could not pickup {item.FullId}"));
                     }
                 }
             }

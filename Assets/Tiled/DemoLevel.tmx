@@ -393,8 +393,9 @@
      <property name="Id" value="Chest1"/>
      <property name="Interaction" propertytype="Interaction" value="Closed"/>
      <property name="Item0" value="Apple"/>
+     <property name="Item0-StackSize" type="int" value="3"/>
      <property name="Item1" value="Brick"/>
-     <property name="Item1-StackSize" type="int" value="4"/>
+     <property name="Item1-StackSize" type="int" value="2"/>
     </properties>
     <point/>
    </object>

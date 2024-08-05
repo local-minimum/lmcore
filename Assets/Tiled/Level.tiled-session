@@ -66,7 +66,7 @@
         "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "Interaction",
+    "property.type": "int",
     "recentFiles": [
         "Mapping.tsx",
         "Rules/AutomappingDungeons.tmx",

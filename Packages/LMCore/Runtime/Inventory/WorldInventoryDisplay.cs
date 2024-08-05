@@ -60,7 +60,7 @@ namespace LMCore.Inventory
 
         void RemoveItem(AbsItem item)
         {
-            Debug.Log($"Word Inventory Display: Removing {item.Id}/{item.Origin}");
+            Debug.Log($"Word Inventory Display: Removing {item.FullId}");
             if (item.WorldRoot != null && item.WorldRoot.transform.parent == Target)
             {
                 item.WorldRoot.gameObject.SetActive(false);

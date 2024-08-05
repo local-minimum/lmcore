@@ -17,11 +17,11 @@ namespace LMCore.Inventory
         public override int Capacity => _Capacity;
 
         [SerializeField, HideInInspector]
-        List<AbsItem> items = new List<AbsItem>();
+        List<InventoryStack> stacks = new List<InventoryStack>();
 
-        public override IEnumerable<AbsItem> Items => items;
+        public override IEnumerable<AbsItem> Items => stacks.SelectMany(s => s.Items);
 
-        public override int Used => items.Count;
+        public override int Used => stacks.Count;
 
         public override void Configure(string id, AbsInventory parent, int capacity)
         {
@@ -30,11 +30,42 @@ namespace LMCore.Inventory
             Parent = parent;
         }
 
+        public bool Full => stacks.Count >= Capacity && stacks.All(stack => stack.Full);
+
+        private bool AddToStack(AbsItem item)
+        {
+            foreach (var stack in stacks)
+            {
+                if (stack.Empty || stack.Id == item.Id && !stack.Full)
+                {
+                    stack.Add(item);
+                    return true;
+                }
+            }
+
+            if (stacks.Count < Capacity)
+            {
+                var newStack = new InventoryStack(item);
+                stacks.Add(newStack);
+                return true;
+            }
+
+            return false;
+        }
+
         public override bool Add(AbsItem item)
         {
-            if (items.Count >= Capacity) return false;
+            if (Full)
+            {
+                Debug.Log($"Inventory {name}: failed to add {item.FullId}, inventory is full");
+                return false;
+            }
 
-            items.Add(item);
+            if (!AddToStack(item))
+            {
+                Debug.LogWarning($"Inventory {name}: failed to add {item.FullId}, no place in any stack");
+                return false;
+            }
 
             if (item.WorldRoot)
             {
@@ -44,54 +75,67 @@ namespace LMCore.Inventory
                     item.WorldRoot.gameObject.SetActive(false);
                 }
             }
+
             EmitAdded(item);
 
+            Debug.Log($"Inventory {name}: {Used}/{Capacity} after adding {item.Id} (full count {Items.Count()})");
             return true;
         }
 
         public override bool Consume(string itemId, out string origin)
         {
-            if (!items.Any(i => i.Id == itemId))
+            if (Remove(itemId, out var item))
             {
-                origin = null;
-                return false;
+                origin = item.Origin;
+
+                return true;
             }
 
-            var item = items.First(i => i.Id == itemId);
-            origin = item.Origin;
-
-            EmitRemoved(item);
-
-            return true;
+            origin = null;
+            return false;
         }
 
         public override bool HasItem(string itemId) =>
-            items.Any(i => i.Id == itemId);
+            stacks.Any(stack => stack.Id == itemId);
 
         public override bool Remove(string itemId, out AbsItem item)
         {
-            if (!items.Any(i => i.Id == itemId))
+            if (!HasItem(itemId))
             {
                 item = null;
                 return false;
             }
 
-            item = items.First(i => i.Id == itemId);
+            foreach (var stack in stacks)
+            {
+                if (stack.Id == itemId)
+                {
+                    if (stack.Remove(itemId, out item))
+                    {
+                        EmitRemoved(item);
+                        return true;
+                    }
+                }
+            }
 
-            EmitRemoved(item);
+            Debug.LogError($"Inventory {name}: Claimed to have {itemId} but non could be removed");
 
-            return true;
+            item = null;
+            return false;
         }
 
         public override bool Remove(AbsItem item)
         {
-            if (items.Contains(item))
+
+            foreach (var stack in stacks)
             {
-                items.Remove(item);
-                return true;
+                if (stack.Remove(item))
+                {
+                    EmitRemoved(item);
+                    return true;
+                }
             }
 
-            EmitRemoved(item);
             return false;
         }
 
