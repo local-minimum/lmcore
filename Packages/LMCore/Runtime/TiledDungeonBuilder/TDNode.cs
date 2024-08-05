@@ -421,13 +421,13 @@ namespace LMCore.TiledDungeon
             {
                 direction = config.FirstObjectValue(
                     rotationClassName, 
-                    props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
+                    props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey, TDEnumDirection.None).AsDirection()
                 );
                 if (direction == Direction.None)
                 {
                     direction = config.FirstObjectValue(
                         className, 
-                        props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey).AsDirection()
+                        props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey, TDEnumDirection.None).AsDirection()
                     );
                 }
 

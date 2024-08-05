@@ -6,6 +6,8 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using System;
+using LMCore.Inventory;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -210,6 +212,8 @@ namespace LMCore.TiledDungeon
         public void GenerateMap()
         {
             SyncNodes();
+
+            GetComponent<AbsInventory>()?.Configure(map.Metadata.Name, null, -1);
 
             foreach (var elevation in elevations)
             {

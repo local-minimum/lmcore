@@ -27,6 +27,8 @@ namespace LMCore.Inventory
 
         public abstract bool Remove(string itemId, out AbsItem item);
 
+        public abstract bool Remove(AbsItem item);
+
         public abstract bool Add(AbsItem item);
 
         protected void EmitAdded(AbsItem item) => OnAddItem?.Invoke(item);

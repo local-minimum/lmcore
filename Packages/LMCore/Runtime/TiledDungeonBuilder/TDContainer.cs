@@ -215,10 +215,12 @@ namespace LMCore.TiledDungeon
             if (direction == Direction.None)
             {
                 // TODO: Doesn't account for thin walls...
+                // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
                 return entity.Position.y == Position.y && entity.Position.ManhattanDistance(Position) == 1;
             }
 
-            return direction.Inverse().Translate(entity.Position) == Position;
+            // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
+            return entity.Position == Position && direction == entity.LookDirection;
         }
 
         private void GridEntity_OnInteract(GridEntity entity)
@@ -227,14 +229,19 @@ namespace LMCore.TiledDungeon
             {
                 if (phase == ContainerPhase.Locked)
                 {
+                    Debug.Log($"Container @ {Position}: {entity.name} is unlocking me");
                     HandleUnlock(entity);
                 } else if (phase == ContainerPhase.Closed)
                 {
+                    Debug.Log($"Container @ {Position}: {entity.name} is opening me");
                     animator?.SetTrigger(OpenTrigger);
                     phase = ContainerPhase.Opened;
-                } else
+                } else if (phase == ContainerPhase.Opened)
                 {
                     HandleLoot(entity);
+                } else
+                {
+                    Debug.Log($"Container @ {Position}: {entity.name} attempted to interact with me but I'm a display cage");
                 }
             }
         }
@@ -259,9 +266,37 @@ namespace LMCore.TiledDungeon
             phase = ContainerPhase.Opened;
         }
 
+        // TODO: Make config or something
+        bool autoLoot = true;
         void HandleLoot(GridEntity entity)
         {
-            // TODO: Handle looting
+            Debug.Log($"Container @ {Position}: Being looted by {entity.name}");
+            if (autoLoot)
+            {
+                // TODO: Should have a main inventory really...
+                var entityInventory = entity.GetComponent<AbsInventory>();
+                if (entityInventory == null)
+                {
+                    Debug.LogWarning($"{entity.name} doesn't have an inventory");
+                    return;
+                }
+
+                
+                foreach (var item in inventory.Items.ToList())
+                {
+                    if (entityInventory.Add(item))
+                    {
+                        if (!inventory.Remove(item))
+                        {
+                            Debug.LogWarning($"Container @ {Position}: Failed to remove {item.Id}/{item.Origin}");
+                        } else
+                        {
+                            Debug.Log($"Container @ {Position}: {entity.name} looted {item.Id}/{item.Origin}");
+                        }
+                    }
+                }
+            }
+            // TODO: Handle show inventory ui
         }
     }
 }

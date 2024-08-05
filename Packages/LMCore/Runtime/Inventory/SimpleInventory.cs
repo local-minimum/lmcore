@@ -36,6 +36,14 @@ namespace LMCore.Inventory
 
             items.Add(item);
 
+            if (item.WorldRoot)
+            {
+                if (item.WorldRoot.transform.parent != item.transform)
+                {
+                    item.WorldRoot.transform.SetParent(item.WorldRoot);
+                    item.WorldRoot.gameObject.SetActive(false);
+                }
+            }
             EmitAdded(item);
 
             return true;
@@ -73,6 +81,18 @@ namespace LMCore.Inventory
             EmitRemoved(item);
 
             return true;
+        }
+
+        public override bool Remove(AbsItem item)
+        {
+            if (items.Contains(item))
+            {
+                items.Remove(item);
+                return true;
+            }
+
+            EmitRemoved(item);
+            return false;
         }
 
         // TODO: Add saving and loading
