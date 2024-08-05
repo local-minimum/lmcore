@@ -45,7 +45,10 @@ namespace LMCore.TiledDungeon
         ContainerPhase phase;
 
         [SerializeField, HideInInspector]
-        Direction direction;
+        Direction facingDirection;
+
+        [SerializeField, HideInInspector]
+        Direction anchor;
 
         [SerializeField, HideInInspector]
         string key;
@@ -66,7 +69,8 @@ namespace LMCore.TiledDungeon
         public void Configure(
             TDNodeConfig nodeConfig,
             Vector3Int position,
-            Direction direction,
+            Direction anchor,
+            Direction facingDirection,
             string containerClass,
             TileModification[] modifications,
             bool blockingPassage
@@ -74,6 +78,8 @@ namespace LMCore.TiledDungeon
         {
             this.blockingPassage = blockingPassage;
             Position = position;
+            this.facingDirection = facingDirection;
+            this.anchor = anchor;
 
             var tileProps = modifications.FirstOrDefault(mod =>
                 mod.Tile.Type == containerClass)?.Tile
@@ -105,8 +111,6 @@ namespace LMCore.TiledDungeon
                     break;
             }
 
-            this.direction = direction;
-
             key = nodeConfig?.FirstObjectValue(
                 TiledConfiguration.instance.ObjLockItemClass,
                 props => props?.String(TiledConfiguration.instance.KeyKey)
@@ -125,7 +129,7 @@ namespace LMCore.TiledDungeon
                 Debug.LogError(PrefixLogMessage("Got no node!"));
             }
 
-            Debug.Log(PrefixLogMessage($"Phase({phase}) Key({key}) Direction({direction}) Capacity({inventory?.Capacity}) Items({inventory?.Used})"));
+            Debug.Log(PrefixLogMessage($"Phase({phase}) Key({key}) Direction({facingDirection}) Capacity({inventory?.Capacity}) Items({inventory?.Used})"));
         }
 
         void ConfigureInventory(TDNodeConfig nodeConfig)
@@ -216,15 +220,24 @@ namespace LMCore.TiledDungeon
 
         private bool AllowInteractBy(GridEntity entity)
         {
-            if (direction == Direction.None)
+            Debug.Log(PrefixLogMessage($"Distance({entity.Position.ManhattanDistance(Position)}) Same Elevation({entity.Position.y == Position.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
+            if (anchor == Direction.Down && facingDirection == Direction.None)
             {
                 // TODO: Doesn't account for thin walls...
                 // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
                 return entity.Position.y == Position.y && entity.Position.ManhattanDistance(Position) == 1;
+            } 
+
+            if (anchor == Direction.Down)
+            {
+                return entity.Position.y == Position.y 
+                    && entity.Position.ManhattanDistance(Position) == 1 
+                    && entity.LookDirection == facingDirection.Inverse();
             }
 
             // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
-            return entity.Position == Position && direction == entity.LookDirection;
+            return entity.Position == Position 
+                && entity.LookDirection == anchor;
         }
 
         private void GridEntity_OnInteract(GridEntity entity)
@@ -277,7 +290,7 @@ namespace LMCore.TiledDungeon
             if (autoLoot)
             {
                 // TODO: Should have a main inventory really...
-                var entityInventory = entity.GetComponent<AbsInventory>();
+                var entityInventory = entity.Inventory;
                 if (entityInventory == null)
                 {
                     Debug.LogWarning(PrefixLogMessage($"{entity.name} doesn't have an inventory"));

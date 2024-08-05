@@ -4,6 +4,7 @@ using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Events;
+using LMCore.Inventory;
 
 namespace LMCore.Crawler
 {
@@ -12,6 +13,10 @@ namespace LMCore.Crawler
     public class GridEntity : MonoBehaviour
     {
         public static event InteractEvent OnInteract;
+
+        [SerializeField]
+        private AbsInventory _inventory;
+        public AbsInventory Inventory => _inventory;
 
         public UnityEvent<bool> OnFall;
         public UnityEvent ContinueFall;

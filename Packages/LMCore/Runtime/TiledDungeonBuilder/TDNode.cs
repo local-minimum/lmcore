@@ -334,7 +334,7 @@ namespace LMCore.TiledDungeon
                         var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
                         alcove.name = direction.ToString();
 
-                        ConfigureContainer(alcove, direction, TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
+                        ConfigureContainer(alcove, direction, direction.Inverse(), TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
 
                         continue;
                     } else if (ConfigureWallSpike(direction))
@@ -468,7 +468,7 @@ namespace LMCore.TiledDungeon
                 nodeConfig, 
                 out Direction direction
             );
-            ConfigureContainer(pedistal, direction, TiledConfiguration.instance.PedistalClass, nodeConfig, true);
+            ConfigureContainer(pedistal, Direction.Down, direction, TiledConfiguration.instance.PedistalClass, nodeConfig, true);
         }
 
         void ConfigureChest(TDNodeConfig nodeConfig)
@@ -479,10 +479,10 @@ namespace LMCore.TiledDungeon
                 nodeConfig,
                 out Direction direction);
 
-            ConfigureContainer(chest, direction, TiledConfiguration.instance.ChestClass, nodeConfig, true);
+            ConfigureContainer(chest, Direction.Down, direction, TiledConfiguration.instance.ChestClass, nodeConfig, true);
         }
 
-        void ConfigureContainer(GameObject tile, Direction direction, string containerClass, TDNodeConfig nodeConfig, bool blockingPassage)
+        void ConfigureContainer(GameObject tile, Direction anchor, Direction facingDirection, string containerClass, TDNodeConfig nodeConfig, bool blockingPassage)
         {
             if (tile == null) return;
 
@@ -490,11 +490,18 @@ namespace LMCore.TiledDungeon
 
             if (container == null) {
                 // Only error if it seems Tiled assumes there should be a chest
-                if (direction != Direction.None) Debug.LogError($"Chest @ {Coordinates}: Lacks script to configure");
+                if (facingDirection != Direction.None) Debug.LogError($"Chest @ {Coordinates}: Lacks script to configure");
                 return;
             };
 
-            container.Configure(nodeConfig, Coordinates, direction, containerClass, modifications, blockingPassage);
+            container.Configure(
+                nodeConfig, 
+                Coordinates, 
+                anchor,
+                facingDirection, 
+                containerClass, 
+                modifications, 
+                blockingPassage);
 
         }
 
