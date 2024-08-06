@@ -1,5 +1,6 @@
 using Codice.CM.Common.Purge;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.Inventory
@@ -38,5 +39,21 @@ namespace LMCore.Inventory
         public abstract IEnumerable<AbsItem> Items { get; }
 
         public abstract void Configure(string id, AbsInventory parent, int capacity);
+
+        static List<AbsInventory> Inventories = new List<AbsInventory>();
+
+        public static AbsInventory GetByFullId(string fullId) =>
+            Inventories.FirstOrDefault(i => i.FullId == fullId);
+
+
+        private void Awake()
+        {
+            Inventories.Add(this);
+        }
+
+        private void OnDestroy()
+        {
+            Inventories.Remove(this);
+        }
     }
 }
