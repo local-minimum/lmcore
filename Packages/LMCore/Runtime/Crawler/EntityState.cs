@@ -72,5 +72,10 @@ namespace LMCore.Crawler
 
             return false;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
