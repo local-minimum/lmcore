@@ -121,11 +121,20 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        TDNode GetOrCreateNode(Vector3Int coordinates)
+        TDNode GetOrCreateNode(Vector3Int coordinates, Transform parent)
         {
-            if (nodes.ContainsKey(coordinates)) return nodes[coordinates];
+            TDNode node;
+            if (nodes.ContainsKey(coordinates))
+            {
+                node = nodes[coordinates];
+                if (node.transform.parent != parent)
+                {
+                    node.transform.SetParent(parent);
+                }
+                return node;
+            }
 
-            var node = Instantiate(Prefab, levelParent);
+            node = Instantiate(Prefab, parent);
             node.Coordinates = coordinates;
 
             nodes.Add(coordinates, node);
@@ -159,7 +168,7 @@ namespace LMCore.TiledDungeon
             return config;
         }
 
-        void GenerateNode(Vector3Int coordinates)
+        void GenerateNode(Vector3Int coordinates, Transform parent)
         {
             var layerConfig = GetLayerConfig(coordinates.y);
             var tile = layerConfig.GetTile(coordinates);
@@ -168,7 +177,7 @@ namespace LMCore.TiledDungeon
 
             if (nodes.ContainsKey(coordinates)) return;
 
-            var node = GetOrCreateNode(coordinates);
+            var node = GetOrCreateNode(coordinates, parent);
 
             var nodeConfig = GetNodeConfig(coordinates);
 
@@ -191,15 +200,34 @@ namespace LMCore.TiledDungeon
             return config;
         }
 
+        Transform GetOrCreateElevationNode(int elevation)
+        {
+            var elevationNodeName = $"Elevation {elevation}";
+            var parent = levelParent;
+            Transform child;
+            for (var i = 0; i < parent.childCount; i++)
+            {
+                child = parent.GetChild(i);
+                if (child.name == elevationNodeName) return child;
+            }
+
+            child = new GameObject(elevationNodeName).transform;
+            child.SetParent(levelParent);
+
+            return child;
+        }
+
         void GenerateLevel(int elevation)
         {
+            var parent = GetOrCreateElevationNode(elevation);
+
             var layerConfig = GetLayerConfig(elevation);
 
             for (int row = 0; row < layerConfig.LayerSize.y; row++)
             {
                 for (int col = 0; col < layerConfig.LayerSize.x; col++)
                 {
-                    GenerateNode(layerConfig.AsUnityCoordinates(col, row));
+                    GenerateNode(layerConfig.AsUnityCoordinates(col, row), parent);
                 }
             }
         }
