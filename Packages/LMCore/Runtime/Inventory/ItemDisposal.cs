@@ -24,6 +24,12 @@ namespace LMCore.Inventory
         public IEnumerable<string> GetDisposed(string originId) =>
             items.Where(i => i.OriginId == originId).Select(i => i.ItemId);
 
-        // TODO: Add loading and saving features
+        public void LoadFromSave(IEnumerable<ItemOrigin> disposed)
+        {
+            items.Clear();
+            items.AddRange(disposed);
+        }
+
+        public List<ItemOrigin> SaveState() => items.ToList();
     }
 }

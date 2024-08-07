@@ -7,5 +7,6 @@ namespace LMCore.TiledDungeon.SaveLoad
     [System.Serializable]
     public class GameSave 
     {
+        public GameSave() { }
     }
 }
