@@ -52,28 +52,35 @@ namespace LMCore.Extensions
         }
 
         // TODO: This doesn't seem to work
-        public static T[] FindObjectsByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) =>
+        /// <summary>
+        /// Find all mono behaviours that implement an interface.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="findObjectsInactive"></param>
+        /// <param name="sortMode"></param>
+        /// <returns></returns>
+        public static T[] FindObjectsByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) where T : class =>
             MonoBehaviour
                 .FindObjectsByType<MonoBehaviour>(findObjectsInactive, sortMode)
-                .Where(c => typeof(T).IsAssignableFrom(c.GetType()) && typeof(IConvertible).IsAssignableFrom(c.GetType()))
-                .Select(c => (T) Convert.ChangeType(c, typeof(T)))
+                .Where(c => c is T)
+                .Select(c => c as T)
                 .ToArray();
 
-        public static T[] FindObjectsByInterface<T>(FindObjectsSortMode sortMode) =>
+        public static T[] FindObjectsByInterface<T>(FindObjectsSortMode sortMode) where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, sortMode);
 
-        public static T[] FindObjectsByInterface<T>() =>
+        public static T[] FindObjectsByInterface<T>() where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
-        public static T FindObjectByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) =>
+        public static T FindObjectByInterface<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) where T : class =>
             FindObjectsByInterface<T>(findObjectsInactive, sortMode).First();
 
-        public static T FindObjectByInterface<T>(FindObjectsSortMode sortMode) =>
+        public static T FindObjectByInterface<T>(FindObjectsSortMode sortMode) where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, sortMode).First();
 
-        public static T FindObjectByInterface<T>() =>
+        public static T FindObjectByInterface<T>() where T: class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).First();
-        public static T FindObjectByInterfaceOrDefault<T>() =>
+        public static T FindObjectByInterfaceOrDefault<T>() where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).FirstOrDefault();
     }    
 }

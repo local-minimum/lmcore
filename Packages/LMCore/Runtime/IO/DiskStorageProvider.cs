@@ -79,6 +79,7 @@ namespace LMCore.IO
 #endif
                 File.WriteAllText(path, JsonUtility.ToJson(value));
 
+                Debug.Log(PrefixLogMessage($"Saved slot {id} at {path}"));
                 return true;
             } catch {
                 Debug.LogError(PrefixLogMessage($"Failed to save slot {id} to {path}"));
@@ -189,6 +190,20 @@ namespace LMCore.IO
                     Debug.Log(PrefixLogMessage($"Most recent save {info.SaveTime} ({Mathf.RoundToInt((float)(DateTime.Now - info.SaveTime).TotalMinutes)} minutes ago)"));
                 }
             }
+        }
+
+        public override bool Delete(int id)
+        {
+            try
+            {
+                File.Delete(FilePath(id));
+            } catch (Exception e)
+            {
+                Debug.LogError(PrefixLogMessage(e.Message));
+                return false;
+            }
+
+            return true;
         }
     }
 }

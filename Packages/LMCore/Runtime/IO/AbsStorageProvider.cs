@@ -58,6 +58,13 @@ namespace LMCore.IO
         /// <param name="value">Object to save</param>
         /// <param name="OnSaveComplete">Called after save is completed. If called with true, it was successful</param>
         public abstract void Save(int id, T value, System.Action OnSave, System.Action OnSaveFail);
+        
+        /// <summary>
+        /// Delete a save
+        /// </summary>
+        /// <param name="id">Save slot</param>
+        /// <returns>If delete was successful</returns>
+        public abstract bool Delete(int id);
 
         /// <summary>
         /// Retrieve info about a save

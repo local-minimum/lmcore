@@ -2,7 +2,8 @@
     "name": "se.localminimum.runtime.io",
     "rootNamespace": "LMCore.IO",
     "references": [
-        "GUID:1ef3e91b45f837b4189fe933aed1adb3"
+        "GUID:1ef3e91b45f837b4189fe933aed1adb3",
+        "GUID:7133380fdf0a2554eb38dd774526b441"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

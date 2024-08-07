@@ -18,6 +18,20 @@ namespace LMCore.AbstractClasses
             }
         }
 
+        public static T InstanceOrCreate(string name = null, Transform parent = null)
+        {
+            var i = instance;
+            if (i) return i;
+
+            var go = new GameObject(name ?? typeof(T).Name, new[] { typeof(T) } );
+            if (parent != null)
+            {
+                go.transform.SetParent(parent);
+            }
+
+            return go.GetComponent<T>();
+        }
+
         protected void Awake()
         {
             if (_instance == null)

@@ -1,5 +1,5 @@
+using LMCore.Inventory;
 using LMCore.IO;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.SaveLoad
@@ -38,14 +38,12 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         protected override T CreateSaveState(T active)
         {
-            //TODO: Actuallly gather save
-            return active;
-        }
+            // TODO: Actually gather a game save
 
-        protected override void Load(T saveData)
-        {
-            base.Load(saveData);
-            // TODO: Actually apply save 
+            return (T)new GameSave()
+            {
+                disposedItems = ItemDisposal.InstanceOrCreate().SaveState(),
+            };
         }
 
         virtual public void LogStatus()

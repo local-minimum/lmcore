@@ -1,4 +1,6 @@
 using LMCore.AbstractClasses;
+using LMCore.Extensions;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.IO
@@ -36,6 +38,13 @@ namespace LMCore.IO
         /// <param name="OnSaveFail">callback for when save fails</param>
         public void Save(int id, System.Action OnSave, System.Action OnSaveFail)
         {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning(PrefixLogMessage("Cannot save without the application running"));
+                OnSaveFail();
+                return;
+            }
+
             if (Provider != null)
             {
                 var newState = CreateSaveState(ActiveSaveData);
@@ -56,12 +65,25 @@ namespace LMCore.IO
         }
 
         /// <summary>
-        /// Override this and ensure to start by calling base and then apply the state to current scene 
+        /// Calls all interfaces that subscribe to game state having been loaded 
         /// </summary>
         /// <param name="saveData">The save data</param>
-        virtual protected void Load(T saveData)
+        void Load(T saveData)
         {
             ActiveSaveData = saveData;
+
+            int n = 0;
+            foreach (var normal in UnityExtensions
+                .FindObjectsByInterface<IOnLoadSave>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None)
+                .OrderByDescending(i => i.OnLoadPriority))
+            {
+                normal.OnLoad();
+                n++;
+            }
+
+            Debug.Log(PrefixLogMessage($"Save loaded and {n} behaviours called to handle load"));
         }
 
         /// <summary>
@@ -72,6 +94,13 @@ namespace LMCore.IO
         /// <param name="OnLoadFail">Callback for if loading fails</param>
         public void Load(int id, System.Action OnLoad, System.Action OnLoadFail)
         {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning(PrefixLogMessage("Cannot save without the application running"));
+                OnLoadFail();
+                return;
+            }
+
             if (Provider != null)
             {
                 Provider.Load(
@@ -85,6 +114,17 @@ namespace LMCore.IO
             {
                 Debug.LogError(PrefixLogMessage($"No storage provider configured, can't load slot {id}"));
                 OnLoadFail();
+            }
+        }
+
+        public void DeleteAllSaves()
+        {
+            foreach (var saveInfo in Provider.List())
+            {
+                if (!Provider.Delete(saveInfo.Id))
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Failed to delete save {saveInfo.Id}"));
+                }
             }
         }
     }

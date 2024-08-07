@@ -7,6 +7,9 @@ using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using System;
 using LMCore.Inventory;
+using LMCore.IO;
+using LMCore.TiledDungeon.SaveLoad;
+
 
 
 #if UNITY_EDITOR
@@ -15,7 +18,7 @@ using UnityEditor;
 
 namespace LMCore.TiledDungeon
 {
-    public class TiledDungeon : MonoBehaviour, IGridSizeProvider, IDungeon
+    public class TiledDungeon : MonoBehaviour, IGridSizeProvider, IDungeon, IOnLoadSave
     {
         [Serializable]
         class GenerationBackupSettings
@@ -237,6 +240,8 @@ namespace LMCore.TiledDungeon
             .ToHashSet()
             .OrderByDescending(x => x);
 
+        int IOnLoadSave.OnLoadPriority => 10000;
+
         public void GenerateMap()
         {
             SyncNodes();
@@ -319,6 +324,13 @@ namespace LMCore.TiledDungeon
         public Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
         {
             return TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize);
+        }
+
+        void IOnLoadSave.OnLoad()
+        {
+            var save = TDSaveSystem<GameSave>.ActiveSaveData;
+
+            ItemDisposal.InstanceOrCreate().LoadFromSave(save.disposedItems);
         }
     }
 }
