@@ -1,15 +1,29 @@
 ﻿using LMCore.AbstractClasses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace LMCore.Inventory
 {
 
-    [System.Serializable]
+    [Serializable]
     public struct ItemOrigin
     {
         public string ItemId;
         public string OriginId;
+
+        public override bool Equals(object obj)
+        {
+            if ( obj is ItemOrigin)
+            {
+                var other = (ItemOrigin)obj;
+                return ItemId == other.ItemId && OriginId == other.OriginId;
+            }
+
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode() => HashCode.Combine(ItemId, OriginId);
     }
 
     public class ItemDisposal : Singleton<ItemDisposal> { 

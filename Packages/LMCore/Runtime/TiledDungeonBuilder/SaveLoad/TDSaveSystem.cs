@@ -1,5 +1,6 @@
 using LMCore.Inventory;
 using LMCore.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.SaveLoad
@@ -42,7 +43,12 @@ namespace LMCore.TiledDungeon.SaveLoad
 
             return (T)new GameSave()
             {
-                disposedItems = ItemDisposal.InstanceOrCreate().SaveState(),
+                disposedItems = ItemDisposal
+                    .InstanceOrCreate()
+                    .SaveState()
+                    .ToHashSet()
+                    .Concat(active.disposedItems)
+                    .ToList(),
             };
         }
 
