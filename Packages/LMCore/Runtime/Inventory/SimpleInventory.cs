@@ -1,3 +1,4 @@
+using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace LMCore.Inventory
         public override int Capacity => _Capacity;
 
         [SerializeField, HideInInspector]
-        List<InventoryStack> stacks = new List<InventoryStack>();
+        protected List<InventoryStack> stacks = new List<InventoryStack>();
 
         public override IEnumerable<AbsItem> Items => stacks.SelectMany(s => s.Items);
 
@@ -32,7 +33,29 @@ namespace LMCore.Inventory
 
         public bool Full => stacks.Count >= Capacity && stacks.All(stack => stack.Full);
 
-        private bool AddToStack(AbsItem item)
+        protected bool AddToStack(int stackIdx, AbsItem item)
+        {
+            var nStacks = stacks.Count;
+            if (stackIdx < nStacks)
+            {
+                return stacks[stackIdx].Add(item);
+            }
+
+            if (stackIdx < Capacity)
+            {
+                while (nStacks <= stackIdx)
+                {
+                    stacks.Add(new InventoryStack());
+                    nStacks++;
+                }
+
+                return stacks[stackIdx].Add(item);
+            }
+
+            return false;
+        }
+
+        protected bool AddToStack(AbsItem item)
         {
             foreach (var stack in stacks)
             {
@@ -53,17 +76,18 @@ namespace LMCore.Inventory
             return false;
         }
 
+        protected string PrefixLogMessage(string message) => $"Inventory {FullId}: {message}";
         public override bool Add(AbsItem item)
         {
             if (Full)
             {
-                Debug.Log($"Inventory {name}: failed to add {item.FullId}, inventory is full");
+                Debug.Log(PrefixLogMessage($"failed to add {item.FullId}, inventory is full"));
                 return false;
             }
 
             if (!AddToStack(item))
             {
-                Debug.LogWarning($"Inventory {name}: failed to add {item.FullId}, no place in any stack");
+                Debug.LogWarning(PrefixLogMessage($"failed to add {item.FullId}, no place in any stack"));
                 return false;
             }
 
@@ -78,7 +102,8 @@ namespace LMCore.Inventory
 
             EmitAdded(item);
 
-            Debug.Log($"Inventory {name}: {Used}/{Capacity} after adding {item.Id} (full count {Items.Count()})");
+            Debug.Log(PrefixLogMessage($"{Used}/{Capacity} after adding {item.Id} (full count {Items.Count()})"));
+            
             return true;
         }
 
@@ -118,7 +143,7 @@ namespace LMCore.Inventory
                 }
             }
 
-            Debug.LogError($"Inventory {name}: Claimed to have {itemId} but non could be removed");
+            Debug.LogError(PrefixLogMessage($"Claimed to have {itemId} but non could be removed"));
 
             item = null;
             return false;
@@ -139,6 +164,5 @@ namespace LMCore.Inventory
             return false;
         }
 
-        // TODO: Add saving and loading
     }
 }

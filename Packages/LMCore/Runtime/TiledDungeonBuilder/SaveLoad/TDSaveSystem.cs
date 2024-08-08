@@ -39,17 +39,43 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         protected override T CreateSaveState(T active)
         {
-            // TODO: Actually gather a game save
+            var save = new GameSave();
 
-            return (T)new GameSave()
+            // Replace Active levels
+            save.levels = new SerializableDictionary<string, LevelSave>(active?.levels);           
+            var levels = save.levels;
+
+            foreach (var dungeon in FindObjectsOfType<TiledDungeon>(true))
             {
-                disposedItems = ItemDisposal
+
+                if (!levels.ContainsKey(dungeon.MapName))
+                {
+                    levels.Add(dungeon.MapName, new LevelSave());
+                }
+
+                // Update inventories
+                levels[dungeon.MapName].TD1DInventories = new SerializableDictionary<string, ContainerSave<StackedItemInfo>>(
+                    dungeon
+                        .GetComponentsInChildren<TD1DInventory>()
+                        .Select(inv => new System.Collections.Generic.KeyValuePair<string, ContainerSave<StackedItemInfo>>(
+                            inv.FullId, 
+                            new ContainerSave<StackedItemInfo>(inv.Save())))
+                );
+            }
+
+            // Merge disposed items
+            save.disposedItems = active?.disposedItems == null ? 
+                ItemDisposal
+                    .InstanceOrCreate()
+                    .SaveState() :
+                ItemDisposal
                     .InstanceOrCreate()
                     .SaveState()
                     .ToHashSet()
-                    .Concat(active.disposedItems)
-                    .ToList(),
-            };
+                    .Concat(active?.disposedItems)
+                    .ToList();
+
+            return (T)save;
         }
 
         virtual public void LogStatus()

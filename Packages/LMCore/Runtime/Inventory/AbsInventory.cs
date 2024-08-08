@@ -1,4 +1,4 @@
-using Codice.CM.Common.Purge;
+using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,6 +8,7 @@ namespace LMCore.Inventory
 
     public delegate void ItemChangeEvent(AbsItem item);
 
+    // TODO: Add IOnLoadSave and make a DungeonLevelInventory too... Probably want an item recycle-bin too...
     public abstract class AbsInventory : MonoBehaviour
     {
         public event ItemChangeEvent OnAddItem;
@@ -40,20 +41,20 @@ namespace LMCore.Inventory
 
         public abstract void Configure(string id, AbsInventory parent, int capacity);
 
-        static List<AbsInventory> Inventories = new List<AbsInventory>();
+        static List<AbsInventory> AllInventories = new List<AbsInventory>();
 
         public static AbsInventory GetByFullId(string fullId) =>
-            Inventories.FirstOrDefault(i => i.FullId == fullId);
+            AllInventories.FirstOrDefault(i => i.FullId == fullId);
 
 
         private void Awake()
         {
-            Inventories.Add(this);
+            AllInventories.Add(this);
         }
 
         private void OnDestroy()
         {
-            Inventories.Remove(this);
+            AllInventories.Remove(this);
         }
     }
 }

@@ -10,13 +10,17 @@ namespace LMCore.IO
         public SerializableDictionary() { }
         public SerializableDictionary(IEnumerable<KeyValuePair<TKey, TValue>> elements)
         {
-            foreach (var (key, value) in elements) { 
-                if (key == null)
+            if (elements != null)
+            {
+                foreach (var (key, value) in elements)
                 {
-                    Debug.LogError($"Illegal null-key for '{value}', skipping...");
-                    continue;
-                } 
-                Add(key, value);
+                    if (key == null)
+                    {
+                        Debug.LogError($"Illegal null-key for '{value}', skipping...");
+                        continue;
+                    }
+                    Add(key, value);
+                }
             }
         }
 

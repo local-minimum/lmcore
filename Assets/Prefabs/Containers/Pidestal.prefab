@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 3256230937407526274}
   - component: {fileID: 2746306277886062633}
   - component: {fileID: 6001561588052769797}
-  - component: {fileID: 5054167991766945374}
+  - component: {fileID: 4483098264171639783}
   m_Layer: 0
   m_Name: Pidestal
   m_TagString: Untagged
@@ -84,10 +84,12 @@ MonoBehaviour:
   OpenTrigger: 
   Position: {x: 0, y: 0, z: 0}
   phase: 0
-  direction: 0
+  facingDirection: 0
+  anchor: 0
   key: 
   consumesKey: 0
   inventory: {fileID: 0}
+  blockingPassage: 0
 --- !u!114 &6001561588052769797
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 2339055864306085950}
---- !u!114 &5054167991766945374
+--- !u!114 &4483098264171639783
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,13 +112,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5317583687550121429}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dda71df1e93f3f24baa5543b57b96aaa, type: 3}
+  m_Script: {fileID: 11500000, guid: b00b0cca979eb8a4eafe6107f089ac32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Parent: {fileID: 0}
   _Id: 
   _Capacity: 0
-  items: []
+  stacks: []
 --- !u!1001 &3462341731488231460
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -7,17 +7,18 @@ namespace LMCore.Inventory
 {
 
     [Serializable]
-    public struct ItemOrigin
+    public class ItemOrigin: ItemInfo
     {
-        public string ItemId;
-        public string OriginId;
-
         public override bool Equals(object obj)
         {
-            if ( obj is ItemOrigin)
+            if (obj is ItemOrigin)
             {
                 var other = (ItemOrigin)obj;
                 return ItemId == other.ItemId && OriginId == other.OriginId;
+            } else if (obj is AbsItem)
+            {
+                var other = (AbsItem)obj;
+                return ItemId == other.Id && OriginId == other.Origin;
             }
 
             return base.Equals(obj);

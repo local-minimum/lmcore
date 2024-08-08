@@ -47,6 +47,9 @@ namespace LMCore.TiledDungeon
 
         [Header("Tiled")]
         [SerializeField] TiledMap map;
+
+        public string MapName => map.Metadata.Name;
+
         [SerializeField] TiledTileset[] tilesets;
 
         [Header("Output")]

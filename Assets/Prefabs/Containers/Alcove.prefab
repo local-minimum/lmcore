@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 8958769811261444536}
   - component: {fileID: 4581633285732787602}
   - component: {fileID: 8083257503884238378}
-  - component: {fileID: -3059636439186186552}
+  - component: {fileID: 3618700139391324501}
   m_Layer: 0
   m_Name: Alcove
   m_TagString: Untagged
@@ -84,10 +84,12 @@ MonoBehaviour:
   OpenTrigger: 
   Position: {x: 0, y: 0, z: 0}
   phase: 0
-  direction: 0
+  facingDirection: 0
+  anchor: 0
   key: 
   consumesKey: 0
   inventory: {fileID: 0}
+  blockingPassage: 0
 --- !u!114 &8083257503884238378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 6054258237389893711}
---- !u!114 &-3059636439186186552
+--- !u!114 &3618700139391324501
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,13 +112,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 9122509217274911164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dda71df1e93f3f24baa5543b57b96aaa, type: 3}
+  m_Script: {fileID: 11500000, guid: b00b0cca979eb8a4eafe6107f089ac32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Parent: {fileID: 0}
   _Id: 
   _Capacity: 0
-  items: []
+  stacks: []
 --- !u!1001 &4255493444391471934
 PrefabInstance:
   m_ObjectHideFlags: 0

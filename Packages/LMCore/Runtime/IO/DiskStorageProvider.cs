@@ -9,6 +9,9 @@ namespace LMCore.IO
 {
     public class DiskStorageProvider<T> : AbsStorageProvider<T> where T : new()
     {
+        [SerializeField]
+        bool Pretty;
+
         private string SaveSlotIdPattern = "{id}";
         private string PrefixLogMessage(string message) => $"DiskStorageProvider: {message}";
 
@@ -77,7 +80,7 @@ namespace LMCore.IO
 #if UNITY_WEBGL
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 #endif
-                File.WriteAllText(path, JsonUtility.ToJson(value));
+                File.WriteAllText(path, JsonUtility.ToJson(value, Pretty));
 
                 Debug.Log(PrefixLogMessage($"Saved slot {id} at {path}"));
                 return true;
