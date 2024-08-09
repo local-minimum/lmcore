@@ -25,16 +25,15 @@ namespace LMCore.TiledDungeon
         }
     }
 
-    public class TD1DInventory : SimpleInventory, IOnLoadSave
+    public class TD1DInventory : SimpleInventory 
     {
         /// <summary>
         /// This load requires item disposal to have loaded first
         /// </summary>
         public int OnLoadPriority => 1000;
 
-        public void OnLoad()
+        public void OnLoad(InventorySave<StackedItemInfo> container)
         {
-            var save = SaveSystem<GameSave>.ActiveSaveData;
             var disposed = ItemDisposal.InstanceOrCreate().GetDisposed(FullId).ToList();
             var recylcer = RecycleBin.InstanceOrCreate();
             var dungeon = GetComponentInParent<TiledDungeon>();
@@ -47,8 +46,6 @@ namespace LMCore.TiledDungeon
                 item.transform.SetParent(ItemDisposal.instance.transform);
             }
 
-            var container = save.levels[dungeon.MapName].TD1DInventories[FullId];
-
             if (container == null)
             {
                 Debug.LogWarning(PrefixLogMessage("No save info exists for me"));
@@ -56,14 +53,14 @@ namespace LMCore.TiledDungeon
             }
 
             // 2. Recycle things no longer here for safety
-            foreach (var item in stacks.SelectMany(stack => stack.Items).Where(item => !container.inventories.Any(info => info.Equals(item))).ToList()) {
+            foreach (var item in stacks.SelectMany(stack => stack.Items).Where(item => !container.items.Any(info => info.Equals(item))).ToList()) {
                 Remove(item);
                 recylcer.Add(item);
                 item.WorldRoot?.gameObject.SetActive(false);
             }
 
             // 3. Claim or create those items that weren't originally here
-            foreach (var info in container.inventories.Where(info => info.OriginId != FullId))
+            foreach (var info in container.items.Where(info => info.OriginId != FullId))
             {
                 if (recylcer.Remove(info.ItemId, info.OriginId, out AbsItem item))
                 {
@@ -102,7 +99,7 @@ namespace LMCore.TiledDungeon
             foreach (var stack in stacks)
             {
                 foreach (var item in stack.Items.ToList()) { 
-                    var info = container.inventories.FirstOrDefault(info => info.Equals(item));
+                    var info = container.items.FirstOrDefault(info => info.Equals(item));
                     if (info == null)
                     {
                         Debug.LogError(PrefixLogMessage($"No save info found for {item.Id}, it should not be possible"));

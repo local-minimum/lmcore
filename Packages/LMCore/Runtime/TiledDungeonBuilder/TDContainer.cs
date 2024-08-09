@@ -5,12 +5,16 @@ using LMCore.Inventory;
 using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
 using LMCore.Extensions;
+using System;
+using LMCore.TiledDungeon.SaveLoad;
+using LMCore.IO;
 
 namespace LMCore.TiledDungeon
 {
-    public class TDContainer : MonoBehaviour
-    {       
-        enum ContainerPhase { 
+    public class TDContainer : MonoBehaviour, IOnLoadSave
+    {
+        [Serializable]
+        public enum ContainerPhase { 
             /// <summary>
             /// Requires a key to open
             /// </summary>
@@ -37,6 +41,18 @@ namespace LMCore.TiledDungeon
 
         [SerializeField]
         string OpenTrigger;
+
+        [SerializeField]
+        string SyncOpenedTrigger;
+
+        [SerializeField]
+        string SyncClosedTrigger;
+
+        [SerializeField]
+        string SyncLockedTrigger;
+
+        [SerializeField]
+        string SyncDisplayCageTrigger;
 
         [SerializeField, HideInInspector]
         Vector3Int Position;
@@ -65,6 +81,13 @@ namespace LMCore.TiledDungeon
         public bool BlockingPassage => blockingPassage;
 
         private string PrefixLogMessage(string message) => $"Container {name} @ {Position}: {message}";
+
+        public string InventoryId => inventory?.FullId;
+
+        /// <summary>
+        /// Must be after the item disposal loading
+        /// </summary>
+        public int OnLoadPriority => 1000;
 
         public void Configure(
             TDNodeConfig nodeConfig,
@@ -316,6 +339,57 @@ namespace LMCore.TiledDungeon
                 }
             }
             // TODO: Handle show inventory ui
+        }
+
+        public KeyValuePair<string, ContainerSave<StackedItemInfo>> Save()
+        {
+            var inventories = GetComponentsInChildren<TD1DInventory>()
+                .Select(inv => new InventorySave<StackedItemInfo>(inv.FullId, inv.Save()));
+
+            return new KeyValuePair<string, ContainerSave<StackedItemInfo>>(InventoryId, new ContainerSave<StackedItemInfo>(phase, inventories));
+        }
+
+        public void OnLoad()
+        {
+            var dungeon = GetComponentInParent<TiledDungeon>();
+
+            var save = SaveSystem<GameSave>.ActiveSaveData;
+            if (save == null) return;
+
+            var containerSave = save.levels[dungeon.MapName].TD1DInventories[InventoryId];
+
+            phase = containerSave.phase;
+            switch (phase)
+            {
+                case ContainerPhase.Locked:
+                    if (!string.IsNullOrEmpty(SyncLockedTrigger))
+                        animator.SetTrigger(SyncLockedTrigger);
+                    break;
+                case ContainerPhase.Opened:
+                    if (!string.IsNullOrEmpty(SyncOpenedTrigger))
+                        animator.SetTrigger(SyncOpenedTrigger);
+                    break;
+                case ContainerPhase.Closed:
+                    if (!string.IsNullOrEmpty(SyncClosedTrigger))
+                        animator.SetTrigger(SyncClosedTrigger);
+                    break;
+                case ContainerPhase.DisplayCage:
+                    if (!string.IsNullOrEmpty(SyncDisplayCageTrigger))
+                        animator.SetTrigger(SyncDisplayCageTrigger);
+                    break;
+            }
+
+            foreach (var inventory in GetComponentsInChildren<TD1DInventory>())
+            {
+                var inventorySave = containerSave.inventories.FirstOrDefault(s => s.fullId == inventory.FullId);
+                if (inventorySave == null)
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Inventory {inventory.FullId} doesn't exist in save"));
+                    continue;
+                }
+
+                inventory.OnLoad(inventorySave);
+            }
         }
     }
 }

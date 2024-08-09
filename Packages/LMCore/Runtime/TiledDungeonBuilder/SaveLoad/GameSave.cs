@@ -7,13 +7,29 @@ using UnityEngine;
 namespace LMCore.TiledDungeon.SaveLoad
 {
     [System.Serializable]
+    public class InventorySave<T>
+    {
+        public List<T> items;
+        public string fullId;
+
+        public InventorySave(string fullId, IEnumerable<T> items) {
+            this.fullId = fullId;
+            this.items = items.ToList();
+        }
+    }
+
+    [System.Serializable]
     public class ContainerSave<T>
     {
-        public List<T> inventories;
+        public TDContainer.ContainerPhase phase;
+        public List<InventorySave<T>> inventories;
 
-        public ContainerSave(IEnumerable<T> inventories)
+        public ContainerSave(
+            TDContainer.ContainerPhase phase, 
+            IEnumerable<InventorySave<T>> inventories)
         {
             this.inventories = inventories.ToList();
+            this.phase = phase;
         }
     }
 

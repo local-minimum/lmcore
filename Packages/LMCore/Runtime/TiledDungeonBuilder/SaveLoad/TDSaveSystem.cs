@@ -1,5 +1,6 @@
 using LMCore.Inventory;
 using LMCore.IO;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -56,10 +57,8 @@ namespace LMCore.TiledDungeon.SaveLoad
                 // Update inventories
                 levels[dungeon.MapName].TD1DInventories = new SerializableDictionary<string, ContainerSave<StackedItemInfo>>(
                     dungeon
-                        .GetComponentsInChildren<TD1DInventory>()
-                        .Select(inv => new System.Collections.Generic.KeyValuePair<string, ContainerSave<StackedItemInfo>>(
-                            inv.FullId, 
-                            new ContainerSave<StackedItemInfo>(inv.Save())))
+                        .GetComponentsInChildren<TDContainer>()
+                        .Select(container => container.Save())
                 );
             }
 

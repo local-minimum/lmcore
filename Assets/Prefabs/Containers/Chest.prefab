@@ -50,6 +50,10 @@ MonoBehaviour:
   animator: {fileID: 148188934061761767}
   UnlockOpenTrigger: Open
   OpenTrigger: Open
+  SyncOpenedTrigger: Opened
+  SyncClosedTrigger: Closed
+  SyncLockedTrigger: Closed
+  SyncDisplayCageTrigger: Closed
   Position: {x: 0, y: 0, z: 0}
   phase: 0
   facingDirection: 0
