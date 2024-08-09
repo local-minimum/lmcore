@@ -2,6 +2,7 @@ using System;
 
 namespace LMCore.Crawler
 {
+    [Serializable]
     [Flags]
     public enum TransportationMode
     {

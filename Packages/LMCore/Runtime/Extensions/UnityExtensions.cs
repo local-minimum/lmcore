@@ -82,5 +82,8 @@ namespace LMCore.Extensions
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).First();
         public static T FindObjectByInterfaceOrDefault<T>() where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).FirstOrDefault();
+
+        public static T FindObjectByInterfaceOrDefault<T>(Func<T, bool> filter) where T : class =>
+            FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Where(filter).FirstOrDefault();
     }    
 }

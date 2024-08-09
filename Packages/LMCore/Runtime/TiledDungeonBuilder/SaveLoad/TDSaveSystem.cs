@@ -74,6 +74,10 @@ namespace LMCore.TiledDungeon.SaveLoad
                     .Concat(active?.disposedItems)
                     .ToList();
 
+
+            // Save player;
+            save.player = FindObjectOfType<TDPlayerEntity>().Save();
+
             return (T)save;
         }
 

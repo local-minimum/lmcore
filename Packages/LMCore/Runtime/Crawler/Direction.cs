@@ -2,10 +2,10 @@ using LMCore.Extensions;
 using LMCore.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace LMCore.Crawler
 {
+    [System.Serializable]
     public enum Direction
     { North, South, West, East, Up, Down, None };
 

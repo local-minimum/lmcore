@@ -27,16 +27,10 @@ namespace LMCore.TiledDungeon
 
     public class TD1DInventory : SimpleInventory 
     {
-        /// <summary>
-        /// This load requires item disposal to have loaded first
-        /// </summary>
-        public int OnLoadPriority => 1000;
-
         public void OnLoad(InventorySave<StackedItemInfo> container)
         {
             var disposed = ItemDisposal.InstanceOrCreate().GetDisposed(FullId).ToList();
             var recylcer = RecycleBin.InstanceOrCreate();
-            var dungeon = GetComponentInParent<TiledDungeon>();
 
             // 1. Dispose of already disposed items
             foreach (var item in stacks.SelectMany(stack => stack.Items).Where(item => disposed.Any(io => io.Equals(item))))

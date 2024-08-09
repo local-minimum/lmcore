@@ -312,15 +312,13 @@ namespace LMCore.TiledDungeon
             Debug.Log(PrefixLogMessage($"Being looted by {entity.name}, inventory has items in {inventory.Used} stacks"));
             if (autoLoot)
             {
-                // TODO: Should have a main inventory really...
                 var entityInventory = entity.Inventory;
                 if (entityInventory == null)
                 {
-                    Debug.LogWarning(PrefixLogMessage($"{entity.name} doesn't have an inventory"));
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} doesn't have a default inventory"));
                     return;
                 }
 
-                
                 foreach (var item in inventory.Items.ToList())
                 {
                     if (entityInventory.Add(item))
