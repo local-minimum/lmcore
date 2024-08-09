@@ -384,7 +384,7 @@ namespace LMCore.TiledDungeon
             }
             var lvl = GetComponentInParent<IDungeon>().MapName;
 
-            var doorSave = save.levels[lvl].doors?.GetValueOrDefault(_Position);
+            var doorSave = save.levels[lvl]?.doors?.GetValueOrDefault(_Position);
 
             if (doorSave == null)
             {

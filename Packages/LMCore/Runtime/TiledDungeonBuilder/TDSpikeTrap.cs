@@ -4,14 +4,17 @@ using LMCore.Crawler;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using UnityEngine;
+using LMCore.IO;
+using LMCore.TiledDungeon.SaveLoad;
 
 namespace LMCore.TiledDungeon
 {
-    public class TDSpikeTrap : MonoBehaviour
+    public class TDSpikeTrap : MonoBehaviour, IOnLoadSave
     {
         enum Management { Automatic, ToggleGroup, Sequencer };
 
-        private enum SpikePhase { Retracted, Extending, Extended, Retracting, Waiting };
+        [SerializeField]
+        public enum SpikePhase { Retracted, Extending, Extended, Retracting, Waiting };
 
         [SerializeField]
         GameObject[] Spikes;
@@ -37,12 +40,21 @@ namespace LMCore.TiledDungeon
 
         [SerializeField, HideInInspector]
         Vector3Int position;
+        public Vector3Int Position => position;
 
         [SerializeField]
         string ExtendTrigger = "Extend";
 
         [SerializeField]
         string RetractTrigger = "Retract";
+
+        [SerializeField]
+        string RetractedTrigger = "Retracted";
+
+        [SerializeField]
+        string ExtendedTrigger = "Extended";
+
+        protected string PrefixLogMessage(string message) => $"Spikes @ {position}: {message}";
 
         HashSet<int> ToggleGroups => node
             .Config
@@ -103,12 +115,12 @@ namespace LMCore.TiledDungeon
 
             if (anchor == Direction.None)
             {
-                Debug.LogWarning($"Spikes @ {position} lacks anchor direction, assuming down");
+                Debug.LogWarning(PrefixLogMessage("lacks anchor direction, assuming down"));
                 anchor = Direction.Down;
             }
 
             // TODO: Improve this logging
-            Debug.Log($"Spike Trap @ {position}: Spikeless({Spikeless}) Anchor({anchor})");
+            Debug.Log(PrefixLogMessage($"Spikeless({Spikeless}) Anchor({anchor})"));
 
             Synch();
         }
@@ -188,6 +200,8 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        public int OnLoadPriority => 100;
+
         public void HandleAnimationDone()
         {
             if (phase == SpikePhase.Extending)
@@ -221,6 +235,7 @@ namespace LMCore.TiledDungeon
                     break;
             }
         }
+
         public void HandleBlockEntry()
         {
             blockingEntry = true;
@@ -248,7 +263,7 @@ namespace LMCore.TiledDungeon
             foreach (var occupant in node.Occupants)
             {
                 var movement = push.AsMovement();
-                Debug.Log($"Spikes @ {position}: Push {occupant.name} {push} using {movement}");
+                Debug.Log(PrefixLogMessage($"Push {occupant.name} {push} using {movement}"));
                 occupant.Input.InjectMovement(movement);
             }
         }
@@ -257,7 +272,7 @@ namespace LMCore.TiledDungeon
         {
             phase = SpikePhase.Retracted;
             SetNextPhaseTime();
-            Debug.Log($"Spikes @ {position} are now ready and will extend");
+            Debug.Log(PrefixLogMessage("now ready and will extend"));
         }
 
         void Extend()
@@ -271,6 +286,7 @@ namespace LMCore.TiledDungeon
             phase = SpikePhase.Retracting;
             animator.SetTrigger(RetractTrigger);
         }
+
         private void Update()
         {
             if (management == Management.Sequencer && startSequence)
@@ -292,5 +308,48 @@ namespace LMCore.TiledDungeon
                 }
             }
         }
+
+        public void OnLoad()
+        {
+            var save = SaveSystem<GameSave>.ActiveSaveData;
+            if (save == null)
+            {
+                return;
+            }
+
+            var lvl = GetComponentInParent<IDungeon>().MapName;
+
+            var trapSave = save.levels[lvl]?.spikes?.GetValueOrDefault(position);
+
+            if (trapSave == null)
+            {
+                Debug.LogError(PrefixLogMessage("No save state exists for me"));
+                return;
+            }
+
+            phase = trapSave.phase;
+
+            switch (phase) {
+                case SpikePhase.Retracted:
+                    animator.SetTrigger(RetractedTrigger);
+                    SetNextPhaseTime();
+                    break;
+                case SpikePhase.Extended:
+                    animator.SetTrigger(ExtendedTrigger);
+                    SetNextPhaseTime();
+                    break;
+                case SpikePhase.Retracting:
+                    Retract();
+                    break;
+                case SpikePhase.Extending:
+                    Extend();
+                    break;
+                case SpikePhase.Waiting:
+                    // TODO: Check that sequenced cant get stuck loading...
+                    break;
+            }
+        }
+
+        public SpikeTrapSave Save() => new SpikeTrapSave(phase);
     }
 }

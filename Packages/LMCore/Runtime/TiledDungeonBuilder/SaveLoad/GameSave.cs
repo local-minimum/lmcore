@@ -8,6 +8,17 @@ using UnityEngine;
 namespace LMCore.TiledDungeon.SaveLoad
 {
     [System.Serializable]
+    public class SpikeTrapSave
+    {
+        public TDSpikeTrap.SpikePhase phase;
+
+        public SpikeTrapSave(TDSpikeTrap.SpikePhase phase)
+        {
+            this.phase = phase;
+        }
+    }
+
+    [System.Serializable]
     public class DoorSave
     {
         public bool isOpen;
@@ -111,6 +122,7 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
         public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
+        public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
     }
 
     [System.Serializable]

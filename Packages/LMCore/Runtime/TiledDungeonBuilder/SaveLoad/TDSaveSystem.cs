@@ -66,6 +66,12 @@ namespace LMCore.TiledDungeon.SaveLoad
                         .GetComponentsInChildren<TDDoor>()
                         .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Position, door.Save()))
                 );
+
+                levels[dungeon.MapName].spikes = new SerializableDictionary<Vector3Int, SpikeTrapSave>(
+                    dungeon
+                        .GetComponentsInChildren<TDSpikeTrap>()
+                        .Select(spike => new KeyValuePair<Vector3Int, SpikeTrapSave>(spike.Position, spike.Save()))
+                );
             }
 
             // Merge disposed items
