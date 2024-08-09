@@ -60,6 +60,12 @@ namespace LMCore.TiledDungeon.SaveLoad
                         .GetComponentsInChildren<TDContainer>()
                         .Select(container => container.Save())
                 );
+
+                levels[dungeon.MapName].doors = new SerializableDictionary<Vector3Int, DoorSave>(
+                    dungeon
+                        .GetComponentsInChildren<TDDoor>()
+                        .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Position, door.Save()))
+                );
             }
 
             // Merge disposed items

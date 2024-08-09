@@ -1,13 +1,25 @@
 using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.IO;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.SaveLoad
 {
+    [System.Serializable]
+    public class DoorSave
+    {
+        public bool isOpen;
+        public bool isLocked;
+
+        public DoorSave(bool isOpen, bool isLocked)
+        {
+            this.isOpen = isOpen;
+            this.isLocked = isLocked;
+        }
+    }
+
     [System.Serializable]
     public class GridEntitySave
     {
@@ -97,8 +109,8 @@ namespace LMCore.TiledDungeon.SaveLoad
     [System.Serializable]
     public class LevelSave
     {
-        // TODO: Should not be abs item!
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
+        public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
     }
 
     [System.Serializable]

@@ -6,11 +6,12 @@ using LMCore.Inventory;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.Actions;
 using LMCore.TiledDungeon.SaveLoad;
+using LMCore.IO;
 
 namespace LMCore.TiledDungeon
 {
     // TODO: Use configuration to present lock and button
-    public class TDDoor : MonoBehaviour
+    public class TDDoor : MonoBehaviour, IOnLoadSave
     {
         private enum Transition { None, Opening, Closing };
 
@@ -18,7 +19,8 @@ namespace LMCore.TiledDungeon
         bool isOpen = false;
 
         [SerializeField, HideInInspector]
-        Vector3Int Position;
+        Vector3Int _Position;
+        public Vector3Int Position => _Position;
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
@@ -44,6 +46,8 @@ namespace LMCore.TiledDungeon
         [SerializeField]
         float autoCloseTime = 0.5f;
 
+        protected string PrefixLogMessage(string message) => $"Door @ {_Position}: {message}";
+
         Transition ActiveTransition
         {
             get
@@ -67,7 +71,7 @@ namespace LMCore.TiledDungeon
             {
                 if (ActiveTransition == Transition.Closing)
                 {
-                    Debug.Log($"Door at {Position} is closing");
+                    Debug.Log(PrefixLogMessage("closing"));
                     return true;
                 }
 
@@ -92,6 +96,8 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        public int OnLoadPriority => 500;
+
         private void Start()
         {
             if (node != null) SyncDoor();
@@ -103,7 +109,7 @@ namespace LMCore.TiledDungeon
             TileModification[] modifications
         )
         {
-            Position = position;
+            _Position = position;
             this.modifications = modifications;
             this.node = node;
 
@@ -141,7 +147,7 @@ namespace LMCore.TiledDungeon
         {
             var states = positions
                 .Zip(anchors, (pos, anch) => new { pos, anch })
-                .Select(state => state.pos == Position && state.anch == Direction.Down)
+                .Select(state => state.pos == _Position && state.anch == Direction.Down)
                 .ToArray();
 
             endsOnTrap = states.LastOrDefault();
@@ -180,15 +186,15 @@ namespace LMCore.TiledDungeon
 
                 if (isOpen || ActiveTransition == Transition.Opening)
                 {
-                    StartCoroutine(AutoClose($"Door @ {Position} automatically closes after {entity.name}"));
+                    StartCoroutine(AutoClose(PrefixLogMessage($"automatically closes after {entity.name}")));
                 }
                 else if (endsOnTrap)
                 {
                     OpenDoor();
-                    Debug.Log($"Door @ {Position} automatically opens for {entity.name}");
+                    Debug.Log(PrefixLogMessage($"automatically opens for {entity.name}"));
                 }
                 else {
-                    Debug.Log($"No door action for Open({isOpen}) ActiveTransition({ActiveTransition}) door");
+                    Debug.LogWarning(PrefixLogMessage($"No action for Open({isOpen}) ActiveTransition({ActiveTransition}) door"));
                     return;
                 }
 
@@ -220,11 +226,11 @@ namespace LMCore.TiledDungeon
         private void GridEntity_OnInteract(GridEntity entity)
         {
             var onTheMove = activelyMovingEntities.Contains(entity);
-            var validPosition = entity.LookDirection.Translate(entity.Position) == Position;
+            var validPosition = entity.LookDirection.Translate(entity.Position) == _Position;
 
             if (!onTheMove && validPosition)
             {
-                Debug.Log("Attempting to open door");
+                Debug.Log(PrefixLogMessage("Attempting to open door"));
 
                 if (isLocked)
                 {
@@ -234,13 +240,13 @@ namespace LMCore.TiledDungeon
 
                     if (keyHolder == null)
                     {
-                        Debug.LogWarning($"Door @ {Position}: requires key ({key})");
+                        Debug.LogWarning(PrefixLogMessage($"requires key ({key})"));
                         return;
                     }
 
                     if (consumesKey && !keyHolder.Consume(key, out string _))
                     {
-                        Debug.LogWarning($"Chest @ {Position}: Failed to consume key {key} from {keyHolder}");
+                        Debug.LogWarning(PrefixLogMessage($"Failed to consume key {key} from {keyHolder}"));
                     }
                     isLocked = false;
                 }
@@ -293,7 +299,7 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Interact")]
         public void Interact()
         {
-            Debug.Log($"Toggling door at {Position} from Open({isOpen} / {ActiveTransition})");
+            Debug.Log(PrefixLogMessage($"Toggling door from Open({isOpen} / {ActiveTransition})"));
             switch (ActiveTransition)
             {
                 case Transition.None:
@@ -312,7 +318,7 @@ namespace LMCore.TiledDungeon
                     OpenDoor();
                     break;
                 default:
-                    Debug.LogError($"Door at {Position} has unhandled transition: {ActiveTransition}");
+                    Debug.LogError(PrefixLogMessage($"Unhandled transition: {ActiveTransition}"));
                     break;
             }
         }
@@ -363,9 +369,42 @@ namespace LMCore.TiledDungeon
                 props => props == null ? false : props.Bool(TiledConfiguration.instance.ConusumesKeyKey)
             );
 
-            Debug.Log(
-                $"Syncing door @ {Position}: Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automaticTrapDoor})"
-            );
+            Debug.Log(PrefixLogMessage(
+                $"Synced as Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automaticTrapDoor})"
+            ));
+        }
+
+        public void OnLoad()
+        {
+            var save = SaveSystem<GameSave>.ActiveSaveData;
+            if (save == null)
+            {
+                return;
+            }
+            var lvl = GetComponentInParent<IDungeon>().MapName;
+
+            var doorSave = save.levels[lvl].doors?.GetValueOrDefault(_Position);
+
+            if (doorSave == null)
+            {
+                Debug.LogError(PrefixLogMessage("I have no saved state"));
+                return;
+            }
+
+            isOpen = doorSave.isOpen;
+            isLocked = doorSave.isLocked;
+
+            MapOverActions(isOpen ? OpenActions : CloseActions, (action) => {
+                action.Play(null);
+                action.Finalise();
+            });
+
+            Debug.Log(PrefixLogMessage($"Loaded as isOpen({isOpen}) and isLocked({isLocked})"));
+        }
+
+        public DoorSave Save()
+        {
+            return new DoorSave(isOpen, isLocked);
         }
     }
 }
