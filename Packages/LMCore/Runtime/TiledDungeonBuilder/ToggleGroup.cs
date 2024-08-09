@@ -1,9 +1,9 @@
-using LMCore.AbstractClasses;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LMCore.TiledDungeon
 {
-    public class ToggleGroup : Singleton<ToggleGroup> 
+    public class ToggleGroup : MonoBehaviour 
     {
         Dictionary<int, HashSet<System.Action>> callbacks = new ();
 

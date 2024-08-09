@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon
 {
-    public class Sequencer : Singleton<Sequencer>
+    public class Sequencer : MonoBehaviour
     {
         struct Reciever
         {

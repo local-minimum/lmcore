@@ -113,6 +113,32 @@ namespace LMCore.TiledDungeon
             Synch();
         }
 
+        ToggleGroup _ToggleGroup;
+        ToggleGroup ToggleGroup
+        {
+            get
+            {
+                if (_ToggleGroup == null)
+                {
+                    _ToggleGroup = GetComponentInParent<ToggleGroup>();
+                }
+                return _ToggleGroup;
+            }
+        }
+
+        Sequencer _Sequencer;
+        Sequencer Sequencer
+        {
+            get
+            {
+                if (_Sequencer == null)
+                {
+                    _Sequencer = GetComponentInParent<Sequencer>();
+                }
+                return _Sequencer;
+            }
+        }
+
         void Synch()
         {
             if (Spikeless)
@@ -131,7 +157,7 @@ namespace LMCore.TiledDungeon
                 management = Management.ToggleGroup;
                 foreach (var toggleGroup in toggleGroups)
                 {
-                    ToggleGroup.instance.RegisterReciever(toggleGroup, Extend);
+                    ToggleGroup.RegisterReciever(toggleGroup, Extend);
                 }
             } else if (sequenceGroup != null)
             {
@@ -139,7 +165,7 @@ namespace LMCore.TiledDungeon
                 sequenceId = sequenceGroup.Int(TiledConfiguration.instance.ObjGroupKey);
                 var phaseId = sequenceGroup.Int(TiledConfiguration.instance.ObjPhaseKey);
 
-                Sequencer.instance.RegisterReciever(sequenceId, phaseId, Ready);
+                Sequencer.RegisterReciever(sequenceId, phaseId, Ready);
                 startSequence = sequenceGroup.Bool(TiledConfiguration.instance.ObjSequenceStarter);
 
                 sequenceNextPhaseId = sequenceGroup.Int(TiledConfiguration.instance.ObjNextPhaseKey, -1);
@@ -176,7 +202,7 @@ namespace LMCore.TiledDungeon
 
                 if (management == Management.Sequencer && sequenceNextPhaseId >= 0)
                 {
-                    Sequencer.instance.Invoke(sequenceId, sequenceNextPhaseId);
+                    Sequencer.Invoke(sequenceId, sequenceNextPhaseId);
                 }
             }
             SetNextPhaseTime();
@@ -249,7 +275,7 @@ namespace LMCore.TiledDungeon
         {
             if (management == Management.Sequencer && startSequence)
             {
-                Sequencer.instance.Invoke(sequenceId, sequenceNextPhaseId);
+                Sequencer.Invoke(sequenceId, sequenceNextPhaseId);
                 startSequence = false;
             }
 

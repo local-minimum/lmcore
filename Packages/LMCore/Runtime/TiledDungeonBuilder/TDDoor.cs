@@ -336,9 +336,10 @@ namespace LMCore.TiledDungeon
                 .Where(group => group > 0)
                 .ToHashSet();
 
-            foreach (var toggleGroup in toggleGroups)
+            var toggleGroup = GetComponentInParent<ToggleGroup>();
+            foreach (var group in toggleGroups)
             {
-                ToggleGroup.instance.RegisterReciever(toggleGroup, Interact);
+                toggleGroup.RegisterReciever(group, Interact);
             }
 
             automaticTrapDoor = config.GetObjectValues(

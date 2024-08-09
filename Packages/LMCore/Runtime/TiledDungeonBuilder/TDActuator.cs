@@ -161,11 +161,24 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        ToggleGroup _toggleGroup;
+        ToggleGroup ToggleGroup
+        {
+            get
+            {
+                if (_toggleGroup == null)
+                {
+                    _toggleGroup = GetComponentInParent<ToggleGroup>();
+                }
+                return _toggleGroup;
+            }
+        }
+
         void Press()
         {
             foreach (var group in groups)
             {
-                ToggleGroup.instance.Toggle(group);
+                ToggleGroup.Toggle(group);
                 Debug.Log($"Actuator {name} @ {Coordinates} is toggling group: {group}");
             }
 
