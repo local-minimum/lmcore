@@ -1,5 +1,6 @@
 using LMCore.Inventory;
 using LMCore.IO;
+using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -53,25 +54,31 @@ namespace LMCore.TiledDungeon.SaveLoad
                 {
                     levels.Add(dungeon.MapName, new LevelSave());
                 }
+                var levelSave = levels[dungeon.MapName];
 
                 // Update inventories
-                levels[dungeon.MapName].TD1DInventories = new SerializableDictionary<string, ContainerSave<StackedItemInfo>>(
+                levelSave.TD1DInventories = new SerializableDictionary<string, ContainerSave<StackedItemInfo>>(
                     dungeon
                         .GetComponentsInChildren<TDContainer>()
                         .Select(container => container.Save())
                 );
 
-                levels[dungeon.MapName].doors = new SerializableDictionary<Vector3Int, DoorSave>(
+                levelSave.doors = new SerializableDictionary<Vector3Int, DoorSave>(
                     dungeon
                         .GetComponentsInChildren<TDDoor>()
                         .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Position, door.Save()))
                 );
 
-                levels[dungeon.MapName].spikes = new SerializableDictionary<Vector3Int, SpikeTrapSave>(
+                levelSave.spikes = new SerializableDictionary<Vector3Int, SpikeTrapSave>(
                     dungeon
                         .GetComponentsInChildren<TDSpikeTrap>()
                         .Select(spike => new KeyValuePair<Vector3Int, SpikeTrapSave>(spike.Position, spike.Save()))
                 );
+
+                levelSave.illusions = dungeon
+                    .GetComponentsInChildren<TDIllusoryCubeSide>()
+                    .Select(illusion => illusion.Save())
+                    .ToList();
             }
 
             // Merge disposed items

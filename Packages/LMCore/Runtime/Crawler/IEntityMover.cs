@@ -24,5 +24,7 @@ namespace LMCore.Crawler
         public bool Enabled { get; }
         public bool Animating { get; }
         public void EndAnimation(bool emitEndEvent = true);
+
+        public GridEntity Entity { get; }
     }
 }

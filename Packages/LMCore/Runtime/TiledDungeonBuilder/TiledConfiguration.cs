@@ -7,6 +7,7 @@ namespace LMCore.TiledDungeon
     {
         [Header("Tile Classes")]
         public string BaseTileClass = "BaseTile";
+        public string IllusoryTileClass = "IllusoryWall";
         public string GrateClass = "Grate";
         public string ObstructionClass = "Obstruction";
         public string DoorClass = "Door";

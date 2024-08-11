@@ -1,12 +1,21 @@
 using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.IO;
+using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.SaveLoad
 {
+    [System.Serializable]
+    public class IllusionSave
+    {
+        public Vector3Int position;
+        public Direction direction;
+        public bool discovered;
+    }
+
     [System.Serializable]
     public class SpikeTrapSave
     {
@@ -123,6 +132,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
         public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
         public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
+        public List<IllusionSave> illusions = new ();
     }
 
     [System.Serializable]

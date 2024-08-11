@@ -112,7 +112,8 @@ namespace LMCore.TiledDungeon
             && tile.CustomProperties
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
-        public bool HasFloor => sides.Down && (HasTrapDoor == false || door?.BlockingPassage == true);
+        public bool HasFloor => 
+            sides.Down && (HasTrapDoor == false || door?.BlockingPassage == true) && !HasIllusion(Direction.Down);
         public bool HasCeiling => sides.Up;
 
         public bool Obstructed =>
@@ -138,10 +139,34 @@ namespace LMCore.TiledDungeon
 
             Dungeon.Style.Get(
                 transform, 
-                TiledConfiguration.instance.GrateClass, 
+                TiledConfiguration.InstanceOrCreate().GrateClass, 
                 grate.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
                 NodeStyle
             );
+        }
+
+        protected string PrefixLogMessage(string message) => $"Node @ {Coordinates}: {message}";
+
+        static System.Func<TileModification, bool> illusoryFilter = mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().IllusoryTileClass;
+
+        public bool HasIllusion(Direction direction) =>
+            modifications
+                .Any(mod => illusoryFilter(mod)
+                    && mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection() == direction);
+
+
+        void ConfigureIllusory(Direction direction)
+        {
+            Debug.Log(PrefixLogMessage($"I have illusionary wall {direction}"));
+
+            var go = Dungeon.Style.Get(
+                transform,
+                TiledConfiguration.InstanceOrCreate().IllusoryTileClass,
+                direction,
+                NodeStyle
+            );
+
+            go.GetComponent<TDIllusoryCubeSide>().Configure(direction);
         }
 
         void ConfigureObstructions()
@@ -235,7 +260,7 @@ namespace LMCore.TiledDungeon
                     NodeStyle
                     );
                 
-                Debug.Log($"{Coordinates} has teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})");
+                Debug.Log(PrefixLogMessage($"Teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})"));
             }
         }
 
@@ -243,12 +268,14 @@ namespace LMCore.TiledDungeon
         {
             if (sides == null)
             {
-                Debug.LogError($"{tile} as {Coordinates} lacks a sides class, can't be used for layouting");
+                Debug.LogError(PrefixLogMessage($"{tile} lacks a sides class, can't be used for layouting"));
                 return;
             }
 
             var hasTrapDoor = HasTrapDoor;
             var aboveNode = Coordinates + Vector3Int.up;
+            var illusionMods = modifications.Where(illusoryFilter).ToList();
+
             foreach (var direction in DirectionExtensions.AllDirections)
             {
                 if (direction == Direction.Down)
@@ -275,7 +302,8 @@ namespace LMCore.TiledDungeon
                             continue;
                         }
                     }
-                    else if (hasPressurePlate) {
+                    else if (hasPressurePlate)
+                    {
                         var plate = Dungeon.Style.Get(
                             transform,
                             TiledConfiguration.instance.PressurePlateClass,
@@ -292,8 +320,20 @@ namespace LMCore.TiledDungeon
                             continue;
                         }
                     }
+                } else if (direction == Direction.Up)
+                {
+                    if (sides.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasIllusion(Direction.Down))
+                    {
+                        ConfigureIllusory(Direction.Up);
+                        continue;
+                    }
                 }
 
+                if (illusionMods.Any(mod => mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection() == direction))
+                {
+                    ConfigureIllusory(direction);
+                    continue;
+                }
 
                 if (!sides.Has(direction)) continue;
 
@@ -433,14 +473,14 @@ namespace LMCore.TiledDungeon
 
                 if (direction == Direction.None)
                 {
-                    Debug.Log($"Node @ {Coordinates}: Getting Un-Rotated version of {className}");
+                    Debug.Log(PrefixLogMessage($"Getting Un-Rotated version of {className}"));
                     return Dungeon.Style.Get(
                         transform,
                         className,
                         NodeStyle);
                 } else
                 {
-                    Debug.Log($"Node @ {Coordinates}: Getting Rotated {direction} version of {className}");
+                    Debug.Log(PrefixLogMessage($"Getting Rotated {direction} version of {className}"));
                     return Dungeon.Style.Get(
                         transform,
                         className,
@@ -490,7 +530,7 @@ namespace LMCore.TiledDungeon
 
             if (container == null) {
                 // Only error if it seems Tiled assumes there should be a chest
-                if (facingDirection != Direction.None) Debug.LogError($"Chest @ {Coordinates}: Lacks script to configure");
+                if (facingDirection != Direction.None) Debug.LogError(PrefixLogMessage("Container lacks script to configure"));
                 return;
             };
 
@@ -547,7 +587,7 @@ namespace LMCore.TiledDungeon
             ConfigurePedistal(config);
             ConfigureChest(config);
 
-            Debug.Log($"Node @ {Coordinates}: Generated");
+            Debug.Log(PrefixLogMessage($"Generated"));
         }
 
         private void OnDestroy()
@@ -672,11 +712,11 @@ namespace LMCore.TiledDungeon
                 }
 
                 // TODO: Other types of wall actions
-                Debug.LogWarning($"{entity.name} is anchored on {anchor} wall but no implementation of movement {direction} at {Coordinates}");
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} is anchored on {anchor} wall but no implementation of movement {direction}"));
                 return MovementOutcome.Refused;
             }
 
-            Debug.LogWarning($"{entity.name} is anchored {anchor} and {Coordinates} doesn't know how to handle that");
+            Debug.LogWarning(PrefixLogMessage($"{entity.name} is anchored {anchor}, don't know how to handle that"));
             return MovementOutcome.Refused;
         }
 
@@ -697,13 +737,13 @@ namespace LMCore.TiledDungeon
 
             if (doorAxis == DirectionAxis.None)
             {
-                Debug.LogWarning($"Door @ {Coordinates} lacks an axis");
+                Debug.LogWarning(PrefixLogMessage($"Door lacks axis"));
                 return false;
             }
 
             if (doorAxis != DirectionAxis.None && doorAxis != direction.AsAxis())
             {
-                Debug.LogWarning($"Trying to enter door @ {Coordinates} by the wrong axis (door {doorAxis} trying to enter {direction.AsAxis()})");
+                Debug.LogWarning(PrefixLogMessage($"Trying to enter door by the wrong axis (door {doorAxis} trying to enter {direction.AsAxis()})"));
                 return true;
             }
 
@@ -743,7 +783,7 @@ namespace LMCore.TiledDungeon
         {
             if (entity.TransportationMode.HasFlag(TransportationMode.Teleporting))
             {
-                Debug.Log($"Ignoring teleportation because {entity.name} was already teleporting here");
+                Debug.Log(PrefixLogMessage($"Ignoring teleportation because {entity.name} was already teleporting here"));
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Teleporting);
                 return null;
             }
@@ -756,11 +796,11 @@ namespace LMCore.TiledDungeon
 
                 if (outlet == null)
                 {
-                    Debug.LogWarning($"{name} teleporter doesn't have a partner in their wormhole {teleporterWormholdId}; ignoring teleportation");
+                    Debug.LogWarning(PrefixLogMessage($"teleporter doesn't have a partner in their wormhole {teleporterWormholdId}; ignoring teleportation"));
                     return null;
                 }
 
-                Debug.Log($"Teleporting {entity.name} to {outlet.Coordinates}");
+                Debug.Log(PrefixLogMessage($"Teleporting {entity.name} to {outlet.Coordinates}"));
                 entity.Position = outlet.Coordinates;
                 entity.Anchor = Direction.Down;
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
@@ -781,7 +821,7 @@ namespace LMCore.TiledDungeon
             var movement = spinMod.Tile.CustomProperties.Rotation().AsMovement();
             if (movement != IO.Movement.None)
             {
-                Debug.Log($"Spinning {entity.name} {movement}");
+                Debug.Log(PrefixLogMessage($"Spinning {entity.name} {movement}"));
                 entity.Input.InjectMovement(movement);
             }
         }
@@ -811,7 +851,7 @@ namespace LMCore.TiledDungeon
 
         public void AddOccupant(GridEntity entity)
         {
-            Debug.Log($"Handle {Coordinates} occupancy of {entity.name}");
+            Debug.Log(PrefixLogMessage($"Handling occupancy of {entity.name}"));
 
             OccupationRules.HandleMeeting(entity, _occupants);
             _reservations.Remove(entity);
@@ -842,7 +882,7 @@ namespace LMCore.TiledDungeon
             {
                 if (HasLadder(entity.Anchor)) return false;
 
-                Debug.LogWarning($"Unhandled wall situation for {entity.name} as {Coordinates}");
+                Debug.LogWarning(PrefixLogMessage($"Unhandled wall situation for {entity.name}"));
             }
             return true;
         }
@@ -861,9 +901,9 @@ namespace LMCore.TiledDungeon
                 return HasLadder(anchor);
             }
 
-            Debug.LogWarning(
-                $"Can't allow {entity.name} to anchor on {anchor} @ {Coordinates} because no ladder"
-            );
+            Debug.LogWarning(PrefixLogMessage(
+                $"Can't allow {entity.name} to anchor on {anchor} because no ladder"
+            ));
 
             return false;
         }

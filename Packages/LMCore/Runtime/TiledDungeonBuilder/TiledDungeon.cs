@@ -158,7 +158,7 @@ namespace LMCore.TiledDungeon
                 return topLayer ? TiledNodeRoofRule.ForcedNotSet : TiledNodeRoofRule.ForcedSet;
             }
 
-            return aboveNode.HasFloor ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet;
+            return aboveNode.HasFloor || aboveNode.HasIllusion(Direction.Down) ? TiledNodeRoofRule.ForcedSet : TiledNodeRoofRule.ForcedNotSet;
         }
 
         Dictionary<int, TDLayerConfig> layerConfigs = new Dictionary<int, TDLayerConfig>();

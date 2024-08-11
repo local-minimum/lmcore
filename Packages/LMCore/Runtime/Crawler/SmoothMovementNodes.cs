@@ -59,6 +59,8 @@ namespace LMCore.Crawler
         float bounceAtProgress = 0.4f;
 
         GridEntity gEntity;
+        public GridEntity Entity => gEntity;
+
         private IEntityMovementInterpreter movementInterpreter;
 
         void Awake()

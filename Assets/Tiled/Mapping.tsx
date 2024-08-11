@@ -690,6 +690,11 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
+ <tile id="63" type="IllusoryWall">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="Down"/>
+  </properties>
+ </tile>
  <tile id="64" type="Alcove">
   <properties>
    <property name="Anchor" propertytype="Direction" value="South"/>
@@ -776,6 +781,26 @@
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
+  </properties>
+ </tile>
+ <tile id="76" type="IllusoryWall">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="West"/>
+  </properties>
+ </tile>
+ <tile id="77" type="IllusoryWall">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="North"/>
+  </properties>
+ </tile>
+ <tile id="78" type="IllusoryWall">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="East"/>
+  </properties>
+ </tile>
+ <tile id="79" type="IllusoryWall">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="South"/>
   </properties>
  </tile>
  <tile id="80" type="Chest">

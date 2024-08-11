@@ -13,6 +13,26 @@ namespace LMCore.TiledDungeon.Integration
         public bool Up;
         public bool Down;
 
+        public TDSidesClass() { }
+        public TDSidesClass(bool north, bool south, bool west, bool east, bool up, bool down)
+        {
+            North = north;
+            South = south;
+            West = west;
+            East = east;
+            Up = up;
+            Down = down;
+        }
+        public TDSidesClass(TDSidesClass source)
+        {
+            North = source.North;
+            South = source.South;
+            West = source.West;
+            East = source.East;
+            Up = source.Up; 
+            Down = source.Down;
+        }
+
         public static TDSidesClass From(TiledCustomClass sides, TiledNodeRoofRule roofRule)
         {
             if (sides == null) return new TDSidesClass();
@@ -48,6 +68,31 @@ namespace LMCore.TiledDungeon.Integration
                     return Down;
                 default: 
                     return false;
+            }
+        }
+
+        public void Set(Direction direction, bool value)
+        {
+            switch (direction)
+            {
+                case Direction.North:
+                    North = value;
+                    break;
+                case Direction.South:
+                    South = value;
+                    break;
+                case Direction.West:
+                    West = value;
+                    break;
+                case Direction.East:
+                    East = value;
+                    break;
+                case Direction.Up:
+                    Up = value;
+                    break;
+                case Direction.Down:
+                    Down = value;
+                    break;
             }
         }
     }

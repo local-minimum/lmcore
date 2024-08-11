@@ -22,6 +22,8 @@ namespace LMCore.Crawler
         NodeShaker RefusedMovementShaker;
 
         private GridEntity gEntity;
+        public GridEntity Entity => gEntity;
+
         private IEntityMovementInterpreter movementInterpreter;
 
         private void Awake()

@@ -17,6 +17,15 @@ namespace LMCore.TiledDungeon
         GameObject Celing;
 
         [SerializeField]
+        GameObject IllusoryWall;
+
+        [SerializeField]
+        GameObject IllusoryCeiling;
+
+        [SerializeField]
+        GameObject IllusoryFloor;
+
+        [SerializeField]
         GameObject Alcove;
 
         [SerializeField, Tooltip("Replacing a floor")]
@@ -72,15 +81,20 @@ namespace LMCore.TiledDungeon
 
         [SerializeField]
         GameObject WallButton;
+
+        protected string PrefixLogMessage(string message) => $"Dungeon Style {name}: {message}";
+
+        protected void LogErrorUnkownId(string classId) => Debug.LogError(PrefixLogMessage($"Don't know what a '{classId}' is."));
+        protected void LogErrorUnknownDirection(string classId, Direction direction) => Debug.LogError($"Unknown direction {direction} of '{classId}'");
         
         public override GameObject Get(Transform parent, string classId, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
-            if (classId == TiledConfiguration.instance.PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
-            if (classId == TiledConfiguration.instance.PedistalClass && Pedistal != null) { return Instantiate(Pedistal, parent); }
-            if (classId == TiledConfiguration.instance.ChestClass && Chest != null) { return Instantiate(Chest, parent); }
+            if (classId == TiledConfiguration.InstanceOrCreate().PressurePlateClass && PressurePlate != null) { return Instantiate(PressurePlate, parent); }
+            if (classId == TiledConfiguration.InstanceOrCreate().PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
+            if (classId == TiledConfiguration.InstanceOrCreate().PedistalClass && Pedistal != null) { return Instantiate(Pedistal, parent); }
+            if (classId == TiledConfiguration.InstanceOrCreate().ChestClass && Chest != null) { return Instantiate(Chest, parent); }
 
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
 
@@ -101,29 +115,38 @@ namespace LMCore.TiledDungeon
 
             if (direction == Direction.Up && Celing != null) { return Instantiate(Celing, parent); }
             if (direction == Direction.Down && Floor != null) { return Instantiate(Floor, parent); }
-            
+
+            LogErrorUnknownDirection(TiledConfiguration.InstanceOrCreate().BaseTileClass, direction);
             return null;
         }
 
 
         public override GameObject Get(Transform parent, string classId, Direction direction, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.BaseTileClass) return InstantiateCubeSide(parent, direction);
-            if (classId == TiledConfiguration.instance.LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
-            if (classId == TiledConfiguration.instance.WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
-            if (classId == TiledConfiguration.instance.AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
-            if (classId == TiledConfiguration.instance.WallSpikeTrapClass)
+            if (classId == TiledConfiguration.InstanceOrCreate().BaseTileClass) return InstantiateCubeSide(parent, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass)
             {
                 if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, WallSpikes, direction);
-                Debug.LogWarning($"Don't know how to instantiate {direction} spikes");
+                LogErrorUnknownDirection(classId, direction);
                 return null;
             }
-            if (classId == TiledConfiguration.instance.SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
-            if (classId == TiledConfiguration.instance.PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
-            if (classId == TiledConfiguration.instance.PedistalClass) { return InstantiateWithRotation(parent, Pedistal, direction); }
-            if (classId == TiledConfiguration.instance.ChestClass) { return InstantiateWithRotation(parent, Chest, direction); }
+            if (classId == TiledConfiguration.InstanceOrCreate().SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
+            if (classId == TiledConfiguration.InstanceOrCreate().PedistalClass) { return InstantiateWithRotation(parent, Pedistal, direction); }
+            if (classId == TiledConfiguration.InstanceOrCreate().ChestClass) { return InstantiateWithRotation(parent, Chest, direction); }
+            if (classId == TiledConfiguration.InstanceOrCreate().IllusoryTileClass)
+            {
+                if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, IllusoryWall, direction);
+                if (direction == Direction.Up) return Instantiate(IllusoryCeiling, parent);
+                if (direction == Direction.Down) return Instantiate(IllusoryFloor, parent);
+                LogErrorUnknownDirection(classId, direction);
+                return null;
+            }
 
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
 
@@ -141,16 +164,16 @@ namespace LMCore.TiledDungeon
 
         public override GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.GrateClass) return InstantiateWithOrientation(parent, Grate, orientation);
-            if (classId == TiledConfiguration.instance.ObstructionClass) return InstantiateWithOrientation(parent, Obstruction, orientation);
-            if (classId == TiledConfiguration.instance.TrapDoorClass) return InstantiateWithOrientation(parent, TrapDoor, orientation);
+            if (classId == TiledConfiguration.InstanceOrCreate().GrateClass) return InstantiateWithOrientation(parent, Grate, orientation);
+            if (classId == TiledConfiguration.InstanceOrCreate().ObstructionClass) return InstantiateWithOrientation(parent, Obstruction, orientation);
+            if (classId == TiledConfiguration.InstanceOrCreate().TrapDoorClass) return InstantiateWithOrientation(parent, TrapDoor, orientation);
 
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
         public override GameObject Get(Transform parent, string classId, TDEnumOrientation orientation, TDEnumInteraction interaction, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.DoorClass)
+            if (classId == TiledConfiguration.InstanceOrCreate().DoorClass)
             {
                 switch (interaction)
                 {
@@ -162,11 +185,11 @@ namespace LMCore.TiledDungeon
                         return InstantiateWithOrientation(parent, ButtonDoor, orientation);
                 }
 
-                Debug.LogError($"Don't know what a {interaction} '{classId}' is.");
+                Debug.LogError(PrefixLogMessage($"Don't know what a {interaction} '{classId}' is."));
                 return null;
             }
 
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
 
@@ -182,7 +205,7 @@ namespace LMCore.TiledDungeon
                     return UpperRamp == null ? null : Instantiate(UpperRamp, parent);
             }
 
-            Debug.LogError($"Don't know what a '{elevation}' ramp is.");
+            Debug.LogError(PrefixLogMessage($"Don't know what a '{elevation}' ramp is."));
             return null;
         }
 
@@ -199,16 +222,16 @@ namespace LMCore.TiledDungeon
 
         public override GameObject Get(Transform parent, string classId, TDEnumElevation elevation, Direction direction, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.RampClass) return InstantiateRamp(parent, elevation, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().RampClass) return InstantiateRamp(parent, elevation, direction);
            
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
 
 
         public override GameObject Get(Transform parent, string classId, TDEnumTransition transition, string variant = null)
         {
-            if (classId == TiledConfiguration.instance.TeleporterClass)
+            if (classId == TiledConfiguration.InstanceOrCreate().TeleporterClass)
             {
                 if (transition == TDEnumTransition.Entry || transition == TDEnumTransition.EntryAndExit)
                 {
@@ -218,7 +241,7 @@ namespace LMCore.TiledDungeon
                 return null;
             }
 
-            Debug.LogError($"Don't know what a '{classId}' is.");
+            LogErrorUnkownId(classId);
             return null;
         }
     }
