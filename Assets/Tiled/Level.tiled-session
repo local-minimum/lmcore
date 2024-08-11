@@ -6,8 +6,8 @@
     "activeFile": "DemoLevel.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        "Rules",
         ".",
+        "Rules",
         "Automapping"
     ],
     "fileStates": {
@@ -24,14 +24,14 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
-                9
+                9,
+                7
             ],
             "scale": 1.5,
-            "selectedLayer": 9,
+            "selectedLayer": 7,
             "viewCenter": {
-                "x": 496,
-                "y": 497.66666666666663
+                "x": 494,
+                "y": 285.66666666666663
             }
         },
         "Mapping.tsx": {
