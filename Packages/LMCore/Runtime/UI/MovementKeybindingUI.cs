@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 namespace LMCore.UI
 {
-    public class MovementKeybindingUI : Singleton<MovementKeybindingUI>
+    public class MovementKeybindingUI : Singleton<MovementKeybindingUI, MovementKeybindingUI>
     {
         [Serializable]
         class KeyBinding

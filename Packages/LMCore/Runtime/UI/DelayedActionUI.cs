@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace LMCore.UI
 {
-    public class DelayedActionUI : Singleton<DelayedActionUI>
+    public class DelayedActionUI : Singleton<DelayedActionUI, DelayedActionUI>
     {
         [SerializeField]
         private TMPro.TextMeshProUGUI TextGUI;

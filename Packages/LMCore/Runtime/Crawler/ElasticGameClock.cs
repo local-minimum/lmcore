@@ -7,7 +7,7 @@ public delegate void TickEndEvent(int tickId);
 
 namespace LMCore.Crawler
 {
-    public class ElasticGameClock : Singleton<ElasticGameClock>
+    public class ElasticGameClock : Singleton<ElasticGameClock, ElasticGameClock>
     {
         public static event TickStartEvent OnTickStart;
         public static event TickEndAjustmentEvent OnTickEndAdjustment;

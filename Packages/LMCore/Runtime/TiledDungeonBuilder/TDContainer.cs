@@ -347,12 +347,11 @@ namespace LMCore.TiledDungeon
             return new KeyValuePair<string, ContainerSave<StackedItemInfo>>(InventoryId, new ContainerSave<StackedItemInfo>(phase, inventories));
         }
 
-        public void OnLoad()
+        public void OnLoadGameSave(GameSave save)
         {
-            var dungeon = GetComponentInParent<TiledDungeon>();
-
-            var save = SaveSystem<GameSave>.ActiveSaveData;
             if (save == null) return;
+
+            var dungeon = GetComponentInParent<TiledDungeon>();
 
             var containerSave = save.levels[dungeon.MapName].TD1DInventories[InventoryId];
 
@@ -387,6 +386,14 @@ namespace LMCore.TiledDungeon
                 }
 
                 inventory.OnLoad(inventorySave);
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
             }
         }
     }

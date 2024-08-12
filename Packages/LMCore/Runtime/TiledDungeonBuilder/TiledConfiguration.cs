@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon
 {
-    public class TiledConfiguration : Singleton<TiledConfiguration>
+    public class TiledConfiguration : Singleton<TiledConfiguration, TiledConfiguration>
     {
         [Header("Tile Classes")]
         public string BaseTileClass = "BaseTile";

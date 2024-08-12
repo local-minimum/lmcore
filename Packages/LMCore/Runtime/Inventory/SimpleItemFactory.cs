@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LMCore.Inventory
 {
-    public class SimpleItemFactory : AbsItemFactory
+    public class SimpleItemFactory : AbsItemFactory<SimpleItemFactory>
     {
         [System.Serializable]
         class ItemInstruction

@@ -1,7 +1,9 @@
 {
     "name": "se.localminimum.lmcore.juice",
     "rootNamespace": "LMCore.Juice",
-    "references": [],
+    "references": [
+        "GUID:7133380fdf0a2554eb38dd774526b441"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

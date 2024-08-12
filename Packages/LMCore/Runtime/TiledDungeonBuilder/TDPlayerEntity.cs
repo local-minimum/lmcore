@@ -20,11 +20,15 @@ namespace LMCore.TiledDungeon
         /// </summary>
         public int OnLoadPriority => 1001;
 
-        public void OnLoad()
+        public void OnLoadGameSave(GameSave save)
         {
-            var save = SaveSystem<GameSave>.ActiveSaveData;
-
-            if (save == null || save.player == null) {
+            if (save == null)
+            {
+                Debug.LogWarning(PrefixLogMessage("There was no save"));
+                return;
+            }
+                
+            if (save.player == null) {
                 Debug.LogWarning(PrefixLogMessage("There was no save for me"));
                 return;
             }
@@ -68,5 +72,13 @@ namespace LMCore.TiledDungeon
         }
 
         public PlayerEntitySave Save() => new PlayerEntitySave(this);
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
+        }
     }
 }

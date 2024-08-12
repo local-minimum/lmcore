@@ -27,7 +27,7 @@ namespace LMCore.Inventory
         public override int GetHashCode() => HashCode.Combine(ItemId, OriginId);
     }
 
-    public class ItemDisposal : Singleton<ItemDisposal> { 
+    public class ItemDisposal : Singleton<ItemDisposal, ItemDisposal> { 
 
         List<ItemOrigin> items = new List<ItemOrigin>();
 

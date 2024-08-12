@@ -98,9 +98,14 @@ namespace LMCore.TiledDungeon
 
         public int OnLoadPriority => 500;
 
+        bool synced = false;
+
         private void Start()
         {
-            if (node != null) SyncDoor();
+            if (node != null && !synced)
+            {
+                SyncDoor();
+            }
         }
 
         public void Configure(
@@ -327,7 +332,6 @@ namespace LMCore.TiledDungeon
         {
             var config = node.Config;
 
-
             var toggleGroups = config 
                 .GetObjectValues(
                     TiledConfiguration.instance.ObjToggleGroupClass,
@@ -373,15 +377,17 @@ namespace LMCore.TiledDungeon
             Debug.Log(PrefixLogMessage(
                 $"Synced as Locked({isLocked}) Key({key}; consumes={consumesKey}) Open({isOpen}) Automatic({automaticTrapDoor})"
             ));
+            synced = true;
         }
 
-        public void OnLoad()
+        public void OnLoadGameSave(GameSave save)
         {
-            var save = SaveSystem<GameSave>.ActiveSaveData;
             if (save == null)
             {
                 return;
             }
+            if (!synced) SyncDoor();
+
             var lvl = GetComponentInParent<IDungeon>().MapName;
 
             var doorSave = save.levels[lvl]?.doors?.GetValueOrDefault(_Position);
@@ -406,6 +412,14 @@ namespace LMCore.TiledDungeon
         public DoorSave Save()
         {
             return new DoorSave(isOpen, isLocked);
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
         }
     }
 }

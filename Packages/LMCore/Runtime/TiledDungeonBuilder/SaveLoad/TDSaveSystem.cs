@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon.SaveLoad
 {
+    public abstract class TDSaveSystem : TDSaveSystem<GameSave, TDSaveSystem> { }
+
     /// <summary>
     /// Basic tiled dungeon saving that can be extended for specific game needs
     /// </summary>
@@ -37,7 +39,7 @@ namespace LMCore.TiledDungeon.SaveLoad
     /// }
     /// </example>
     /// <typeparam name="T">The extended GameSave that the game saves</typeparam>
-    public abstract class TDSaveSystem<T> : SaveSystem<T> where T : GameSave, new()
+    public abstract class TDSaveSystem<T, TSelf> : SaveSystem<T, TSelf> where T : GameSave, new() where TSelf : TDSaveSystem<T, TSelf>
     {
         protected override T CreateSaveState(T active)
         {

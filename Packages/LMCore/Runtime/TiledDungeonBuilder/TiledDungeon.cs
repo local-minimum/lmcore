@@ -291,9 +291,13 @@ namespace LMCore.TiledDungeon
             Player.Sync();
         }
 
+        bool spawnPlayerAtLevelStart = true;
         private void Start()
         {
-            Spawn();
+            if (spawnPlayerAtLevelStart)
+            {
+                Spawn();
+            }
         }
 
         private void OnEnable()
@@ -329,11 +333,21 @@ namespace LMCore.TiledDungeon
             return TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize);
         }
 
-        void IOnLoadSave.OnLoad()
+        void OnLoadGameSave(GameSave save)
         {
-            var save = TDSaveSystem<GameSave>.ActiveSaveData;
+            if (save != null)
+            {
+                ItemDisposal.InstanceOrCreate().LoadFromSave(save.disposedItems);
+                spawnPlayerAtLevelStart = false;
+            }
+        }
 
-            ItemDisposal.InstanceOrCreate().LoadFromSave(save.disposedItems);
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace LMCore.UI
 {
-    public class KeyPressHUD : Singleton<KeyPressHUD>
+    public class KeyPressHUD : Singleton<KeyPressHUD, KeyPressHUD>
     {
         [SerializeField]
         private GameObject[] ExtraActions;

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace LMCore.Extensions
 {
@@ -85,5 +86,22 @@ namespace LMCore.Extensions
 
         public static T FindObjectByInterfaceOrDefault<T>(Func<T, bool> filter) where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Where(filter).FirstOrDefault();
-    }    
+
+        /// <summary>
+        /// Get first instance of type in scene of the behaviour
+        /// </summary>
+        public static T GetFirstInScene<T>(this MonoBehaviour mono) => mono.GetFirstInScene<T>(mono.gameObject.scene.name);
+
+        /// <summary>
+        /// Get first instance in scene
+        /// </summary>
+        /// <param name="sceneName">Name of scene</param>
+        public static T GetFirstInScene<T>(this MonoBehaviour _, string sceneName) =>
+            SceneManager
+                    .GetSceneByName(sceneName)
+                    .GetRootGameObjects()
+                    .Select(obj => obj.GetComponentInChildren<T>())
+                    .Where(t => t != null)
+                    .FirstOrDefault();
+        }    
 }

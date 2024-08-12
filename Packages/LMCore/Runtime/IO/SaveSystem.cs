@@ -5,9 +5,11 @@ using UnityEngine;
 
 namespace LMCore.IO
 {
-    public abstract class SaveSystem<T> : Singleton<SaveSystem<T>> where T : new()
+    public abstract class SaveSystem<T> : SaveSystem<T, SaveSystem<T>> where T : new() { }
+    public abstract class SaveSystem<T, TSelf> : Singleton<SaveSystem<T, TSelf>, TSelf> where T : new() where TSelf : SaveSystem<T, TSelf>
     {
-        public static T ActiveSaveData;
+        public abstract T saveData { get; protected set; }
+        public static T ActiveSaveData => instance != null ? instance.saveData : new T();
 
         [Min(1), Tooltip("Number of saves the game allows, minimum 1")]
         public int maxSaves = 3;
@@ -47,13 +49,13 @@ namespace LMCore.IO
 
             if (Provider != null)
             {
-                var newState = CreateSaveState(ActiveSaveData);
+                var newState = CreateSaveState(saveData);
                 Provider.Save(
                     id, 
                     newState, 
                     () =>
                     {
-                        ActiveSaveData = newState;
+                        saveData = newState;
                         OnSave();
                     }, 
                     OnSaveFail);
@@ -70,8 +72,8 @@ namespace LMCore.IO
         /// <param name="saveData">The save data</param>
         void Load(T saveData)
         {
-            ActiveSaveData = saveData;
-
+            this.saveData = saveData;
+            
             int n = 0;
             foreach (var normal in UnityExtensions
                 .FindObjectsByInterface<IOnLoadSave>(
@@ -79,7 +81,7 @@ namespace LMCore.IO
                     FindObjectsSortMode.None)
                 .OrderByDescending(i => i.OnLoadPriority))
             {
-                normal.OnLoad();
+                normal.OnLoad(saveData);
                 n++;
             }
 
@@ -127,5 +129,7 @@ namespace LMCore.IO
                 }
             }
         }
+
+        public bool HasSave(int saveId) => Provider?.HasSave(saveId) ?? false;
     }
 }

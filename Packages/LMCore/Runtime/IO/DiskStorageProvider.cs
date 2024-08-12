@@ -1,4 +1,3 @@
-using LMCore.AbstractClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace LMCore.IO
 {
-    public class DiskStorageProvider<T> : AbsStorageProvider<T> where T : new()
+    public class DiskStorageProvider<TSave> : AbsStorageProvider<TSave> where TSave : new()
     {
         [SerializeField]
         bool Pretty;
@@ -15,7 +14,7 @@ namespace LMCore.IO
         private string SaveSlotIdPattern = "{id}";
         private string PrefixLogMessage(string message) => $"DiskStorageProvider: {message}";
 
-        int MaxSaves => SaveSystem<T>.instance.maxSaves;
+        int MaxSaves => SaveSystem<TSave>.instance?.maxSaves ?? 0;
 
         [Tooltip("Use '{id}' for injection of identifier for game with multiple saves")]
         public string SavePattern = "GameSave_{id}.json";
@@ -41,24 +40,24 @@ namespace LMCore.IO
 
         public override bool HasSave(int id) => File.Exists(FilePath(id));
 
-        public override bool Load(int id, out T value)
+        public override bool Load(int id, out TSave value)
         {
             try
             {
-                value = JsonUtility.FromJson<T>(File.ReadAllText(FilePath(id)));
+                value = JsonUtility.FromJson<TSave>(File.ReadAllText(FilePath(id)));
             } catch
             {
                 Debug.LogError(PrefixLogMessage($"Failed to load save {id}"));
-                value = default(T);
+                value = default(TSave);
                 return false;
             }
 
             return true;
         }
 
-        private IEnumerator<WaitForSeconds> AsyncLoad(int id, Action<T> OnLoad, Action OnLoadFail)
+        private IEnumerator<WaitForSeconds> AsyncLoad(int id, Action<TSave> OnLoad, Action OnLoadFail)
         {
-            if (Load(id, out T value))
+            if (Load(id, out TSave value))
             {
                 OnLoad(value);
             } else
@@ -68,10 +67,10 @@ namespace LMCore.IO
             yield break;
         }
 
-        public override void Load(int id, Action<T> OnLoad, Action OnLoadFail) =>
+        public override void Load(int id, Action<TSave> OnLoad, Action OnLoadFail) =>
             StartCoroutine(AsyncLoad(id, OnLoad, OnLoadFail));
 
-        public override bool Save(int id, T value)
+        public override bool Save(int id, TSave value)
         {
             var path = FilePath(id);
 
@@ -90,7 +89,7 @@ namespace LMCore.IO
             }
         }
 
-        IEnumerator<WaitForSeconds> AsyncSave(int id, T value, Action OnSave, Action OnSaveFail)
+        IEnumerator<WaitForSeconds> AsyncSave(int id, TSave value, Action OnSave, Action OnSaveFail)
         {
             if (Save(id, value))
             {
@@ -102,7 +101,7 @@ namespace LMCore.IO
             yield break;
         }
 
-        public override void Save(int id, T value, Action OnSave, Action OnSaveFail) =>
+        public override void Save(int id, TSave value, Action OnSave, Action OnSaveFail) =>
             StartCoroutine(AsyncSave(id, value, OnSave, OnSaveFail));
 
         public override bool Info(int id, out SaveInfo info)

@@ -97,6 +97,8 @@ namespace LMCore.TiledDungeon
                 var pos = positions[i];
                 var next = positions[i + 1];
 
+                if (next == pos) continue;
+
                 var direction = (next - pos).AsDirection();
                 if (pos == Position && direction == this.direction)
                 {
@@ -132,9 +134,8 @@ namespace LMCore.TiledDungeon
             direction = direction,
         };
 
-        void IOnLoadSave.OnLoad()
+        void OnLoadGameSave(GameSave save)
         {
-            var save = SaveSystem<GameSave>.ActiveSaveData;
             if (save == null)
             {
                 return;
@@ -151,6 +152,14 @@ namespace LMCore.TiledDungeon
            {
                 animator.SetTrigger(DiscoveredTrigger);
            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
         }
     }
 }

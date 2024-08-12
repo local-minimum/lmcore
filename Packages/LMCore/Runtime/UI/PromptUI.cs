@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LMCore.UI
 {
-    public class PromptUI : Singleton<PromptUI>
+    public class PromptUI : Singleton<PromptUI, PromptUI>
     {
         [SerializeField]
         private TextMeshProUGUI prompt;

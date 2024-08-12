@@ -309,9 +309,8 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        public void OnLoad()
+        public void OnLoadGameSave(GameSave save)
         {
-            var save = SaveSystem<GameSave>.ActiveSaveData;
             if (save == null)
             {
                 return;
@@ -351,5 +350,13 @@ namespace LMCore.TiledDungeon
         }
 
         public SpikeTrapSave Save() => new SpikeTrapSave(phase);
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
+        }
     }
 }

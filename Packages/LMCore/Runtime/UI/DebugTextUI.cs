@@ -3,7 +3,7 @@ using TMPro;
 
 namespace LMCore.UI
 {
-    public class DebugTextUI : Singleton<DebugTextUI>
+    public class DebugTextUI : Singleton<DebugTextUI, DebugTextUI>
     {
         private TextMeshProUGUI TextUI;
 

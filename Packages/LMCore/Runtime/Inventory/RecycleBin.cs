@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LMCore.Inventory
 {
-    public class RecycleBin : Singleton<RecycleBin> 
+    public class RecycleBin : Singleton<RecycleBin, RecycleBin> 
     {
         List<AbsItem> recycledItems = new List<AbsItem>();
 

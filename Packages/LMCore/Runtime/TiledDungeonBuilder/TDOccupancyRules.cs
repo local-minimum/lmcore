@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace LMCore.TiledDungeon
 {
-    public class TDOccupancyRules : Singleton<TDOccupancyRules>, IOccupationRules
+    public class TDOccupancyRules : Singleton<TDOccupancyRules, TDOccupancyRules>, IOccupationRules
     {
         public void HandleDeparture(GridEntity entity, IEnumerable<GridEntity> occupants)
         {

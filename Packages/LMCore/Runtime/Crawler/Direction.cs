@@ -52,7 +52,7 @@ namespace LMCore.Crawler
             if (cardinal == Vector3Int.forward) return Direction.North;
             if (cardinal == Vector3Int.back) return Direction.South;
 
-            throw new System.ArgumentException($"${lookDirection} is not a cardinal direction");
+            throw new System.ArgumentException($"{lookDirection} is not a cardinal direction");
         }
 
         #endregion Making Directions
