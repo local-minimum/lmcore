@@ -55,7 +55,7 @@ namespace LMCore.TiledDungeon.SaveLoad
                 (save, invokeLoadSave) => 
                     continueLoading(
                         player.gameObject.scene, 
-                        save.player.sceneName, 
+                        save.player.levelName, 
                         continueLoading => { 
                             invokeLoadSave();
                             continueLoading();

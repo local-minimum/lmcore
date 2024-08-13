@@ -240,7 +240,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelManagerResoruce: LevelManager
   SaveSystemResource: SaveSystem
-  FirstLevelSceneName: SampleScene
+  FirstLevel: TiledMap - DemoLevel
   ContinueButton: {fileID: 365408584}
 --- !u!1 &365408584
 GameObject:

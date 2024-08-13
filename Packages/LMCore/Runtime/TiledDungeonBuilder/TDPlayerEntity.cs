@@ -13,6 +13,8 @@ namespace LMCore.TiledDungeon
         public GridEntity Entity;
         public List<TDPlayerCharacter> Party;
 
+        public IDungeon Dungeon => GetComponentInParent<IDungeon>();
+
         protected string PrefixLogMessage(string message) => $"Player Entity {name}: {message}";
 
         /// <summary>

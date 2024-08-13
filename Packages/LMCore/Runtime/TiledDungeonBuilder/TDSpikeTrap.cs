@@ -94,7 +94,7 @@ namespace LMCore.TiledDungeon
 
         void Start()
         {
-            Synch();
+            Sync();
             SetNextPhaseTime();
         }
 
@@ -122,7 +122,7 @@ namespace LMCore.TiledDungeon
             // TODO: Improve this logging
             Debug.Log(PrefixLogMessage($"Spikeless({Spikeless}) Anchor({anchor})"));
 
-            Synch();
+            Sync();
         }
 
         ToggleGroup _ToggleGroup;
@@ -151,8 +151,12 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        void Synch()
+        bool synced = false;
+
+        void Sync()
         {
+            if (synced) return;
+
             if (Spikeless)
             {
                 foreach (var spike in Spikes)
@@ -188,6 +192,7 @@ namespace LMCore.TiledDungeon
             }
 
             phase = managed ? SpikePhase.Waiting : SpikePhase.Retracted;
+            synced = true;
         }
 
         bool blockingEntry;
@@ -224,7 +229,6 @@ namespace LMCore.TiledDungeon
 
         void SetNextPhaseTime()
         {
-
             switch (phase)
             {
                 case SpikePhase.Retracted:
@@ -311,6 +315,8 @@ namespace LMCore.TiledDungeon
 
         public void OnLoadGameSave(GameSave save)
         {
+            Sync();
+
             if (save == null)
             {
                 return;

@@ -1,6 +1,8 @@
 using LMCore.AbstractClasses;
 using LMCore.Extensions;
+using LMCore.IO;
 using LMCore.Juice;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -18,12 +20,16 @@ namespace LMCore.TiledDungeon
         [SerializeField]
         string LoadingSceneName;
 
+        [SerializeField]
+        SerializableDictionary<string, string> levelsToScenes = new SerializableDictionary<string, string>();
+        string levelToLoad;
+        string levelSceneName => levelsToScenes.GetValueOrDefault(levelToLoad);
+
         Transition loadingEffect;
 
         protected string PrefixLogMessage(string message) => $"Level Manager: {message}";
 
         private bool transitioning = false;
-        string levelToLoadName;
         bool readyToFinalizeLoading;
         Scene unloadingScene;
         bool sourceSceneUnloaded;
@@ -67,7 +73,7 @@ namespace LMCore.TiledDungeon
             }
 
             transitioning = true;
-            levelToLoadName = null;
+            levelToLoad = null;
             saveLoader = null;
             levelLoadedStarted = false;
             sourceSceneUnloaded = false;
@@ -77,14 +83,14 @@ namespace LMCore.TiledDungeon
             return StartLoading;
         }
 
-        void StartLoading(Scene unloadingScene, string levelToLoadName, SaveLoader saveLoader) {
+        void StartLoading(Scene unloadingScene, string levelToLoad, SaveLoader saveLoader) {
             this.unloadingScene = unloadingScene;
-            this.levelToLoadName = levelToLoadName;
+            this.levelToLoad = levelToLoad;
             this.saveLoader = saveLoader;
 
             DisableEventSystem(unloadingScene);
 
-            Debug.Log(PrefixLogMessage($"Loading '{levelToLoadName}' from '{unloadingScene.name}' with save state: {saveLoader != null}"));
+            Debug.Log(PrefixLogMessage($"Loading '{levelToLoad}'/'{levelSceneName}' from '{unloadingScene.name}' with save state: {saveLoader != null}"));
             InitiateUnloadSourceScene();
         }
 
@@ -117,7 +123,7 @@ namespace LMCore.TiledDungeon
             Debug.Log(PrefixLogMessage("Loading target level scene"));
             levelLoadedStarted = true;
             var levelLoadingOperation = SceneManager
-                .LoadSceneAsync(levelToLoadName, LoadSceneMode.Additive);
+                .LoadSceneAsync(levelSceneName, LoadSceneMode.Additive);
             levelLoadingOperation.completed += LevelLoadingOperation_completed;
         }
 
@@ -191,7 +197,7 @@ namespace LMCore.TiledDungeon
         private void LevelLoadingOperation_completed(AsyncOperation obj)
         {
             DisableCamera(LoadingSceneName);
-            var levelScene = SceneManager.GetSceneByName(levelToLoadName);
+            var levelScene = SceneManager.GetSceneByName(levelSceneName);
             SceneManager.SetActiveScene(levelScene);
             levelSceneAudioListerner = DisableLevelAudioListener(levelScene);
 
@@ -252,7 +258,7 @@ namespace LMCore.TiledDungeon
         private void TDLevelManager_completed(AsyncOperation obj)
         {
             transitioning = false;
-            Debug.Log(PrefixLogMessage($"Transition completed for '{levelToLoadName}'"));
+            Debug.Log(PrefixLogMessage($"Transition completed for '{levelSceneName}'"));
         }
     }
 }

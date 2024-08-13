@@ -71,6 +71,8 @@ namespace LMCore.TiledDungeon
 
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
 
+        protected string PrefixLogMessage(string message) => $"TiledDungeon '{MapName}': {message}";
+
         public float GridSize => scale;
 
         Dictionary<Vector3Int, TDNode> _nodes;
@@ -312,6 +314,8 @@ namespace LMCore.TiledDungeon
                 mover.GridSizeProvider = this;
                 mover.Dungeon = this;
             }
+
+            Debug.Log(PrefixLogMessage("Enabled"));
         }
 
         public bool HasNodeAt(Vector3Int coordinates) => nodes.ContainsKey(coordinates);
@@ -339,6 +343,7 @@ namespace LMCore.TiledDungeon
             {
                 ItemDisposal.InstanceOrCreate().LoadFromSave(save.disposedItems);
                 spawnPlayerAtLevelStart = false;
+                Debug.Log(PrefixLogMessage("Save loaded"));
             }
         }
 

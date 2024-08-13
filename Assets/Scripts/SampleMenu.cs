@@ -15,7 +15,7 @@ public class SampleMenu : MonoBehaviour
     string SaveSystemResource = "SaveSystem";
 
     [SerializeField]
-    string FirstLevelSceneName = "SampleScene";
+    string FirstLevel = "SampleScene";
 
     [SerializeField]
     GameObject ContinueButton;
@@ -32,7 +32,7 @@ public class SampleMenu : MonoBehaviour
         var continueLoading = TDLevelManager.InstanceOrResource(LevelManagerResoruce).LoadSceneAsync();
         if (useAutoSave == false)
         {
-            continueLoading(gameObject.scene, FirstLevelSceneName, null);
+            continueLoading(gameObject.scene, FirstLevel, null);
         } else
         {
             saveSystem.LoadSaveAsync(
@@ -40,12 +40,12 @@ public class SampleMenu : MonoBehaviour
                 (save, invokeLoad) => 
                     continueLoading(
                         gameObject.scene, 
-                        save.player.sceneName, 
+                        save.player.levelName, 
                         continueLoading => { 
                             invokeLoad();
                             continueLoading();
                         }),
-                () => continueLoading(gameObject.scene, FirstLevelSceneName, null)
+                () => continueLoading(gameObject.scene, FirstLevel, null)
             );
             
         }

@@ -45,3 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LoadingSceneName: SampleLoadingScene
+  levelsToScenes:
+    keys:
+    - TiledMap - DemoLevel
+    values:
+    - SampleScene

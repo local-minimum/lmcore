@@ -73,6 +73,9 @@ namespace LMCore.TiledDungeon
                     mover.OnMoveStart -= Mover_OnMoveStart;
                 }
             }
+
+            Movers.OnActivateMover -= Movers_OnActivateMover;
+            Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
         }
 
         private void Movers_OnDeactivateMover(IEntityMover mover)

@@ -861,6 +861,7 @@ namespace LMCore.TiledDungeon
             } else {
                 _occupants.Add(entity);
             }
+            entity.transform.SetParent(transform);
         }
 
         public IEnumerable<GridEntity> Occupants => _occupants;
@@ -874,6 +875,10 @@ namespace LMCore.TiledDungeon
         {
             _occupants.Remove(entity);
             OccupationRules.HandleDeparture(entity, _occupants);
+            if (entity.transform.parent == transform)
+            {
+                entity.transform.SetParent(Dungeon.transform);
+            }
         }
 
         public bool AllowsRotating(GridEntity entity)

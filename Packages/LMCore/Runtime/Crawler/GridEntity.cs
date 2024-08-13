@@ -95,7 +95,7 @@ namespace LMCore.Crawler
         {
             if (GridSizeProvider == null)
             {
-                Debug.LogError($"{name} have yet to recieve a grid size provider, ignoring sync");
+                Debug.LogWarning($"{name} have yet to recieve a grid size provider, ignoring sync");
                 return;
             }
 

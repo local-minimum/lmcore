@@ -82,14 +82,13 @@ namespace LMCore.TiledDungeon.SaveLoad
     [System.Serializable]
     public class PlayerEntitySave
     {
-        // TODO: Probably swap for level name instead and resolve by other means?
-        public string sceneName;
+        public string levelName;
         public GridEntitySave entity;
         public List<PlayerCharacterSave> characters = new List<PlayerCharacterSave>();
 
         public PlayerEntitySave(TDPlayerEntity playerEntity)
         {
-            sceneName = playerEntity.gameObject.scene.name;
+            levelName = playerEntity.Dungeon.MapName;
             entity = new GridEntitySave(playerEntity.Entity);
             characters = playerEntity
                 .Party

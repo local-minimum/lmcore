@@ -301,7 +301,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
   </layer>
-  <objectgroup id="14" name="details" visible="0">
+  <objectgroup id="14" name="details">
    <properties>
     <property name="Elevation" type="int" value="1"/>
     <property name="Imported" type="bool" value="true"/>
