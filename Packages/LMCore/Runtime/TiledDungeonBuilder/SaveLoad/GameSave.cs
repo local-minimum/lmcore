@@ -1,7 +1,7 @@
 using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.IO;
-using LMCore.TiledDungeon.Integration;
+using LMCore.TiledDungeon.DungeonFeatures;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

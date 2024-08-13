@@ -5,6 +5,7 @@ using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
+using LMCore.TiledDungeon.DungeonFeatures;
 
 namespace LMCore.TiledDungeon
 {
