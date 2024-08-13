@@ -9,6 +9,14 @@ using UnityEngine;
 namespace LMCore.TiledDungeon.SaveLoad
 {
     [System.Serializable]
+    public class PlayerStatsSave
+    {
+        public float playTime;
+        public int steps;
+        public int turns;
+    }
+
+    [System.Serializable]
     public class IllusionSave
     {
         public Vector3Int position;
@@ -145,6 +153,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public List<ItemOrigin> disposedItems = new List<ItemOrigin>();
         public SerializableDictionary<string, LevelSave> levels = new SerializableDictionary<string, LevelSave>();
         public PlayerEntitySave player;
+        public PlayerStatsSave playerStats;
 
         public GameSave() { }
     }

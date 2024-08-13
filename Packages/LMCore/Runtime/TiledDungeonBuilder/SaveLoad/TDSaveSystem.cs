@@ -101,7 +101,15 @@ namespace LMCore.TiledDungeon.SaveLoad
 
 
             // Save player;
-            save.player = FindObjectOfType<TDPlayerEntity>().Save();
+            var player = FindObjectOfType<TDPlayerEntity>();
+            if (player != null)
+            {
+                save.player = player.Save();
+                save.playerStats = player.GetComponent<TDPlayerStats>()?.Save();
+            } else
+            {
+                Debug.LogWarning(PrefixLogMessage("Could not locate a player"));
+            }
 
             return (T)save;
         }
