@@ -119,6 +119,35 @@ namespace LMCore.IO
             }
         }
 
+        public void LoadSaveAsync(
+            int id, 
+            System.Action<T, System.Action> OnLoad, 
+            System.Action OnLoadFail
+        )
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning(PrefixLogMessage("Cannot save without the application running"));
+                OnLoadFail();
+                return;
+            }
+
+            if (Provider != null)
+            {
+                Provider.Load(
+                    id, 
+                    saveGame => { 
+                        OnLoad(saveGame, () => Load(saveGame)); 
+                    }, 
+                    OnLoadFail);
+            } else
+            {
+                Debug.LogError(PrefixLogMessage($"No storage provider configured, can't load slot {id}"));
+                OnLoadFail();
+            }
+
+        }
+
         public void DeleteAllSaves()
         {
             foreach (var saveInfo in Provider.List())

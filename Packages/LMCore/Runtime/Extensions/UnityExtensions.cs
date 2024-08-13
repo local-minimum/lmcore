@@ -79,7 +79,7 @@ namespace LMCore.Extensions
         public static T FindObjectByInterface<T>(FindObjectsSortMode sortMode) where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, sortMode).First();
 
-        public static T FindObjectByInterface<T>() where T: class =>
+        public static T FindObjectByInterface<T>() where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).First();
         public static T FindObjectByInterfaceOrDefault<T>() where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).FirstOrDefault();
@@ -98,10 +98,34 @@ namespace LMCore.Extensions
         /// <param name="sceneName">Name of scene</param>
         public static T GetFirstInScene<T>(this MonoBehaviour _, string sceneName) =>
             SceneManager
-                    .GetSceneByName(sceneName)
-                    .GetRootGameObjects()
-                    .Select(obj => obj.GetComponentInChildren<T>())
-                    .Where(t => t != null)
-                    .FirstOrDefault();
-        }    
+                .GetSceneByName(sceneName)
+                .GetRootGameObjects()
+                .Select(obj => obj.GetComponentInChildren<T>())
+                .Where(t => t != null)
+                .FirstOrDefault();
+
+        /// <summary>
+        /// Get first instance in scene
+        /// </summary>
+        /// <param name="sceneName">Name of scene</param>
+        public static T GetFirstInScene<T>(this MonoBehaviour _, Scene scene) =>
+            scene
+                .GetRootGameObjects()
+                .Select(obj => obj.GetComponentInChildren<T>())
+                .Where(t => t != null)
+                .FirstOrDefault();
+
+        /// <summary>
+        /// Get first instance in scene
+        /// </summary>
+        /// <param name="sceneName">Name of scene</param>
+        public static T GetFirstInScene<T>(this MonoBehaviour _, Scene scene, Func<T, bool> filter) =>
+            scene
+                .GetRootGameObjects()
+                .Select(obj => obj.GetComponentInChildren<T>())
+                .Where(t => t != null && filter(t))
+                .FirstOrDefault();
+    }
+
+
 }

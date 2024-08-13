@@ -1,11 +1,14 @@
 using LMCore.Extensions;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace LMCore.Juice
 {
     public class Transition : MonoBehaviour
     {
+        public delegate void PhaseChangeEvent(Phase phase);
+
+        public event PhaseChangeEvent OnPhaseChange;
+
         [SerializeField]
         int animState = 0;
 
@@ -26,7 +29,7 @@ namespace LMCore.Juice
 
         protected string PrefixLogMessage(string message) => $"Transition {name}: {message}";
 
-        public enum Phase { Inacive, EaseIn, Waiting, EaseOut };
+        public enum Phase { Inacive, EaseIn, Waiting, EaseOut, Completed };
 
         private Phase phase = Phase.Inacive;
         public Phase ActivePhase
@@ -42,9 +45,9 @@ namespace LMCore.Juice
                     anim.PlayInFixedTime(animState);
                 }
 
-                if ((value != Phase.Inacive) != EffectRoot.activeSelf)
+                if ((value == Phase.Inacive || value == Phase.Completed) == EffectRoot.activeSelf)
                 {
-                    EffectRoot.SetActive(value != Phase.Inacive);
+                    EffectRoot.SetActive(!EffectRoot.activeSelf);
                 }
 
                 switch (value)
@@ -62,12 +65,13 @@ namespace LMCore.Juice
                 }
 
                 phase = value; 
+                OnPhaseChange?.Invoke(phase);
             }
         }
 
         void Awake()
         {
-            StopAnimation();
+            StopAnimation(Phase.Inacive);
         }
 
         [SerializeField]
@@ -84,26 +88,24 @@ namespace LMCore.Juice
             {
                 Debug.Log(PrefixLogMessage("Currently waiting"));
                 phase = Phase.Waiting;
+                OnPhaseChange?.Invoke(phase);
             }
 
             if (ActivePhase != Phase.Inacive && anim.IsActiveAnimation(animState, fadeOutClip.name) && !anim.IsAnimating(animState, fadeOutClip.name))
             {
-                StopAnimation(true);
+                StopAnimation(Phase.Completed);
             }
         }
 
-        private void StopAnimation(bool unload = false)
+        private void StopAnimation(Phase phase)
         {
-            Debug.Log(PrefixLogMessage("Shutting down"));
-            phase = Phase.Inacive;
+            Debug.Log(PrefixLogMessage(phase.ToString()));
+            this.phase = phase;
             EffectRoot.SetActive(false);
             anim.StopPlayback();
             anim.enabled = false;
 
-            if (unload)
-            {
-                SceneManager.UnloadSceneAsync(gameObject.scene.name);
-            }
+            OnPhaseChange?.Invoke(phase);
         }
 
 
