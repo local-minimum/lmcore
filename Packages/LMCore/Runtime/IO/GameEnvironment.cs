@@ -16,14 +16,17 @@ namespace LMCore.IO
         public bool genuine;
         public float sessionPlayTime;
 
-        public GameEnvironment() {
-            buildGUID = Application.buildGUID;
-            version = Application.version;
-            unityVersion = Application.unityVersion;
-            systemLanguage = Application.systemLanguage.ToString();
-            platform = Application.platform.ToString();
-            genuine = Application.genuine;
-            sessionPlayTime = Time.realtimeSinceStartup;
+        public static GameEnvironment FromApplication() {
+            return new GameEnvironment()
+            {
+                buildGUID = Application.buildGUID,
+                version = Application.version,
+                unityVersion = Application.unityVersion,
+                systemLanguage = Application.systemLanguage.ToString(),
+                platform = Application.platform.ToString(),
+                genuine = Application.genuine,
+                sessionPlayTime = Time.realtimeSinceStartup,
+            };
         }
     }
 }

@@ -41,7 +41,10 @@ public class SampleMenu : MonoBehaviour
                     continueLoading(
                         gameObject.scene, 
                         save.player.sceneName, 
-                        invokeLoad),
+                        continueLoading => { 
+                            invokeLoad();
+                            continueLoading();
+                        }),
                 () => continueLoading(gameObject.scene, FirstLevelSceneName, null)
             );
             

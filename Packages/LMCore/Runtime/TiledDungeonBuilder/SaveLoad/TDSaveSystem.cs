@@ -45,6 +45,8 @@ namespace LMCore.TiledDungeon.SaveLoad
         {
             var save = new GameSave();
 
+            save.environment = GameEnvironment.FromApplication();
+
             // Replace Active levels
             save.levels = new SerializableDictionary<string, LevelSave>(active?.levels);           
             var levels = save.levels;

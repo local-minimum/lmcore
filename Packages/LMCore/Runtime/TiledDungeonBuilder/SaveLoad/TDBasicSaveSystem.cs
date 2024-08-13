@@ -9,9 +9,18 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         public override GameSave saveData { get; protected set; }
 
+        [SerializeField]
+        string LevelManagerResource;
+
+        [SerializeField]
+        string FirstLevelSceneName;
+
+        TDLevelManager levelManager;
+
         private void Start()
         {
             DontDestroyOnLoad(gameObject);
+            levelManager = TDLevelManager.InstanceOrResource(LevelManagerResource);
         }
 
         [ContextMenu("Log Status")]
@@ -33,10 +42,26 @@ namespace LMCore.TiledDungeon.SaveLoad
         [ContextMenu("Load AutoSave")]
         void LoadAutoSave()
         {
-            Load(
+            var continueLoading = levelManager.LoadSceneAsync();
+            if (continueLoading == null) return;
+
+            var player = FindObjectOfType<TDPlayerEntity>();
+            if (player == null) {
+                Debug.LogError(PrefixLogMessage("Without a player I don't know what scene to unload!"));
+            };
+
+            LoadSaveAsync(
                 0,
-                () => Debug.Log(PrefixLogMessage("Loaded Auto Save 0")),
-                () => Debug.Log(PrefixLogMessage("Failed to load Auto Save 0")));
+                (save, invokeLoadSave) => 
+                    continueLoading(
+                        player.gameObject.scene, 
+                        save.player.sceneName, 
+                        continueLoading => { 
+                            invokeLoadSave();
+                            continueLoading();
+                        }),
+                () => continueLoading(player.gameObject.scene, FirstLevelSceneName, null)
+            );
         }
 
 

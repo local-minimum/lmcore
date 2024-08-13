@@ -47,6 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSaves: 3
   Provider: {fileID: 2747045478197945731}
+  LevelManagerResource: LevelManager
+  FirstLevelSceneName: SampleScene
 --- !u!114 &2747045478197945731
 MonoBehaviour:
   m_ObjectHideFlags: 0

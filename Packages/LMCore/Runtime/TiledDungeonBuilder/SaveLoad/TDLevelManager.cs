@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace LMCore.TiledDungeon
 {
-    using SaveLoader = System.Action;
+    using SaveLoader = System.Action<System.Action>;
 
     public class TDLevelManager : Singleton<TDLevelManager, TDLevelManager> 
     {
@@ -26,6 +26,7 @@ namespace LMCore.TiledDungeon
         string levelToLoadName;
         bool readyToFinalizeLoading;
         Scene unloadingScene;
+        bool sourceSceneUnloaded;
 
         private void Start()
         {
@@ -34,7 +35,7 @@ namespace LMCore.TiledDungeon
 
         EventSystem unloadingSceneEventSystem;
 
-        void DisableSourceSceneEventSystem(Scene sourceScene)
+        void DisableEventSystem(Scene sourceScene)
         {
             unloadingSceneEventSystem = this.GetFirstInScene<EventSystem>(sourceScene, sys => sys.gameObject.activeSelf);
             if (unloadingSceneEventSystem != null )
@@ -43,10 +44,20 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        Camera DisableCamera(string sceneName) => DisableCamera(SceneManager.GetSceneByName(sceneName));
+        Camera DisableCamera(Scene scene)
+        {
+            var camera = this.GetFirstInScene<Camera>(scene);
+            if (camera != null)
+            {
+                camera.enabled = false;
+            }
+            return camera;
+        }
+
         /// <summary>
         /// Start a loading transition, supplying needed information later
         /// </summary>
-        /// <returns></returns>
         public System.Action<Scene, string, SaveLoader> LoadSceneAsync() 
         {
             if (transitioning)
@@ -59,8 +70,9 @@ namespace LMCore.TiledDungeon
             levelToLoadName = null;
             saveLoader = null;
             levelLoadedStarted = false;
+            sourceSceneUnloaded = false;
 
-            InitiateLoadingTransition();
+            InitiateLoadingTransitionScene();
 
             return StartLoading;
         }
@@ -70,51 +82,29 @@ namespace LMCore.TiledDungeon
             this.levelToLoadName = levelToLoadName;
             this.saveLoader = saveLoader;
 
-            DisableSourceSceneEventSystem(unloadingScene);
+            DisableEventSystem(unloadingScene);
 
             Debug.Log(PrefixLogMessage($"Loading '{levelToLoadName}' from '{unloadingScene.name}' with save state: {saveLoader != null}"));
-            InitiateLevelSceneLoading();
+            InitiateUnloadSourceScene();
         }
 
-        private void InitiateLoadingTransition()
+        private void InitiateLoadingTransitionScene()
         {
+            Debug.Log(PrefixLogMessage("Loading transition scene"));
             var loadingSceneOperation = SceneManager
                 .LoadSceneAsync(LoadingSceneName, LoadSceneMode.Additive);
             loadingSceneOperation.completed += LoadingSceneOperation_completed;
         }
 
-        private void LoadingSceneOperation_completed(AsyncOperation obj)
+        private void InitiateUnloadSourceScene()
         {
-            loadingEffect = this.GetFirstInScene<Transition>(LoadingSceneName);
+            if (sourceSceneUnloaded || transitionPhase != Transition.Phase.Waiting) return;
 
-            if (loadingEffect == null)
-            {
-                Debug.LogError(PrefixLogMessage($"Loading scene '{LoadingSceneName}' does not have any transition effect"));
-                transitionPhase = Transition.Phase.Waiting;
-            } else
-            {
-                loadingEffect.OnPhaseChange += LoadingEffect_onPhaseChange;
-                loadingEffect.ActivePhase = Transition.Phase.EaseIn;
-            }
-
-            if (levelToLoadName != null) InitiateLevelSceneLoading();
+            Debug.Log(PrefixLogMessage($"Unloading source scene {unloadingScene.name}"));
+            sourceSceneUnloaded = true;
+            var unloadSceneOperation = SceneManager.UnloadSceneAsync(unloadingScene);
+            unloadSceneOperation.completed += UnloadSceneOperation_completed;
         }
-
-        Transition.Phase transitionPhase;
-
-        private void LoadingEffect_onPhaseChange(Transition.Phase phase)
-        {
-            transitionPhase = phase;
-
-            if (transitionPhase == Transition.Phase.Waiting)
-            {
-                InitiateLevelSceneLoading();
-            } else if (readyToFinalizeLoading && phase == Transition.Phase.Completed) {
-                FinalizeTransition();
-            }
-        }
-
-        bool levelLoadedStarted;
 
         private void InitiateLevelSceneLoading()
         {
@@ -124,55 +114,117 @@ namespace LMCore.TiledDungeon
                 return;
             }
 
+            Debug.Log(PrefixLogMessage("Loading target level scene"));
             levelLoadedStarted = true;
             var levelLoadingOperation = SceneManager
                 .LoadSceneAsync(levelToLoadName, LoadSceneMode.Additive);
             levelLoadingOperation.completed += LevelLoadingOperation_completed;
         }
 
+        private void SwapAudioListenerToLoadingScene() {
+            var loadingListener = this.GetFirstInScene<AudioListener>(LoadingSceneName);
+            if (loadingListener != null)
+            {
+                DisableLevelAudioListener(unloadingScene);
+
+                loadingListener.enabled = true;
+            }
+        }
+
+        private void LoadingSceneOperation_completed(AsyncOperation obj)
+        {
+            loadinSceneCamera = DisableCamera(LoadingSceneName);
+            SwapAudioListenerToLoadingScene();
+
+            loadingEffect = this.GetFirstInScene<Transition>(LoadingSceneName);
+
+            Debug.Log(PrefixLogMessage("Loading scene loaded"));
+
+            if (loadingEffect == null)
+            {
+                Debug.LogError(PrefixLogMessage($"Loading scene '{LoadingSceneName}' does not have any transition effect"));
+                transitionPhase = Transition.Phase.Waiting;
+                InitiateUnloadSourceScene();
+            } else
+            {
+                loadingEffect.OnPhaseChange += LoadingEffect_onPhaseChange;
+                loadingEffect.ActivePhase = Transition.Phase.EaseIn;
+            }
+        }
+
+        Transition.Phase transitionPhase;
+
+        private void LoadingEffect_onPhaseChange(Transition.Phase phase)
+        {
+            transitionPhase = phase;
+
+            Debug.Log(PrefixLogMessage($"Transition phase is {transitionPhase}"));
+
+            if (transitionPhase == Transition.Phase.Waiting)
+            {
+                InitiateUnloadSourceScene();
+            } else if (readyToFinalizeLoading || phase == Transition.Phase.Completed) {
+                FinalizeTransition();
+            }
+        }
+
+        bool levelLoadedStarted;
 
         AudioListener levelSceneAudioListerner;
         /// <summary>
         /// To avoid duplicate audio listeners while transitioning it is disabled
         /// </summary>
-        void DisableLevelAudioListener(Scene levelScene)
+        AudioListener DisableLevelAudioListener(Scene scene)
         {
-            levelSceneAudioListerner = this.GetFirstInScene<AudioListener>(levelScene);
-            if (levelSceneAudioListerner == null && levelSceneAudioListerner.enabled)
+            var listener = this.GetFirstInScene<AudioListener>(scene);
+            if (listener == null && listener.enabled)
             {
-                levelSceneAudioListerner.enabled = false;
-            } else
-            {
-                levelSceneAudioListerner = null;
+                listener.enabled = false;
+                return listener;
             }
+            return null;
         }
 
         SaveLoader saveLoader;
+        Camera loadinSceneCamera;
 
         private void LevelLoadingOperation_completed(AsyncOperation obj)
         {
+            DisableCamera(LoadingSceneName);
             var levelScene = SceneManager.GetSceneByName(levelToLoadName);
             SceneManager.SetActiveScene(levelScene);
-            DisableLevelAudioListener(levelScene);
+            levelSceneAudioListerner = DisableLevelAudioListener(levelScene);
+
+            Debug.Log(PrefixLogMessage("Target scene loaded"));
 
             if (saveLoader != null)
             {
-                saveLoader();
-            } 
-
-            UnloadSourceScene();
+                saveLoader(HandleLoadingLevelComplete);
+            } else
+            {
+                HandleLoadingLevelComplete();
+            }
         }
 
-        void SwapAudioListeners()
+        void HandleLoadingLevelComplete()
         {
-            if (unloadingScene != null)
+            Debug.Log(PrefixLogMessage("Target scene ready"));
+            if (loadingEffect != null)
             {
-                var myAudioListener = this.GetFirstInScene<AudioListener>(unloadingScene);
+                loadingEffect.ActivePhase = Transition.Phase.EaseOut;
+            } else
+            {
+                FinalizeTransition();
+            }
+        }
 
-                if (myAudioListener != null)
-                {
-                    myAudioListener.enabled = false;
-                }
+        void SwapToLoadingLevelAudioListerner()
+        {
+            var loadingListeners = this.GetFirstInScene<AudioListener>(LoadingSceneName);
+
+            if (loadingListeners != null)
+            {
+                loadingListeners.enabled = false;
             }
 
             if (levelSceneAudioListerner != null)
@@ -181,46 +233,18 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        private void UnloadSourceScene()
+
+        private void UnloadSceneOperation_completed(AsyncOperation obj)
         {
-            SwapAudioListeners();
-
-            if (unloadingScene != null)
-            {
-                var unloadSceneOperation = SceneManager.UnloadSceneAsync(unloadingScene);
-                if (loadingEffect == null)
-                {
-                    unloadSceneOperation.completed += UnloadSceneOperation_completed_withoutEffect; ;
-                } else
-                {
-                    unloadSceneOperation.completed += UnloadSceneOperation_completed_withEffect;
-                }
-
-            } else if (loadingEffect != null)
-            {
-                loadingEffect.ActivePhase = Transition.Phase.EaseOut;
-            } else
-            {
-                FinalizeTransition();
-            }
-            
+            Debug.Log(PrefixLogMessage("Source scene unloaded"));
+            loadinSceneCamera.enabled = true;
+            InitiateLevelSceneLoading();
         }
-
-        private void UnloadSceneOperation_completed_withEffect(AsyncOperation obj)
-        {
-            if (transitionPhase == Transition.Phase.Waiting)
-            {
-                loadingEffect.ActivePhase = Transition.Phase.EaseOut;
-            } else
-            {
-                readyToFinalizeLoading = true;
-            }
-        }
-
-        private void UnloadSceneOperation_completed_withoutEffect(AsyncOperation obj) => FinalizeTransition();
 
         private void FinalizeTransition()
         {
+            Debug.Log(PrefixLogMessage($"Loading of {LoadingSceneName} completed"));
+            SwapToLoadingLevelAudioListerner();
             OnSceneLoaded?.Invoke(LoadingSceneName);
             SceneManager.UnloadSceneAsync(LoadingSceneName).completed += TDLevelManager_completed;
         }

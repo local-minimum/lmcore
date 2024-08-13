@@ -146,9 +146,6 @@ namespace LMCore.TiledDungeon.SaveLoad
         public SerializableDictionary<string, LevelSave> levels = new SerializableDictionary<string, LevelSave>();
         public PlayerEntitySave player;
 
-        public GameSave() { 
-            environment = new GameEnvironment();
-            
-        }
+        public GameSave() { }
     }
 }

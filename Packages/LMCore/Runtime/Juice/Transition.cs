@@ -84,14 +84,14 @@ namespace LMCore.Juice
         {
             if (!anim.enabled) return;
 
-            if (ActivePhase != Phase.Waiting && anim.IsAnimating(animState, waitingClip.name))
+            if (ActivePhase == Phase.EaseIn && anim.IsAnimating(animState, waitingClip.name))
             {
                 Debug.Log(PrefixLogMessage("Currently waiting"));
                 phase = Phase.Waiting;
                 OnPhaseChange?.Invoke(phase);
             }
 
-            if (ActivePhase != Phase.Inacive && anim.IsActiveAnimation(animState, fadeOutClip.name) && !anim.IsAnimating(animState, fadeOutClip.name))
+            if (ActivePhase != Phase.Completed && anim.IsActiveAnimation(animState, fadeOutClip.name) && !anim.IsAnimating(animState, fadeOutClip.name))
             {
                 StopAnimation(Phase.Completed);
             }

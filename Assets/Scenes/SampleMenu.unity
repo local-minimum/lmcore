@@ -238,10 +238,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 955daa05491745544abe60efd6c5bf64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LevelManagerResoruce: LevelManager
   SaveSystemResource: SaveSystem
-  MenuScene: SampleMenu
-  LevelSceneName: SampleScene
-  LoadingSceneName: SampleLoadingScene
+  FirstLevelSceneName: SampleScene
   ContinueButton: {fileID: 365408584}
 --- !u!1 &365408584
 GameObject:
