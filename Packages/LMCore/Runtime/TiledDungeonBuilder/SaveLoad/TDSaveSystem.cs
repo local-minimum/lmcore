@@ -83,6 +83,8 @@ namespace LMCore.TiledDungeon.SaveLoad
                     .GetComponentsInChildren<TDIllusoryCubeSide>()
                     .Select(illusion => illusion.Save())
                     .ToList();
+
+                levelSave.playerPositions = dungeon.GetComponentInChildren<TDPlayerPositionTracker>()?.Save().ToList();
             }
 
             // Merge disposed items

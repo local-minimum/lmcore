@@ -106,6 +106,11 @@ namespace LMCore.Crawler
             );
             transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
 
+            var node = Dungeon[Position];
+            if (node != null)
+            {
+                node.AddOccupant(this);
+            }
             CheckFall();
         }
 

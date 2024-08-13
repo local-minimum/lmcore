@@ -135,6 +135,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
         public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
         public List<IllusionSave> illusions = new ();
+        public List<Vector3Int> playerPositions = new ();
     }
 
     [System.Serializable]

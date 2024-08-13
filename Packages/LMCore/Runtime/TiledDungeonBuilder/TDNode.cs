@@ -9,9 +9,12 @@ using LMCore.TiledDungeon.DungeonFeatures;
 
 namespace LMCore.TiledDungeon
 {
+    public delegate void NewOccupantEvent(TDNode node, GridEntity entity);
 
     public class TDNode : MonoBehaviour, IDungeonNode
     {
+        public static event NewOccupantEvent OnNewOccupant;
+
         [SerializeField, HideInInspector]
         TiledTile tile;
 
@@ -856,6 +859,8 @@ namespace LMCore.TiledDungeon
 
             OccupationRules.HandleMeeting(entity, _occupants);
             _reservations.Remove(entity);
+
+            OnNewOccupant?.Invoke(this, entity);
 
             if (IsTrap) {
                 HandleTraps(entity);
