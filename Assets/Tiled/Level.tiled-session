@@ -27,11 +27,11 @@
                 7,
                 9
             ],
-            "scale": 1.5,
+            "scale": 0.75,
             "selectedLayer": 7,
             "viewCenter": {
-                "x": 452.33333333333337,
-                "y": 283.66666666666663
+                "x": 548.6666666666667,
+                "y": 399.3333333333333
             }
         },
         "Mapping.tsx": {
@@ -61,17 +61,15 @@
     "map.width": 32,
     "openFiles": [
         "Mapping.tsx",
-        "Rules/AutomappingDungeons.tmx",
-        "Rules/ModernDungeonAutomapping.tmx",
         "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "Direction",
+    "property.type": "string",
     "recentFiles": [
-        "Rules/ModernDungeonAutomapping.tmx",
-        "Rules/AutomappingDungeons.tmx",
         "Mapping.tsx",
         "DemoLevel.tmx",
+        "Rules/ModernDungeonAutomapping.tmx",
+        "Rules/AutomappingDungeons.tmx",
         "Automapping/AutomappingDungeons.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"

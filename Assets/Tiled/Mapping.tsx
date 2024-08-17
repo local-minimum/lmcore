@@ -567,6 +567,7 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
+ <tile id="47" type="MovingPlatform"/>
  <tile id="48" type="Stairs">
   <properties>
    <property name="Direction" propertytype="Direction" value="Down"/>

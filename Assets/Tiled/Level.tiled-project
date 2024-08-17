@@ -117,6 +117,18 @@
             "valuesAsFlags": false
         },
         {
+            "id": 10,
+            "name": "Loop",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "None",
+                "Bounce",
+                "Wrap"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "id": 3,
             "name": "Orientation",
             "storageType": "string",

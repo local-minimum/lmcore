@@ -214,7 +214,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     }
                 } else
                 {
-                    Debug.LogWarning(PrefixLogMessage("Inventory has no configuration, removing it"));
+                    Debug.LogWarning(PrefixLogMessage($"Inventory for {nodeConfig.Coordinates} has no configuration, removing it"));
                     DestroyImmediate(inventory);
                     inventory = null;
                 } 

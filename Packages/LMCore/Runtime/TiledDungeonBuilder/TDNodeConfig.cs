@@ -9,6 +9,7 @@ namespace LMCore.TiledDungeon
 {
     public class TDNodeConfig
     {
+        public Vector3Int Coordinates { get; set; }
         public TileModification[] Modifications { get; private set; }
         public TiledNodeRoofRule RoofRule { get; private set; }
         public TiledObjectLayer.Point[] Points { get; private set; }
@@ -20,6 +21,7 @@ namespace LMCore.TiledDungeon
             TiledNodeRoofRule roofRule
         )
         {
+            Coordinates = coordinates;
             RoofRule = roofRule;
             Modifications = layerConfig.getModifications(coordinates).ToArray();
 
