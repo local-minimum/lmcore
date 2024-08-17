@@ -15,7 +15,6 @@ namespace LMCore.TiledDungeon.Integration {
     {
         public static TDEnumAspect Aspect(this TiledCustomProperties props, string name = "Aspect")
         {
-
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("Cannot construct a Aspect without specifying the enum key");

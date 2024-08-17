@@ -24,6 +24,7 @@ namespace LMCore.TiledDungeon
         public string PillarClass = "Pillar";
         public string PedistalClass = "Pedistal";
         public string ChestClass = "Chest";
+        public string MovingPlatformClass = "MovingPlatform";
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";
@@ -37,6 +38,7 @@ namespace LMCore.TiledDungeon
         public string DownDirectionKey = "DownDirection";
         public string InteractionKey = "Interaction";
         public string TransitionKey = "Transition";
+        public string LoopKey = "Loop";
 
         [Header("Booleans")]
         public string TrapKey = "Trap";
@@ -46,6 +48,10 @@ namespace LMCore.TiledDungeon
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";
         public string LayerElevationKey = "Elevation";
+
+        [Header("Floats")]
+        public string VelocityKey = "Velocity";
+        public string PauseKey = "Pause";
 
         [Header("Strings")]
         public string KeyKey = "Key";

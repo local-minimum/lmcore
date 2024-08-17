@@ -282,6 +282,8 @@ namespace LMCore.TiledDungeon
 
             foreach (var direction in DirectionExtensions.AllDirections)
             {
+                var upNode = direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) ? Dungeon[aboveNode] : null;
+
                 if (direction == Direction.Down)
                 {
                     if (hasTrapDoor)
@@ -326,10 +328,13 @@ namespace LMCore.TiledDungeon
                     }
                 } else if (direction == Direction.Up)
                 {
-                    if (sides.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasIllusion(Direction.Down))
+                    if (sides.Up && upNode)
                     {
-                        ConfigureIllusory(Direction.Up);
-                        continue;
+                        if (upNode.HasIllusion(Direction.Down)) {
+                            ConfigureIllusory(Direction.Up);
+                            continue;
+                        }
+
                     }
                 }
 
@@ -359,7 +364,7 @@ namespace LMCore.TiledDungeon
                     }
                 }
 
-                if (direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) && Dungeon[aboveNode].HasTrapDoor) continue;
+                if (upNode != null && upNode.HasTrapDoor) continue;
 
                 if (direction.IsPlanarCardinal())
                 {
@@ -388,6 +393,18 @@ namespace LMCore.TiledDungeon
                 }
                 var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction, NodeStyle);
                 go.name = direction.ToString();
+
+                if (upNode != null)
+                {
+                    var upIsMovingFloor = upNode.GetComponentInChildren<TDMovingPlatform>();
+                    if (upIsMovingFloor != null)
+                    {
+                        upIsMovingFloor.AddAttachedObject(go.transform, direction);
+                    }
+                } else if (direction == Direction.Down)
+                {
+                    ConfigureMovingPlatform(go);
+                }
             }
         }
 
@@ -547,6 +564,16 @@ namespace LMCore.TiledDungeon
                 modifications, 
                 blockingPassage);
 
+        }
+
+        void ConfigureMovingPlatform(GameObject floor)
+        {
+            var mover = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.MovingPlatformClass);
+            if (mover == null) { return; }
+
+            var conf = Dungeon.GetNodeConfig(Coordinates);
+            var platform = floor.AddComponent<TDMovingPlatform>();
+            platform.Configure(conf);
         }
 
         TileModification TrapdoorModification =>
