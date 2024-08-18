@@ -20,6 +20,9 @@ namespace LMCore.TiledDungeon
 
         [SerializeField]
         TDSidesClass sides;
+        
+        public void UpdateSide(Direction direction, bool value) 
+            => sides.Set(direction, value);
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
@@ -693,6 +696,11 @@ namespace LMCore.TiledDungeon
 
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
+            if (entity == null && anchor == Direction.None)
+            {
+                return sides.Has(direction) ? MovementOutcome.Refused : MovementOutcome.NodeExit;
+            }
+
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
             {
                 if (RampOutcome(direction, out MovementOutcome outcome))

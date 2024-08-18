@@ -1,4 +1,5 @@
 using LMCore.Crawler;
+using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
 using UnityEngine;
@@ -7,6 +8,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public class TDMovingPlatform : MonoBehaviour
     {
+        public enum Phase { 
+            Initial, 
+            WaitingStart, 
+            Moving, 
+            WaitingEnd,
+            Ended 
+        };
+
+        Phase phase;
+
         [SerializeField, Tooltip("Time waiting when invoking loop condition")]
         float loopDelay = 2f;
 
@@ -17,6 +28,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         Vector3Int OriginCoordinates;
 
         Vector3Int CurrentCoordinates => GetComponentInParent<TDNode>().Coordinates;
+
+        TiledDungeon _dungeon;
+        TiledDungeon Dungeon { 
+            get { 
+                if (_dungeon == null)
+                {
+                    _dungeon = GetComponentInParent<TiledDungeon>(); 
+                }
+                return _dungeon;
+            } 
+        }
 
         [SerializeField, HideInInspector]
         Direction MoveDirection = Direction.None;
@@ -61,5 +83,200 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             managedOffsetSides.Add(offset, cubeSide);
         }
 
+        float nextPhase;
+
+        private void Start()
+        {
+            if (phase == Phase.Initial && Interaction == TDEnumInteraction.Automatic)
+            {
+                Debug.Log(PrefixLogMessage($"Starting platform Interaction({Interaction}) Loop({Loop}) MoveDirection({MoveDirection})"));
+                InitWaitToStart();
+            }
+        }
+
+        System.Action ActivePhaseFunction;
+
+        void InitWaitToStart()
+        {
+            Debug.Log(PrefixLogMessage($"Init start wait before move {MoveDirection}"));
+            phase = Phase.WaitingStart;
+            nextPhase = Time.timeSinceLevelLoad + loopDelay / 2;
+            ActivePhaseFunction = HandleWaitToStart;
+        }
+
+
+        void HandleWaitToStart()
+        {
+            if (phase != Phase.WaitingStart)
+            {
+                Debug.LogError(PrefixLogMessage($"Unexpected phase {phase} while waiting to start"));
+                return;
+            }
+
+            if (Time.timeSinceLevelLoad > nextPhase)
+            {
+                ActivePhaseFunction = null;
+                InitMoveStep();
+            }
+        }
+
+        void InitWaitEnd()
+        {
+            Debug.Log(PrefixLogMessage($"Init move end wait at {CurrentCoordinates}"));
+            phase = Phase.WaitingEnd;
+            nextPhase = Time.timeSinceLevelLoad + loopDelay / 2;
+
+            ActivePhaseFunction = HandleWaitToEnd;
+        }
+
+        void HandleWaitToEnd()
+        {
+            if (phase != Phase.WaitingEnd)
+            {
+                Debug.LogError(PrefixLogMessage($"Unexpected phase {phase} while waiting to start"));
+                return;
+            }
+
+            if (Time.timeSinceLevelLoad > nextPhase)
+            {
+                switch (Loop)
+                {
+                    case TDEnumLoop.None:
+                        phase = Phase.Ended;
+                        ActivePhaseFunction = null;
+                        Debug.Log(PrefixLogMessage("Movements completed"));
+                        break;
+                    case TDEnumLoop.Bounce:
+                        MoveDirection = MoveDirection.Inverse();
+                        InitWaitToStart();
+                        break;
+                    case TDEnumLoop.Wrap:
+                        if (BecomeTile(OriginCoordinates, true))
+                        {
+                            InitWaitToStart();
+                        }
+                        break;
+                }
+            }
+        }
+
+        bool CanTranslate(Direction direction)
+        {
+            // TODO: Handle offsets too!
+            var source = Dungeon[CurrentCoordinates];
+            if (source.AllowsMovement(null, Direction.None, MoveDirection) != MovementOutcome.NodeExit)
+            {
+                return false;
+            }
+
+            var target = direction.Translate(CurrentCoordinates);
+            if (Dungeon.HasNodeAt(target))
+            {
+                var node = Dungeon[target];
+
+                return !node.HasFloor;
+            }
+
+            return true;
+        }
+
+        bool BecomeTile(Vector3Int coordinates, bool translate = false)
+        {
+            var currentNode = GetComponentInParent<TDNode>();
+
+            if (currentNode.Coordinates == coordinates)
+            {
+                Debug.LogWarning(PrefixLogMessage($"I'm already at {coordinates}"));
+
+                if (translate)
+                {
+                    transform.localPosition = Vector3.zero;
+                }
+                return true;
+            }
+
+            currentNode.UpdateSide(Direction.Down, false);
+            foreach (var dependent in managedOffsetSides)
+            {
+                var otherCoordinates = dependent.Key + currentNode.Coordinates;
+                if (!Dungeon.HasNodeAt(otherCoordinates)) continue;
+
+                Dungeon[otherCoordinates].UpdateSide(dependent.Value, false);
+            }
+
+            if (Dungeon.HasNodeAt(coordinates))
+            {
+                Debug.Log(PrefixLogMessage($"I'm becomming {coordinates}"));
+                var newNode = Dungeon[coordinates];
+                transform.SetParent(newNode.transform);
+
+                newNode.UpdateSide(Direction.Down, true);
+
+                foreach (var dependent in managedOffsetSides)
+                {
+                    var otherCoordinates = dependent.Key + currentNode.Coordinates;
+                    if (!Dungeon.HasNodeAt(otherCoordinates))
+                    {
+                        Debug.LogWarning(PrefixLogMessage($"Could not set dependent side {dependent.Value} because dungeon lacks node at {otherCoordinates}"));
+                        continue;
+                    }
+
+                    Dungeon[otherCoordinates].UpdateSide(dependent.Value, true);
+                }
+            } else
+            {
+                Debug.LogWarning(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));
+            }
+
+            if (translate)
+            {
+                transform.localPosition = Vector3.zero;
+            }
+            return false;
+        }
+
+        public bool AlignedWithGrid { get; private set; }
+
+        void InitMoveStep()
+        {
+            Debug.Log(PrefixLogMessage($"Init move {MoveDirection}"));
+
+            if (!CanTranslate(MoveDirection))
+            {
+                Debug.Log(PrefixLogMessage($"I've reached end of my movement at, can't move {MoveDirection} to {MoveDirection.Translate(CurrentCoordinates)}"));
+                InitWaitEnd();
+                return;
+            }
+
+            var startCoordinates = CurrentCoordinates;
+            var startPosition = startCoordinates.ToPosition(Dungeon.Scale);
+            var targetCoordinates = MoveDirection.Translate(CurrentCoordinates);
+            var targetPosition = targetCoordinates.ToPosition(Dungeon.Scale);
+            var t0 = Time.timeSinceLevelLoad;
+
+            ActivePhaseFunction = () =>
+            {
+                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - t0) / moveSpeed);
+
+                AlignedWithGrid = progress < 0.1f || progress > 0.9f;
+
+                if (progress > 0.5f && CurrentCoordinates == startCoordinates)
+                {
+                    BecomeTile(targetCoordinates);
+                }
+
+                transform.position = Vector3.Lerp(startPosition, targetPosition, progress);
+
+                if (progress == 1)
+                {
+                    ActivePhaseFunction = InitMoveStep;
+                }
+            };
+        }
+
+        private void Update()
+        {
+            ActivePhaseFunction?.Invoke();
+        }
     }
 }
