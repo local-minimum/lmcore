@@ -876,7 +876,14 @@ namespace LMCore.TiledDungeon
 
             if (entity.Anchor == Direction.Down && IsSpinner)
             {
-                HandleSpinner(entity);
+                if (_occupants.Contains(entity))
+                {
+
+                    Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
+                } else
+                {
+                    HandleSpinner(entity);
+                }
             }
 
             if (target == null || target == (IDungeonNode)this)
