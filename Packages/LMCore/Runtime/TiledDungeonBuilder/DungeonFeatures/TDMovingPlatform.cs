@@ -2,7 +2,9 @@ using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
@@ -72,15 +74,82 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         SerializableDictionary<Vector3Int, Direction> managedOffsetSides = new SerializableDictionary<Vector3Int, Direction>();
 
+        ConstraintSource constraintSource => new ConstraintSource() { sourceTransform = transform, weight = 1 };
         public void AddAttachedObject(Transform attached, Direction cubeSide)
         {
-            attached.transform.SetParent(transform);
+            var constraint = attached.gameObject.AddComponent<PositionConstraint>();
+            constraint.AddSource(constraintSource);
+            constraint.constraintActive = true;
+
             if (cubeSide == Direction.None) return;
 
             var otherNode = attached.GetComponentInParent<TDNode>();
             var offset = otherNode.Coordinates - GetComponentInParent<TDNode>().Coordinates;
 
             managedOffsetSides.Add(offset, cubeSide);
+        }
+
+        public bool MayEnter(GridEntity entity) { 
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return true;
+
+            if (entity.Anchor == Direction.Down) {
+                var myCoordinates = CurrentCoordinates;
+                foreach (var dependant in managedOffsetSides)
+                {
+                    // We're part of the same platform!
+                    if (myCoordinates + dependant.Key == entity.Position && dependant.Value == Direction.Down)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return AlignedWithGrid;
+        }
+
+        HashSet<GridEntity> constrainedEntities = new HashSet<GridEntity>();
+
+        public bool ConstrainEntity(GridEntity entity)
+        {
+            var constraint = entity.GetComponent<PositionConstraint>();
+            if (constraint == null)
+            {
+                constraint = entity.gameObject.AddComponent<PositionConstraint>();
+            }
+
+            while (constraint.sourceCount > 0)
+            {
+                constraint.RemoveSource(0);
+            }
+
+            // TODO: This doesn't work great...
+            constraint.AddSource(constraintSource);
+            constraint.constraintActive = true;
+
+            constrainedEntities.Add(entity);
+
+            return true;
+        }
+
+        public bool FreeEntity(GridEntity entity)
+        {
+            constrainedEntities.Remove(entity);
+
+            var constraint = entity.GetComponent<PositionConstraint>();
+            if (constraint == null) { return false; }
+
+            for (int i = 0, l =  constraint.sourceCount; i < l; i++)
+            {
+                var source = constraint.GetSource(i);
+                if (source.sourceTransform == transform)
+                {
+                    constraint.RemoveSource(i);
+                    constraint.constraintActive = constraint.sourceCount == 0;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         float nextPhase;
@@ -208,6 +277,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 Debug.Log(PrefixLogMessage($"I'm becomming {coordinates}"));
                 var newNode = Dungeon[coordinates];
+
                 transform.SetParent(newNode.transform);
 
                 newNode.UpdateSide(Direction.Down, true);
@@ -222,6 +292,22 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     }
 
                     Dungeon[otherCoordinates].UpdateSide(dependent.Value, true);
+                }
+
+                foreach (var entity in constrainedEntities)
+                {
+                    var offset = entity.Position - currentNode.Coordinates;
+                    var newEntityCoordinates = coordinates + offset;
+
+                    if (Dungeon.HasNodeAt(entity.Position)) {
+                        Dungeon[entity.Position].RemoveOccupant(entity);
+                    }
+
+                    entity.Position = newEntityCoordinates;
+
+                    if (Dungeon.HasNodeAt(entity.Position)) {
+                        Dungeon[entity.Position].AddOccupant(entity);
+                    }
                 }
             } else
             {

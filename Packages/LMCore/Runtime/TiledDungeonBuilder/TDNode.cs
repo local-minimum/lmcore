@@ -808,9 +808,25 @@ namespace LMCore.TiledDungeon
                 }
             }
 
-            if (_occupants.Count == 0) return true;
+            var platform = GetComponentInChildren<TDMovingPlatform>();
+            if (platform)
+            {
+                if (!platform.MayEnter(entity)) return false;
+            }
 
-            return OccupationRules.MayCoexist(entity, _occupants);
+
+            if (_occupants.Count == 0 || OccupationRules.MayCoexist(entity, _occupants))
+            {
+                if (platform)
+                {
+                    // TODO: This probably doesn't work
+                    // Also needs way to release entity
+                    platform.ConstrainEntity(entity);
+                }
+                return true;
+            }
+
+            return false;
 
         }
 
@@ -926,6 +942,13 @@ namespace LMCore.TiledDungeon
             if (entity.transform.parent == transform)
             {
                 entity.transform.SetParent(Dungeon.transform);
+            }
+
+            // TODO: This hack doesn't fully work
+            var platform = GetComponentInChildren<TDMovingPlatform>();
+            if (platform != null)
+            {
+                platform.FreeEntity(entity);
             }
         }
 

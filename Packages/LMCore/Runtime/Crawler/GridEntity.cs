@@ -30,6 +30,8 @@ namespace LMCore.Crawler
         public Direction Anchor = Direction.Down;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
+        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Position} anchor {Anchor} looking {LookDirection}: {message}";
+
         private bool _falling;
         public bool Falling
         {
@@ -38,11 +40,11 @@ namespace LMCore.Crawler
                 if (value != _falling)
                 {
                     if (value) {
-                        Debug.Log($"{name} is falling");
+                        Debug.Log(PrefixLogMessage("Is falling"));
                         OnFall?.Invoke(true);
                     } else
                     {
-                        Debug.Log($"{name} stopped falling");
+                        Debug.Log(PrefixLogMessage("Stopped falling"));
                         OnLand?.Invoke();
                     }
                 } else if (value)
@@ -95,7 +97,7 @@ namespace LMCore.Crawler
         {
             if (GridSizeProvider == null)
             {
-                Debug.LogWarning($"{name} have yet to recieve a grid size provider, ignoring sync");
+                Debug.LogWarning(PrefixLogMessage("have yet to recieve a grid size provider, ignoring sync"));
                 return;
             }
 
@@ -133,7 +135,7 @@ namespace LMCore.Crawler
 
         public void Interact()
         {
-            Debug.Log($"I, {name}, am interacting");
+            Debug.Log(PrefixLogMessage("Interacting"));
             OnInteract?.Invoke(this);
         }
 
@@ -141,14 +143,14 @@ namespace LMCore.Crawler
         {
             if (TransportationMode.HasFlag(TransportationMode.Flying) || TransportationMode.HasFlag(TransportationMode.Climbing))
             {
-                Debug.Log($"{name} ended its fall due to tranportation mode");
+                Debug.Log(PrefixLogMessage("Ended its fall due to tranportation mode"));
                 Falling = false;
                 return;
             }
 
             var node = Dungeon[Position];
             if (node == null) {
-                Debug.LogWarning($"Player is at {Position}, which is outside the map, assuming fall");
+                Debug.LogWarning(PrefixLogMessage("Outside the map, assuming fall"));
                 Falling = true;
                 return;
             }
@@ -157,12 +159,12 @@ namespace LMCore.Crawler
             {
                 if (!node.HasFloor)
                 {
-                    Debug.Log($"{name} is standing in the air @ {Position} Anchor({Anchor}) Looking({LookDirection}) -> fall");
+                    Debug.Log(PrefixLogMessage("In the air -> falling"));
                     Falling = true;
                 }
             } else if (Falling)
             {
-                Debug.Log($"{name} ended its fall");
+                Debug.Log(PrefixLogMessage("Ended its fall"));
                 Falling = false;
             }
         }
