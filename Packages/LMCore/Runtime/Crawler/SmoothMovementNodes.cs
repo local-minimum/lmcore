@@ -4,6 +4,7 @@ using LMCore.Juice;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace LMCore.Crawler
 {
@@ -172,7 +173,11 @@ namespace LMCore.Crawler
                 Dungeon[gEntity.Position]?.RemoveOccupant(gEntity);
             }
 
-            gEntity.Position = synchState.Coordinates;
+            // Only sync position if nothing else moved us
+            if (animationStart.Coordinates == gEntity.Position)
+            {
+                gEntity.Position = synchState.Coordinates;
+            }
             gEntity.Anchor = synchState.Anchor;
             gEntity.LookDirection = synchState.LookDirection;
             gEntity.RotationRespectsAnchorDirection = synchState.RotationRespectsAnchorDirection;
@@ -201,6 +206,7 @@ namespace LMCore.Crawler
 
         MovementOutcome animationOutcome;
 
+        PositionConstraint positionConstraint;
 
         private void MovementInterpreter_OnEntityMovement(int tickId, GridEntity entity, MovementOutcome outcome, List<EntityState> states, float duration)
         {
@@ -249,12 +255,34 @@ namespace LMCore.Crawler
             }
 
             var first = animationCheckpoints.FirstOrDefault();
+
             onlyTurning = animationCheckpoints.All(s => s.Position == first.Position);
 
             Animating = true;
 
             animationStart = states.FirstOrDefault();
             animationEnd = states.LastOrDefault();
+
+            if (!onlyTurning)
+            {
+                if (positionConstraint != null)
+                {
+                    positionConstraint.constraintActive = false;
+                }
+                /*
+                Dungeon[entity.Position]?.RemoveConstraints(entity, entity.Anchor);
+                */
+                if (states.Count > 1)
+                {
+                    Dungeon[animationEnd.Coordinates]?.AssignConstraints(entity, animationEnd.Anchor);
+                }
+
+                positionConstraint = entity.GetComponent<PositionConstraint>();
+                if (positionConstraint != null && positionConstraint.constraintActive == false)
+                {
+                    positionConstraint = null;
+                }
+            }
 
             animationStartTime = Time.timeSinceLevelLoad;
             animationInterpolationStart = 0;
@@ -320,6 +348,11 @@ namespace LMCore.Crawler
             }
 
             var progress = AnimationProgress;
+
+            if (positionConstraint != null)
+            {
+                positionConstraint.weight = progress;
+            }
 
             if (progress == 1)
             {

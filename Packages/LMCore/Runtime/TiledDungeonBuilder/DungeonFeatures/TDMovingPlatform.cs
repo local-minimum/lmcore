@@ -3,6 +3,7 @@ using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
 
@@ -74,6 +75,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         SerializableDictionary<Vector3Int, Direction> managedOffsetSides = new SerializableDictionary<Vector3Int, Direction>();
 
+        public bool IsSamePlatform(Vector3Int coordinates, Direction anchor)
+        {
+            var offset = coordinates - CurrentCoordinates;
+            if (offset == Vector3Int.zero && anchor == Direction.Down) return true;
+
+            return managedOffsetSides.Any(kvp => kvp.Key == offset && kvp.Value == anchor);
+        }
+
         ConstraintSource constraintSource => new ConstraintSource() { sourceTransform = transform, weight = 1 };
         public void AddAttachedObject(Transform attached, Direction cubeSide)
         {
@@ -122,8 +131,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 constraint.RemoveSource(0);
             }
 
-            // TODO: This doesn't work great...
             constraint.AddSource(constraintSource);
+            constraint.weight = 0;
             constraint.constraintActive = true;
 
             constrainedEntities.Add(entity);
@@ -138,13 +147,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             var constraint = entity.GetComponent<PositionConstraint>();
             if (constraint == null) { return false; }
 
-            for (int i = 0, l =  constraint.sourceCount; i < l; i++)
+            for (int i = 0, l = constraint.sourceCount; i < l; i++)
             {
                 var source = constraint.GetSource(i);
                 if (source.sourceTransform == transform)
                 {
                     constraint.RemoveSource(i);
                     constraint.constraintActive = constraint.sourceCount == 0;
+                    if (l == 1)
+                    {
+                        constraint.constraintActive = false;
+                    }
                     return true;
                 }
             }

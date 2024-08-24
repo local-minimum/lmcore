@@ -1041,5 +1041,24 @@ namespace LMCore.TiledDungeon
 
             return direction.Translate(Coordinates);
         }
+
+        public void AssignConstraints(GridEntity entity, Direction direction)
+        {
+            var platform = GetComponentInChildren<TDMovingPlatform>();
+            if (platform != null && direction == Direction.Down)
+            {
+                platform.ConstrainEntity(entity);
+            }
+        }
+
+        public void RemoveConstraints(GridEntity entity, Direction direction)
+        {
+            var platform = GetComponentInChildren<TDMovingPlatform>();
+            Debug.Log(PrefixLogMessage($"Free {entity.name} {platform != null} {direction == Direction.Down}"));
+            if (platform != null && direction == Direction.Down)
+            {
+                platform.FreeEntity(entity);
+            }
+        }
     }   
 }

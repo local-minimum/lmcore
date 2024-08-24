@@ -3,6 +3,7 @@ using LMCore.Juice;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace LMCore.Crawler
 {
@@ -93,6 +94,12 @@ namespace LMCore.Crawler
             entity.LookDirection = target.LookDirection;
             entity.RotationRespectsAnchorDirection = target.RotationRespectsAnchorDirection;
             entity.TransportationMode = target.TransportationMode;
+
+            var constraint = GetComponent<PositionConstraint>();
+            if (constraint != null && constraint.constraintActive)
+            {
+                constraint.weight = 1;
+            }
 
             entity.Sync();
 
