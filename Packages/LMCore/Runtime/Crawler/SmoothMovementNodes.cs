@@ -13,12 +13,9 @@ namespace LMCore.Crawler
         public Vector3 Position;
         public Quaternion Rotation;
 
-        public SmoothMovementCheckpoints(IDungeon dungeon, EntityState state, float gridSize)
+        public SmoothMovementCheckpoints(IDungeon dungeon, EntityState state)
         {
-            Position = state.Coordinates.ToPosition(gridSize) +
-                (dungeon.HasNodeAt(state.Coordinates) ?
-                dungeon[state.Coordinates].AnchorOffset(state.Anchor, state.RotationRespectsAnchorDirection) :
-                dungeon.DefaultAnchorOffset(state.Anchor, state.RotationRespectsAnchorDirection));
+            Position = dungeon.Position(state.Coordinates, state.Anchor, state.RotationRespectsAnchorDirection);
 
             Rotation = state.LookDirection.AsQuaternion(
                 state.Anchor,
@@ -227,7 +224,7 @@ namespace LMCore.Crawler
             if (outcome == MovementOutcome.NodeInternal && states.Count == 2)
             {
                 // Tweak node internal transition to go to node side inbetween rather than diagonal
-                var checkpoints = states.Select(s => new SmoothMovementCheckpoints(Dungeon, s, GridSizeProvider.GridSize)).ToList();
+                var checkpoints = states.Select(s => new SmoothMovementCheckpoints(Dungeon, s)).ToList();
                 var initialDirection = states.Last().Anchor.AsLookVector3D();
                 var firstCP = checkpoints[0];
                 var lastCP = checkpoints[1];
@@ -243,14 +240,14 @@ namespace LMCore.Crawler
                 Dungeon[entity.Position].IsRamp &&
                 states.Count == 2)
             {
-                var firstCP = new SmoothMovementCheckpoints(Dungeon, states[0], GridSizeProvider.GridSize);
+                var firstCP = new SmoothMovementCheckpoints(Dungeon, states[0]);
 
                 animationCheckpoints.Add(firstCP);
                 animationCheckpoints.Add(new SmoothMovementCheckpoints(firstCP, states[1].Coordinates - states[0].Coordinates, GridSizeProvider.GridSize));
             } else
             {
                 animationCheckpoints.AddRange(
-                    states.Select(s => new SmoothMovementCheckpoints(Dungeon, s, GridSizeProvider.GridSize))
+                    states.Select(s => new SmoothMovementCheckpoints(Dungeon, s))
                 );
             }
 

@@ -101,11 +101,7 @@ namespace LMCore.Crawler
                 return;
             }
 
-            transform.position = Position.ToPosition(GridSizeProvider.GridSize) + (
-                Dungeon.HasNodeAt(Position) ? 
-                Dungeon[Position].AnchorOffset(Anchor, RotationRespectsAnchorDirection) :
-                Dungeon.DefaultAnchorOffset(Anchor, RotationRespectsAnchorDirection)
-            );
+            transform.position = Dungeon.Position(this);
             transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
 
             var node = Dungeon[Position];

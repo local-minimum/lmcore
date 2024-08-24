@@ -11,5 +11,7 @@ namespace LMCore.Crawler
         public List<IDungeonNode> FindTeleportersById(int id);
 
         public Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection);
+        public Vector3 Position(GridEntity entity);
+        public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection);
     }
 }

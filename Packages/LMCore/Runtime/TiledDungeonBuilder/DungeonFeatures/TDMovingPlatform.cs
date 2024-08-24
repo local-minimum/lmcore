@@ -348,9 +348,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             var startCoordinates = CurrentCoordinates;
-            var startPosition = startCoordinates.ToPosition(Dungeon.Scale);
+            var startPosition = startCoordinates.ToPosition(Dungeon.GridSize);
             var targetCoordinates = MoveDirection.Translate(CurrentCoordinates);
-            var targetPosition = targetCoordinates.ToPosition(Dungeon.Scale);
+            var targetPosition = targetCoordinates.ToPosition(Dungeon.GridSize);
             var t0 = Time.timeSinceLevelLoad;
 
             ActivePhaseFunction = () =>

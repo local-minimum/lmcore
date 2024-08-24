@@ -36,8 +36,8 @@ namespace LMCore.TiledDungeon
 
         [Header("Settings")]
         [SerializeField, Range(0, 10)]
-        float scale = 3f;
-        public float Scale => scale;
+        float gridScale = 3f;
+        public float GridSize => gridScale;
 
         [SerializeField]
         bool inferRoof = true;
@@ -72,8 +72,6 @@ namespace LMCore.TiledDungeon
         TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
 
         protected string PrefixLogMessage(string message) => $"TiledDungeon '{MapName}': {message}";
-
-        public float GridSize => scale;
 
         Dictionary<Vector3Int, TDNode> _nodes;
         Dictionary<Vector3Int, TDNode> nodes
@@ -150,7 +148,7 @@ namespace LMCore.TiledDungeon
             return node;
         }
 
-        public int Size => nodes.Count;
+        public int NodeCount => nodes.Count;
 
         TiledNodeRoofRule Roofing(TDNode aboveNode, bool topLayer) {
             if (!inferRoof) return TiledNodeRoofRule.CustomProps;
@@ -331,6 +329,18 @@ namespace LMCore.TiledDungeon
                 .Select(n => (IDungeonNode)n)
                 .ToList();
         }
+
+        public Vector3 Position(GridEntity entity) =>
+            entity.Position.ToPosition(GridSize) +
+                (HasNodeAt(entity.Position) ?
+                    this[entity.Position].AnchorOffset(entity.Anchor, entity.RotationRespectsAnchorDirection) :
+                    TDNode.DefaultAnchorOffset(entity.Anchor, entity.RotationRespectsAnchorDirection, GridSize));
+
+        public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection) =>
+            coordinates.ToPosition(GridSize) +
+                (HasNodeAt(coordinates) ?
+                    this[coordinates].AnchorOffset(anchor, rotationRespectsAnchorDirection) :
+                    TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize));
 
         public Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
         {
