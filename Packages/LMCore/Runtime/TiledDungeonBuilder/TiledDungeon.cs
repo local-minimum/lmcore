@@ -43,7 +43,7 @@ namespace LMCore.TiledDungeon
         bool inferRoof = true;
 
         [SerializeField]
-        TDNode Prefab;
+        public TDNode Prefab;
 
         [Header("Tiled")]
         [SerializeField] TiledMap map;
@@ -55,7 +55,7 @@ namespace LMCore.TiledDungeon
         [Header("Output")]
         [SerializeField, Tooltip("If empty, generated level will be placed under this node directly")]
         Transform _levelParent;
-        Transform levelParent => _levelParent == null ? transform : _levelParent;
+        public Transform LevelParent => _levelParent == null ? transform : _levelParent;
 
 
         [SerializeField]
@@ -69,7 +69,7 @@ namespace LMCore.TiledDungeon
 
         public DungeonStyle Style;
 
-        TDNode[] instancedNodes => levelParent.GetComponentsInChildren<TDNode>();
+        TDNode[] instancedNodes => LevelParent.GetComponentsInChildren<TDNode>();
 
         protected string PrefixLogMessage(string message) => $"TiledDungeon '{MapName}': {message}";
 
@@ -83,7 +83,7 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        void SyncNodes()
+        public void SyncNodes()
         {
             if (_nodes == null)
             {
@@ -118,6 +118,11 @@ namespace LMCore.TiledDungeon
             {
                 return nodes.GetValueOrDefault(coordinates);
             }
+
+            set
+            {
+                nodes[coordinates] = value;
+            }
         }
 
         IDungeonNode IDungeon.this[Vector3Int coordinates] { 
@@ -125,27 +130,6 @@ namespace LMCore.TiledDungeon
             {
                 return this[coordinates];
             }
-        }
-
-        TDNode GetOrCreateNode(Vector3Int coordinates, Transform parent)
-        {
-            TDNode node;
-            if (nodes.ContainsKey(coordinates))
-            {
-                node = nodes[coordinates];
-                if (node.transform.parent != parent)
-                {
-                    node.transform.SetParent(parent);
-                }
-                return node;
-            }
-
-            node = Instantiate(Prefab, parent);
-            node.Coordinates = coordinates;
-
-            nodes.Add(coordinates, node);
-
-            return node;
         }
 
         public int NodeCount => nodes.Count;
@@ -163,32 +147,15 @@ namespace LMCore.TiledDungeon
 
         Dictionary<int, TDLayerConfig> layerConfigs = new Dictionary<int, TDLayerConfig>();
 
-        TDLayerConfig GetLayerConfig(int elevation)
+        public TDLayerConfig GetLayerConfig(int elevation)
         {
             if (layerConfigs.ContainsKey(elevation)) return layerConfigs[elevation];
 
-            var topLayer = elevations.Max() == elevation;
+            var topLayer = Elevations.Max() == elevation;
             var config = new TDLayerConfig(map, tilesets, elevation, topLayer);
             layerConfigs[elevation] = config;
 
             return config;
-        }
-
-        void GenerateNode(Vector3Int coordinates, Transform parent)
-        {
-            var layerConfig = GetLayerConfig(coordinates.y);
-            var tile = layerConfig.GetTile(coordinates);
-
-            if (tile == null) return;
-
-            if (nodes.ContainsKey(coordinates)) return;
-
-            var node = GetOrCreateNode(coordinates, parent);
-
-            var nodeConfig = GetNodeConfig(coordinates);
-
-            node.Configure(tile, nodeConfig, this);
-
         }
 
         Dictionary<Vector3Int, TDNodeConfig> nodeConfigurations = new Dictionary<Vector3Int, TDNodeConfig>();
@@ -206,64 +173,18 @@ namespace LMCore.TiledDungeon
             return config;
         }
 
-        Transform GetOrCreateElevationNode(int elevation)
-        {
-            var elevationNodeName = $"Elevation {elevation}";
-            var parent = levelParent;
-            Transform child;
-            for (var i = 0; i < parent.childCount; i++)
-            {
-                child = parent.GetChild(i);
-                if (child.name == elevationNodeName) return child;
-            }
-
-            child = new GameObject(elevationNodeName).transform;
-            child.SetParent(levelParent);
-
-            return child;
-        }
-
-        void GenerateLevel(int elevation)
-        {
-            var parent = GetOrCreateElevationNode(elevation);
-
-            var layerConfig = GetLayerConfig(elevation);
-
-            for (int row = 0; row < layerConfig.LayerSize.y; row++)
-            {
-                for (int col = 0; col < layerConfig.LayerSize.x; col++)
-                {
-                    GenerateNode(layerConfig.AsUnityCoordinates(col, row), parent);
-                }
-            }
-        }
-
-        IEnumerable<int> elevations => map
+        public IEnumerable<int> Elevations => map
             .FindInLayers(layer => layer.CustomProperties.Ints[TiledConfiguration.instance.LayerElevationKey])
             .ToHashSet()
             .OrderByDescending(x => x);
 
         int IOnLoadSave.OnLoadPriority => 10000;
 
-        public void GenerateMap()
-        {
-            SyncNodes();
-
-            GetComponent<AbsInventory>()?.Configure(map.Metadata.Name, null, -1);
-
-            foreach (var elevation in elevations)
-            {
-                GenerateLevel(elevation);
-            }
-
-            SyncNodes();
-        }
-
         [ContextMenu("Clean")]
         private void Clean() {
-            levelParent.DestroyAllChildren(DestroyImmediate);
+            LevelParent.DestroyAllChildren(DestroyImmediate);
 #if UNITY_EDITOR
-            Undo.RegisterFullObjectHierarchyUndo(levelParent, "Clean level");
+            Undo.RegisterFullObjectHierarchyUndo(LevelParent, "Clean level");
 #endif
         }
 
@@ -273,12 +194,13 @@ namespace LMCore.TiledDungeon
             backupSettings = new GenerationBackupSettings(this);
 
             Clean();
-            GenerateMap();
+
+            TDDungeonGenerator.GenerateMap(this);
 
             SpawnTile = this[backupSettings.SpawnCoordinates];
 
 #if UNITY_EDITOR
-            Undo.RegisterFullObjectHierarchyUndo(levelParent, "Regenerate level");
+            Undo.RegisterFullObjectHierarchyUndo(LevelParent, "Regenerate level");
 #endif
         }
 
