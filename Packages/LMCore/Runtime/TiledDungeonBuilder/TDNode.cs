@@ -70,7 +70,7 @@ namespace LMCore.TiledDungeon
             set => _coordinates = value;
         }
 
-        public Vector3 Center => Coordinates.ToPosition(Dungeon.GridSize);
+        public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
 
         TDContainer _container;
         TDContainer container 
@@ -110,7 +110,7 @@ namespace LMCore.TiledDungeon
                 return _spikes;
             }
         }
-
+        
         public bool Walkable => 
             !Obstructed 
             && tile.CustomProperties
@@ -986,47 +986,6 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
-        public static Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection, float gridSize)
-        {
-            // TODO: Place magic number to be somewhat below ceiling somewhere 
-            if (anchor == Direction.Up) return rotationRespectsAnchorDirection ?
-                    Vector3.up * gridSize : Vector3.up * gridSize * 0.9f;
-
-
-            if (rotationRespectsAnchorDirection)
-            {
-                return Vector3.up * gridSize * 0.5f + anchor.AsLookVector3D().ToDirection() * gridSize * 0.5f;
-            }
-
-            // TODO: Place magic number to not get too close to wall somewhere
-            return Vector3.up * gridSize * 0.45f 
-                + anchor.AsLookVector3D().ToDirection() * gridSize * 0.45f;
-
-        }
-
-        public Vector3 AnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
-        {
-            if (anchor == Direction.Down)
-            {
-                var ramp = RampModification;
-                if (ramp == null) return Vector3.zero;
-
-                switch (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey))
-                {
-                    case TDEnumElevation.Low:
-                        return Vector3.up * Dungeon.GridSize / 6f;
-                    case TDEnumElevation.Middle:
-                        return Vector3.up * Dungeon.GridSize * 0.5f;
-                    case TDEnumElevation.High:
-                        return Vector3.up * Dungeon.GridSize * 5f / 6f;
-                    default:
-                        return Vector3.zero;
-                }
-            }
-
-            return DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, Dungeon.GridSize);
-        }
-
         public Vector3Int Neighbour(Direction direction)
         {
             if (direction.IsPlanarCardinal() && IsHighRamp)
@@ -1061,6 +1020,28 @@ namespace LMCore.TiledDungeon
             {
                 platform.FreeEntity(entity);
             }
+        }
+
+        TDAnchor GetAnchor(Direction direction) => 
+            GetComponentsInChildren<TDAnchor>()
+                .FirstOrDefault(a => a.Anchor == direction);
+
+        public Vector3 GetPosition(Direction anchor)
+        {
+            var a = GetAnchor(anchor);
+            if (a != null) return a.CenterPosition;
+
+            return CenterPosition + anchor.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
+        }
+
+        public Vector3 GetEdge(Direction anchor, Direction edge)
+        {
+            var a = GetAnchor(anchor);
+            if (a != null) return a.GetEdgePosition(edge);
+
+            return CenterPosition 
+                + anchor.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f)
+                + edge.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
         }
     }   
 }

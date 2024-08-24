@@ -331,21 +331,13 @@ namespace LMCore.TiledDungeon
         }
 
         public Vector3 Position(GridEntity entity) =>
-            entity.Position.ToPosition(GridSize) +
-                (HasNodeAt(entity.Position) ?
-                    this[entity.Position].AnchorOffset(entity.Anchor, entity.RotationRespectsAnchorDirection) :
-                    TDNode.DefaultAnchorOffset(entity.Anchor, entity.RotationRespectsAnchorDirection, GridSize));
+            HasNodeAt(entity.Position) ?
+                this[entity.Position].GetPosition(entity.Anchor) :
+                entity.Position.ToPosition(GridSize) + entity.Anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
 
         public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection) =>
-            coordinates.ToPosition(GridSize) +
-                (HasNodeAt(coordinates) ?
-                    this[coordinates].AnchorOffset(anchor, rotationRespectsAnchorDirection) :
-                    TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize));
-
-        public Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
-        {
-            return TDNode.DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, GridSize);
-        }
+            HasNodeAt(coordinates) ? this[coordinates].GetPosition(anchor) :
+            coordinates.ToPosition(GridSize) + anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
 
         void OnLoadGameSave(GameSave save)
         {

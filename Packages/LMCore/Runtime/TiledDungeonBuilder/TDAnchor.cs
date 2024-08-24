@@ -12,8 +12,8 @@ namespace LMCore.TiledDungeon
         protected string PrefixLogMessage(string message) =>
             $"Anchor {Anchor} @ {Node.Coordinates}: {message}";
 
-        [SerializeField, HideInInspector]
-        Direction Anchor;
+        [HideInInspector, Tooltip("Use None for center")]
+        public Direction Anchor;
 
         TDNode _node;
         public TDNode Node
@@ -72,11 +72,16 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawCube(CenterPosition, Vector3.one * 0.1f);
+        }
 
         public Vector3 CenterPosition =>
             sentinels.ContainsKey(Direction.None) ?
             sentinels[Direction.None].Position :
-            Node.Center;
+            Node.CenterPosition + Anchor.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
 
 
         public Vector3 GetEdgePosition(Direction direction)
@@ -92,7 +97,7 @@ namespace LMCore.TiledDungeon
 
             if (sentinels.ContainsKey(direction)) return sentinels[direction].Position;
 
-            return CenterPosition + direction.AsLookVector3D().ToDirection(Dungeon.GridSize);
+            return CenterPosition + direction.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
         }
         #endregion
     }

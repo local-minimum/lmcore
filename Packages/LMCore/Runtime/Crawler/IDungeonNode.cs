@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.Crawler
@@ -7,13 +5,16 @@ namespace LMCore.Crawler
     public interface IDungeonNode
     {
         public Vector3Int Coordinates { get; }
+        public Vector3 CenterPosition { get; }
+
+        public Vector3 GetPosition(Direction anchor);
+        public Vector3 GetEdge(Direction anchor, Direction edge);
 
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
         public bool AllowsEntryFrom(GridEntity entity, Direction direction);
         public bool AllowsRotating(GridEntity entity);
 
         public bool CanAnchorOn(GridEntity entity, Direction anchor);
-        public Vector3 AnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection);
 
         public void Reserve(GridEntity entity);
         public void AddOccupant(GridEntity entity);

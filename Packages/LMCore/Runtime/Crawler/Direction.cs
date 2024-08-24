@@ -275,6 +275,9 @@ namespace LMCore.Crawler
                 case Direction.Down:
                     return new Vector3Int(0, -1, 0);
 
+                case Direction.None:
+                    return Vector3Int.zero;
+
                 default:
                     throw new System.ArgumentOutOfRangeException();
             }
