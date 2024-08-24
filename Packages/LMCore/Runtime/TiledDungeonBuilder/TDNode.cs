@@ -70,6 +70,8 @@ namespace LMCore.TiledDungeon
             set => _coordinates = value;
         }
 
+        public Vector3 Center => Coordinates.ToPosition(Dungeon.GridSize);
+
         TDContainer _container;
         TDContainer container 
         {

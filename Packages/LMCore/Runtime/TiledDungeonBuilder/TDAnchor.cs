@@ -2,6 +2,7 @@ using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.TiledDungeon.DungeonFeatures;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon
@@ -54,9 +55,28 @@ namespace LMCore.TiledDungeon
         #endregion
 
         #region WorldPositions
-        // TODO: This isn't great, we need a better way to say where we are
+        Dictionary<Direction, PositionSentinel> _sentinels = null;
+        Dictionary<Direction, PositionSentinel> sentinels
+        {
+            get
+            {
+                if (sentinels == null)
+                {
+                    _sentinels = new Dictionary<Direction, PositionSentinel>(
+                        GetComponentsInChildren<PositionSentinel>()
+                        .Select(s => new KeyValuePair<Direction, PositionSentinel>(s.Direction, s))
+                    );
+                }
+
+                return _sentinels;
+            }
+        }
+
+
         public Vector3 CenterPosition =>
-            transform.position;
+            sentinels.ContainsKey(Direction.None) ?
+            sentinels[Direction.None].Position :
+            Node.Center;
 
 
         public Vector3 GetEdgePosition(Direction direction)
@@ -69,6 +89,8 @@ namespace LMCore.TiledDungeon
                 Debug.LogWarning(PrefixLogMessage("Requesting inverse of anchor, returning center"));
                 return CenterPosition;
             }
+
+            if (sentinels.ContainsKey(direction)) return sentinels[direction].Position;
 
             return CenterPosition + direction.AsLookVector3D().ToDirection(Dungeon.GridSize);
         }
