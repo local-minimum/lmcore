@@ -323,6 +323,12 @@ namespace LMCore.Crawler
                 case Movement.PitchDown:
                     return direction.PitchDown(down, out newDown);
 
+                case Movement.RollCCW:
+                case Movement.RollCW:
+                    Debug.LogError($"Rotation {movement} not supported yet");
+                    newDown = down;
+                    return direction;
+
                 default:
                     newDown = down;
                     return direction;

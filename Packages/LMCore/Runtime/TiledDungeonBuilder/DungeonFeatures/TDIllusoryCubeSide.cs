@@ -102,7 +102,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 if (next == pos) continue;
 
-                var direction = (next - pos).AsDirection();
+                var delta = next - pos;
+                if (delta.sqrMagnitude != 1) continue;
+
+                var direction = delta.AsDirection();
                 if (pos == Position && direction == this.direction)
                 {
                     Discovered = true;

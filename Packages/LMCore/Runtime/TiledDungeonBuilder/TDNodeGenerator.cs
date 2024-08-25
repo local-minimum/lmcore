@@ -124,20 +124,34 @@ namespace LMCore.TiledDungeon
             go.GetComponent<TDActuator>()?.Configure(node);
         }
 
+        static void ApplyAnchorRotation(GameObject obj, Direction direction)
+        {
+            if (obj == null) return;
+
+            var anchor = obj.GetComponent<TDAnchor>();
+            if (anchor == null) return;
+
+            anchor.PrefabRotation = direction.AsYRotation();
+        }
+
         static void ConfigureRamps(TDNode node)
         {
             var ramp = node.RampModification;
             if (ramp == null) return;
 
-            node.Dungeon.Style.Get(
+            var down = ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection();
+
+            var go = node.Dungeon.Style.Get(
                 node.transform, 
                 TiledConfiguration.instance.RampClass, 
                 ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey),
-                ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection(),
+                down,
                 node.NodeStyle
             );
 
+            ApplyAnchorRotation(go, down.Inverse());
         }
+
         static void ConfigureTeleporter(TDNode node)
         {
             var teleporterMod = node.modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
@@ -162,12 +176,14 @@ namespace LMCore.TiledDungeon
                 var direction = tdDirection.AsDirection();
                 if (!node.HasLadder(direction)) continue;
 
-                node.Dungeon.Style.Get(
+                var go = node.Dungeon.Style.Get(
                     node.transform,
                     TiledConfiguration.instance.LadderClass,
                     direction,
                     node.NodeStyle
                 );
+
+                ApplyAnchorRotation(go, direction);
             }
         }
 
@@ -228,16 +244,16 @@ namespace LMCore.TiledDungeon
             platform.Configure(conf);
         }
 
-        static bool ConfigureWallSpike(TDNode node, Direction directection)
+        static bool ConfigureWallSpike(TDNode node, Direction direction)
         {
             var spikes = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallSpikeTrapClass);
 
-            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != directection) return false; 
+            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != direction) return false; 
 
             var go = node.Dungeon.Style.Get(
                 node.transform,
                 TiledConfiguration.instance.WallSpikeTrapClass,
-                directection,
+                direction,
                 node.NodeStyle
             );
 
@@ -245,6 +261,7 @@ namespace LMCore.TiledDungeon
 
             go.GetComponent<TDSpikeTrap>()?.Configure(node, node.Coordinates, node.modifications);
 
+            ApplyAnchorRotation(go, direction);
             return true;
         }
 
@@ -260,6 +277,8 @@ namespace LMCore.TiledDungeon
             );
 
             go.GetComponent<TDIllusoryCubeSide>().Configure(direction);
+
+            ApplyAnchorRotation(go, direction);
         }
 
         static void ConfigureCube(TDNode node)
@@ -289,6 +308,7 @@ namespace LMCore.TiledDungeon
                             node.TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
                             node.NodeStyle
                         );
+
                         if (trapdoor != null)
                         {
                             trapdoor.name = $"TrapDoor ({direction})";
@@ -301,6 +321,7 @@ namespace LMCore.TiledDungeon
                                 node.modifications.Where(TDNode.DoorFilter).ToArray()
                             );
 
+                            ApplyAnchorRotation(trapdoor, direction);
                             continue;
                         }
                     }
@@ -319,6 +340,8 @@ namespace LMCore.TiledDungeon
                             var pressurePlate = plate.GetComponent<TDActuator>();
 
                             pressurePlate?.Configure(node);
+
+                            ApplyAnchorRotation(plate, direction);
                             continue;
                         }
                     }
@@ -356,6 +379,8 @@ namespace LMCore.TiledDungeon
                         spikes.name = $"Spikes ({direction})";
 
                         spikes.GetComponent<TDSpikeTrap>()?.Configure(node, node.Coordinates, node.modifications);
+
+                        ApplyAnchorRotation(spikes, direction);
                         continue;
                     }
                 }
@@ -380,6 +405,8 @@ namespace LMCore.TiledDungeon
                         alcove.name = direction.ToString();
 
                         ConfigureContainer(node, alcove, direction, direction.Inverse(), TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
+                        
+                        ApplyAnchorRotation(alcove, direction);
 
                         continue;
                     } else if (ConfigureWallSpike(node, direction))
@@ -394,6 +421,7 @@ namespace LMCore.TiledDungeon
                     node.NodeStyle);
 
                 go.name = direction.ToString();
+                ApplyAnchorRotation(go, direction);
 
                 if (upNode != null)
                 {
