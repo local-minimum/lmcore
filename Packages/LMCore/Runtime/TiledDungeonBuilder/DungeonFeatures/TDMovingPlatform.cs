@@ -9,7 +9,7 @@ using UnityEngine.Animations;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDMovingPlatform : MonoBehaviour
+    public class TDMovingPlatform : MonoBehaviour, IMovingCubeFace
     {
         public enum Phase { 
             Initial, 
@@ -51,6 +51,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField, HideInInspector]
         TDEnumInteraction Interaction = TDEnumInteraction.Automatic;
+
+        /// <summary>
+        /// World position of a virtual node center misaligned with the dungeon grid
+        /// </summary>
+        public Vector3 VirtualNodeCenter => transform.position + Vector3.up * (Dungeon?.GridSize ?? 3f) * 0.5f;
 
         protected string PrefixLogMessage(string message) => $"Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
         
@@ -173,6 +178,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 Debug.Log(PrefixLogMessage($"Starting platform Interaction({Interaction}) Loop({Loop}) MoveDirection({MoveDirection})"));
                 InitWaitToStart();
+            }
+
+            var anchor = GetComponent<Anchor>();
+            if (anchor != null) {
+                anchor.ManagingMovingCubeFace = this;
             }
         }
 

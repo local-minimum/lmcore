@@ -128,7 +128,7 @@ namespace LMCore.TiledDungeon
         {
             if (obj == null) return;
 
-            var anchor = obj.GetComponent<TDAnchor>();
+            var anchor = obj.GetComponent<Anchor>();
             if (anchor == null) return;
 
             anchor.PrefabRotation = direction.AsYRotation();

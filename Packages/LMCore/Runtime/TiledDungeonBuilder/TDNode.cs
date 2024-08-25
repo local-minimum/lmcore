@@ -444,7 +444,6 @@ namespace LMCore.TiledDungeon
 
         void HandleSpinner(GridEntity entity)
         {
-
             var spinMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.SpinnerClass);
 
             if (spinMod == null) { return; }
@@ -604,9 +603,9 @@ namespace LMCore.TiledDungeon
         }
         #endregion
 
-        TDAnchor GetAnchor(Direction direction) => 
-            GetComponentsInChildren<TDAnchor>()
-                .FirstOrDefault(a => a.Anchor == direction);
+        public Anchor GetAnchor(Direction direction) => 
+            GetComponentsInChildren<Anchor>()
+                .FirstOrDefault(a => a.CubeFace == direction);
 
         public Vector3 GetPosition(Direction anchor)
         {
