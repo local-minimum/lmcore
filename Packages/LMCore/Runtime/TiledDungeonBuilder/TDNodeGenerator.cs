@@ -134,10 +134,10 @@ namespace LMCore.TiledDungeon
             anchor.PrefabRotation = direction.AsYRotation();
         }
 
-        static void ConfigureRamps(TDNode node)
+        static bool ConfigureRamps(TDNode node)
         {
             var ramp = node.RampModification;
-            if (ramp == null) return;
+            if (ramp == null) return false;
 
             var down = ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection();
 
@@ -149,7 +149,9 @@ namespace LMCore.TiledDungeon
                 node.NodeStyle
             );
 
-            ApplyAnchorRotation(go, down.Inverse());
+            ApplyAnchorRotation(go, down);
+
+            return true;
         }
 
         static void ConfigureTeleporter(TDNode node)
@@ -344,6 +346,9 @@ namespace LMCore.TiledDungeon
                             ApplyAnchorRotation(plate, direction);
                             continue;
                         }
+                    } else if (ConfigureRamps(node))
+                    {
+                        continue;
                     }
                 } else if (direction == Direction.Up)
                 {
@@ -465,7 +470,6 @@ namespace LMCore.TiledDungeon
             ConfigureDoors(node);
             ConfigureLadders(node);
             ConfigureTeleporter(node);
-            ConfigureRamps(node);
             ConfigureWallButtons(node);
             ConfigurePillar(node, config);
             ConfigurePedistal(node, config);

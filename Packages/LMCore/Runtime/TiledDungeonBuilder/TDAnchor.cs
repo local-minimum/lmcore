@@ -51,11 +51,14 @@ namespace LMCore.TiledDungeon
         protected string PrefixLogMessage(string message) =>
             $"Anchor {Anchor} @ {Node.Coordinates}: {message}";
 
-        [Tooltip("Use None for center of cube")]
-        public Direction Anchor;
-
         [HideInInspector]
-        public AnchorYRotation PrefabRotation; 
+        public AnchorYRotation PrefabRotation = AnchorYRotation.None;
+
+        [Tooltip("Use None for center of cube")]
+        public Direction Anchor = Direction.Down;
+
+        public Direction RotatedAnchor =>
+            PrefabRotation.Rotate(Anchor);
 
         TDNode _node;
         public TDNode Node
@@ -125,19 +128,48 @@ namespace LMCore.TiledDungeon
             }
         }
 
+#if UNITY_EDITOR
+        float edgeDirectionToSize(Direction direction)
+        {
+            switch (direction)
+            {                
+                case Direction.North:
+                case Direction.East:
+                case Direction.Up:
+                    return 0.1f;
+                case Direction.Down:
+                case Direction.West:
+                case Direction.South:
+                    return 0.075f;
+                default:
+                    return 0.05f;
+            }
+        }
+
+        Dictionary<Direction, Color> directionToColor = new Dictionary<Direction, Color>() {
+            { Direction.North, Color.blue },
+            { Direction.South, Color.white},
+            { Direction.West, Color.green },
+            { Direction.East, Color.yellow },
+            { Direction.Up, Color.cyan},
+            { Direction.Down, Color.magenta },
+            { Direction.None, Color.red },
+        };
+
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.red;
+            var a = RotatedAnchor;
+            Gizmos.color = directionToColor[a];
             Gizmos.DrawWireCube(CenterPosition, Vector3.one * 0.3f);
 
-            Gizmos.color = Color.blue;
-            var a = PrefabRotation.Rotate(Anchor);
             foreach (var direction in DirectionExtensions.AllDirections)
             {
                 if (direction == a || direction == a.Inverse()) continue;
-                Gizmos.DrawWireSphere(GetEdgePosition(direction), 0.1f);
+                Gizmos.color = directionToColor[direction];
+                Gizmos.DrawWireSphere(GetEdgePosition(direction), edgeDirectionToSize(direction));
             }
         }
+#endif
 
         [ContextMenu("Refresh sentinels in editor")]
         void RefreshSentinels() => _sentinels = null;
@@ -153,7 +185,7 @@ namespace LMCore.TiledDungeon
                 }
 
                 var n = Node;
-                var offset = PrefabRotation.Rotate(Anchor).AsLookVector3D().ToDirection(halfSize);
+                var offset = RotatedAnchor.AsLookVector3D().ToDirection(halfSize);
 
                 if (n != null)
                 {
