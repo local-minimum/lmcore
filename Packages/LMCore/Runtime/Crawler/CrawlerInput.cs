@@ -10,6 +10,8 @@ namespace LMCore.Crawler
 
     public class CrawlerInput : MonoBehaviour
     {
+        protected string PrefixLogMessage(string message) => $"Crawler input '{gEntity.name}': {message}";
+
         bool inputEnabled = true;
         public event MovementEvent OnMovement;
 
@@ -73,10 +75,13 @@ namespace LMCore.Crawler
             {
                 currentMovement = movement;
                 requestTick = !ElasticGameClock.instance.RequestTick();
+                // TODO why should we enqueue twice if we don't get tick?!
                 if (!requestTick)
                 {
                     return;
                 }
+
+                Debug.LogWarning(PrefixLogMessage($"Movement {movement} enqueued more than once for some reason"));
             }
 
             if (nextMovement == Movement.None)
@@ -111,6 +116,8 @@ namespace LMCore.Crawler
             }
             nextMovement = Movement.None;
             nextNextMovement = Movement.None;
+
+            Debug.Log(PrefixLogMessage($"Queue cleared (fully {includingCurrent}) {QueueInfo}"));
         }
 
         private string QueueInfo => $"Queue {currentMovement} <- {nextMovement} <- {nextNextMovement}";
@@ -132,7 +139,6 @@ namespace LMCore.Crawler
 
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
-
             if (context.phase == InputActionPhase.Started)
             {
                 if (!inputEnabled) return;
@@ -147,7 +153,9 @@ namespace LMCore.Crawler
                 EnqueueMovement(movement);
 
                 if (replayTurns || movement.IsTranslation())
+                {
                     replayStack.Add(new HeldButtonInfo(movement));
+                }
             }
             else if (context.phase == InputActionPhase.Canceled)
             {
@@ -198,7 +206,7 @@ namespace LMCore.Crawler
         {
             if (currentMovement != Movement.None)
             {
-                Debug.Log($"{tickId}: {currentMovement} ({expectedDuration})");
+                Debug.Log(PrefixLogMessage($"Tick {tickId}: {currentMovement} ({expectedDuration})"));
                 OnMovement?.Invoke(tickId, currentMovement, expectedDuration);
             }
         }
@@ -248,31 +256,29 @@ namespace LMCore.Crawler
 
         public void CauseFall(bool clearQueue)
         {
-            Debug.Log($"{name}: Cause fall, clear queue: {clearQueue}");
-            inputEnabled = false; 
-            if (clearQueue) ClearQueue();
+            DisableInput(clearQueue);
             EnqueueMovement(Movement.AbsDown);
-            Debug.Log($"Fall {QueueInfo}");
+            Debug.Log(PrefixLogMessage($"Fall with queue {QueueInfo}"));
         }
 
         public void DisableInput(bool clearQueue)
         {
-            Debug.Log($"Disable input, clear queue:{clearQueue}");
             inputEnabled = false;
-            if (clearQueue) ClearQueue();
+            if (clearQueue) ClearQueue(true);
+            Debug.Log(PrefixLogMessage($"Disable input"));
         }
 
         public void EnableInput()
         {
-            Debug.Log($"Enable input");
             inputEnabled = true;
+            Debug.Log(PrefixLogMessage("Enable input"));
         }
 
         public void EndFall(bool clearQueue)
         {
-            Debug.Log($"{name}: End fall, clear queue: {clearQueue}");
             if (clearQueue) ClearQueue(true);
             inputEnabled = true;
+            Debug.Log(PrefixLogMessage("End fall"));
         }
     }
 }

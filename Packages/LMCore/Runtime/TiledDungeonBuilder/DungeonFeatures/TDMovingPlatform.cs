@@ -106,7 +106,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 foreach (var dependant in managedOffsetSides)
                 {
                     // We're part of the same platform!
-                    if (myCoordinates + dependant.Key == entity.Position && dependant.Value == Direction.Down)
+                    if (myCoordinates + dependant.Key == entity.Coordinates && dependant.Value == Direction.Down)
                     {
                         return true;
                     }
@@ -309,17 +309,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 foreach (var entity in constrainedEntities)
                 {
-                    var offset = entity.Position - currentNode.Coordinates;
+                    var offset = entity.Coordinates - currentNode.Coordinates;
                     var newEntityCoordinates = coordinates + offset;
 
-                    if (Dungeon.HasNodeAt(entity.Position)) {
-                        Dungeon[entity.Position].RemoveOccupant(entity);
+                    if (Dungeon.HasNodeAt(entity.Coordinates)) {
+                        Dungeon[entity.Coordinates].RemoveOccupant(entity);
                     }
 
-                    entity.Position = newEntityCoordinates;
+                    entity.Coordinates = newEntityCoordinates;
 
-                    if (Dungeon.HasNodeAt(entity.Position)) {
-                        Dungeon[entity.Position].AddOccupant(entity);
+                    if (Dungeon.HasNodeAt(entity.Coordinates)) {
+                        Dungeon[entity.Coordinates].AddOccupant(entity);
                     }
                 }
             } else

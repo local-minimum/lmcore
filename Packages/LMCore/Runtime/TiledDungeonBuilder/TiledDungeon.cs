@@ -207,7 +207,7 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Spawn")]
         private void Spawn()
         {
-            Player.Position = SpawnTile.Coordinates;
+            Player.Coordinates = SpawnTile.Coordinates;
             Player.LookDirection = StartLookDirection;
             Player.Anchor = Direction.Down;
             Player.Sync();
@@ -253,9 +253,9 @@ namespace LMCore.TiledDungeon
         }
 
         public Vector3 Position(GridEntity entity) =>
-            HasNodeAt(entity.Position) ?
-                this[entity.Position].GetPosition(entity.Anchor) :
-                entity.Position.ToPosition(GridSize) + entity.Anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
+            HasNodeAt(entity.Coordinates) ?
+                this[entity.Coordinates].GetPosition(entity.Anchor) :
+                entity.Coordinates.ToPosition(GridSize) + entity.Anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
 
         public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection) =>
             HasNodeAt(coordinates) ? this[coordinates].GetPosition(anchor) :

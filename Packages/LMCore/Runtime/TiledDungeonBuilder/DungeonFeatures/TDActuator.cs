@@ -136,7 +136,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Mover_OnMoveEnd(GridEntity enity, bool successful)
         {
             if (!active) return;
-            if (occupants.Contains(enity) && (enity.Position != Coordinates || enity.Anchor != anchor))
+            if (occupants.Contains(enity) && (enity.Coordinates != Coordinates || enity.Anchor != anchor))
             {
                 occupants.Remove(enity);
 
@@ -149,7 +149,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
-            if (!active || entity.Position != Coordinates) return;
+            if (!active || entity.Coordinates != Coordinates) return;
 
             if (lastActionWasPress && !automaticallyResets)
             {

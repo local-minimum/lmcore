@@ -211,7 +211,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Mover_OnMoveEnd(GridEntity entity, bool successful)
         {
             activelyMovingEntities.Remove(entity);
-            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Position }, new List<Direction> { entity.Anchor }, out bool _))
+            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Coordinates }, new List<Direction> { entity.Anchor }, out bool _))
             {
                 entity.Falling = true; 
             }
@@ -231,7 +231,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void GridEntity_OnInteract(GridEntity entity)
         {
             var onTheMove = activelyMovingEntities.Contains(entity);
-            var validPosition = entity.LookDirection.Translate(entity.Position) == _Position;
+            var validPosition = entity.LookDirection.Translate(entity.Coordinates) == _Position;
 
             if (!onTheMove && validPosition)
             {

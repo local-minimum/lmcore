@@ -12,7 +12,7 @@ namespace LMCore.Crawler
 
         public EntityState(GridEntity entity)
         {
-            Coordinates = entity.Position;
+            Coordinates = entity.Coordinates;
             Anchor = entity.Anchor;
             LookDirection = entity.LookDirection;
             RotationRespectsAnchorDirection = entity.RotationRespectsAnchorDirection;

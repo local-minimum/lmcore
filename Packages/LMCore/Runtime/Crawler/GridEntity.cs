@@ -30,7 +30,7 @@ namespace LMCore.Crawler
         public Direction Anchor = Direction.Down;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
-        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Position} anchor {Anchor} looking {LookDirection}: {message}";
+        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {Anchor} looking {LookDirection}: {message}";
 
         private bool _falling;
         public bool Falling
@@ -76,23 +76,37 @@ namespace LMCore.Crawler
 
         public CrawlerInput Input => GetComponent<CrawlerInput>();
 
+        #region Coordinates
         /// <summary>
-        /// Using XZ Plane, returns position in 2D
+        /// Using XZ Plane, returns coordinates in 2D
         /// </summary>
-        public Vector2Int Position2D {
-            get => Position.To2DInXZPlane();
-            set => Position = value.To3DFromXZPlane();
+        public Vector2Int Coordinates2D {
+            get => Coordinates.To2DInXZPlane();
+            set => Coordinates = value.To3DFromXZPlane(Elevation);
         }
 
-        Vector3Int _Position;
-        public Vector3Int Position
+        public int Elevation
         {
-            get => _Position;
-            set => _Position = value;
+            get => Coordinates.y;
+            set
+            {
+                _Coordinates.y = value;
+            }
         }
+
+        Vector3Int _Coordinates;
+        public Vector3Int Coordinates
+        {
+            get => _Coordinates;
+            set => _Coordinates = value;
+        }
+        #endregion
 
         public Direction LookDirection { get; set; }
 
+        /// <summary>
+        /// Updates position and rotation as well as occupying dungeon node at coordinates possible
+        /// </summary>
         public void Sync()
         {
             if (GridSizeProvider == null)
@@ -104,7 +118,7 @@ namespace LMCore.Crawler
             transform.position = Dungeon.Position(this);
             transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
 
-            var node = Dungeon[Position];
+            var node = Dungeon[Coordinates];
             if (node != null)
             {
                 node.AddOccupant(this);
@@ -112,15 +126,26 @@ namespace LMCore.Crawler
             CheckFall();
         }
 
+        /// <summary>
+        /// Update coordinates based on a movement.
+        /// 
+        /// Does not sync position
+        /// </summary>
         public void Translate(Movement movement)
         {
-            Position = LookDirection.RelativeTranslation3D(Anchor, movement).Translate(Position);
+            Coordinates = LookDirection.RelativeTranslation3D(Anchor, movement).Translate(Coordinates);
         }
 
+        /// <summary>
+        /// Update look direction and transportation mode climbing based on movement.
+        /// 
+        /// Does not sync rotation
+        /// </summary>
         public void Rotate(Movement movement)
         {
             LookDirection = LookDirection.ApplyRotation(Anchor, movement, out Anchor);
-            if (Anchor != Direction.Down)
+
+            if (Anchor != Direction.Down && Anchor != Direction.None)
             {
                 TransportationMode = TransportationMode.AddFlag(TransportationMode.Climbing);
             } else
@@ -144,7 +169,7 @@ namespace LMCore.Crawler
                 return;
             }
 
-            var node = Dungeon[Position];
+            var node = Dungeon[Coordinates];
             if (node == null) {
                 Debug.LogWarning(PrefixLogMessage("Outside the map, assuming fall"));
                 Falling = true;

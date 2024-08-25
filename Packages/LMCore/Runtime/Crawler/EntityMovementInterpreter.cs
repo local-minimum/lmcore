@@ -64,7 +64,7 @@ namespace LMCore.Crawler
         {
             // TODO: Allow letting go / walling down and catching wall further down?
 
-            var position = gEntity.Value.Position;
+            var position = gEntity.Value.Coordinates;
             var lookDirection = gEntity.Value.LookDirection;
             var anchor = gEntity.Value.Anchor;
 
@@ -211,7 +211,7 @@ namespace LMCore.Crawler
                 }
             }
 
-            var startPosition = gEntity.Value.Position;
+            var startPosition = gEntity.Value.Coordinates;
             var startLookDirection = gEntity.Value.LookDirection;
             var startAnchor = gEntity.Value.Anchor;
 

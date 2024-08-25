@@ -167,13 +167,13 @@ namespace LMCore.Crawler
 
             if (animationOutcome == MovementOutcome.NodeExit)
             {
-                Dungeon[gEntity.Position]?.RemoveOccupant(gEntity);
+                Dungeon[gEntity.Coordinates]?.RemoveOccupant(gEntity);
             }
 
             // Only sync position if nothing else moved us
-            if (animationStart.Coordinates == gEntity.Position)
+            if (animationStart.Coordinates == gEntity.Coordinates)
             {
-                gEntity.Position = synchState.Coordinates;
+                gEntity.Coordinates = synchState.Coordinates;
             }
             gEntity.Anchor = synchState.Anchor;
             gEntity.LookDirection = synchState.LookDirection;
@@ -189,7 +189,7 @@ namespace LMCore.Crawler
 
             if (animationOutcome == MovementOutcome.NodeExit)
             {
-                Dungeon[gEntity.Position]?.AddOccupant(gEntity);
+                Dungeon[gEntity.Coordinates]?.AddOccupant(gEntity);
             }
 
             if (emitEndEvent)
@@ -236,8 +236,8 @@ namespace LMCore.Crawler
                 animationCheckpoints.Add(lastCP);
             } else if (
                 outcome == MovementOutcome.Blocked && 
-                Dungeon.HasNodeAt(entity.Position) && 
-                Dungeon[entity.Position].IsRamp &&
+                Dungeon.HasNodeAt(entity.Coordinates) && 
+                Dungeon[entity.Coordinates].IsRamp &&
                 states.Count == 2)
             {
                 var firstCP = new SmoothMovementCheckpoints(Dungeon, states[0]);

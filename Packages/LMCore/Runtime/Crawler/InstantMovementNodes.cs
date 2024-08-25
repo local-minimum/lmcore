@@ -86,10 +86,10 @@ namespace LMCore.Crawler
 
             if (outcome == MovementOutcome.NodeExit)
             {
-                Dungeon[entity.Position]?.RemoveOccupant(entity);
+                Dungeon[entity.Coordinates]?.RemoveOccupant(entity);
             }
 
-            entity.Position = target.Coordinates;
+            entity.Coordinates = target.Coordinates;
             entity.Anchor = target.Anchor;
             entity.LookDirection = target.LookDirection;
             entity.RotationRespectsAnchorDirection = target.RotationRespectsAnchorDirection;
@@ -104,7 +104,7 @@ namespace LMCore.Crawler
             entity.Sync();
 
             if (outcome == MovementOutcome.NodeExit) { 
-                Dungeon[entity.Position]?.AddOccupant(entity);
+                Dungeon[entity.Coordinates]?.AddOccupant(entity);
             }
 
             OnMoveEnd?.Invoke(

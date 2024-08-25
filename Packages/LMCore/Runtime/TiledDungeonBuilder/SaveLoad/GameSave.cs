@@ -61,7 +61,7 @@ namespace LMCore.TiledDungeon.SaveLoad
 
         public GridEntitySave(GridEntity entity)
         {
-            position = entity.Position;
+            position = entity.Coordinates;
             lookDirection = entity.LookDirection;
             anchor = entity.Anchor;
             transportationMode = entity.TransportationMode;

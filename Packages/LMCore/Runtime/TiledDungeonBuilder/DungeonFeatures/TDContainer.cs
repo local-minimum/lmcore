@@ -243,23 +243,23 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private bool AllowInteractBy(GridEntity entity)
         {
-            Debug.Log(PrefixLogMessage($"Distance({entity.Position.ManhattanDistance(Position)}) Same Elevation({entity.Position.y == Position.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
+            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(Position)}) Same Elevation({entity.Coordinates.y == Position.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
             if (anchor == Direction.Down && facingDirection == Direction.None)
             {
                 // TODO: Doesn't account for thin walls...
                 // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
-                return entity.Position.y == Position.y && entity.Position.ManhattanDistance(Position) == 1;
+                return entity.Coordinates.y == Position.y && entity.Coordinates.ManhattanDistance(Position) == 1;
             } 
 
             if (anchor == Direction.Down)
             {
-                return entity.Position.y == Position.y 
-                    && entity.Position.ManhattanDistance(Position) == 1 
+                return entity.Coordinates.y == Position.y 
+                    && entity.Coordinates.ManhattanDistance(Position) == 1 
                     && entity.LookDirection == facingDirection.Inverse();
             }
 
             // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
-            return entity.Position == Position 
+            return entity.Coordinates == Position 
                 && entity.LookDirection == anchor;
         }
 

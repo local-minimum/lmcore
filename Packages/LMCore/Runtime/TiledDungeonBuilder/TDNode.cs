@@ -341,7 +341,7 @@ namespace LMCore.TiledDungeon
 
         public bool HasBlockingDoor(Direction direction)
         {
-            var door = this.Door;
+            var door = Door;
 
             if (door == null) return false;
 
@@ -410,9 +410,6 @@ namespace LMCore.TiledDungeon
 
         }
 
-        HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
-        HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
-
         IDungeonNode HandleTeleporter(GridEntity entity)
         {
             if (entity.TransportationMode.HasFlag(TransportationMode.Teleporting))
@@ -435,7 +432,7 @@ namespace LMCore.TiledDungeon
                 }
 
                 Debug.Log(PrefixLogMessage($"Teleporting {entity.name} to {outlet.Coordinates}"));
-                entity.Position = outlet.Coordinates;
+                entity.Coordinates = outlet.Coordinates;
                 entity.Anchor = Direction.Down;
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
                 entity.Sync();
@@ -490,6 +487,11 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        #region EntityOccupation
+        HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
+        HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
+
+
         public void AddOccupant(GridEntity entity)
         {
             Debug.Log(PrefixLogMessage($"Handling occupancy of {entity.name}"));
@@ -530,6 +532,7 @@ namespace LMCore.TiledDungeon
                 platform.FreeEntity(entity);
             }
         }
+        #endregion
 
         public bool AllowsRotating(GridEntity entity)
         {
@@ -580,6 +583,7 @@ namespace LMCore.TiledDungeon
             return direction.Translate(Coordinates);
         }
 
+        #region EntityConstraints
         public void AssignConstraints(GridEntity entity, Direction direction)
         {
             var platform = GetComponentInChildren<TDMovingPlatform>();
@@ -598,6 +602,7 @@ namespace LMCore.TiledDungeon
                 platform.FreeEntity(entity);
             }
         }
+        #endregion
 
         TDAnchor GetAnchor(Direction direction) => 
             GetComponentsInChildren<TDAnchor>()
