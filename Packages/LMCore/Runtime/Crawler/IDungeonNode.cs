@@ -10,6 +10,8 @@ namespace LMCore.Crawler
         public Vector3 GetPosition(Direction anchor);
         public Vector3 GetEdge(Direction anchor, Direction edge);
 
+        public Anchor GetAnchor(Direction direction);
+
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
         public bool AllowsEntryFrom(GridEntity entity, Direction direction);
         public bool AllowsRotating(GridEntity entity);

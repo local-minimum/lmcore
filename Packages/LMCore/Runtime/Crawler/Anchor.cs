@@ -1,10 +1,9 @@
-using LMCore.Crawler;
 using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace LMCore.TiledDungeon
+namespace LMCore.Crawler
 {
     public enum AnchorYRotation { None, CW, CCW, OneEighty }
 
@@ -56,6 +55,9 @@ namespace LMCore.TiledDungeon
         [Tooltip("Use None for center of cube")]
         public Direction CubeFace = Direction.Down;
 
+        public bool HasEdge(Direction direction) =>
+            CubeFace != direction && CubeFace.Inverse() != direction;
+
         public Direction RotatedAnchor =>
             PrefabRotation.Rotate(CubeFace);
 
@@ -99,6 +101,7 @@ namespace LMCore.TiledDungeon
         }
 
         public IMovingCubeFace ManagingMovingCubeFace { get; set; }
+
 
         #region Managing Entiteis
         private HashSet<GridEntity> entities = new HashSet<GridEntity>();
@@ -163,7 +166,7 @@ namespace LMCore.TiledDungeon
 
             foreach (var direction in DirectionExtensions.AllDirections)
             {
-                if (direction == a || direction == a.Inverse()) continue;
+                if (!HasEdge(direction)) continue;
                 Gizmos.color = directionToColor[direction];
                 Gizmos.DrawWireSphere(GetEdgePosition(direction), edgeDirectionToSize(direction));
             }
@@ -218,5 +221,34 @@ namespace LMCore.TiledDungeon
             return CenterPosition + direction.AsLookVector3D().ToDirection(HalfGridSize);
         }
         #endregion
+
+        public Anchor GetNeighbour(Direction direction)
+        {
+            if (!HasEdge(direction)) return null;
+
+            var node = Node;
+            if (node != null)
+            {
+                var neighbourAnchor = node.GetAnchor(direction);
+                if (neighbourAnchor != null) return neighbourAnchor;
+
+                // TODO: We need to check if entity can exit the node this way
+                // or it has to be checked somewhere else
+                var neighbourCoordinates = node.Neighbour(direction);
+                var dungeon = Dungeon;
+                if (dungeon != null && dungeon.HasNodeAt(neighbourCoordinates))
+                {
+                    var neighbourNode = Dungeon[neighbourCoordinates];
+                    if (neighbourNode != null )
+                    {
+                        // TODO: We need to check if entity can enter this
+                        // face from the direction in question
+                        return neighbourNode.GetAnchor(CubeFace);
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
