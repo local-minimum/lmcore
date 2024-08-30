@@ -222,15 +222,23 @@ namespace LMCore.Crawler
         }
         #endregion
 
-        public Anchor GetNeighbour(Direction direction)
+        public Anchor GetNeighbour(Direction direction, out bool sameNode)
         {
-            if (!HasEdge(direction)) return null;
+            if (!HasEdge(direction))
+            {
+                sameNode = true;
+                return null;
+            }
 
             var node = Node;
             if (node != null)
             {
                 var neighbourAnchor = node.GetAnchor(direction);
-                if (neighbourAnchor != null) return neighbourAnchor;
+                if (neighbourAnchor != null)
+                {
+                    sameNode = true;
+                    return neighbourAnchor;
+                }
 
                 // TODO: We need to check if entity can exit the node this way
                 // or it has to be checked somewhere else
@@ -243,11 +251,13 @@ namespace LMCore.Crawler
                     {
                         // TODO: We need to check if entity can enter this
                         // face from the direction in question
+                        sameNode = false;
                         return neighbourNode.GetAnchor(CubeFace);
                     }
                 }
             }
 
+            sameNode = true;
             return null;
         }
     }

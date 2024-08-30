@@ -21,13 +21,94 @@ namespace LMCore.Crawler
         public UnityEvent<bool> OnFall;
         public UnityEvent ContinueFall;
         public UnityEvent OnLand;
+        public EntityAbilities Abilities;
+        public MovementInterpreter MovementInterpreter;
 
         public GridEntityType EntityType;
         public IGridSizeProvider GridSizeProvider { get; set; }
         public IDungeon Dungeon { get; set; }
 
+        private Anchor _anchor;
+        public Anchor NodeAnchor {
+            get => _anchor;
+            set
+            {
+                _anchor = value;
+                if (value != null)
+                {
+                    _node = null;
+                    _anchorDirection = value.CubeFace;
+                }
+            }
+        }
+
+        private Direction _anchorDirection = Direction.Down;
+        public Direction Anchor
+        {
+            get
+            {
+                if (_anchor != null) return _anchor.CubeFace;
+                return _anchorDirection;
+            }
+            set
+            {
+                _anchorDirection = value;
+                _anchor = null;
+            }
+        }
+
+        private IDungeonNode _node;
+        public IDungeonNode Node { 
+            get
+            {
+                if (_anchor != null) return _anchor.Node;
+                return _node;
+            }
+            set
+            {
+                _node = value;
+                _anchor = null;
+                _Coordinates = value.Coordinates;
+            }
+        }
+
+        #region Coordinates
+        /// <summary>
+        /// Using XZ Plane, returns coordinates in 2D
+        /// </summary>
+        public Vector2Int Coordinates2D {
+            get => Coordinates.To2DInXZPlane();
+            set => Coordinates = value.To3DFromXZPlane(Elevation);
+        }
+
+        public int Elevation
+        {
+            get => Coordinates.y;
+            set
+            {
+                _Coordinates.y = value;
+                Node = Dungeon.HasNodeAt(_Coordinates) ? Dungeon[_Coordinates] : null;
+            }
+        }
+
+        Vector3Int _Coordinates;
+        public Vector3Int Coordinates
+        {
+            get
+            {
+                if (_anchor) return _anchor.Node.Coordinates;
+                if (_node != null) return _node.Coordinates;
+                return _Coordinates;
+            }
+            set
+            {
+                _Coordinates = value;
+                Node = Dungeon.HasNodeAt(_Coordinates) ? Dungeon[_Coordinates] : null;
+            }
+        }
+        #endregion
+
         public TransportationMode TransportationMode;
-        public Direction Anchor = Direction.Down;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
         protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {Anchor} looking {LookDirection}: {message}";
@@ -76,32 +157,6 @@ namespace LMCore.Crawler
 
         public CrawlerInput Input => GetComponent<CrawlerInput>();
 
-        #region Coordinates
-        /// <summary>
-        /// Using XZ Plane, returns coordinates in 2D
-        /// </summary>
-        public Vector2Int Coordinates2D {
-            get => Coordinates.To2DInXZPlane();
-            set => Coordinates = value.To3DFromXZPlane(Elevation);
-        }
-
-        public int Elevation
-        {
-            get => Coordinates.y;
-            set
-            {
-                _Coordinates.y = value;
-            }
-        }
-
-        Vector3Int _Coordinates;
-        public Vector3Int Coordinates
-        {
-            get => _Coordinates;
-            set => _Coordinates = value;
-        }
-        #endregion
-
         public Direction LookDirection { get; set; }
 
         /// <summary>
@@ -143,7 +198,8 @@ namespace LMCore.Crawler
         /// </summary>
         public void Rotate(Movement movement)
         {
-            LookDirection = LookDirection.ApplyRotation(Anchor, movement, out Anchor);
+            LookDirection = LookDirection.ApplyRotation(Anchor, movement, out var anchorDirecition);
+            Anchor = anchorDirecition;
 
             if (Anchor != Direction.Down && Anchor != Direction.None)
             {

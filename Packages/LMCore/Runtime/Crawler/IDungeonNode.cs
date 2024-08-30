@@ -14,6 +14,7 @@ namespace LMCore.Crawler
 
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
         public bool AllowsEntryFrom(GridEntity entity, Direction direction);
+        public bool AllowExit(GridEntity entity, Direction direction);
         public bool AllowsRotating(GridEntity entity);
 
         public bool CanAnchorOn(GridEntity entity, Direction anchor);

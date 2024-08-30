@@ -369,6 +369,8 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
+        public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction);
+
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
             if (HasWall(direction) || HasLadder(direction)) return false;
