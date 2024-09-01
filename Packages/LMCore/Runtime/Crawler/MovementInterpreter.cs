@@ -1,31 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace LMCore.Crawler
 {
-    public enum MomventTransition { None, Grounded, Jump, Ungrounded };
-
-    public struct MovementCheckpointWithTransition
-    {
-        public MovementCheckpoint Checkpoint { get; set; }
-        public MomventTransition Transition { get; set; }
-    }
-
-    public enum MovementInterpretationOutcome
-    {
-        Grounded, Landing, Airbourne, Bouncing
-    }
-
-    public class  MovementInterpretation
-    {
-        public Direction PrimaryDirection { get; set; }
-        public MovementInterpretationOutcome Outcome { get; set; }
-        public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
-
-        public MovementCheckpointWithTransition Start => Steps[0];
-        public MovementCheckpointWithTransition Finish => Steps.Last();
-    }
 
     public class MovementInterpreter : MonoBehaviour
     {
@@ -85,13 +61,13 @@ namespace LMCore.Crawler
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
                 Checkpoint = MovementCheckpoint.From(targetAnchor, originAnchor.CubeFace.Inverse()),
-                Transition = MomventTransition.Grounded,
+                Transition = MovementTransition.Grounded,
             });
 
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
                 Checkpoint = MovementCheckpoint.From(targetAnchor),
-                Transition = MomventTransition.Grounded,
+                Transition = MovementTransition.Grounded,
             });
 
             return true;
@@ -110,7 +86,7 @@ namespace LMCore.Crawler
                     // Normal anchoring on same cube face
 
 
-                    interpretation.Outcome = origin.Transition == MomventTransition.Grounded 
+                    interpretation.Outcome = origin.Transition == MovementTransition.Grounded 
                         ? MovementInterpretationOutcome.Grounded : MovementInterpretationOutcome.Landing;
 
                     var targetAnchor = targetNode.GetAnchor(wantedAnchorDirection);
@@ -120,14 +96,14 @@ namespace LMCore.Crawler
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
                             Checkpoint = MovementCheckpoint.From(targetAnchor, direction.Inverse()),
-                            Transition = MomventTransition.Grounded,
+                            Transition = MovementTransition.Grounded,
                         });
                     }
 
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(targetAnchor),
-                        Transition = MomventTransition.Grounded,
+                        Transition = MovementTransition.Grounded,
                     });
                     return;
                 }
@@ -139,22 +115,22 @@ namespace LMCore.Crawler
                 if (targetNode.GetAnchor(direction) == null)
                 {
                     // Falling or flying through a tile
-                    if (origin.Transition == MomventTransition.Grounded)
+                    if (origin.Transition == MovementTransition.Grounded)
                     {
-                        origin.Transition = MomventTransition.Jump;
+                        origin.Transition = MovementTransition.Jump;
                     }
                     interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(targetNode),
-                        Transition = MomventTransition.Ungrounded,
+                        Transition = MovementTransition.Ungrounded,
                     });
                 }
                 else
                 {
-                    if (origin.Transition == MomventTransition.Grounded)
+                    if (origin.Transition == MovementTransition.Grounded)
                     {
-                        origin.Transition = MomventTransition.Jump;
+                        origin.Transition = MovementTransition.Jump;
                     }
                     if (!Entity.TransportationMode.HasFlag(TransportationMode.Flying))
                     {
@@ -163,7 +139,7 @@ namespace LMCore.Crawler
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
                             Checkpoint = MovementCheckpoint.From(targetNode, direction),
-                            Transition = MomventTransition.Ungrounded
+                            Transition = MovementTransition.Ungrounded
                         });
                     } else
                     {
@@ -173,7 +149,7 @@ namespace LMCore.Crawler
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(targetNode),
-                        Transition = MomventTransition.Ungrounded
+                        Transition = MovementTransition.Ungrounded
                     });
                 }
             } else
@@ -196,21 +172,22 @@ namespace LMCore.Crawler
             } else
             {
                 // Flying or falling outside the dungeon
-                if (origin.Transition == MomventTransition.Grounded)
+                if (origin.Transition == MovementTransition.Grounded)
                 {
-                    origin.Transition = MomventTransition.Jump;
+                    origin.Transition = MovementTransition.Jump;
                     interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                 }
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
                     Checkpoint = MovementCheckpoint.From(targetCoordinates),
-                    Transition = MomventTransition.Ungrounded
+                    Transition = MovementTransition.Ungrounded
                 });
             }
         }
 
-        public MovementInterpretation InterpretMovement(Direction direction, float progress)
+        public MovementInterpretation InterpretMovement(Direction direction)
         {
+            // TODO: Figure out how to make Checkpoint is Scale when stepping up
             var interpretation = new MovementInterpretation() { PrimaryDirection = direction }; 
 
             var anchor = Entity.NodeAnchor;
@@ -225,7 +202,7 @@ namespace LMCore.Crawler
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(Entity),
-                        Transition = MomventTransition.Ungrounded,
+                        Transition = MovementTransition.Ungrounded,
                     });
                     InterpretByDungeon(interpretation);
                 } else
@@ -234,7 +211,7 @@ namespace LMCore.Crawler
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(Entity),
-                        Transition = MomventTransition.Ungrounded,
+                        Transition = MovementTransition.Ungrounded,
                     });
 
                     var targetCoordinates = node.Neighbour(direction);
@@ -252,13 +229,13 @@ namespace LMCore.Crawler
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
                     Checkpoint = MovementCheckpoint.From(Entity),
-                    Transition = MomventTransition.Grounded,
+                    Transition = MovementTransition.Grounded,
                 });
                 // Intermediary step at edge of starting anchor
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
                     Checkpoint = MovementCheckpoint.From(interpretation.Start.Checkpoint, direction),
-                    Transition = MomventTransition.Grounded,
+                    Transition = MovementTransition.Grounded,
                 });
 
                 if (sameNode)
@@ -267,7 +244,7 @@ namespace LMCore.Crawler
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(targetAnchor),
-                        Transition = MomventTransition.Grounded,
+                        Transition = MovementTransition.Grounded,
                     });
                 } else if (anchor.Node.AllowExit(Entity, direction))
                 {

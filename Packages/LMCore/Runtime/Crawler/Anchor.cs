@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
+    public enum AnchorTraversal { None, Walk, Climb, Scale, Stairs, Converyor }
     public enum AnchorYRotation { None, CW, CCW, OneEighty }
 
     public static class AnchorYRotationExtensions
@@ -51,6 +52,8 @@ namespace LMCore.Crawler
 
         [HideInInspector]
         public AnchorYRotation PrefabRotation = AnchorYRotation.None;
+
+        public AnchorTraversal Traversal;
 
         [Tooltip("Use None for center of cube")]
         public Direction CubeFace = Direction.Down;

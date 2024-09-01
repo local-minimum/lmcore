@@ -7,7 +7,7 @@ namespace LMCore.Crawler
         public Vector3Int Coordinates { get; }
         public Vector3 CenterPosition { get; }
 
-        public Vector3 GetPosition(Direction anchor);
+        public Vector3 GetEdge(Direction anchor);
         public Vector3 GetEdge(Direction anchor, Direction edge);
 
         public Anchor GetAnchor(Direction direction);

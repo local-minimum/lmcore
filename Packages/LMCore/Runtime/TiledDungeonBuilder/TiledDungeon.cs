@@ -254,11 +254,11 @@ namespace LMCore.TiledDungeon
 
         public Vector3 Position(GridEntity entity) =>
             HasNodeAt(entity.Coordinates) ?
-                this[entity.Coordinates].GetPosition(entity.Anchor) :
+                this[entity.Coordinates].GetEdge(entity.Anchor) :
                 entity.Coordinates.ToPosition(GridSize) + entity.Anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
 
         public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection) =>
-            HasNodeAt(coordinates) ? this[coordinates].GetPosition(anchor) :
+            HasNodeAt(coordinates) ? this[coordinates].GetEdge(anchor) :
             coordinates.ToPosition(GridSize) + anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
 
         void OnLoadGameSave(GameSave save)

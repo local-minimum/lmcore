@@ -609,7 +609,7 @@ namespace LMCore.TiledDungeon
             GetComponentsInChildren<Anchor>()
                 .FirstOrDefault(a => a.CubeFace == direction);
 
-        public Vector3 GetPosition(Direction anchor)
+        public Vector3 GetEdge(Direction anchor)
         {
             var a = GetAnchor(anchor);
             if (a != null) return a.CenterPosition;

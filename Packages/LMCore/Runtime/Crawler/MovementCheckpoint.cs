@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LMCore.Extensions;
+using UnityEngine;
 
 namespace LMCore.Crawler
 {
@@ -42,6 +43,64 @@ namespace LMCore.Crawler
                 _anchor = null;
                 _node = null;
             }
+        }
+
+        public AnchorTraversal Traversal
+        {
+            get
+            {
+                if (_anchor != null) return _anchor.Traversal;
+
+                return AnchorTraversal.None;
+            }
+        }
+
+        public Direction Down
+        {
+            get
+            {
+                if (_anchor != null)
+                {
+                    return _anchor.CubeFace;
+                }
+
+                return Edge;
+            }
+        }
+
+        public Vector3 Position(IDungeon dungeon)
+        {
+            if (_anchor == null)
+            {
+                if (Edge == Direction.None)
+                {
+                    return _anchor.CenterPosition;
+                }
+
+                return _anchor.GetEdgePosition(Edge);
+            }
+
+            if (_node != null)
+            {
+                if (Edge == Direction.None)
+                {
+                    return _node.CenterPosition;
+                }
+
+                return _node.GetEdge(Edge);
+            }
+
+            return _coordinates.ToPosition(dungeon.GridSize) + Edge.AsLookVector3D().ToDirection(dungeon.GridSize * 0.5f);
+        }
+
+        public bool IsSame(MovementCheckpoint other)
+        {
+            if (other == null) return false;
+
+            if (Anchor != null && other.Anchor != null) return Anchor == other.Anchor && Edge == other.Edge;
+            if (Node != null && other.Node != null) return Node == other.Node && Edge == other.Edge;
+
+            return Coordinates == other.Coordinates && Edge == other.Edge;
         }
 
         public Direction Edge { get; set; }

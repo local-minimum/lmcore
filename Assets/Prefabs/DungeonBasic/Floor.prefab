@@ -119,5 +119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71bb9b26812f15c41b162c99ffcdb766, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Anchor: 5
   PrefabRotation: 0
+  Traversal: 1
+  CubeFace: 5
