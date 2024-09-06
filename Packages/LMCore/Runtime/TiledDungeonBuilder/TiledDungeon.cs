@@ -207,9 +207,16 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Spawn")]
         private void Spawn()
         {
-            Player.Coordinates = SpawnTile.Coordinates;
+            if (Player.TransportationMode.HasFlag(TransportationMode.Flying) 
+                || !SpawnTile.CanAnchorOn(Player, Direction.Down))
+            {
+                Player.Node = SpawnTile;
+            } else
+            {
+                Player.NodeAnchor = SpawnTile.GetAnchor(Direction.Down);
+            }
             Player.LookDirection = StartLookDirection;
-            Player.Anchor = Direction.Down;
+            
             Player.Sync();
         }
 
