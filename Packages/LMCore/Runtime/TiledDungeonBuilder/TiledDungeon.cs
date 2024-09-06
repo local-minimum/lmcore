@@ -226,6 +226,9 @@ namespace LMCore.TiledDungeon
         {
             Player.GridSizeProvider = this;
             Player.Dungeon = this;
+
+            // TODO: replace with new systems
+            /*
             var movementInterpreter = Player.EntityMovementInterpreter;
             movementInterpreter.Dungeon = this;
 
@@ -233,7 +236,7 @@ namespace LMCore.TiledDungeon
             {
                 mover.GridSizeProvider = this;
                 mover.Dungeon = this;
-            }
+            }*/
 
             Debug.Log(PrefixLogMessage("Enabled"));
         }

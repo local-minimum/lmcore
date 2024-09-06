@@ -56,6 +56,18 @@ namespace LMCore.Crawler
                 _anchor = null;
             }
         }
+        
+        public Direction Down
+        {
+            get {
+                if (RotationRespectsAnchorDirection && Anchor != Direction.None)
+                {
+                    return _anchorDirection;
+                }
+
+                return Direction.Down; 
+            }
+        }
 
         private IDungeonNode _node;
         public IDungeonNode Node { 
@@ -68,7 +80,7 @@ namespace LMCore.Crawler
             {
                 _node = value;
                 _anchor = null;
-                _Coordinates = value.Coordinates;
+                if (value != null) _Coordinates = value.Coordinates;
             }
         }
 
@@ -179,6 +191,27 @@ namespace LMCore.Crawler
                 node.AddOccupant(this);
             }
             CheckFall();
+        }
+
+        public void Sync(MovementCheckpoint checkpoint)
+        {
+            if (Node != checkpoint.Node)
+            {
+                Node?.RemoveOccupant(this);
+            }
+            if (checkpoint.Anchor != null)
+            {
+                NodeAnchor = checkpoint.Anchor;
+            } else if (checkpoint.Node != null)
+            {
+                Node = checkpoint.Node;
+            } else {
+                Coordinates = checkpoint.Coordinates;
+            }
+
+            // TODO: handle look direction changes here too
+
+            Sync();
         }
 
         /// <summary>

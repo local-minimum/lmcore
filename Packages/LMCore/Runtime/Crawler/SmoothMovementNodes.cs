@@ -66,6 +66,7 @@ namespace LMCore.Crawler
             gEntity = GetComponent<GridEntity>();
             movementInterpreter = GetComponent<IEntityMovementInterpreter>();
 
+            /*
             GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
             enabled = !GameSettings.InstantMovement.Value;
 
@@ -73,6 +74,7 @@ namespace LMCore.Crawler
             {
                 gEntity.Sync();
             }
+            */
         }
 
         private void OnDestroy()

@@ -70,7 +70,7 @@ namespace LMCore.Crawler
 
         public Vector3 Position(IDungeon dungeon)
         {
-            if (_anchor == null)
+            if (_anchor != null)
             {
                 if (Edge == Direction.None)
                 {

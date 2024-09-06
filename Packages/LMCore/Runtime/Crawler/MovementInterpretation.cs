@@ -8,6 +8,7 @@ namespace LMCore.Crawler
 {
     public class MovementInterpretation
     {
+        public float DurationScale { get; set; } = 1.0f;
         public Direction PrimaryDirection { get; set; }
         public MovementInterpretationOutcome Outcome { get; set; }
         public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
@@ -231,7 +232,7 @@ namespace LMCore.Crawler
                     start, 
                     end, 
                     down.AsLookVector3D(), 
-                    entity.Abilities.jumpHeight, 
+                    entity.Abilities.jumpHeight, // TODO: scale height by length of jump
                     segmentProgress);
             }
 
@@ -327,7 +328,7 @@ namespace LMCore.Crawler
             CurrentSegment = Segment.Last;
         }
         
-        public Vector3 Evaluate(GridEntity entity, float progress)
+        public Vector3 Evaluate(GridEntity entity, float progress, out Quaternion rotation, out MovementCheckpoint checkpoint)
         {
             // 1. Figure out segment active from total length and progressNumber of steps in a full tile
             //    Take into account freeze frames and step-up/downs and jumps for misaligned tiles
@@ -347,8 +348,12 @@ namespace LMCore.Crawler
             var start = Start;
             var end = End;
 
+            // TODO: support rotations
+            rotation = entity.transform.rotation;
+
             if (Steps.Count == 2 && start.Transition == MovementTransition.Jump)
             {
+                checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
                 return EvaluateSegment(
                     MovementTransition.Jump,
                     AnchorTraversal.None,
@@ -364,6 +369,8 @@ namespace LMCore.Crawler
                 if (progress < 0.5f && CurrentSegment == Segment.First)
                 {
                     var startPos = start.Checkpoint.Position(entity.Dungeon);
+                    checkpoint = start.Checkpoint;
+
                     return EvaluateSegment(
                         start.Transition,
                         start.Checkpoint.Traversal,
@@ -378,6 +385,8 @@ namespace LMCore.Crawler
                 {
                     CurrentSegment = Segment.Last;
                     var endPos = end.Checkpoint.Position(entity.Dungeon);
+                    checkpoint = end.Checkpoint;
+
                     return EvaluateSegment(
                         transition,
                         end.Checkpoint.Traversal,
@@ -396,7 +405,9 @@ namespace LMCore.Crawler
 
                 if (segments != 3)
                 {
+                    checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
                     Debug.LogError($"{entity.name} is attempting a {segments} part transition, we don't know how to handle that");
+
                     return Vector3.Lerp(
                         start.Checkpoint.Position(entity.Dungeon),
                         end.Checkpoint.Position(entity.Dungeon),
@@ -461,6 +472,8 @@ namespace LMCore.Crawler
 
                 var pt1 = Steps[startIdx];
                 var pt2 = Steps[startIdx + 1];
+
+                checkpoint = segmentProgress < 0.5 ? pt1.Checkpoint : pt2.Checkpoint;
 
                 return EvaluateSegment(
                     pt1.Transition,

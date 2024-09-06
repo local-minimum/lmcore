@@ -1,10 +1,18 @@
+using LMCore.IO;
 using UnityEngine;
 
 namespace LMCore.Crawler
 {
+    public delegate void MovementInterpretationEvent(
+        GridEntity entity, 
+        MovementInterpretation interpretation,
+        int tickId,
+        float duration);
 
     public class MovementInterpreter : MonoBehaviour
     {
+        public event MovementInterpretationEvent OnMovement; 
+
         GridEntity _entity;
         GridEntity Entity { 
             get { 
@@ -262,6 +270,25 @@ namespace LMCore.Crawler
             }
 
             return interpretation;
+        }
+
+        private void OnEnable()
+        {
+            GetComponent<CrawlerInput>().OnMovement += MovementInterpreter_OnMovement;
+        }
+
+        private void OnDisable()
+        {
+           GetComponent<CrawlerInput>().OnMovement -= MovementInterpreter_OnMovement;
+        }
+
+        private void MovementInterpreter_OnMovement(int tickId, Movement movement, float duration)
+        {
+            if (movement.IsTranslation())
+            {
+                var interpretation = InterpretMovement(Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement));
+                if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
+            } 
         }
     }
 }
