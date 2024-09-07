@@ -5,6 +5,25 @@ namespace LMCore.Crawler
 {
     public class MovementCheckpoint
     {
+        public Direction LookDirection { get; set; }
+
+        public Quaternion Rotation(GridEntity entity)
+        {
+            if (LookDirection == Direction.None) {
+                Debug.LogError($"{entity.name} Checkpoint: LookDirection is None, can't produce rotation");
+                return entity.transform.rotation;
+            }
+            
+            try
+            {
+                return LookDirection.AsQuaternion(Down, entity.RotationRespectsAnchorDirection);
+            } catch (System.ArgumentException e)
+            {
+                Debug.LogError($"{entity.name} Checkpoint: LookDirection can't be turned into 2d vector: {e.Message}");
+                return entity.transform.rotation;
+            }
+        }
+
         private Anchor _anchor;
         public Anchor Anchor { 
             get => _anchor; 
@@ -100,7 +119,7 @@ namespace LMCore.Crawler
             if (Anchor != null && other.Anchor != null) return Anchor == other.Anchor && Edge == other.Edge;
             if (Node != null && other.Node != null) return Node == other.Node && Edge == other.Edge;
 
-            return Coordinates == other.Coordinates && Edge == other.Edge;
+            return Coordinates == other.Coordinates && Edge == other.Edge && LookDirection == other.LookDirection;
         }
 
         public Direction Edge { get; set; }
@@ -109,55 +128,97 @@ namespace LMCore.Crawler
         {
             if (entity.NodeAnchor != null)
             {
-                return new MovementCheckpoint { Anchor = entity.NodeAnchor, Edge = Direction.None };
+                return new MovementCheckpoint {
+                    Anchor = entity.NodeAnchor, 
+                    Edge = Direction.None,
+                    LookDirection = entity.LookDirection,
+                };
             }
             else if (entity.Node != null)
             {
-                return new MovementCheckpoint { Node = entity.Node, Edge = entity.Anchor };
+                return new MovementCheckpoint { 
+                    Node = entity.Node, 
+                    Edge = entity.Anchor,
+                    LookDirection = entity.LookDirection,
+                };
             }
 
-            return new MovementCheckpoint { Coordinates = entity.Coordinates, Edge = entity.Anchor };
+            return new MovementCheckpoint { 
+                Coordinates = entity.Coordinates, 
+                Edge = entity.Anchor,
+                LookDirection = entity.LookDirection,
+            };
         }
 
-        public static MovementCheckpoint From(IDungeonNode node, Direction edge = Direction.None) =>
-            new MovementCheckpoint { Node = node, Edge = edge };
+        public static MovementCheckpoint From(
+            IDungeonNode node, 
+            Direction edge,
+            Direction lookDirection 
+            ) =>
+            new MovementCheckpoint { Node = node, Edge = edge, LookDirection = lookDirection };
 
-        public static MovementCheckpoint FromAnchor(IDungeonNode node, Direction anchorDirection) =>
+        public static MovementCheckpoint FromAnchor(
+            IDungeonNode node, 
+            Direction anchorDirection,
+            Direction lookDirection
+            ) =>
             new MovementCheckpoint
             {
                 Anchor = node.GetAnchor(anchorDirection),
-                Edge = Direction.None
+                Edge = Direction.None,
+                LookDirection = lookDirection,
             };
 
-        public static MovementCheckpoint From(Vector3Int coordinates, Direction edge = Direction.None) =>
+        public static MovementCheckpoint From(
+            Vector3Int coordinates, 
+            Direction edge = Direction.None,
+            Direction lookDirection = Direction.North
+            ) =>
             new MovementCheckpoint
             {
                 Coordinates = coordinates,
-                Edge = edge
+                Edge = edge,
+                LookDirection = lookDirection,
             };
 
         public static MovementCheckpoint From(MovementCheckpoint template) =>
-            From(template, template.Edge);
+            From(template, template.Edge, template.LookDirection);
 
-        public static MovementCheckpoint From(MovementCheckpoint template, Direction edge) {
+        public static MovementCheckpoint From(MovementCheckpoint template, Direction edge, Direction lookDirection) {
             if (template.Anchor != null)
             {
-                return new MovementCheckpoint { Anchor = template.Anchor, Edge = edge };
+                return new MovementCheckpoint { 
+                    Anchor = template.Anchor,
+                    Edge = edge,
+                    LookDirection = lookDirection,
+                };
             }
 
             if (template.Node != null)
             {
-                return new MovementCheckpoint { Node = template.Node, Edge = edge };
+                return new MovementCheckpoint { 
+                    Node = template.Node, 
+                    Edge = edge,
+                    LookDirection = lookDirection,
+                };
             }
 
             return new MovementCheckpoint
             {
                 Coordinates = template.Coordinates,
-                Edge = edge
+                Edge = edge,
+                LookDirection = lookDirection,
             };
         }
 
-        public static MovementCheckpoint From(Anchor anchor, Direction edge = Direction.None) =>
-            new MovementCheckpoint { Anchor = anchor, Edge = edge };
+        public static MovementCheckpoint From(
+            Anchor anchor,
+            Direction edge,
+            Direction lookDirection) =>
+            new MovementCheckpoint {
+                Anchor = anchor,
+                Edge = edge,
+                LookDirection = lookDirection,
+            };
     }
 }

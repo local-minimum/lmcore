@@ -183,8 +183,14 @@ namespace LMCore.Crawler
             }
 
             transform.position = Dungeon.Position(this);
-            transform.rotation = LookDirection.AsQuaternion(Anchor, RotationRespectsAnchorDirection);
-
+            try
+            {
+                transform.rotation = LookDirection.AsQuaternion(Down, RotationRespectsAnchorDirection);
+            } catch (System.ArgumentException e)
+            {
+                Debug.LogError(
+                    PrefixLogMessage($"Can't parse look direction as rotation ({LookDirection} / 3D {RotationRespectsAnchorDirection}): {e.Message}"));
+            }
             var node = Dungeon[Coordinates];
             if (node != null)
             {
@@ -209,7 +215,7 @@ namespace LMCore.Crawler
                 Coordinates = checkpoint.Coordinates;
             }
 
-            // TODO: handle look direction changes here too
+            LookDirection = checkpoint.LookDirection;
 
             Sync();
         }

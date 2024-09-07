@@ -94,7 +94,7 @@ namespace LMCore.Crawler
         {
             if (activeInterpretation != null)
             {
-                Entity.Sync(activeInterpretation.End.Checkpoint);
+                Entity.Sync(activeInterpretation.Last.Checkpoint);
                 animationTickId = -1;
                 activeInterpretation = null;
                 currentCheckpoint = null;
@@ -123,7 +123,7 @@ namespace LMCore.Crawler
             animationDuration = duration;
             animationInterpolationStart = 0;
 
-            currentCheckpoint = activeInterpretation.Start.Checkpoint;
+            currentCheckpoint = activeInterpretation.First.Checkpoint;
 
             for (int i = 1, l = interpretation.Steps.Count; i < l; i++)
             {

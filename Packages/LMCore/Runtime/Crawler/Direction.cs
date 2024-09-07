@@ -246,7 +246,7 @@ namespace LMCore.Crawler
                     return new Vector2Int(1, 0);
 
                 default:
-                    throw new System.ArgumentException();
+                    throw new System.ArgumentException($"{direction} is not a planar look vector");
             }
         }
 

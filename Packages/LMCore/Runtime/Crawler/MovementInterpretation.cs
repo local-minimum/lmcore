@@ -13,12 +13,12 @@ namespace LMCore.Crawler
         public MovementInterpretationOutcome Outcome { get; set; }
         public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
 
-        public MovementCheckpointWithTransition Start => Steps[0];
-        public MovementCheckpointWithTransition End => Steps.Last();
+        public MovementCheckpointWithTransition First => Steps[0];
+        public MovementCheckpointWithTransition Last => Steps.Last();
 
         public IEnumerable<float> Lengths(IDungeon dungeon)
         {
-            var previous = Start.Checkpoint.Position(dungeon);
+            var previous = First.Checkpoint.Position(dungeon);
             for (int i=1, n=Steps.Count; i<n; ++i)
             {
                 var current = Steps[i].Checkpoint.Position(dungeon);
@@ -155,8 +155,8 @@ namespace LMCore.Crawler
             var count = Steps.Count;
             if (count == 2)
             {
-                position = Vector3.Lerp(Start.Checkpoint.Position(entity.Dungeon), End.Checkpoint.Position(entity.Dungeon), 0.5f);
-                transition = Start.Transition;
+                position = Vector3.Lerp(First.Checkpoint.Position(entity.Dungeon), Last.Checkpoint.Position(entity.Dungeon), 0.5f);
+                transition = First.Transition;
                 return true;
             }
             if (count == 3)
@@ -173,7 +173,7 @@ namespace LMCore.Crawler
                 return false;                
             }
 
-            var origin = Start;
+            var origin = First;
             var first = Steps[1];
             var second = Steps[2];
 
@@ -303,20 +303,20 @@ namespace LMCore.Crawler
             {
                 if (CurrentSegment == Segment.First)
                 {
-                    return Start.Checkpoint.Node;
+                    return First.Checkpoint.Node;
                 } else
                 {
-                    return End.Checkpoint.Node;
+                    return Last.Checkpoint.Node;
                 }
             }
         }
 
         public void RefuseMovement() {
-            var start = Start;
+            var start = First;
             MovementCheckpointWithTransition intermediary = new MovementCheckpointWithTransition()
             {
-                Checkpoint = MovementCheckpoint.From(start.Checkpoint, PrimaryDirection),
-                Transition = Start.Transition,
+                Checkpoint = MovementCheckpoint.From(start.Checkpoint, PrimaryDirection, start.Checkpoint.LookDirection),
+                Transition = First.Transition,
             };
 
             Steps.Clear();
@@ -345,14 +345,16 @@ namespace LMCore.Crawler
                 progress = EaseOutCubic(progress);
             }
 
-            var start = Start;
-            var end = End;
-
-            // TODO: support rotations
-            rotation = entity.transform.rotation;
+            var start = First;
+            var end = Last;
 
             if (Steps.Count == 2 && start.Transition == MovementTransition.Jump)
             {
+                var startRotation = start.Checkpoint.Rotation(entity);
+                var endRotation = end.Checkpoint.Rotation(entity);
+
+                rotation = Quaternion.Lerp(startRotation, endRotation, progress);
+
                 checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
                 return EvaluateSegment(
                     MovementTransition.Jump,
@@ -366,6 +368,11 @@ namespace LMCore.Crawler
             }
             else if (CalculateMidpoint(entity, out var mid, out var transition))
             {
+                var startRotation = start.Checkpoint.Rotation(entity);
+                var endRotation = end.Checkpoint.Rotation(entity);
+
+                rotation = Quaternion.Lerp(startRotation, endRotation, progress);
+
                 if (progress < 0.5f && CurrentSegment == Segment.First)
                 {
                     var startPos = start.Checkpoint.Position(entity.Dungeon);
@@ -407,6 +414,11 @@ namespace LMCore.Crawler
                 {
                     checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
                     Debug.LogError($"{entity.name} is attempting a {segments} part transition, we don't know how to handle that");
+
+                    var startRotation = start.Checkpoint.Rotation(entity);
+                    var endRotation = end.Checkpoint.Rotation(entity);
+
+                    rotation = Quaternion.Lerp(startRotation, endRotation, progress);
 
                     return Vector3.Lerp(
                         start.Checkpoint.Position(entity.Dungeon),
@@ -474,6 +486,11 @@ namespace LMCore.Crawler
                 var pt2 = Steps[startIdx + 1];
 
                 checkpoint = segmentProgress < 0.5 ? pt1.Checkpoint : pt2.Checkpoint;
+
+                var pt1Rotation = pt1.Checkpoint.Rotation(entity);
+                var pt2Rotation = pt2.Checkpoint.Rotation(entity);
+
+                rotation = Quaternion.Lerp(pt1Rotation, pt2Rotation, progress);
 
                 return EvaluateSegment(
                     pt1.Transition,

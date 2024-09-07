@@ -27,16 +27,16 @@ namespace LMCore.Crawler
         private void InterpretRefuse(MovementInterpretation interpretation)
         {
             var direction = interpretation.PrimaryDirection;
-            var origin = interpretation.Steps[interpretation.Steps.Count - 1];
+            var origin = interpretation.Last;
 
             interpretation.Outcome = MovementInterpretationOutcome.Bouncing;
             interpretation.Steps.Add(new MovementCheckpointWithTransition() {
-                Checkpoint = MovementCheckpoint.From(origin.Checkpoint, direction),
+                Checkpoint = MovementCheckpoint.From(origin.Checkpoint, direction, origin.Checkpoint.LookDirection),
                 Transition = origin.Transition,
             });
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
-                Checkpoint = MovementCheckpoint.From(origin.Checkpoint),
+                Checkpoint = MovementCheckpoint.From(origin.Checkpoint, Direction.None, origin.Checkpoint.LookDirection),
                 Transition = origin.Transition,
             });
 
@@ -44,12 +44,14 @@ namespace LMCore.Crawler
 
         private bool InterpretRoundOuterCorner(MovementInterpretation interpretation)
         {
-            var origin = interpretation.Steps[interpretation.Steps.Count - 1];
+            var origin = interpretation.Last;
             var originAnchor = origin.Checkpoint.Anchor;
             if (originAnchor == null) return false;
 
-            var targetCoordinates = originAnchor.CubeFace 
-                .Translate(interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates));
+            // First one step in primary direction
+            var intermediaryCoordinates = interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates);
+            // Then to make an outer corner we need to move in the direction of the starting anchor
+            var targetCoordinates = originAnchor.CubeFace.Translate(intermediaryCoordinates);
 
             if (!Entity.Dungeon.HasNodeAt(targetCoordinates)) return false;
 
@@ -65,16 +67,32 @@ namespace LMCore.Crawler
 
             var targetAnchor = target.GetAnchor(targetAnchorDirection);
 
+            var lookDirection = Entity.RotationRespectsAnchorDirection ? origin.Checkpoint.LookDirection : targetAnchorDirection;
             // Adding intermediary point
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
-                Checkpoint = MovementCheckpoint.From(targetAnchor, originAnchor.CubeFace.Inverse()),
+                Checkpoint = MovementCheckpoint.From(
+                    targetAnchor, 
+                    originAnchor.CubeFace.Inverse(),
+                    lookDirection
+                    ),
                 Transition = MovementTransition.Grounded,
             });
 
+            if (Entity.RotationRespectsAnchorDirection)
+            {
+                if (interpretation.PrimaryDirection == Entity.LookDirection)
+                {
+                    lookDirection = origin.Checkpoint.LookDirection.PitchDown(Entity.Down, out var _);
+                } else if (interpretation.PrimaryDirection.Inverse() == Entity.LookDirection)
+                {
+                    lookDirection = origin.Checkpoint.LookDirection.PitchUp(Entity.Down, out var _);
+                }
+            }
+
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
-                Checkpoint = MovementCheckpoint.From(targetAnchor),
+                Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
                 Transition = MovementTransition.Grounded,
             });
 
@@ -93,7 +111,6 @@ namespace LMCore.Crawler
                 {
                     // Normal anchoring on same cube face
 
-
                     interpretation.Outcome = origin.Transition == MovementTransition.Grounded 
                         ? MovementInterpretationOutcome.Grounded : MovementInterpretationOutcome.Landing;
 
@@ -103,14 +120,20 @@ namespace LMCore.Crawler
                     {
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
-                            Checkpoint = MovementCheckpoint.From(targetAnchor, direction.Inverse()),
+                            Checkpoint = MovementCheckpoint.From(
+                                targetAnchor, 
+                                direction.Inverse(),
+                                interpretation.Last.Checkpoint.LookDirection),
                             Transition = MovementTransition.Grounded,
                         });
                     }
 
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
-                        Checkpoint = MovementCheckpoint.From(targetAnchor),
+                        Checkpoint = MovementCheckpoint.From(
+                            targetAnchor, 
+                            Direction.None,
+                            interpretation.Last.Checkpoint.LookDirection),
                         Transition = MovementTransition.Grounded,
                     });
                     return;
@@ -130,7 +153,7 @@ namespace LMCore.Crawler
                     interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
-                        Checkpoint = MovementCheckpoint.From(targetNode),
+                        Checkpoint = MovementCheckpoint.From(targetNode, Direction.None, interpretation.Last.Checkpoint.LookDirection),
                         Transition = MovementTransition.Ungrounded,
                     });
                 }
@@ -146,7 +169,7 @@ namespace LMCore.Crawler
                         interpretation.Outcome = MovementInterpretationOutcome.Bouncing;
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
-                            Checkpoint = MovementCheckpoint.From(targetNode, direction),
+                            Checkpoint = MovementCheckpoint.From(targetNode, direction, interpretation.Last.Checkpoint.LookDirection),
                             Transition = MovementTransition.Ungrounded
                         });
                     } else
@@ -156,7 +179,7 @@ namespace LMCore.Crawler
                     }
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
-                        Checkpoint = MovementCheckpoint.From(targetNode),
+                        Checkpoint = MovementCheckpoint.From(targetNode, Direction.None, interpretation.Last.Checkpoint.LookDirection),
                         Transition = MovementTransition.Ungrounded
                     });
                 }
@@ -187,16 +210,57 @@ namespace LMCore.Crawler
                 }
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
-                    Checkpoint = MovementCheckpoint.From(targetCoordinates),
+                    Checkpoint = MovementCheckpoint.From(
+                        targetCoordinates, 
+                        Direction.None, 
+                        interpretation.Last.Checkpoint.LookDirection),
                     Transition = MovementTransition.Ungrounded
                 });
             }
         }
 
+        public MovementInterpretation InterpretMovement(Movement movement)
+        {
+            if (movement.IsTranslation())
+            {
+                return InterpretMovement(Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement));
+            } else if (movement.IsRotation())
+            {
+                if (Entity.Node?.AllowsRotating(Entity) != true) return null;
+
+                var interpretation = new MovementInterpretation() { 
+                    DurationScale = Entity.Abilities.turnDurationScaleFactor,
+                };
+
+                var startCheckpoint = MovementCheckpoint.From(Entity);
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = startCheckpoint,
+                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
+                });
+
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = MovementCheckpoint.From(
+                        startCheckpoint, 
+                        Direction.None, 
+                        startCheckpoint.LookDirection.ApplyRotation(Entity.Down, movement, out var _)),
+                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
+                });
+
+                return interpretation;
+
+            }
+
+            return null;
+        }
+
         public MovementInterpretation InterpretMovement(Direction direction)
         {
             // TODO: Figure out how to make Checkpoint is Scale when stepping up
-            var interpretation = new MovementInterpretation() { PrimaryDirection = direction }; 
+            var interpretation = new MovementInterpretation() { 
+                PrimaryDirection = direction 
+            }; 
 
             var anchor = Entity.NodeAnchor;
             if (anchor == null)
@@ -210,7 +274,7 @@ namespace LMCore.Crawler
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(Entity),
-                        Transition = MovementTransition.Ungrounded,
+                        Transition = MovementTransition.Ungrounded,                    
                     });
                     InterpretByDungeon(interpretation);
                 } else
@@ -239,19 +303,34 @@ namespace LMCore.Crawler
                     Checkpoint = MovementCheckpoint.From(Entity),
                     Transition = MovementTransition.Grounded,
                 });
+
                 // Intermediary step at edge of starting anchor
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
-                    Checkpoint = MovementCheckpoint.From(interpretation.Start.Checkpoint, direction),
+                    Checkpoint = MovementCheckpoint.From(interpretation.First.Checkpoint, direction, Entity.LookDirection),
                     Transition = MovementTransition.Grounded,
                 });
 
                 if (sameNode)
                 {
                     // E.g. getting onto a ladder on the wall of the same node
+                    var lookDirection = Entity.LookDirection; 
+                    if (Entity.RotationRespectsAnchorDirection)
+                    {
+                        if (Entity.LookDirection == direction)
+                        {
+                            lookDirection = direction.PitchUp(Entity.Down, out var _);
+                        } else if (Entity.LookDirection.Inverse() == direction)
+                        {
+                            lookDirection = direction.PitchDown(Entity.Down, out var _);
+                        }
+                    } else if (targetAnchor.CubeFace.IsPlanarCardinal())
+                    {
+                        lookDirection = targetAnchor.CubeFace;
+                    }
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
-                        Checkpoint = MovementCheckpoint.From(targetAnchor),
+                        Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
                         Transition = MovementTransition.Grounded,
                     });
                 } else if (anchor.Node.AllowExit(Entity, direction))
@@ -284,11 +363,8 @@ namespace LMCore.Crawler
 
         private void MovementInterpreter_OnMovement(int tickId, Movement movement, float duration)
         {
-            if (movement.IsTranslation())
-            {
-                var interpretation = InterpretMovement(Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement));
-                if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
-            } 
+            var interpretation = InterpretMovement(movement);
+            if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
         }
     }
 }

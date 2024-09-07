@@ -5,6 +5,9 @@ namespace LMCore.Crawler
     [System.Serializable]
     public struct EntityAbilities 
     {
+        [Range(0f, 1f)]
+        public float turnDurationScaleFactor;
+
         [Tooltip("Inverse direction of current down. Smaller than this is ignored / walked over")]
         public float minScaleHeight;
         [Tooltip("Inverse direction of current down. Larger than this is refused")]
