@@ -125,6 +125,9 @@ namespace LMCore.Crawler
 
         protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {Anchor} looking {LookDirection}: {message}";
 
+        public override string ToString() => 
+            $"Entity '{name}' @ {Coordinates} Anchor({Anchor}) Down({Down}) Looking({LookDirection})";
+
         private bool _falling;
         public bool Falling
         {

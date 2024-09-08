@@ -13,7 +13,7 @@ namespace LMCore.Crawler
      *  
      *  After stepping on spikes we are no longer properly grounded
      *  
-     *  Getting to the right place on a ladder interprets all movements from it wrong.
+     *  Ladders dont block latteral movements
      *  
      *  Ramps causes error
      *  
@@ -86,7 +86,17 @@ namespace LMCore.Crawler
 
             var targetAnchor = target.GetAnchor(targetAnchorDirection);
 
-            var lookDirection = Entity.RotationRespectsAnchorDirection ? origin.Checkpoint.LookDirection : targetAnchorDirection;
+            var lookDirection = origin.Checkpoint.LookDirection;
+            if (!Entity.RotationRespectsAnchorDirection)
+            {
+                if (targetAnchorDirection.IsPlanarCardinal())
+                {
+                    lookDirection = targetAnchorDirection;
+                } else
+                {
+                    lookDirection = origin.Checkpoint.LookDirection;
+                }
+            }
             // Adding intermediary point
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {
@@ -268,7 +278,32 @@ namespace LMCore.Crawler
         {
             if (movement.IsTranslation())
             {
-                return InterpretMovement(Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement));
+                var direction = Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement);
+                if (!Entity.RotationRespectsAnchorDirection && Entity.Anchor.IsPlanarCardinal())
+                {
+                    if (Entity.LookDirection == Entity.Anchor)
+                    {
+                        switch (movement)
+                        {
+                            case Movement.StrafeLeft:
+                            case Movement.StrafeRight:
+                                // These movements follow normal rules
+                                break;
+                            case Movement.Forward:
+                                direction = Entity.LookDirection.PitchUp(Direction.Down, out var _);
+                                break;
+                            case Movement.Backward:
+                                direction = Entity.LookDirection.PitchDown(Direction.Down, out var _);
+                                break;
+                        } 
+                    } else
+                    {
+                        Debug.LogWarning($"Movement {movement} for {Entity} not possible becuase enitity is on wall without respecting wall down and not looking at the wall");
+                    }
+                }
+
+                Debug.Log($"Interpret {movement} for {Entity} is {direction}");
+                return InterpretMovement(direction);
             } else if (movement.IsRotation())
             {
                 if (Entity.Node?.AllowsRotating(Entity) != true) return null;
