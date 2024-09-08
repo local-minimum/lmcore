@@ -4,21 +4,20 @@ using UnityEngine;
 namespace LMCore.Crawler
 {
     /* KNOWN BUGS
+     *
+     *  There are pauses in the jumping
      * 
-     * Going off an edge tries to not jump but anchor you directly to the floor
-     * on the elevation below, which also causes an invalid edge on that anchor in
-     * the opposite direction of the anchor cube face. This seems to lead to the
-     * outcome being grounded.
-     * 
-     *  A slew of traversals are None
+     *  A some of traversals are None
      *  
      *  The spinner goes crazy
      *  
      *  After stepping on spikes we are no longer properly grounded
      *  
-     *  There are twice as many steps as wanted
-     *  
      *  Getting to the right place on a ladder interprets all movements from it wrong.
+     *  
+     *  Ramps causes error
+     *  
+     *  Holding forwards pressed gets us unsynched
      */
 
     public delegate void MovementInterpretationEvent(
@@ -79,7 +78,7 @@ namespace LMCore.Crawler
 
             var targetAnchorDirection = interpretation
                 .PrimaryDirection
-                .PitchDown(originAnchor.CubeFace, out var _);
+                .Inverse();
 
             if (!target.CanAnchorOn(Entity, targetAnchorDirection)) return false;
 
@@ -122,7 +121,7 @@ namespace LMCore.Crawler
         private void InterpretTargetNode(MovementInterpretation interpretation, IDungeonNode targetNode)
         {
             var direction = interpretation.PrimaryDirection;
-            var origin = interpretation.Steps[interpretation.Steps.Count - 1];
+            var origin = interpretation.Last;
 
             if (targetNode.AllowsEntryFrom(Entity, direction.Inverse()))
             {
@@ -190,9 +189,11 @@ namespace LMCore.Crawler
                 if (targetNode.GetAnchor(direction) == null)
                 {
                     // Falling or flying through a tile
+                    Debug.Log("Flying or falling through tile");
                     if (origin.Transition == MovementTransition.Grounded)
                     {
                         origin.Transition = MovementTransition.Jump;
+                        Debug.Log($"Reclassifying prior transition as a jump: {origin}");
                     }
                     interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()

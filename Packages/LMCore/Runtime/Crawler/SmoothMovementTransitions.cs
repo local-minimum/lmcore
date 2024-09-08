@@ -160,8 +160,12 @@ namespace LMCore.Crawler
 
             if (currentCheckpoint != checkpoint)
             {
+                currentCheckpoint.Anchor?.RemoveAnchor(Entity);
                 currentCheckpoint.Node?.RemoveOccupant(Entity);
+
                 checkpoint.Node?.AddOccupant(Entity);
+                currentCheckpoint.Anchor?.AddAnchor(Entity);
+
                 ReservationNodes.Remove(checkpoint.Node);
 
                 Entity.Coordinates = checkpoint.Coordinates;

@@ -78,6 +78,9 @@ namespace LMCore.Crawler
             set { _node = value; }
         }
 
+        public override string ToString() =>
+            $"Anchor {CubeFace} ({Traversal}) of {Node}";
+
         IDungeon _dungeon;
         public IDungeon Dungeon
         {

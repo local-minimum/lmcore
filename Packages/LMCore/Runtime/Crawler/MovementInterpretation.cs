@@ -32,7 +32,7 @@ namespace LMCore.Crawler
 
         float SteppingProgress(float progress, int stepsPerTransition, System.Func<float, float> easing)
         {
-            float stepLength = 0.5f / stepsPerTransition;
+            float stepLength = 1f / stepsPerTransition;
             var remainder = progress % stepLength;
 
             return progress - remainder + easing(remainder) * stepLength;
@@ -437,7 +437,10 @@ namespace LMCore.Crawler
                     }
                 }
 
-                var startIdx = Mathf.Max(activeSegment, (int)CurrentSegment);
+                var startIdx =  Mathf.Min(
+                    Mathf.Max(activeSegment, (int)CurrentSegment),
+                    Steps.Count - 2);
+
                 var newSegment = (Segment)startIdx;
 
                 if (CurrentSegment != newSegment)
