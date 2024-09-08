@@ -14,9 +14,11 @@ namespace LMCore.Crawler
      *  
      *  The spinner goes crazy
      *  
-     *  The floor spikes after first correctly probably refusing entry caused some
-     *  bug when they are retracted.
+     *  After stepping on spikes we are no longer properly grounded
      *  
+     *  There are twice as many steps as wanted
+     *  
+     *  Getting to the right place on a ladder interprets all movements from it wrong.
      */
 
     public delegate void MovementInterpretationEvent(
@@ -81,6 +83,8 @@ namespace LMCore.Crawler
 
             if (!target.CanAnchorOn(Entity, targetAnchorDirection)) return false;
 
+            Debug.Log($"Outer corner movement confirmed");
+
             var targetAnchor = target.GetAnchor(targetAnchorDirection);
 
             var lookDirection = Entity.RotationRespectsAnchorDirection ? origin.Checkpoint.LookDirection : targetAnchorDirection;
@@ -131,9 +135,23 @@ namespace LMCore.Crawler
                         ? MovementInterpretationOutcome.Grounded : MovementInterpretationOutcome.Landing;
 
                     var targetAnchor = targetNode.GetAnchor(wantedAnchorDirection);
-                    // Intermediary step
-                    if (targetAnchor.HasEdge(direction.Inverse()))
+
+                    if (targetAnchor == null)
                     {
+                        Debug.LogError(
+                            $"{targetNode} @ {targetNode.Coordinates} lacks anchor in direction {wantedAnchorDirection} though it says {Entity.name} can anchor there."
+                            );
+                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                        {
+                            Checkpoint = MovementCheckpoint.From(
+                                targetNode, 
+                                wantedAnchorDirection,
+                                interpretation.Last.Checkpoint.LookDirection),
+                            Transition = MovementTransition.Grounded,
+                        });
+                    } else if (targetAnchor.HasEdge(direction.Inverse()))
+                    {
+                        // Intermediary step
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
                             Checkpoint = MovementCheckpoint.From(
@@ -142,16 +160,26 @@ namespace LMCore.Crawler
                                 interpretation.Last.Checkpoint.LookDirection),
                             Transition = MovementTransition.Grounded,
                         });
+                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                        {
+                            Checkpoint = MovementCheckpoint.From(
+                                targetAnchor, 
+                                Direction.None,
+                                interpretation.Last.Checkpoint.LookDirection),
+                            Transition = MovementTransition.Grounded,
+                        });
                     }
-
-                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                    else
                     {
-                        Checkpoint = MovementCheckpoint.From(
-                            targetAnchor, 
-                            Direction.None,
-                            interpretation.Last.Checkpoint.LookDirection),
-                        Transition = MovementTransition.Grounded,
-                    });
+                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                        {
+                            Checkpoint = MovementCheckpoint.From(
+                                targetAnchor, 
+                                Direction.None,
+                                interpretation.Last.Checkpoint.LookDirection),
+                            Transition = MovementTransition.Grounded,
+                        });
+                    }
                     return;
                 }
 
@@ -330,6 +358,16 @@ namespace LMCore.Crawler
                 if (sameNode)
                 {
                     // E.g. getting onto a ladder on the wall of the same node
+                    
+                    if (targetAnchor == null)
+                    {
+                        Debug.LogError(
+                            $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
+
+                        InterpretRefuse(interpretation);
+                        return interpretation;
+
+                    }
                     var lookDirection = Entity.LookDirection; 
                     if (Entity.RotationRespectsAnchorDirection)
                     {

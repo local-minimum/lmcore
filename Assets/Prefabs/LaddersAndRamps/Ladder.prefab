@@ -93,7 +93,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PrefabRotation: 0
   Traversal: 2
-  CubeFace: 5
+  _PrefabCubeFace: 0
 --- !u!1001 &4798380277699071463
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -71,6 +71,8 @@ namespace LMCore.TiledDungeon
             get => _coordinates;
             set => _coordinates = value;
         }
+        public override string ToString() =>
+                $"TDNode {name} @ {Coordinates}";
 
         public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
 

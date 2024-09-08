@@ -55,14 +55,14 @@ namespace LMCore.Crawler
 
         public AnchorTraversal Traversal;
 
-        [Tooltip("Use None for center of cube")]
-        public Direction CubeFace = Direction.Down;
+        [SerializeField, Tooltip("Use None for center of cube")]
+        private Direction _PrefabCubeFace = Direction.Down;
 
         public bool HasEdge(Direction direction) =>
             CubeFace != direction && CubeFace.Inverse() != direction;
 
-        public Direction RotatedAnchor =>
-            PrefabRotation.Rotate(CubeFace);
+        public Direction CubeFace =>
+            PrefabRotation.Rotate(_PrefabCubeFace);
 
         IDungeonNode _node;
         public IDungeonNode Node
@@ -163,7 +163,7 @@ namespace LMCore.Crawler
 
         private void OnDrawGizmosSelected()
         {
-            var a = RotatedAnchor;
+            var a = CubeFace;
             Gizmos.color = directionToColor[a];
             Gizmos.DrawWireCube(CenterPosition, Vector3.one * 0.3f);
 
@@ -189,7 +189,7 @@ namespace LMCore.Crawler
                     return s[Direction.None].Position;
                 }
 
-                var offset = RotatedAnchor.AsLookVector3D().ToDirection(halfSize);
+                var offset = CubeFace.AsLookVector3D().ToDirection(halfSize);
 
                 if (ManagingMovingCubeFace != null)
                 {
@@ -209,17 +209,16 @@ namespace LMCore.Crawler
 
         public Vector3 GetEdgePosition(Direction direction)
         {
-            var d = PrefabRotation.Rotate(direction);
-            if (d == Direction.None || d == CubeFace) 
+            if (direction == Direction.None || direction == CubeFace) 
                 return CenterPosition;
 
-            if (d == CubeFace.Inverse())
+            if (direction == CubeFace.Inverse())
             {
                 Debug.LogWarning(PrefixLogMessage("Requesting inverse of anchor, returning center"));
                 return CenterPosition;
             }
 
-            if (Sentinels.ContainsKey(d)) return Sentinels[d].Position;
+            if (Sentinels.ContainsKey(direction)) return Sentinels[direction].Position;
 
             return CenterPosition + direction.AsLookVector3D().ToDirection(HalfGridSize);
         }
@@ -262,6 +261,12 @@ namespace LMCore.Crawler
 
             sameNode = true;
             return null;
+        }
+
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(PrefixLogMessage($"Managed entities: {string.Join(", ", entities.Select(e => e.name))}"));
         }
     }
 }
