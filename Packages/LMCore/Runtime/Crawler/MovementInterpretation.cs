@@ -35,7 +35,7 @@ namespace LMCore.Crawler
             float stepLength = 1f / stepsPerTransition;
             var remainder = progress % stepLength;
 
-            return progress - remainder + easing(remainder) * stepLength;
+            return progress - remainder + easing(remainder / stepLength) * stepLength;
         }
 
         float SteppingProgress(float progress, int stepsPerTransition) =>
@@ -94,9 +94,12 @@ namespace LMCore.Crawler
         /// <returns></returns>
         Vector3 LerpHalfNode(Vector3 start, Vector3 end, float progress, System.Func<float, float> easing, bool entering)
         {
+            // Delta is half of the total distance.
             var delta = end - start;
 
+            // Progress along the cube face 
             var adjustedProgress = entering ? progress / 2f : 0.5f + progress / 2f;
+            // Start of the cube face
             var adjustedStart = entering ? start : start - delta;
 
             return adjustedStart + 2f * delta * easing(adjustedProgress);
@@ -199,11 +202,13 @@ namespace LMCore.Crawler
         {
             if (transition == MovementTransition.Jump)
             {
+                var jumpDistance = Vector3.Distance(start, end);
+
                 return LerpJump(
                     start, 
                     end, 
                     down.AsLookVector3D(), 
-                    entity.Abilities.jumpHeight, // TODO: scale height by length of jump
+                    entity.Abilities.jumpHeight * Mathf.Clamp01(jumpDistance/entity.Abilities.maxForwardJump),
                     segmentProgress);
             }
 

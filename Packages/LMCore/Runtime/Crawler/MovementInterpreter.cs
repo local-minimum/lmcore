@@ -17,6 +17,8 @@ namespace LMCore.Crawler
      *  
      *  we are not carried by movable platforms
      *  
+     *  stepping up off a ladder feels like it skips one part of the animation
+     *  
      */
 
     public delegate void MovementInterpretationEvent(
