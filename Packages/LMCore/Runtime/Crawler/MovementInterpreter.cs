@@ -3,6 +3,22 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
+    /* KNOWN BUGS
+     * 
+     * Going off an edge tries to not jump but anchor you directly to the floor
+     * on the elevation below, which also causes an invalid edge on that anchor in
+     * the opposite direction of the anchor cube face. This seems to lead to the
+     * outcome being grounded.
+     * 
+     *  A slew of traversals are None
+     *  
+     *  The spinner goes crazy
+     *  
+     *  The floor spikes after first correctly probably refusing entry caused some
+     *  bug when they are retracted.
+     *  
+     */
+
     public delegate void MovementInterpretationEvent(
         GridEntity entity, 
         MovementInterpretation interpretation,
