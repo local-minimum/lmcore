@@ -124,6 +124,30 @@ namespace LMCore.Crawler
 
         public Direction Edge { get; set; }
 
+        public Direction AnchorDirection
+        {
+            get
+            {
+                if (Anchor == null) return Edge;
+
+                return Anchor.CubeFace;
+            }
+        }
+
+        private string Attachment
+        {
+            get
+            {
+                if (Anchor != null) return "Anchor";
+                if (Node != null) return "Node";
+                return "Dungeon";
+            }
+        }
+
+        public override string ToString() =>
+            $"{Coordinates} - Attached({Attachment}) Traversal({Traversal}) Anchor({AnchorDirection}) Down({Down}) Edge({Edge}) Looking({LookDirection})";
+
+        #region Creation
         public static MovementCheckpoint From(GridEntity entity)
         {
             if (entity.NodeAnchor != null)
@@ -220,5 +244,6 @@ namespace LMCore.Crawler
                 Edge = edge,
                 LookDirection = lookDirection,
             };
+        #endregion
     }
 }

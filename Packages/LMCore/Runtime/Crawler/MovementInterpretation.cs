@@ -13,6 +13,9 @@ namespace LMCore.Crawler
         public MovementInterpretationOutcome Outcome { get; set; }
         public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
 
+        public override string ToString() =>
+            $"MovementInterpretation: Direction {PrimaryDirection}, Outcome {Outcome}, Duration {DurationScale} - {string.Join(", ", Steps.Select(s => $"[{s}]"))}";
+
         public MovementCheckpointWithTransition First => Steps[0];
         public MovementCheckpointWithTransition Last => Steps.Last();
 
@@ -29,19 +32,6 @@ namespace LMCore.Crawler
 
         public float Length(IDungeon dungeon) => Lengths(dungeon).Sum();
 
-        /*
-        Vector3 Lerp(
-            MovementCheckpointWithTransition start, 
-            MovementCheckpointWithTransition end, 
-            float progress, 
-            IDungeon dungeon) =>
-            Vector3.Lerp(
-                start.Checkpoint.Position(dungeon),
-                end.Checkpoint.Position(dungeon),
-                progress
-            );
-        */
-
         float SteppingProgress(float progress, int stepsPerTransition, System.Func<float, float> easing)
         {
             float stepLength = 0.5f / stepsPerTransition;
@@ -52,23 +42,6 @@ namespace LMCore.Crawler
 
         float SteppingProgress(float progress, int stepsPerTransition) =>
             SteppingProgress(progress, stepsPerTransition, (p) => Mathf.SmoothStep(0, 1, p));
-
-        /*
-        Vector3 LerpJump(
-            MovementCheckpointWithTransition start,
-            MovementCheckpointWithTransition end,
-            Direction down,
-            float height,
-            float progress,
-            IDungeon dungeon
-        ) => LerpJump(
-            start.Checkpoint.Position(dungeon),
-            end.Checkpoint.Position(dungeon),
-            down.AsLookVector3D().ToDirection(),
-            height,
-            progress
-        );
-        */
 
         /// <summary>
         /// Lerps position through a jump segment.

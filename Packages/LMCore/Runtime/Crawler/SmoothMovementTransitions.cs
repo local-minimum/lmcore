@@ -135,7 +135,7 @@ namespace LMCore.Crawler
                 }
             }
 
-            Debug.Log(PrefixLogMessage($"Perform {activeInterpretation.Outcome}"));
+            Debug.Log(PrefixLogMessage($"Perform {activeInterpretation}"));
         }
 
         private void Update()
@@ -150,7 +150,12 @@ namespace LMCore.Crawler
                 return;
             }
 
-            transform.position = activeInterpretation.Evaluate(Entity, progres, out var rotation, out var checkpoint);
+            transform.position = activeInterpretation.Evaluate(
+                Entity, 
+                Mathf.Clamp01(progres / activeInterpretation.DurationScale), 
+                out var rotation, 
+                out var checkpoint);
+
             transform.rotation = rotation;
 
             if (currentCheckpoint != checkpoint)
@@ -162,7 +167,7 @@ namespace LMCore.Crawler
                 Entity.Coordinates = checkpoint.Coordinates;
 
                 currentCheckpoint = checkpoint;
-                Debug.Log(PrefixLogMessage($"Shift checkpoint: {checkpoint.Coordinates}"));
+                Debug.Log(PrefixLogMessage($"Shift checkpoint: {checkpoint}"));
             }
         }
     }
