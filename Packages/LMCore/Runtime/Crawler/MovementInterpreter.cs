@@ -6,18 +6,17 @@ namespace LMCore.Crawler
     /* KNOWN BUGS
      *
      *  There are pauses in the jumping
-     * 
+     *  
      *  A some of traversals are None
      *  
      *  The spinner goes crazy
      *  
-     *  After stepping on spikes we are no longer properly grounded
-     *  
-     *  Ladders dont block latteral movements
-     *  
      *  Ramps causes error
      *  
-     *  Holding forwards pressed gets us unsynched
+     *  Stepping up onto a ramp from the side makes odd transition 
+     *  
+     *  we are not carried by movable platforms
+     *  
      */
 
     public delegate void MovementInterpretationEvent(
@@ -337,7 +336,6 @@ namespace LMCore.Crawler
 
         public MovementInterpretation InterpretMovement(Direction direction)
         {
-            // TODO: Figure out how to make Checkpoint is Scale when stepping up
             var interpretation = new MovementInterpretation() { 
                 PrimaryDirection = direction 
             }; 
@@ -366,75 +364,102 @@ namespace LMCore.Crawler
                         Transition = MovementTransition.Ungrounded,
                     });
 
-                    var targetCoordinates = node.Neighbour(direction);
-                    if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
+                    var outcome = node.AllowsMovement(Entity, Entity.Anchor, direction);
+                    if (outcome == MovementOutcome.Refused)
                     {
-                        InterpretByDungeon(interpretation);
-                    } else 
+                        interpretation.Steps.Add(interpretation.First);
+                    } else if (outcome == MovementOutcome.Blocked)
                     {
-                        InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates]);
+                        InterpretRefuse(interpretation);
+                    } else
+                    {
+                        var targetCoordinates = node.Neighbour(direction);
+                        if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
+                        {
+                            InterpretByDungeon(interpretation);
+                        } else 
+                        {
+                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates]);
+                        }
                     }
                 }
             } else {
-                var targetAnchor = anchor.GetNeighbour(direction, out var sameNode);
-
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
                     Checkpoint = MovementCheckpoint.From(Entity),
                     Transition = MovementTransition.Grounded,
                 });
 
-                // Intermediary step at edge of starting anchor
-                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                var outcome = anchor.Node.AllowsMovement(Entity, anchor.CubeFace, direction);
+                if (outcome == MovementOutcome.Refused)
                 {
-                    Checkpoint = MovementCheckpoint.From(interpretation.First.Checkpoint, direction, Entity.LookDirection),
-                    Transition = MovementTransition.Grounded,
-                });
-
-                if (sameNode)
-                {
-                    // E.g. getting onto a ladder on the wall of the same node
-                    
-                    if (targetAnchor == null)
-                    {
-                        Debug.LogError(
-                            $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
-
-                        InterpretRefuse(interpretation);
-                        return interpretation;
-
-                    }
-                    var lookDirection = Entity.LookDirection; 
-                    if (Entity.RotationRespectsAnchorDirection)
-                    {
-                        if (Entity.LookDirection == direction)
-                        {
-                            lookDirection = direction.PitchUp(Entity.Down, out var _);
-                        } else if (Entity.LookDirection.Inverse() == direction)
-                        {
-                            lookDirection = direction.PitchDown(Entity.Down, out var _);
-                        }
-                    } else if (targetAnchor.CubeFace.IsPlanarCardinal())
-                    {
-                        lookDirection = targetAnchor.CubeFace;
-                    }
-                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                    {
-                        Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
-                        Transition = MovementTransition.Grounded,
-                    });
-                } else if (anchor.Node.AllowExit(Entity, direction))
-                {
-                    if (targetAnchor == null)
-                    {
-                        InterpretByDungeon(interpretation);
-                    } else
-                    {
-                        InterpretTargetNode(interpretation, targetAnchor.Node);
-                    }
-                } else
+                    interpretation.Steps.Add(interpretation.First);
+                }
+                else if (outcome == MovementOutcome.Blocked)
                 {
                     InterpretRefuse(interpretation);
+                }
+                else
+                {
+                    var targetAnchor = anchor.GetNeighbour(direction, out var sameNode);
+
+                    // Intermediary step at edge of starting anchor
+                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                    {
+                        Checkpoint = MovementCheckpoint.From(interpretation.First.Checkpoint, direction, Entity.LookDirection),
+                        Transition = MovementTransition.Grounded,
+                    });
+
+                    if (sameNode)
+                    {
+                        // E.g. getting onto a ladder on the wall of the same node
+
+                        if (targetAnchor == null)
+                        {
+                            Debug.LogError(
+                                $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
+
+                            InterpretRefuse(interpretation);
+                            return interpretation;
+
+                        }
+                        var lookDirection = Entity.LookDirection;
+                        if (Entity.RotationRespectsAnchorDirection)
+                        {
+                            if (Entity.LookDirection == direction)
+                            {
+                                lookDirection = direction.PitchUp(Entity.Down, out var _);
+                            }
+                            else if (Entity.LookDirection.Inverse() == direction)
+                            {
+                                lookDirection = direction.PitchDown(Entity.Down, out var _);
+                            }
+                        }
+                        else if (targetAnchor.CubeFace.IsPlanarCardinal())
+                        {
+                            lookDirection = targetAnchor.CubeFace;
+                        }
+                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                        {
+                            Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
+                            Transition = MovementTransition.Grounded,
+                        });
+                    }
+                    else if (anchor.Node.AllowExit(Entity, direction))
+                    {
+                        if (targetAnchor == null)
+                        {
+                            InterpretByDungeon(interpretation);
+                        }
+                        else
+                        {
+                            InterpretTargetNode(interpretation, targetAnchor.Node);
+                        }
+                    }
+                    else
+                    {
+                        InterpretRefuse(interpretation);
+                    }
                 }
             }
 

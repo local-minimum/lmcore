@@ -52,6 +52,15 @@ namespace LMCore.Crawler
             }
             set
             {
+                if (Node != null)
+                {
+                    var anchor = Node.GetAnchor(value);
+                    if (anchor != null)
+                    {
+                        NodeAnchor = anchor;
+                        return;
+                    }
+                }
                 _anchorDirection = value;
                 _anchor = null;
             }
@@ -78,9 +87,16 @@ namespace LMCore.Crawler
             }
             set
             {
-                _node = value;
-                _anchor = null;
-                if (value != null) _Coordinates = value.Coordinates;
+                var anchor = value?.GetAnchor(Anchor);
+                if (anchor != null)
+                {
+                    NodeAnchor = anchor;
+                } else
+                {
+                    _node = value;
+                    _anchor = null;
+                    if (value != null) _Coordinates = value.Coordinates;
+                }
             }
         }
 
@@ -98,8 +114,7 @@ namespace LMCore.Crawler
             get => Coordinates.y;
             set
             {
-                _Coordinates.y = value;
-                Node = Dungeon.HasNodeAt(_Coordinates) ? Dungeon[_Coordinates] : null;
+                Coordinates = new Vector3Int(_Coordinates.x, value, _Coordinates.z);
             }
         }
 
@@ -115,6 +130,21 @@ namespace LMCore.Crawler
             set
             {
                 _Coordinates = value;
+                if (Dungeon.HasNodeAt(_Coordinates))
+                {
+                    var node = Dungeon[_Coordinates];
+                    var anchor = node?.GetAnchor(Anchor);
+                    if (anchor != null)
+                    {
+                        NodeAnchor = anchor;
+                    } else
+                    {
+                        Node = node;
+                    }
+                } else
+                {
+                    Node = null;
+                }
                 Node = Dungeon.HasNodeAt(_Coordinates) ? Dungeon[_Coordinates] : null;
             }
         }
