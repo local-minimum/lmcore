@@ -136,6 +136,7 @@ namespace LMCore.Crawler
             }
 
             Debug.Log(PrefixLogMessage($"Perform {activeInterpretation}"));
+            Debug.Log(PrefixLogMessage($"Segment relative lengths: {string.Join(", ", activeInterpretation.RelativeLengths(Entity.Dungeon))}"));
         }
 
         private void Update()

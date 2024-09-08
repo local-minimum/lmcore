@@ -11,8 +11,10 @@ namespace LMCore.Crawler
         public MovementInterpretationOutcome Outcome { get; set; }
         public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
 
-        public override string ToString() =>
-            $"MovementInterpretation: Direction {PrimaryDirection}, Outcome {Outcome}, Duration {DurationScale} - {string.Join(", ", Steps.Select(s => $"[{s}]"))}";
+        public override string ToString()
+        {
+            return $"MovementInterpretation: Direction {PrimaryDirection}, Outcome {Outcome}, Duration {DurationScale} - {string.Join(", ", Steps.Select(s => $"[{s}]"))}";
+        }
 
         public MovementCheckpointWithTransition First => Steps[0];
         public MovementCheckpointWithTransition Last => Steps.Last();
@@ -29,6 +31,20 @@ namespace LMCore.Crawler
         }
 
         public float Length(IDungeon dungeon) => Lengths(dungeon).Sum();
+
+        public IEnumerable<float> RelativeLengths(IDungeon dungeon)
+        {
+            if (Steps.Count <= 2)
+            {
+                yield return 1f;
+                yield break;
+            }
+            var total = Length(dungeon);
+            foreach (var l in Lengths(dungeon))
+            {
+                yield return l / total;
+            }
+        }
 
         float SteppingProgress(float progress, int stepsPerTransition, System.Func<float, float> easing)
         {
