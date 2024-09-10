@@ -80,7 +80,7 @@ namespace LMCore.Crawler
                     return Direction.North;
 
                 default:
-                    throw new System.ArgumentOutOfRangeException();
+                    throw new System.ArgumentOutOfRangeException($"{direction} is not a planar cardinal");
             }
         }
 
@@ -118,7 +118,7 @@ namespace LMCore.Crawler
                     return Direction.North;
 
                 default:
-                    throw new System.ArgumentOutOfRangeException();
+                    throw new System.ArgumentOutOfRangeException($"{direction} is not a planar cardinal");
             }
         }
 
@@ -467,7 +467,7 @@ namespace LMCore.Crawler
 
         public static bool IsPlanarCardinal(this Direction direction)
         {
-            return direction != Direction.Up && direction != Direction.Down;
+            return direction != Direction.Up && direction != Direction.Down && direction != Direction.None;
         }
 
         public static bool IsParallell(this Direction down, Direction other) =>

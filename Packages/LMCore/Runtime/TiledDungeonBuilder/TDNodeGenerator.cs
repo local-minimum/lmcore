@@ -134,22 +134,32 @@ namespace LMCore.TiledDungeon
             anchor.PrefabRotation = direction.AsYRotation();
         }
 
+        static void ApplyAnchorRotation(GameObject obj, TDEnumOrientation orientation)
+        {
+            if (obj == null) return;
+
+            var anchor = obj.GetComponent<Anchor>();
+            if (anchor == null) return;
+
+            anchor.PrefabRotation = orientation == TDEnumOrientation.Horizontal ? AnchorYRotation.CW : AnchorYRotation.None;
+        }
+
         static bool ConfigureRamps(TDNode node)
         {
             var ramp = node.RampModification;
             if (ramp == null) return false;
 
-            var down = ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection();
+            var downSlopeDirection = ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection();
 
             var go = node.Dungeon.Style.Get(
                 node.transform, 
                 TiledConfiguration.instance.RampClass, 
                 ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey),
-                down,
+                downSlopeDirection,
                 node.NodeStyle
             );
 
-            ApplyAnchorRotation(go, down);
+            ApplyAnchorRotation(go, downSlopeDirection.Inverse());
 
             return true;
         }
@@ -304,10 +314,11 @@ namespace LMCore.TiledDungeon
                 {
                     if (hasTrapDoor)
                     {
+                        var orientation = node.TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey);
                         var trapdoor = Dungeon.Style.Get(
                             node.transform,
                             TiledConfiguration.instance.TrapDoorClass,
-                            node.TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
+                            orientation,
                             node.NodeStyle
                         );
 
@@ -323,7 +334,7 @@ namespace LMCore.TiledDungeon
                                 node.modifications.Where(TDNode.DoorFilter).ToArray()
                             );
 
-                            ApplyAnchorRotation(trapdoor, direction);
+                            ApplyAnchorRotation(trapdoor, orientation);
                             continue;
                         }
                     }
@@ -385,7 +396,8 @@ namespace LMCore.TiledDungeon
 
                         spikes.GetComponent<TDSpikeTrap>()?.Configure(node, node.Coordinates, node.modifications);
 
-                        ApplyAnchorRotation(spikes, direction);
+                        // Spikes have no rotation so hopefully sentinells are like they should be
+                        // ApplyAnchorRotation(spikes, direction);
                         continue;
                     }
                 }
@@ -426,9 +438,12 @@ namespace LMCore.TiledDungeon
                     node.NodeStyle);
 
                 go.name = direction.ToString();
-                ApplyAnchorRotation(go, direction);
+                if (direction.IsPlanarCardinal())
+                {
+                    ApplyAnchorRotation(go, direction);
+                }
 
-                if (upNode != null)
+                if (upNode != null) 
                 {
                     var upIsMovingFloor = upNode.GetComponentInChildren<TDMovingPlatform>();
                     if (upIsMovingFloor != null)

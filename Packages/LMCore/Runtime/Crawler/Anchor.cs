@@ -128,7 +128,8 @@ namespace LMCore.Crawler
                 {
                     _sentinels = new Dictionary<Direction, PositionSentinel>(
                         GetComponentsInChildren<PositionSentinel>()
-                        .Select(s => new KeyValuePair<Direction, PositionSentinel>(s.Direction, s))
+                        .Select(s => new KeyValuePair<Direction, PositionSentinel>(
+                            PrefabRotation.Rotate(s.Direction), s))
                     );
                 }
 
@@ -180,7 +181,11 @@ namespace LMCore.Crawler
 #endif
 
         [ContextMenu("Refresh sentinels in editor")]
-        void RefreshSentinels() => _sentinels = null;
+        void RefreshSentinels()
+        {
+            _sentinels = null;
+            Debug.Log(PrefixLogMessage($"Rotating sentinels by {PrefabRotation}"));
+        }
 
         public Vector3 CenterPosition { 
             get
@@ -269,7 +274,8 @@ namespace LMCore.Crawler
         [ContextMenu("Info")]
         void Info()
         {
-            Debug.Log(PrefixLogMessage($"Managed entities: {string.Join(", ", entities.Select(e => e.name))}"));
+            Debug.Log(PrefixLogMessage(
+                $"Managed entities: {string.Join(", ", entities.Select(e => e.name))}"));
         }
     }
 }

@@ -399,7 +399,8 @@ namespace LMCore.Crawler
             } else 
             {
                 // Some multistep procedure
-                var lengths = Lengths(entity.Dungeon).ToList();
+                // TODO figure out if it uses the wrong checkpoint with three steps also use relative lengths directly
+                var lengths = RelativeLengths(entity.Dungeon).ToList();
                 var segments = lengths.Count;
 
                 if (segments != 3)
@@ -419,14 +420,17 @@ namespace LMCore.Crawler
                     );
                 }
 
-                var totalLength = lengths.Sum();
-                var progressCheckpoints = lengths.Select(l => l / totalLength).ToList();
                 var activeSegment = 0;
+                var remainingProgress = progress;
                 for ( var i = 0; i < segments; i++ )
                 {
-                    if (progress > progressCheckpoints[i])
+                    if (progress > lengths[i])
                     {
                         activeSegment++;
+                        remainingProgress -= lengths[i];
+                    } else
+                    {
+                        break;
                     }
                 }
 
@@ -435,8 +439,8 @@ namespace LMCore.Crawler
 
                 var midStart = Steps[1];
                 var midEnd = Steps[2];
-
-                // Check if we may go from 0 -> 1
+                 
+                // Check if we should progress from first segment / that is commit to the entire movement
                 if (activeSegment > 0 && CurrentSegment == Segment.First)
                 {
                     var delta = midEnd.Checkpoint.Position(entity.Dungeon) - midStart.Checkpoint.Position(entity.Dungeon);
@@ -458,7 +462,8 @@ namespace LMCore.Crawler
                     }
                 }
 
-                var startIdx =  Mathf.Min(
+                // perhaps best to recheck where we are after potential updates
+                var startIdx = Mathf.Min(
                     Mathf.Max(activeSegment, (int)CurrentSegment),
                     Steps.Count - 2);
 
@@ -466,10 +471,10 @@ namespace LMCore.Crawler
 
                 if (CurrentSegment != newSegment)
                 {
-                    segmentStartProgress = progress;
+                    // this is an approximation and perhaps we need to take into account current progress too
+                    segmentStartProgress = lengths.Take(startIdx).Sum();
+                    CurrentSegment = newSegment;
                 }
-                CurrentSegment = newSegment;
-
 
                 var remainingProgressAtSegmentStart = 1 - segmentStartProgress;
                 var totalRemainingSegmentLengths = lengths.Skip(startIdx).Sum();
@@ -480,7 +485,7 @@ namespace LMCore.Crawler
                 var pt1 = Steps[startIdx];
                 var pt2 = Steps[startIdx + 1];
 
-                checkpoint = segmentProgress < 0.5 ? pt1.Checkpoint : pt2.Checkpoint;
+                checkpoint = segmentProgress < 0.5f ? pt1.Checkpoint : pt2.Checkpoint;
 
                 var pt1Rotation = pt1.Checkpoint.Rotation(entity);
                 var pt2Rotation = pt2.Checkpoint.Rotation(entity);

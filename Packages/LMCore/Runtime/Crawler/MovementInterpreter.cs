@@ -11,13 +11,13 @@ namespace LMCore.Crawler
      *  
      *  The spinner goes crazy
      *  
-     *  Ramps causes error
-     *  
-     *  Stepping up onto a ramp from the side makes odd transition 
-     *  
      *  we are not carried by movable platforms
      *  
-     *  stepping up off a ladder feels like it skips one part of the animation
+     *  stepping off top of ramp to next level doesnt work.
+     *  
+     *  also not climbing up to the side
+     *  
+     *  refused movements should not go full way to midpoint anchor...
      *  
      */
 
