@@ -1,6 +1,5 @@
 using LMCore.IO;
 using UnityEngine;
-using UnityEngine.InputSystem.DualShock;
 
 namespace LMCore.Crawler
 {
@@ -14,11 +13,11 @@ namespace LMCore.Crawler
      *  
      *  we are not carried by movable platforms
      *  
-     *  stepping off top of ramp to next level doesnt work.
-     *  
-     *  also not climbing up to the side
-     *  
      *  refused movements should not go full way to midpoint anchor...
+     *  
+     *  stepping off ramp should jump down when larger than abs max scale..
+     *  
+     *  something wrong with stepping into open trapdoor
      *  
      */
 
@@ -87,6 +86,7 @@ namespace LMCore.Crawler
             var lookDirection = origin.Checkpoint.LookDirection;
             var dungeon = Entity.Dungeon;
 
+            // Climb up off high ramps
             var targetCoordinates = interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates) + Vector3Int.up;
             if (dungeon.HasNodeAt(targetCoordinates)) {
                 var target = dungeon[targetCoordinates]; 
@@ -107,7 +107,6 @@ namespace LMCore.Crawler
                             var verticality = Vector3.Dot(edgeDelta, Vector3.up);
                             var planarGap = Mathf.Abs(Vector3.Dot(edgeDelta, interpretation.PrimaryDirection.AsLookVector3D()));
 
-                            Debug.Log($"Verticality {verticality}, planar gap {planarGap}");
                             if (verticality <= Entity.Abilities.minScaleHeight && planarGap < Entity.Abilities.maxForwardJump ||
                                 verticality < Entity.Abilities.maxScaleHeight && planarGap < Entity.Abilities.minForwardJump)
                             {
@@ -133,6 +132,57 @@ namespace LMCore.Crawler
                             }
                         }
                     }
+                }
+            }
+
+            // Climbing down onto a high ramp
+            targetCoordinates = interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates) + Vector3Int.down;
+            if (dungeon.HasNodeAt(targetCoordinates))
+            {
+                var target = dungeon[targetCoordinates];
+                if (target.AllowsEntryFrom(Entity, Direction.Up))
+                {
+                    var intermediaryCoordinates = interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates);
+                    if (!dungeon.HasNodeAt(intermediaryCoordinates) ||
+                        dungeon[intermediaryCoordinates].AllowsEntryFrom(Entity, interpretation.PrimaryDirection.Inverse())
+                        && dungeon[intermediaryCoordinates].AllowExit(Entity, Direction.Down))
+                    {
+                        var anchor = target.GetAnchor(Direction.Down);
+                        if (flying)
+                        {
+                            // TODO: this should check the verticality of scaleheight compared to the floor of above tile even if there's none
+                        } else if (anchor != null)
+                        {
+                            var edgeDelta = originEdge - anchor.GetEdgePosition(interpretation.PrimaryDirection.Inverse());
+                            var verticality = Mathf.Abs(Vector3.Dot(edgeDelta, Vector3.up));
+                            var planarGap = Mathf.Abs(Vector3.Dot(edgeDelta, interpretation.PrimaryDirection.AsLookVector3D()));
+
+                            if (verticality <= Entity.Abilities.minScaleHeight && planarGap < Entity.Abilities.maxForwardJump ||
+                                verticality < Entity.Abilities.maxScaleHeight && planarGap < Entity.Abilities.minForwardJump)
+                            {
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(originDown, interpretation.PrimaryDirection, lookDirection),
+                                    Transition = planarGap < Entity.Abilities.minForwardJump ? MovementTransition.Grounded : MovementTransition.Jump,
+                                });
+
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(anchor, interpretation.PrimaryDirection.Inverse(), lookDirection),
+                                    Transition = MovementTransition.Grounded,
+                                });
+
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(anchor, Direction.None, lookDirection),
+                                    Transition = MovementTransition.Grounded,
+                                });
+
+                                return true;
+                            }
+                        }
+                    }
+
                 }
             }
 
