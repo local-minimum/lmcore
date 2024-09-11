@@ -1,5 +1,6 @@
 using LMCore.IO;
 using UnityEngine;
+using UnityEngine.InputSystem.DualShock;
 
 namespace LMCore.Crawler
 {
@@ -58,6 +59,84 @@ namespace LMCore.Crawler
                 Transition = origin.Transition,
             });
 
+        }
+        
+        /// <summary>
+        /// For example stepping off of the highest elevation of ramps
+        /// 
+        /// Note that there is no dynamic discovery of these once the interpretation 
+        /// has been created.
+        /// </summary>
+        /// <returns>If movement is allowed</returns>
+        private bool ElevationOffsetEdge(MovementInterpretation interpretation)
+        {
+            var flying = Entity.TransportationMode.HasFlag(TransportationMode.Flying);
+            var origin = interpretation.Last;
+            if (!interpretation.PrimaryDirection.IsPlanarCardinal() ||
+                !(origin.Checkpoint.AnchorDirection == Direction.Down ||
+                flying && origin.Checkpoint.AnchorDirection == Direction.None))
+                return false;
+
+            var originNode = origin.Checkpoint.Node;
+            if (originNode == null) return false;
+
+            var originDown = originNode.GetAnchor(Direction.Down);
+            if (originDown == null) return false;
+
+            var originEdge = originDown.GetEdgePosition(interpretation.PrimaryDirection);
+            var lookDirection = origin.Checkpoint.LookDirection;
+            var dungeon = Entity.Dungeon;
+
+            var targetCoordinates = interpretation.PrimaryDirection.Translate(origin.Checkpoint.Coordinates) + Vector3Int.up;
+            if (dungeon.HasNodeAt(targetCoordinates)) {
+                var target = dungeon[targetCoordinates]; 
+                if (target.AllowsEntryFrom(Entity, interpretation.PrimaryDirection.Inverse()))
+                {
+                    var intermediaryCoordinates = origin.Checkpoint.Coordinates + Vector3Int.up;
+                    if (!dungeon.HasNodeAt(intermediaryCoordinates) || 
+                        dungeon[intermediaryCoordinates].AllowsEntryFrom(Entity, Direction.Down) 
+                        && dungeon[intermediaryCoordinates].AllowExit(Entity, interpretation.PrimaryDirection))
+                    {
+                        var anchor = target.GetAnchor(Direction.Down);
+                        if (flying)
+                        {
+                            // TODO: this should check the verticality of scaleheight compared to the floor of above tile even if there's none
+                        } else if (anchor != null)
+                        {
+                            var edgeDelta = anchor.GetEdgePosition(interpretation.PrimaryDirection.Inverse()) - originEdge;
+                            var verticality = Vector3.Dot(edgeDelta, Vector3.up);
+                            var planarGap = Mathf.Abs(Vector3.Dot(edgeDelta, interpretation.PrimaryDirection.AsLookVector3D()));
+
+                            Debug.Log($"Verticality {verticality}, planar gap {planarGap}");
+                            if (verticality <= Entity.Abilities.minScaleHeight && planarGap < Entity.Abilities.maxForwardJump ||
+                                verticality < Entity.Abilities.maxScaleHeight && planarGap < Entity.Abilities.minForwardJump)
+                            {
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(originDown, interpretation.PrimaryDirection, lookDirection),
+                                    Transition = planarGap < Entity.Abilities.minForwardJump ? MovementTransition.Grounded : MovementTransition.Jump,
+                                });
+
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(anchor, interpretation.PrimaryDirection.Inverse(), lookDirection),
+                                    Transition = MovementTransition.Grounded,
+                                });
+
+                                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                                {
+                                    Checkpoint = MovementCheckpoint.From(anchor, Direction.None, lookDirection),
+                                    Transition = MovementTransition.Grounded,
+                                });
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         private bool InterpretRoundOuterCorner(MovementInterpretation interpretation)
@@ -356,7 +435,7 @@ namespace LMCore.Crawler
                         Checkpoint = MovementCheckpoint.From(Entity),
                         Transition = MovementTransition.Ungrounded,                    
                     });
-                    InterpretByDungeon(interpretation);
+                    if (!ElevationOffsetEdge(interpretation)) InterpretByDungeon(interpretation);
                 } else
                 {
                     // We start flying or falling
@@ -373,7 +452,7 @@ namespace LMCore.Crawler
                     } else if (outcome == MovementOutcome.Blocked)
                     {
                         InterpretRefuse(interpretation);
-                    } else
+                    } else if (!ElevationOffsetEdge(interpretation))
                     {
                         var targetCoordinates = node.Neighbour(direction);
                         if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
@@ -401,7 +480,7 @@ namespace LMCore.Crawler
                 {
                     InterpretRefuse(interpretation);
                 }
-                else
+                else if (!ElevationOffsetEdge(interpretation))
                 {
                     var targetAnchor = anchor.GetNeighbour(direction, out var sameNode);
 
