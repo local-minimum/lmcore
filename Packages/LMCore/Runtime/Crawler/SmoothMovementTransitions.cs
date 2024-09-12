@@ -127,7 +127,7 @@ namespace LMCore.Crawler
             for (int i = 1, l = interpretation.Steps.Count; i < l; i++)
             {
                 var node = interpretation.Steps[i].Checkpoint.Node;
-                if (node != null)
+                if (node != null && currentCheckpoint.Node != node)
                 {
                     ReservationNodes.Add(node);
                     node.Reserve(entity);
@@ -160,13 +160,17 @@ namespace LMCore.Crawler
 
             if (currentCheckpoint != checkpoint)
             {
-                currentCheckpoint.Anchor?.RemoveAnchor(Entity);
-                currentCheckpoint.Node?.RemoveOccupant(Entity);
+                var swapAnchor = currentCheckpoint.Anchor != checkpoint.Anchor;
+                var swapNode = currentCheckpoint.Node != checkpoint.Node;
 
-                checkpoint.Node?.AddOccupant(Entity);
-                currentCheckpoint.Anchor?.AddAnchor(Entity);
-
-                ReservationNodes.Remove(checkpoint.Node);
+                if (swapAnchor) currentCheckpoint.Anchor?.RemoveAnchor(Entity);
+                if (swapNode)
+                {
+                    currentCheckpoint.Node?.RemoveOccupant(Entity);
+                    checkpoint.Node?.AddOccupant(Entity);
+                    ReservationNodes.Remove(checkpoint.Node);
+                }
+                if (swapAnchor) checkpoint.Anchor?.AddAnchor(Entity);
 
                 Entity.Coordinates = checkpoint.Coordinates;
 

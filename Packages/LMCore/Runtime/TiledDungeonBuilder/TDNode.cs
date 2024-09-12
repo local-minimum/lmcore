@@ -473,7 +473,6 @@ namespace LMCore.TiledDungeon
             {
                 if (_occupants.Contains(entity))
                 {
-
                     Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
                 } else
                 {
@@ -516,11 +515,13 @@ namespace LMCore.TiledDungeon
 
         public void Reserve(GridEntity entity)
         {
+            Debug.Log($"Reserving {entity.name} occupancy for {Coordinates}");
             _reservations.Add(entity);
         }
 
         public void RemoveOccupant(GridEntity entity)
         {
+            Debug.Log($"Removing {entity.name} occupancy from {Coordinates}");
             _occupants.Remove(entity);
             OccupationRules.HandleDeparture(entity, _occupants);
             if (entity.transform.parent == transform)

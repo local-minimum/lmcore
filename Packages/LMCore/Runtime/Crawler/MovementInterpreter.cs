@@ -7,8 +7,6 @@ namespace LMCore.Crawler
      *
      *  There are pauses in the jumping
      *  
-     *  A some of traversals are None
-     *  
      *  The spinner goes crazy
      *  
      *  we are not carried by movable platforms
