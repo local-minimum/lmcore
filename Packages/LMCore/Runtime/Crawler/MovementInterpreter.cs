@@ -7,15 +7,16 @@ namespace LMCore.Crawler
      *
      *  There are pauses in the jumping
      *  
-     *  The spinner goes crazy
-     *  
      *  we are not carried by movable platforms
-     *  
-     *  refused movements should not go full way to midpoint anchor...
      *  
      *  stepping off ramp should jump down when larger than abs max scale..
      *  
      *  something wrong with stepping into open trapdoor
+     *  
+     *  getting onto ladder from above makes strange instant turn without 
+     *  animation
+     *  
+     *  running onto ladders may cause glitched retake of animation
      *  
      */
 
@@ -40,7 +41,7 @@ namespace LMCore.Crawler
             } 
         }
 
-        private void InterpretRefuse(MovementInterpretation interpretation)
+        private void InterpretBlocked(MovementInterpretation interpretation)
         {
             var direction = interpretation.PrimaryDirection;
             var origin = interpretation.Last;
@@ -369,7 +370,7 @@ namespace LMCore.Crawler
             } else
             {
                 // Refusing movement
-                InterpretRefuse(interpretation);
+                InterpretBlocked(interpretation);
             }
         }
 
@@ -499,7 +500,7 @@ namespace LMCore.Crawler
                         interpretation.Steps.Add(interpretation.First);
                     } else if (outcome == MovementOutcome.Blocked)
                     {
-                        InterpretRefuse(interpretation);
+                        InterpretBlocked(interpretation);
                     } else if (!ElevationOffsetEdge(interpretation))
                     {
                         var targetCoordinates = node.Neighbour(direction);
@@ -526,7 +527,7 @@ namespace LMCore.Crawler
                 }
                 else if (outcome == MovementOutcome.Blocked)
                 {
-                    InterpretRefuse(interpretation);
+                    InterpretBlocked(interpretation);
                 }
                 else if (!ElevationOffsetEdge(interpretation))
                 {
@@ -548,7 +549,7 @@ namespace LMCore.Crawler
                             Debug.LogError(
                                 $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
 
-                            InterpretRefuse(interpretation);
+                            InterpretBlocked(interpretation);
                             return interpretation;
 
                         }
@@ -587,7 +588,7 @@ namespace LMCore.Crawler
                     }
                     else
                     {
-                        InterpretRefuse(interpretation);
+                        InterpretBlocked(interpretation);
                     }
                 }
             }

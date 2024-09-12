@@ -2,6 +2,6 @@
 {
     public enum MovementInterpretationOutcome
     {
-        Grounded, Landing, Airbourne, Bouncing
+        Grounded, Landing, Airbourne, Bouncing, DynamicBounce,
     }
 }

@@ -284,7 +284,6 @@ namespace LMCore.Crawler
         float SmothStep(float progress) => Mathf.SmoothStep(0, 1, progress);
         #endregion
 
-
         private enum Segment { First, Intermediary, Last }
         private Segment CurrentSegment = Segment.First;
         float segmentStartProgress = 0;
@@ -303,7 +302,7 @@ namespace LMCore.Crawler
             }
         }
 
-        public void RefuseMovement() {
+        public void RegretMovementDynamically() {
             var start = First;
             MovementCheckpointWithTransition intermediary = new MovementCheckpointWithTransition()
             {
@@ -316,7 +315,7 @@ namespace LMCore.Crawler
             Steps.Add(intermediary);
             Steps.Add(start);
 
-            Outcome = MovementInterpretationOutcome.Bouncing;
+            Outcome = MovementInterpretationOutcome.DynamicBounce;
             CurrentSegment = Segment.Last;
         }
         
@@ -329,9 +328,20 @@ namespace LMCore.Crawler
             // 3. Given transition of segment scale progress to internal 0-1 progress of segment
             //    and lerp its positions using potentially ajusted intermediaries
 
-            if (Outcome == MovementInterpretationOutcome.Bouncing)
+            if (Outcome == MovementInterpretationOutcome.Bouncing || Outcome == MovementInterpretationOutcome.DynamicBounce)
             {
-                progress = CubicBezier(0.1f, 0.62f, 0.9f, 0.38f, progress);
+                // TODO: Something is wrong with the parameters or the equations
+                // progress = CubicBezier(0.1f, 0.62f, 0.9f, 0.38f, progress);
+                if (Outcome == MovementInterpretationOutcome.Bouncing && Steps.Count == 3)
+                {
+                    if (progress < 0.5f)
+                    {
+                        progress = Mathf.Min(progress, entity.Abilities.refusedMidpointMaxInterpolation * 0.5f);
+                    } else
+                    {
+                        progress = Mathf.Max(progress, 1 - entity.Abilities.refusedMidpointMaxInterpolation * 0.5f);
+                    }
+                }
             } else if (Outcome == MovementInterpretationOutcome.Landing)
             {
                 progress = EaseOutCubic(progress);
@@ -450,14 +460,14 @@ namespace LMCore.Crawler
                         var forward = PrimaryDirection.AsLookVector3D();
                         if (Vector3.Project(delta, forward).magnitude > entity.Abilities.maxForwardJump)
                         {
-                            RefuseMovement();
+                            RegretMovementDynamically();
                         }
                     } else if (midStart.Transition == MovementTransition.Grounded)
                     {
                         var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
                         if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
                         {
-                            RefuseMovement();
+                            RegretMovementDynamically();
                         }
                     }
                 }
