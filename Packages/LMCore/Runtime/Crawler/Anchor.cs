@@ -61,6 +61,12 @@ namespace LMCore.Crawler
         public bool HasEdge(Direction direction) =>
             CubeFace != direction && CubeFace.Inverse() != direction;
 
+        public void SetPrefabCubeFace(Direction direction)
+        {
+            PrefabRotation = AnchorYRotation.None;
+            _PrefabCubeFace = direction;
+        }
+
         public Direction CubeFace =>
             PrefabRotation.Rotate(_PrefabCubeFace);
 

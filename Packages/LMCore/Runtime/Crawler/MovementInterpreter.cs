@@ -13,8 +13,6 @@ namespace LMCore.Crawler
      *  
      *  we are not carried by movable platforms
      *  
-     *  stepping off ramp should jump down when larger than abs max scale..
-     *  
      *  getting onto ladder from above makes strange instant turn without 
      *  animation
      *  
@@ -229,7 +227,11 @@ namespace LMCore.Crawler
                 {
                     lookDirection = origin.Checkpoint.LookDirection;
                 }
+
+                // We need to update the first intermediate checkpoint too
+                origin.Checkpoint.LookDirection = lookDirection;
             }
+
             // Adding intermediary point
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
             {

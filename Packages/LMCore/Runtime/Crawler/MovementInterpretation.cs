@@ -70,7 +70,7 @@ namespace LMCore.Crawler
         Vector3 LerpJump(Vector3 start, Vector3 end, Vector3 down, float height, float progress)
         {
             var up = down * -1f;
-            return Vector3.Lerp(start, end, progress) + up * Mathf.Cos(progress * Mathf.PI) * height;
+            return Vector3.Lerp(start, end, progress) + up * Mathf.Sin(progress * Mathf.PI) * height;
         }
 
         /// <summary>
@@ -221,7 +221,6 @@ namespace LMCore.Crawler
             {
                 var jumpDistance = Vector3.Distance(start, end);
 
-                Debug.Log($"Jumping {segmentProgress}");
                 return LerpJump(
                     start, 
                     end, 
@@ -304,7 +303,7 @@ namespace LMCore.Crawler
             }
         }
 
-        public void RegretMovementDynamically() {
+        void RegretMovementDynamically() {
             var start = First;
             MovementCheckpointWithTransition intermediary = new MovementCheckpointWithTransition()
             {
@@ -452,21 +451,6 @@ namespace LMCore.Crawler
                         progress
                     );
                 }
-
-                /*
-                var activeSegment = 0;
-                var remainingProgress = progress;
-                for ( var i = 0; i < segments; i++ )
-                {
-                    if (progress > lengths[i])
-                    {
-                        activeSegment++;
-                        remainingProgress -= lengths[i];
-                    } else
-                    {
-                        break;
-                    }
-                }*/
 
                 var unclampedSegmentProgress = UnclampedSegmentProgress(entity, progress, (int)CurrentSegment);
                 // Adjust active segment if we're overshooting the current one 
