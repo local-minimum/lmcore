@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace LMCore.Crawler
@@ -32,7 +33,7 @@ namespace LMCore.Crawler
 
         public float Length(IDungeon dungeon) => Lengths(dungeon).Sum();
 
-        public IEnumerable<float> RelativeLengths(IDungeon dungeon)
+        public IEnumerable<float> RelativeSegmentLengths(IDungeon dungeon)
         {
             if (Steps.Count <= 2)
             {
@@ -220,6 +221,7 @@ namespace LMCore.Crawler
             {
                 var jumpDistance = Vector3.Distance(start, end);
 
+                Debug.Log($"Jumping {segmentProgress}");
                 return LerpJump(
                     start, 
                     end, 
@@ -319,6 +321,27 @@ namespace LMCore.Crawler
             CurrentSegment = Segment.Last;
         }
         
+        float UnclampedSegmentProgress(GridEntity entity, float progress, int segmentIdx)
+        {
+            var lengths = RelativeSegmentLengths(entity.Dungeon).ToList();
+            if (lengths.Count <= segmentIdx)
+            {
+                Debug.LogError($"Requesting segment {segmentIdx} is not possible on {this}");
+                return 1f;
+            }
+            var segmentLength = lengths[segmentIdx];
+            if (segmentLength == 0) return 1f;
+
+            var remainingProgressAtSegmentStart = 1 - segmentStartProgress;
+            var progressOnRemainder = Mathf.Clamp01(progress - segmentStartProgress) / remainingProgressAtSegmentStart;
+            var totalRemainingSegmentLengths = lengths.Skip(segmentIdx).Sum();
+            var segmentPartOfTotalRemaining = segmentLength / totalRemainingSegmentLengths;
+            var segmentProgress = Mathf.Clamp01(progressOnRemainder / segmentPartOfTotalRemaining);
+            
+            // Debug.Log($"{segmentIdx} - progress({progress}) progressonremain({progressOnRemainder})  remaining@start({remainingProgressAtSegmentStart}) segmentPartOfTotalRem({segmentPartOfTotalRemaining}) => {segmentProgress}");
+            return segmentProgress;
+        }
+
         public Vector3 Evaluate(GridEntity entity, float progress, out Quaternion rotation, out MovementCheckpoint checkpoint)
         {
             // 1. Figure out segment active from total length and progressNumber of steps in a full tile
@@ -410,10 +433,10 @@ namespace LMCore.Crawler
             {
                 // Some multistep procedure
                 // TODO figure out if it uses the wrong checkpoint with three steps also use relative lengths directly
-                var lengths = RelativeLengths(entity.Dungeon).ToList();
+                var lengths = RelativeSegmentLengths(entity.Dungeon).ToList();
                 var segments = lengths.Count;
 
-                if (segments != 3)
+                if (segments <= 2)
                 {
                     checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
                     Debug.LogError($"{entity.name} is attempting a {segments} part transition, we don't know how to handle that");
@@ -430,6 +453,7 @@ namespace LMCore.Crawler
                     );
                 }
 
+                /*
                 var activeSegment = 0;
                 var remainingProgress = progress;
                 for ( var i = 0; i < segments; i++ )
@@ -442,19 +466,23 @@ namespace LMCore.Crawler
                     {
                         break;
                     }
-                }
+                }*/
 
-                // Adjust activeSegment by CurrentSegment
-                activeSegment = Mathf.Min(Mathf.Max(activeSegment, (int)CurrentSegment), 2);
+                var unclampedSegmentProgress = UnclampedSegmentProgress(entity, progress, (int)CurrentSegment);
+                // Adjust active segment if we're overshooting the current one 
+                var candidateSegmentIdx = Mathf.Min(
+                    Mathf.Max(
+                        unclampedSegmentProgress >= 1.0f ? (int)CurrentSegment + 1: 0,
+                        (int)CurrentSegment),
+                    2);
 
+                // Check if we should progress from first segment / that is commit to the entire movement
                 var midStart = Steps[1];
                 var midEnd = Steps[2];
-                 
-                // Check if we should progress from first segment / that is commit to the entire movement
-                if (activeSegment > 0 && CurrentSegment == Segment.First)
+                var delta = midEnd.Checkpoint.Position(entity.Dungeon) - midStart.Checkpoint.Position(entity.Dungeon);
+                var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
+                if (candidateSegmentIdx > 0 && CurrentSegment == Segment.First)
                 {
-                    var delta = midEnd.Checkpoint.Position(entity.Dungeon) - midStart.Checkpoint.Position(entity.Dungeon);
-
                     if (midStart.Transition == MovementTransition.Jump)
                     {
                         var forward = PrimaryDirection.AsLookVector3D();
@@ -464,7 +492,6 @@ namespace LMCore.Crawler
                         }
                     } else if (midStart.Transition == MovementTransition.Grounded)
                     {
-                        var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
                         if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
                         {
                             RegretMovementDynamically();
@@ -473,31 +500,52 @@ namespace LMCore.Crawler
                 }
 
                 // perhaps best to recheck where we are after potential updates
-                var startIdx = Mathf.Min(
-                    Mathf.Max(activeSegment, (int)CurrentSegment),
+                var segmentIdx = Mathf.Min(
+                    Mathf.Max(candidateSegmentIdx, (int)CurrentSegment),
                     Steps.Count - 2);
 
-                var newSegment = (Segment)startIdx;
+                var segment = (Segment)segmentIdx;
 
-                if (CurrentSegment != newSegment)
+                var pt1 = Steps[segmentIdx];
+                var pt2 = Steps[segmentIdx + 1];
+                var pt1Rotation = pt1.Checkpoint.Rotation(entity);
+
+                if (CurrentSegment != segment)
                 {
-                    // this is an approximation and perhaps we need to take into account current progress too
-                    segmentStartProgress = lengths.Take(startIdx).Sum();
-                    CurrentSegment = newSegment;
+                    // TODO: Could subtract overshoot from previous unlcamped progress...
+                    segmentStartProgress = progress;
+                    CurrentSegment = segment;
+
+                    delta = pt2.Checkpoint.Position(entity.Dungeon) - pt1.Checkpoint.Position(entity.Dungeon);
+                    var climb = Vector3.Dot(delta, up);
+                    if (CurrentSegment == Segment.Intermediary && pt1.Transition == MovementTransition.Grounded && climb < -entity.Abilities.maxScaleHeight)
+                    {
+                        pt1.Transition = MovementTransition.Jump;
+                        var last = Last;
+                        if (last.Checkpoint.Node != null && last.Checkpoint.AnchorDirection == Direction.Down)
+                        {
+                            pt2 = new MovementCheckpointWithTransition()
+                            {
+                                Checkpoint = MovementCheckpoint.From(last.Checkpoint.Node, Direction.None, pt2.Checkpoint.LookDirection),
+                                Transition = MovementTransition.Ungrounded,
+                            };
+                            Steps[segmentIdx + 1] = pt2;
+                        }
+                        else { 
+                            pt2 = Last;
+                            Steps.RemoveAt(segmentIdx + 1);
+                        }
+
+                        lengths = RelativeSegmentLengths(entity.Dungeon).ToList();
+                        Debug.Log($"Dynamically updated interpretation because vertical fall of {climb} to: {this}");
+                        Debug.Log($"Segment relative lengths: {string.Join(", ", lengths)}");
+                    }
                 }
 
-                var remainingProgressAtSegmentStart = 1 - segmentStartProgress;
-                var totalRemainingSegmentLengths = lengths.Skip(startIdx).Sum();
-                var segmentPartOfTotalRemaining = lengths[startIdx] / totalRemainingSegmentLengths;
-                var segmentDuration = segmentPartOfTotalRemaining * remainingProgressAtSegmentStart;
-                var segmentProgress = (progress - segmentStartProgress) / segmentDuration;
-
-                var pt1 = Steps[startIdx];
-                var pt2 = Steps[startIdx + 1];
+                var segmentProgress = Mathf.Clamp01(UnclampedSegmentProgress(entity, progress, segmentIdx));
 
                 checkpoint = segmentProgress < 0.5f ? pt1.Checkpoint : pt2.Checkpoint;
 
-                var pt1Rotation = pt1.Checkpoint.Rotation(entity);
                 var pt2Rotation = pt2.Checkpoint.Rotation(entity);
 
                 rotation = Quaternion.Lerp(pt1Rotation, pt2Rotation, progress);

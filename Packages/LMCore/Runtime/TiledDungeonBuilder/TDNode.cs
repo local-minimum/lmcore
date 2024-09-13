@@ -337,8 +337,7 @@ namespace LMCore.TiledDungeon
                 return MovementOutcome.Refused;
             }
 
-            Debug.LogWarning(PrefixLogMessage($"{entity.name} is anchored {anchor}, don't know how to handle that"));
-            return MovementOutcome.Refused;
+            return ExitOrFallback(direction, MovementOutcome.Blocked);
         }
 
         public bool HasBlockingDoor(Direction direction)
@@ -552,6 +551,8 @@ namespace LMCore.TiledDungeon
         public bool CanAnchorOn(GridEntity entity, Direction anchor)
         {
             if (Obstructed) return false;
+
+            if (anchor == Direction.None) return entity.TransportationMode.HasFlag(TransportationMode.Flying);
 
             if (anchor == Direction.Down) return HasFloor || entity.TransportationMode.HasFlag(TransportationMode.Flying);
 

@@ -135,7 +135,7 @@ namespace LMCore.Crawler
             }
 
             Debug.Log(PrefixLogMessage($"Perform {activeInterpretation}"));
-            Debug.Log(PrefixLogMessage($"Segment relative lengths: {string.Join(", ", activeInterpretation.RelativeLengths(Entity.Dungeon))}"));
+            Debug.Log(PrefixLogMessage($"Segment relative lengths: {string.Join(", ", activeInterpretation.RelativeSegmentLengths(Entity.Dungeon))}"));
         }
 
         private void Update()
@@ -170,7 +170,17 @@ namespace LMCore.Crawler
                     checkpoint.Node?.AddOccupant(Entity);
                     ReservationNodes.Remove(checkpoint.Node);
                 }
-                if (swapAnchor) checkpoint.Anchor?.AddAnchor(Entity);
+                if (swapAnchor)
+                {
+                    if (checkpoint.Anchor != null)
+                    {
+                        checkpoint.Anchor?.AddAnchor(Entity);
+                    }
+                    else
+                    {
+                        Entity.Anchor = checkpoint.AnchorDirection;
+                    }
+                }
 
                 Entity.Coordinates = checkpoint.Coordinates;
 

@@ -7,16 +7,20 @@ namespace LMCore.Crawler
      *
      *  There are pauses in the jumping
      *  
+     *  we are jumping too high onto empty squares
+     *  
+     *  it would be nice if stepping onto an illusory floor didn't jump up at all
+     *  
      *  we are not carried by movable platforms
      *  
      *  stepping off ramp should jump down when larger than abs max scale..
-     *  
-     *  something wrong with stepping into open trapdoor
      *  
      *  getting onto ladder from above makes strange instant turn without 
      *  animation
      *  
      *  running onto ladders may cause glitched retake of animation
+     *  
+     *  automatic trapdoor doesnt open
      *  
      */
 
