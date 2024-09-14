@@ -9,9 +9,9 @@ namespace LMCore.Crawler
      *  
      *  we are not carried by movable platforms
      *  
-     *  running onto ladders may cause glitched retake of animation
-     *  
      *  automatic trapdoor doesnt open
+     *  
+     *  moving backwards should refuse move even earlier
      *  
      */
 

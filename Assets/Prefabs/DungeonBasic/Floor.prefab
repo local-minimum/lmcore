@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fb040042b95d9284ebce1811f33e24d0, type: 2}
+  - {fileID: 2100000, guid: 7783a4f9392bd2144bbf80202ef9253a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -121,4 +121,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PrefabRotation: 0
   Traversal: 1
-  CubeFace: 5
+  _PrefabCubeFace: 5
