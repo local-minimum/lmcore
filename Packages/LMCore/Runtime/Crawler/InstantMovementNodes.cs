@@ -90,7 +90,7 @@ namespace LMCore.Crawler
             }
 
             entity.Coordinates = target.Coordinates;
-            entity.Anchor = target.Anchor;
+            entity.AnchorDirection = target.Anchor;
             entity.LookDirection = target.LookDirection;
             entity.RotationRespectsAnchorDirection = target.RotationRespectsAnchorDirection;
             entity.TransportationMode = target.TransportationMode;

@@ -69,21 +69,6 @@ namespace LMCore.Crawler
 
         void EnqueueMovement(Movement movement)
         {
-            // TODO: Investigate if we really should both request later if failed and put 
-            // movment on nextMovement with an end adjustment
-            if (currentMovement == Movement.None)
-            {
-                currentMovement = movement;
-                requestTick = !ElasticGameClock.instance.RequestTick();
-                // TODO why should we enqueue twice if we don't get tick?!
-                if (!requestTick)
-                {
-                    return;
-                }
-
-                Debug.LogWarning(PrefixLogMessage($"Movement {movement} enqueued more than once for some reason"));
-            }
-
             if (nextMovement == Movement.None)
             {
                 nextMovement = movement;
@@ -97,8 +82,8 @@ namespace LMCore.Crawler
 
         public void InjectMovement(Movement movement)
         {
-            ClearQueue(true);
-            EnqueueMovement(movement);
+            nextMovement = movement;
+            nextNextMovement = Movement.None;
         }
 
         void ShiftQueue()
@@ -106,18 +91,6 @@ namespace LMCore.Crawler
             currentMovement = nextMovement;
             nextMovement = nextNextMovement;
             nextNextMovement = Movement.None;
-        }
-
-        void ClearQueue(bool includingCurrent = false)
-        {
-            if (includingCurrent)
-            {
-                currentMovement = Movement.None;
-            }
-            nextMovement = Movement.None;
-            nextNextMovement = Movement.None;
-
-            Debug.Log(PrefixLogMessage($"Queue cleared (fully {includingCurrent}) {QueueInfo}"));
         }
 
         private string QueueInfo => $"Queue {currentMovement} <- {nextMovement} <- {nextNextMovement}";
@@ -204,67 +177,72 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickStart(int tickId, float expectedDuration)
         {
+            ShiftQueue();
             if (currentMovement != Movement.None)
             {
                 Debug.Log(PrefixLogMessage($"Tick {tickId}: {currentMovement} ({expectedDuration})"));
                 OnMovement?.Invoke(tickId, currentMovement, expectedDuration);
+            } else
+            {
+                Debug.Log(PrefixLogMessage("No movement waiting, skipping turn"));
             }
         }
 
-        bool requestTick = false;
+        void AddReplayMove()
+        {
+            var replay = GetReplay(true);
+            if (replay != null)
+            {
+                replay.Replay();
+                EnqueueMovement(replay.movement);
+            }
+        }
 
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
-            ShiftQueue();
-            if (currentMovement == Movement.None && inputEnabled)
+            currentMovement = Movement.None;
+            if (!MovesWaiting && inputEnabled)
             {
-                var replay = GetReplay(true);
-                if (replay != null)
-                {
-                    replay.Replay();
-                    EnqueueMovement(replay.movement);
-                }
-            }
-            else
-            {
-                requestTick = true;
+                AddReplayMove();
             }
         }
+         
+        bool Moving => currentMovement != Movement.None;
 
-        bool HasEmptyQueue => currentMovement == Movement.None 
-            || nextMovement == Movement.None 
-            || nextNextMovement == Movement.None;
+        bool MovesWaiting => nextMovement != Movement.None 
+            || nextNextMovement != Movement.None;
 
         private void Update()
         {
-            if (requestTick)
-            {
-                requestTick = !ElasticGameClock.instance.RequestTick();
-            }
-
-            if (HasEmptyQueue && inputEnabled)
-            {
-                var replay = GetReplay();
-                if (replay != null)
+            if (Moving) return;
+            
+            if (MovesWaiting) {
+                if (!ElasticGameClock.instance.RequestTick())
                 {
-                    replay.Replay();
-                    EnqueueMovement(replay.movement);
-
+                    if (!ElasticGameClock.instance.AdjustEndOfTick())
+                    {
+                        Debug.LogWarning(PrefixLogMessage("We have moves waiting but clock refuses both new ticks and adjusting end time of tick!"));
+                    }
                 }
+            } else if (inputEnabled)
+            {
+                AddReplayMove();
             }
         }
 
-        public void CauseFall(bool clearQueue)
+        public void CauseFall()
         {
-            DisableInput(clearQueue);
-            EnqueueMovement(Movement.AbsDown);
+            InjectMovement(Movement.AbsDown);
             Debug.Log(PrefixLogMessage($"Fall with queue {QueueInfo}"));
         }
 
         public void DisableInput(bool clearQueue)
         {
             inputEnabled = false;
-            if (clearQueue) ClearQueue(true);
+            if (clearQueue) { 
+                nextMovement = Movement.None;
+                nextNextMovement = Movement.None;
+            }
             Debug.Log(PrefixLogMessage($"Disable input"));
         }
 
@@ -274,9 +252,8 @@ namespace LMCore.Crawler
             Debug.Log(PrefixLogMessage("Enable input"));
         }
 
-        public void EndFall(bool clearQueue)
+        public void EndFall()
         {
-            if (clearQueue) ClearQueue(true);
             inputEnabled = true;
             Debug.Log(PrefixLogMessage("End fall"));
         }

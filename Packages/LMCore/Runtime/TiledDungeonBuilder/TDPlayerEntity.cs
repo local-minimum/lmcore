@@ -39,7 +39,7 @@ namespace LMCore.TiledDungeon
 
             // Load entity state
             Entity.Dungeon = UnityExtensions.FindObjectByInterfaceOrDefault<IDungeon>(dung => dung.MapName == playerSave.entity.mapName);
-            Entity.Anchor = playerSave.entity.anchor;
+            Entity.AnchorDirection = playerSave.entity.anchor;
             Entity.LookDirection = playerSave.entity.lookDirection;
             Entity.Coordinates = playerSave.entity.position;
             Entity.TransportationMode = playerSave.entity.transportationMode;

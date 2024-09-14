@@ -211,7 +211,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Mover_OnMoveEnd(GridEntity entity, bool successful)
         {
             activelyMovingEntities.Remove(entity);
-            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Coordinates }, new List<Direction> { entity.Anchor }, out bool _))
+            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Coordinates }, new List<Direction> { entity.AnchorDirection }, out bool _))
             {
                 entity.Falling = true; 
             }

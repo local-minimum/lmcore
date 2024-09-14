@@ -32,7 +32,7 @@ namespace LMCore.Crawler
 
         private void HandleRotation(int tickId, Movement movement, Vector3Int startPosition, float duration)
         {
-            var endLookDirection = gEntity.Value.LookDirection.ApplyRotation(gEntity.Value.Anchor, movement, out var endAnchor);
+            var endLookDirection = gEntity.Value.LookDirection.ApplyRotation(gEntity.Value.AnchorDirection, movement, out var endAnchor);
 
             OnEntityMovement?.Invoke(
                 tickId,
@@ -54,7 +54,7 @@ namespace LMCore.Crawler
                 new List<EntityState>()
                 {
                     new EntityState(gEntity),
-                    new EntityState(target, gEntity.Value.Anchor, startLookDirection, gEntity.Value)
+                    new EntityState(target, gEntity.Value.AnchorDirection, startLookDirection, gEntity.Value)
                 },
                 duration
             );
@@ -66,7 +66,7 @@ namespace LMCore.Crawler
 
             var position = gEntity.Value.Coordinates;
             var lookDirection = gEntity.Value.LookDirection;
-            var anchor = gEntity.Value.Anchor;
+            var anchor = gEntity.Value.AnchorDirection;
 
             if (Dungeon.HasNodeAt(position))
             {
@@ -213,7 +213,7 @@ namespace LMCore.Crawler
 
             var startPosition = gEntity.Value.Coordinates;
             var startLookDirection = gEntity.Value.LookDirection;
-            var startAnchor = gEntity.Value.Anchor;
+            var startAnchor = gEntity.Value.AnchorDirection;
 
             Debug.Log($"{name} Position{startPosition} Anchor({startAnchor}) Looking({startLookDirection}): {movement}");
 

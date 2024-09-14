@@ -436,7 +436,7 @@ namespace LMCore.TiledDungeon
 
                 Debug.Log(PrefixLogMessage($"Teleporting {entity.name} to {outlet.Coordinates}"));
                 entity.Coordinates = outlet.Coordinates;
-                entity.Anchor = Direction.Down;
+                entity.AnchorDirection = Direction.Down;
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
                 entity.Sync();
                 return outlet;
@@ -468,7 +468,7 @@ namespace LMCore.TiledDungeon
                 target = HandleTeleporter(entity);
             }
 
-            if (entity.Anchor == Direction.Down && IsSpinner)
+            if (entity.AnchorDirection == Direction.Down && IsSpinner)
             {
                 if (_occupants.Contains(entity))
                 {
@@ -539,9 +539,9 @@ namespace LMCore.TiledDungeon
 
         public bool AllowsRotating(GridEntity entity)
         {
-            if (entity.Anchor.IsPlanarCardinal())
+            if (entity.AnchorDirection.IsPlanarCardinal())
             {
-                if (HasLadder(entity.Anchor)) return false;
+                if (HasLadder(entity.AnchorDirection)) return false;
 
                 Debug.LogWarning(PrefixLogMessage($"Unhandled wall situation for {entity.name}"));
             }

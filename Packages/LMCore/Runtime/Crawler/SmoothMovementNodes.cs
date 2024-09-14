@@ -177,7 +177,7 @@ namespace LMCore.Crawler
             {
                 gEntity.Coordinates = synchState.Coordinates;
             }
-            gEntity.Anchor = synchState.Anchor;
+            gEntity.AnchorDirection = synchState.Anchor;
             gEntity.LookDirection = synchState.LookDirection;
             gEntity.RotationRespectsAnchorDirection = synchState.RotationRespectsAnchorDirection;
             gEntity.TransportationMode = synchState.TransportationMode;

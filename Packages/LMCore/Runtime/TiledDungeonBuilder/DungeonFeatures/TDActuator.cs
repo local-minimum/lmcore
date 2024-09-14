@@ -136,7 +136,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Mover_OnMoveEnd(GridEntity enity, bool successful)
         {
             if (!active) return;
-            if (occupants.Contains(enity) && (enity.Coordinates != Coordinates || enity.Anchor != anchor))
+            if (occupants.Contains(enity) && (enity.Coordinates != Coordinates || enity.AnchorDirection != anchor))
             {
                 occupants.Remove(enity);
 

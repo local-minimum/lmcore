@@ -162,14 +162,14 @@ namespace LMCore.Crawler
             {
                 return new MovementCheckpoint { 
                     Node = entity.Node, 
-                    Edge = entity.Anchor,
+                    Edge = entity.AnchorDirection,
                     LookDirection = entity.LookDirection,
                 };
             }
 
             return new MovementCheckpoint { 
                 Coordinates = entity.Coordinates, 
-                Edge = entity.Anchor,
+                Edge = entity.AnchorDirection,
                 LookDirection = entity.LookDirection,
             };
         }

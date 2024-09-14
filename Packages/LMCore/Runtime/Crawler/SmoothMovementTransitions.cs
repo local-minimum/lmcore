@@ -160,29 +160,19 @@ namespace LMCore.Crawler
 
             if (currentCheckpoint != checkpoint)
             {
-                var swapAnchor = currentCheckpoint.Anchor != checkpoint.Anchor;
-                var swapNode = currentCheckpoint.Node != checkpoint.Node;
-
-                if (swapAnchor) currentCheckpoint.Anchor?.RemoveAnchor(Entity);
-                if (swapNode)
+                if (checkpoint.Anchor != null)
                 {
-                    currentCheckpoint.Node?.RemoveOccupant(Entity);
-                    checkpoint.Node?.AddOccupant(Entity);
-                    ReservationNodes.Remove(checkpoint.Node);
+                    Entity.NodeAnchor = checkpoint.Anchor;
                 }
-                if (swapAnchor)
+                else if (checkpoint.Node != null)
                 {
-                    if (checkpoint.Anchor != null)
-                    {
-                        checkpoint.Anchor?.AddAnchor(Entity);
-                    }
-                    else
-                    {
-                        Entity.Anchor = checkpoint.AnchorDirection;
-                    }
-                }
-
-                Entity.Coordinates = checkpoint.Coordinates;
+                    Entity.Node = checkpoint.Node;
+                } else
+                {
+                    Entity.Coordinates = checkpoint.Coordinates;
+                    Entity.AnchorDirection = checkpoint.AnchorDirection;
+                } 
+                Entity.LookDirection = checkpoint.LookDirection;
 
                 currentCheckpoint = checkpoint;
                 Debug.Log(PrefixLogMessage($"Shift checkpoint: {checkpoint}"));

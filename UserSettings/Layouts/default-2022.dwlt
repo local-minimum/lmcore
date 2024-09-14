@@ -351,7 +351,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 44234
+  m_LastSelectedObjectID: -43112
 --- !u!114 &14
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -573,7 +573,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/se.localminimum.lmcore/Runtime/Crawler
+    - Assets/Scripts/DebugAnimatons
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -581,16 +581,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Packages/se.localminimum.lmcore/Runtime/Crawler
+  - Assets/Scripts/DebugAnimatons
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 160}
-    m_SelectedIDs: 08cc0000
-    m_LastClickedID: 52232
-    m_ExpandedIDs: 0000000012ca000014ca000016ca000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 0}
+    m_SelectedIDs: 42630700
+    m_LastClickedID: 484162
+    m_ExpandedIDs: 0000000012ca000014ca000016ca0000eacb000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -643,8 +643,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: f6280000
-    m_LastClickedInstanceID: 10486
+    m_SelectedInstanceIDs: 401cffff
+    m_LastClickedInstanceID: -58304
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000326dffff
     m_RenameOverlay:
@@ -760,9 +760,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: caac0000
-      m_LastClickedID: 44234
-      m_ExpandedIDs: 2afbffffc86f0000108b00003a990000049f000096a800000eac0000caac0000
+      m_SelectedIDs: 94200800
+      m_LastClickedID: 532628
+      m_ExpandedIDs: 6405ffffea2affff1c3fffffae42ffff9857ffffb858ffff2afbffffde750000887e0000ba7e0000f48000007a8400007a8500009a850000caac0000fab2000074270800
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1130,9 +1130,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 62.929012, y: 20.94362, z: 35.728867}
+    m_Target: {x: 12, y: 4.5, z: -10.5}
     speed: 2
-    m_Value: {x: 62.929012, y: 20.94362, z: 35.728867}
+    m_Value: {x: 12, y: 4.5, z: -10.5}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1152,17 +1152,17 @@ MonoBehaviour:
   m_Grid:
     xGrid:
       m_Fade:
-        m_Target: 0
+        m_Target: 1
         speed: 2
-        m_Value: 0
+        m_Value: 1
       m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.4}
       m_Pivot: {x: 0, y: 0, z: 0}
       m_Size: {x: 3, y: 3}
     yGrid:
       m_Fade:
-        m_Target: 1
+        m_Target: 0
         speed: 2
-        m_Value: 1
+        m_Value: 0
       m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.4}
       m_Pivot: {x: 0, y: 0, z: 0}
       m_Size: {x: 3, y: 3}
@@ -1178,13 +1178,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.33982605, y: -0.19601816, z: 0.07263885, w: -0.9169864}
+    m_Target: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
     speed: 2
-    m_Value: {x: -0.33981836, y: -0.19601372, z: 0.0726372, w: -0.91696566}
+    m_Value: {x: 0, y: -0.70710677, z: 0, w: 0.70710677}
   m_Size:
-    m_Target: 3.3578434
+    m_Target: 12.124355
     speed: 2
-    m_Value: 3.3578434
+    m_Value: 12.124355
   m_Ortho:
     m_Target: 1
     speed: 2

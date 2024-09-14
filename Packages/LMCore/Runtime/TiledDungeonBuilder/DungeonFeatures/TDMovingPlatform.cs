@@ -106,7 +106,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         public bool MayEnter(GridEntity entity) { 
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return true;
 
-            if (entity.Anchor == Direction.Down) {
+            if (entity.AnchorDirection == Direction.Down) {
                 var myCoordinates = CurrentCoordinates;
                 foreach (var dependant in managedOffsetSides)
                 {
@@ -322,15 +322,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     var offset = entity.Coordinates - currentNode.Coordinates;
                     var newEntityCoordinates = coordinates + offset;
 
-                    if (Dungeon.HasNodeAt(entity.Coordinates)) {
-                        Dungeon[entity.Coordinates].RemoveOccupant(entity);
-                    }
-
                     entity.Coordinates = newEntityCoordinates;
-
-                    if (Dungeon.HasNodeAt(entity.Coordinates)) {
-                        Dungeon[entity.Coordinates].AddOccupant(entity);
-                    }
                 }
             } else
             {

@@ -5,16 +5,9 @@ namespace LMCore.Crawler
 {
     /* KNOWN BUGS
      *
-     *  There are pauses in the jumping
-     *  
-     *  we are jumping too high onto empty squares
-     *  
      *  it would be nice if stepping onto an illusory floor didn't jump up at all
      *  
      *  we are not carried by movable platforms
-     *  
-     *  getting onto ladder from above makes strange instant turn without 
-     *  animation
      *  
      *  running onto ladders may cause glitched retake of animation
      *  
@@ -414,9 +407,9 @@ namespace LMCore.Crawler
             if (movement.IsTranslation())
             {
                 var direction = Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement);
-                if (!Entity.RotationRespectsAnchorDirection && Entity.Anchor.IsPlanarCardinal())
+                if (!Entity.RotationRespectsAnchorDirection && Entity.AnchorDirection.IsPlanarCardinal())
                 {
-                    if (Entity.LookDirection == Entity.Anchor)
+                    if (Entity.LookDirection == Entity.AnchorDirection)
                     {
                         switch (movement)
                         {
@@ -500,7 +493,7 @@ namespace LMCore.Crawler
                         Transition = MovementTransition.Ungrounded,
                     });
 
-                    var outcome = node.AllowsMovement(Entity, Entity.Anchor, direction);
+                    var outcome = node.AllowsMovement(Entity, Entity.AnchorDirection, direction);
                     if (outcome == MovementOutcome.Refused)
                     {
                         interpretation.Steps.Add(interpretation.First);

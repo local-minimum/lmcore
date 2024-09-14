@@ -18,7 +18,7 @@ namespace LMCore.Crawler
         private AbsInventory _inventory;
         public AbsInventory Inventory => _inventory;
 
-        public UnityEvent<bool> OnFall;
+        public UnityEvent OnFall;
         public UnityEvent ContinueFall;
         public UnityEvent OnLand;
         public EntityAbilities Abilities;
@@ -33,17 +33,29 @@ namespace LMCore.Crawler
             get => _anchor;
             set
             {
-                _anchor = value;
+                if (_anchor != value) {
+                    _anchor?.RemoveAnchor(this);
+                }
+
                 if (value != null)
                 {
+                    value.AddAnchor(this);
+                    if (Node != value.Node)
+                    {
+                        Node?.RemoveOccupant(this);
+                        value.Node.AddOccupant(this);
+                    }
+
                     _node = null;
                     _anchorDirection = value.CubeFace;
                 }
+
+                _anchor = value;
             }
         }
 
         private Direction _anchorDirection = Direction.Down;
-        public Direction Anchor
+        public Direction AnchorDirection
         {
             get
             {
@@ -60,7 +72,10 @@ namespace LMCore.Crawler
                         NodeAnchor = anchor;
                         return;
                     }
+
+                    NodeAnchor?.RemoveAnchor(this);
                 }
+
                 _anchorDirection = value;
                 _anchor = null;
             }
@@ -69,7 +84,7 @@ namespace LMCore.Crawler
         public Direction Down
         {
             get {
-                if (RotationRespectsAnchorDirection && Anchor != Direction.None)
+                if (RotationRespectsAnchorDirection && AnchorDirection != Direction.None)
                 {
                     return _anchorDirection;
                 }
@@ -85,17 +100,23 @@ namespace LMCore.Crawler
                 if (_anchor != null) return _anchor.Node;
                 return _node;
             }
+
             set
             {
-                var anchor = value?.GetAnchor(Anchor);
+                var anchor = value?.GetAnchor(AnchorDirection);
                 if (anchor != null)
                 {
                     NodeAnchor = anchor;
                 } else
                 {
+                    if (_node != value)
+                    {
+                        _node?.RemoveOccupant(this);
+                        value?.AddOccupant(this);
+                        _anchor?.RemoveAnchor(this);
+                    }
                     _node = value;
                     _anchor = null;
-                    if (value != null) _Coordinates = value.Coordinates;
                 }
             }
         }
@@ -133,7 +154,7 @@ namespace LMCore.Crawler
                 if (Dungeon.HasNodeAt(_Coordinates))
                 {
                     var node = Dungeon[_Coordinates];
-                    var anchor = node?.GetAnchor(Anchor);
+                    var anchor = node?.GetAnchor(AnchorDirection);
                     if (anchor != null)
                     {
                         NodeAnchor = anchor;
@@ -145,7 +166,6 @@ namespace LMCore.Crawler
                 {
                     Node = null;
                 }
-                Node = Dungeon.HasNodeAt(_Coordinates) ? Dungeon[_Coordinates] : null;
             }
         }
         #endregion
@@ -153,10 +173,10 @@ namespace LMCore.Crawler
         public TransportationMode TransportationMode;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
-        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {Anchor} looking {LookDirection}: {message}";
+        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection} looking {LookDirection}: {message}";
 
         public override string ToString() => 
-            $"Entity '{name}' @ {Coordinates} Anchor({Anchor}) Down({Down}) Looking({LookDirection})";
+            $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}) Down({Down}) Looking({LookDirection})";
 
         private bool _falling;
         public bool Falling
@@ -167,7 +187,7 @@ namespace LMCore.Crawler
                 {
                     if (value) {
                         Debug.Log(PrefixLogMessage("Is falling"));
-                        OnFall?.Invoke(true);
+                        OnFall?.Invoke();
                     } else
                     {
                         Debug.Log(PrefixLogMessage("Stopped falling"));
@@ -224,20 +244,11 @@ namespace LMCore.Crawler
                 Debug.LogError(
                     PrefixLogMessage($"Can't parse look direction as rotation ({LookDirection} / 3D {RotationRespectsAnchorDirection}): {e.Message}"));
             }
-            var node = Dungeon[Coordinates];
-            if (node != null)
-            {
-                node.AddOccupant(this);
-            }
             CheckFall();
         }
 
         public void Sync(MovementCheckpoint checkpoint)
         {
-            if (Node != checkpoint.Node)
-            {
-                Node?.RemoveOccupant(this);
-            }
             if (checkpoint.Anchor != null)
             {
                 NodeAnchor = checkpoint.Anchor;
@@ -260,7 +271,7 @@ namespace LMCore.Crawler
         /// </summary>
         public void Translate(Movement movement)
         {
-            Coordinates = LookDirection.RelativeTranslation3D(Anchor, movement).Translate(Coordinates);
+            Coordinates = LookDirection.RelativeTranslation3D(AnchorDirection, movement).Translate(Coordinates);
         }
 
         /// <summary>
@@ -270,10 +281,10 @@ namespace LMCore.Crawler
         /// </summary>
         public void Rotate(Movement movement)
         {
-            LookDirection = LookDirection.ApplyRotation(Anchor, movement, out var anchorDirecition);
-            Anchor = anchorDirecition;
+            LookDirection = LookDirection.ApplyRotation(AnchorDirection, movement, out var anchorDirecition);
+            AnchorDirection = anchorDirecition;
 
-            if (Anchor != Direction.Down && Anchor != Direction.None)
+            if (AnchorDirection != Direction.Down && AnchorDirection != Direction.None)
             {
                 TransportationMode = TransportationMode.AddFlag(TransportationMode.Climbing);
             } else
@@ -304,7 +315,7 @@ namespace LMCore.Crawler
                 return;
             }
 
-            if (!TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(this, Anchor))
+            if (!TransportationMode.HasFlag(TransportationMode.Flying) && !node.CanAnchorOn(this, AnchorDirection))
             {
                 if (!node.HasFloor)
                 {

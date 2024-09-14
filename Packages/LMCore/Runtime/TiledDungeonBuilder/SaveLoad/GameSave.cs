@@ -63,7 +63,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         {
             position = entity.Coordinates;
             lookDirection = entity.LookDirection;
-            anchor = entity.Anchor;
+            anchor = entity.AnchorDirection;
             transportationMode = entity.TransportationMode;
             rotationRespectsAnchorDirection = entity.RotationRespectsAnchorDirection;
             falling = entity.Falling;
