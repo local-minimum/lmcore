@@ -11,6 +11,9 @@ namespace LMCore.Crawler
         [Range(0f, 1f), Tooltip("Factor of distance to the midpoint where movement should stop")]
         public float refusedMidpointMaxInterpolation;
 
+        [Range(0f, 1f), Tooltip("Factor of distance to the midpoint where movement should stop when reversing")]
+        public float refusedMidpointReversingMaxInterpolation;
+
         [Tooltip("Inverse direction of current down. Smaller than this is ignored / walked over")]
         public float minScaleHeight;
         [Tooltip("Inverse direction of current down. Larger than this is refused")]

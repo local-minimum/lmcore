@@ -11,8 +11,6 @@ namespace LMCore.Crawler
      *  
      *  automatic trapdoor doesnt open
      *  
-     *  moving backwards should refuse move even earlier
-     *  
      */
 
     public delegate void MovementInterpretationEvent(

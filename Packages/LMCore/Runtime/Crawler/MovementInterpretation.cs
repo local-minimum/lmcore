@@ -181,7 +181,7 @@ namespace LMCore.Crawler
                 return false;
             }
 
-            var direction = (firstPos - originPos);
+            var direction = firstPos - originPos;
             var dFirst = direction.magnitude;
             var norm = direction.normalized;
             var dSecond = Vector3.Project(secondPos - originPos, norm).magnitude;
@@ -356,12 +356,16 @@ namespace LMCore.Crawler
                 // progress = CubicBezier(0.1f, 0.62f, 0.9f, 0.38f, progress);
                 if (Outcome == MovementInterpretationOutcome.Bouncing && Steps.Count == 3)
                 {
+                    var progressCap = entity.LookDirection == PrimaryDirection.Inverse() ?
+                        entity.Abilities.refusedMidpointReversingMaxInterpolation : 
+                        entity.Abilities.refusedMidpointMaxInterpolation;
+
                     if (progress < 0.5f)
                     {
-                        progress = Mathf.Min(progress, entity.Abilities.refusedMidpointMaxInterpolation * 0.5f);
+                        progress = Mathf.Min(progress, 0.5f * progressCap);
                     } else
                     {
-                        progress = Mathf.Max(progress, 1 - entity.Abilities.refusedMidpointMaxInterpolation * 0.5f);
+                        progress = Mathf.Max(progress, 1 - 0.5f * progressCap);
                     }
                 }
             } else if (Outcome == MovementInterpretationOutcome.Landing)
