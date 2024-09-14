@@ -40,6 +40,7 @@ namespace LMCore.Crawler
 
     public class SmoothMovementNodes : MonoBehaviour, IEntityMover
     {
+        // TODO: Doesn't invoke Entity.Moving   
         public event EntityMovementStartEvent OnMoveStart;
         public event EntityMovementEndEvent OnMoveEnd;
         public bool Enabled => enabled && gameObject.activeSelf;

@@ -9,10 +9,12 @@ using LMCore.Inventory;
 namespace LMCore.Crawler
 {
     public delegate void InteractEvent(GridEntity entity);
+    public delegate void MoveEvent(GridEntity entity);
 
     public class GridEntity : MonoBehaviour
     {
         public static event InteractEvent OnInteract;
+        public static event MoveEvent OnMove;
 
         [SerializeField]
         private AbsInventory _inventory;
@@ -28,6 +30,16 @@ namespace LMCore.Crawler
         public IGridSizeProvider GridSizeProvider { get; set; }
         public IDungeon Dungeon { get; set; }
 
+        private bool _moving;
+        public bool Moving {
+            get => _moving; 
+            set
+            {
+                _moving = value;
+                OnMove?.Invoke(this);
+            }
+        }
+
         private Anchor _anchor;
         public Anchor NodeAnchor {
             get => _anchor;
@@ -37,13 +49,14 @@ namespace LMCore.Crawler
                     _anchor?.RemoveAnchor(this);
                 }
 
+                bool addOccupant = false;
                 if (value != null)
                 {
                     value.AddAnchor(this);
                     if (Node != value.Node)
                     {
                         Node?.RemoveOccupant(this);
-                        value.Node.AddOccupant(this);
+                        addOccupant = true;
                     }
 
                     _node = null;
@@ -51,6 +64,11 @@ namespace LMCore.Crawler
                 }
 
                 _anchor = value;
+                if (addOccupant)
+                {
+                    // This needs to happen last so that the entity is fully in sync
+                    value.Node.AddOccupant(this);
+                }
             }
         }
 
@@ -103,6 +121,7 @@ namespace LMCore.Crawler
 
             set
             {
+                bool addOccupant = false;
                 var anchor = value?.GetAnchor(AnchorDirection);
                 if (anchor != null)
                 {
@@ -112,11 +131,17 @@ namespace LMCore.Crawler
                     if (_node != value)
                     {
                         _node?.RemoveOccupant(this);
-                        value?.AddOccupant(this);
                         _anchor?.RemoveAnchor(this);
+                        addOccupant = true;
                     }
                     _node = value;
                     _anchor = null;
+                }
+
+                if (addOccupant)
+                {
+                    // This needs to happen last so that the entity is fully in sync
+                    value?.AddOccupant(this);
                 }
             }
         }

@@ -97,6 +97,7 @@ namespace LMCore.Crawler
                 animationTickId = -1;
                 activeInterpretation = null;
                 currentCheckpoint = null;
+                Entity.Moving = false;
             }
         }
 
@@ -121,6 +122,7 @@ namespace LMCore.Crawler
             animationStartTime = Time.timeSinceLevelLoad;
             animationDuration = duration;
             animationInterpolationStart = 0;
+            Entity.Moving = false;
 
             currentCheckpoint = activeInterpretation.First.Checkpoint;
 

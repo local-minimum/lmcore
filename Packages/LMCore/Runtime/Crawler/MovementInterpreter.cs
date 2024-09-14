@@ -9,7 +9,7 @@ namespace LMCore.Crawler
      *  
      *  we are not carried by movable platforms
      *  
-     *  automatic trapdoor doesnt open
+     *  automatic trapdoor doesnt make player fall
      *  
      */
 

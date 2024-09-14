@@ -468,14 +468,18 @@ namespace LMCore.TiledDungeon
                 target = HandleTeleporter(entity);
             }
 
-            if (entity.AnchorDirection == Direction.Down && IsSpinner)
+            if (entity.AnchorDirection == Direction.Down)
             {
-                if (_occupants.Contains(entity))
+                if (IsSpinner)
                 {
-                    Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
-                } else
-                {
-                    HandleSpinner(entity);
+                    if (_occupants.Contains(entity))
+                    {
+                        Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
+                    }
+                    else
+                    {
+                        HandleSpinner(entity);
+                    }
                 }
             }
 

@@ -9,6 +9,7 @@ namespace LMCore.Crawler
 {
     public class InstantMovementNodes : MonoBehaviour, IEntityMover
     {
+        // TODO: Doesn't invoke Entity.Moving   
         public IGridSizeProvider GridSizeProvider { get; set; }
         public IDungeon Dungeon { get; set; }
 
