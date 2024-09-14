@@ -79,6 +79,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        public bool FullyClosed => !isOpen && ActiveTransition == Transition.None;
+
         public DirectionAxis TraversalAxis
         {
             get
@@ -145,6 +147,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        HashSet<GridEntity> trapTriggeringEntities = new HashSet<GridEntity>();
+
         private void TDNode_OnNewOccupant(TDNode node, GridEntity entity)
         {
             if (entity.Coordinates != Coordinates)
@@ -167,6 +171,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (automaticTrapDoor && ActiveTransition != Transition.Opening && !isOpen)
             {
+                trapTriggeringEntities.Add(entity);
                 OpenDoor();
                 entity.Falling = true; 
                 Debug.Log(PrefixLogMessage($"automatically opens for {entity.name}"));
@@ -188,8 +193,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 && !entity.TransportationMode.HasFlag(TransportationMode.Flying)
                 && states.Any(b => b);
         }
-
-        HashSet<GridEntity> trapTriggeringEntities = new HashSet<GridEntity>();
 
         IEnumerator<WaitForSeconds> AutoClose(string logMessage)
         {

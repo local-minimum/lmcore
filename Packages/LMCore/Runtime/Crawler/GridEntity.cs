@@ -269,6 +269,7 @@ namespace LMCore.Crawler
                 Debug.LogError(
                     PrefixLogMessage($"Can't parse look direction as rotation ({LookDirection} / 3D {RotationRespectsAnchorDirection}): {e.Message}"));
             }
+
             CheckFall();
         }
 

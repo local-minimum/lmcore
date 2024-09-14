@@ -126,7 +126,7 @@ namespace LMCore.TiledDungeon
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
         public bool HasFloor => 
-            sides.Down && (HasTrapDoor == false || Door?.BlockingPassage == true) && !HasIllusion(Direction.Down);
+            sides.Down && (HasTrapDoor == false || Door?.FullyClosed == true) && !HasIllusion(Direction.Down);
         public bool HasCeiling => sides.Up;
 
         public bool Obstructed =>
