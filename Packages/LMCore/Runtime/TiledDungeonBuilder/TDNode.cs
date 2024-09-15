@@ -127,6 +127,13 @@ namespace LMCore.TiledDungeon
 
         public bool HasFloor => 
             sides.Down && (HasTrapDoor == false || Door?.FullyClosed == true) && !HasIllusion(Direction.Down);
+
+        public bool HasIllusorySurface(Direction direction)
+        {
+            return GetComponentsInChildren<TDIllusoryCubeSide>()
+                .Any(s => s.CubeFace == direction);
+        }
+
         public bool HasCeiling => sides.Up;
 
         public bool Obstructed =>
@@ -518,6 +525,8 @@ namespace LMCore.TiledDungeon
 
         public void Reserve(GridEntity entity)
         {
+            if (_occupants.Contains(entity)) return;
+
             Debug.Log($"Reserving {entity.name} occupancy for {Coordinates}");
             _reservations.Add(entity);
         }

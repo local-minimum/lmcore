@@ -16,6 +16,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField, HideInInspector]
         Direction direction;
+        public Direction CubeFace => direction;
 
         [SerializeField]
         string DiscoverTrigger = "Discover";

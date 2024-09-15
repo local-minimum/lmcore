@@ -352,8 +352,6 @@ namespace LMCore.Crawler
 
             if (Outcome == MovementInterpretationOutcome.Bouncing || Outcome == MovementInterpretationOutcome.DynamicBounce)
             {
-                // TODO: Something is wrong with the parameters or the equations
-                // progress = CubicBezier(0.1f, 0.62f, 0.9f, 0.38f, progress);
                 if (Outcome == MovementInterpretationOutcome.Bouncing && Steps.Count == 3)
                 {
                     var progressCap = entity.LookDirection == PrimaryDirection.Inverse() ?

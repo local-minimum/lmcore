@@ -29,6 +29,7 @@ namespace LMCore.Crawler
         public bool IsRamp { get; }
 
         public bool HasFloor { get; }
+        public bool HasIllusorySurface(Direction direction);  
 
         public void AssignConstraints(GridEntity entity, Direction direction);
         public void RemoveConstraints(GridEntity entity, Direction direction);

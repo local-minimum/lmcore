@@ -5,8 +5,6 @@ namespace LMCore.Crawler
 {
     /* KNOWN BUGS
      *
-     *  it would be nice if stepping onto an illusory floor didn't jump up at all
-     *  
      *  we are not carried by movable platforms
      *  
      */
@@ -34,6 +32,7 @@ namespace LMCore.Crawler
 
         private void InterpretBlocked(MovementInterpretation interpretation)
         {
+            Debug.LogWarning("Blocked movement detected");
             var direction = interpretation.PrimaryDirection;
             var origin = interpretation.Last;
 
@@ -320,42 +319,44 @@ namespace LMCore.Crawler
                     return; 
                 }
 
-                if (targetNode.GetAnchor(direction) == null)
-                {
-                    // Falling or flying through a tile
-                    Debug.Log("Flying or falling through tile");
-                    if (origin.Transition == MovementTransition.Grounded)
+                if (targetNode.GetAnchor(wantedAnchorDirection) == null)
+                { 
+                    if (targetNode.HasIllusorySurface(wantedAnchorDirection))
                     {
-                        origin.Transition = MovementTransition.Jump;
-                        Debug.Log($"Reclassifying prior transition as a jump: {origin}");
-                    }
-                    interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
-                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                    {
-                        Checkpoint = MovementCheckpoint.From(targetNode, Direction.None, interpretation.Last.Checkpoint.LookDirection),
-                        Transition = MovementTransition.Ungrounded,
-                    });
-                }
-                else
-                {
-                    if (origin.Transition == MovementTransition.Grounded)
-                    {
-                        origin.Transition = MovementTransition.Jump;
-                    }
-                    if (!Entity.TransportationMode.HasFlag(TransportationMode.Flying))
-                    {
-                        // Bouncing off wall/floor in the direction of the movement
-                        interpretation.Outcome = MovementInterpretationOutcome.Bouncing;
+                        interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                         interpretation.Steps.Add(new MovementCheckpointWithTransition()
                         {
-                            Checkpoint = MovementCheckpoint.From(targetNode, direction, interpretation.Last.Checkpoint.LookDirection),
-                            Transition = MovementTransition.Ungrounded
+                            Checkpoint = MovementCheckpoint.From(targetNode, wantedAnchorDirection, interpretation.Last.Checkpoint.LookDirection),
+                            Transition = MovementTransition.Ungrounded,
                         });
                     } else
                     {
-                        // Flying into new tile
+                        // Falling or flying through a tile
+                        Debug.Log("Flying or falling through tile");
+                        if (origin.Transition == MovementTransition.Grounded)
+                        {
+                            origin.Transition = MovementTransition.Jump;
+                            Debug.Log($"Reclassifying prior transition as a jump: {origin}");
+                        }
                         interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
+                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                        {
+                            Checkpoint = MovementCheckpoint.From(targetNode, Direction.None, interpretation.Last.Checkpoint.LookDirection),
+                            Transition = MovementTransition.Ungrounded,
+                        });
                     }
+                }
+                else
+                {
+                    // There's an achor on the same surface direction as the movement
+                    // started, but we aren't allowed on it.
+                    if (origin.Transition == MovementTransition.Grounded)
+                    {
+                        origin.Transition = MovementTransition.Jump;
+                    }
+
+                    interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
+
                     interpretation.Steps.Add(new MovementCheckpointWithTransition()
                     {
                         Checkpoint = MovementCheckpoint.From(targetNode, Direction.None, interpretation.Last.Checkpoint.LookDirection),

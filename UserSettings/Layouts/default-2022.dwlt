@@ -68,8 +68,8 @@ MonoBehaviour:
     y: 0
     width: 643
     height: 957
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 16}
   m_Panes:
   - {fileID: 16}
@@ -95,8 +95,8 @@ MonoBehaviour:
     y: 0
     width: 315
     height: 498
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -573,7 +573,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Prefabs/IllusorySides
+    - Assets/Materials/ambientgc/diamondplate
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -581,16 +581,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Prefabs/IllusorySides
+  - Assets/Materials/ambientgc/diamondplate
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 120}
-    m_SelectedIDs: 34c40300
-    m_LastClickedID: 246836
-    m_ExpandedIDs: 000000001cca00001eca000020ca0000e8cb0000eacb0000eecb000010cc0000e0c30300e4c3030000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 60}
+    m_SelectedIDs: 8ccd0000
+    m_LastClickedID: 52620
+    m_ExpandedIDs: 0000000022ca000024ca000026ca000028ca00002aca00002cca00002eca000032ca000006cc000094cc000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -618,7 +618,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000001cca00001eca000020ca0000
+    m_ExpandedIDs: 0000000022ca000024ca000026ca000028ca00002aca00002cca00002eca000030ca000032ca0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -649,18 +649,18 @@ MonoBehaviour:
     m_ExpandedInstanceIDs: c6230000326dfffff2c30300
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: IllusoryWall
-      m_OriginalName: IllusoryWall
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 49686
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 5}
     m_CreateAssetUtility:
@@ -760,9 +760,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: d4ac0000
-      m_LastClickedID: 44244
-      m_ExpandedIDs: d6e4fdffe6e4fdffece4fdff6ee6fdffd8e8fdffe8e8fdfffce8fdff36f3fdff3cf3fdff92f4fdff2afbffffd4ac0000
+      m_SelectedIDs: 548effff
+      m_LastClickedID: 0
+      m_ExpandedIDs: 2afbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1130,9 +1130,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 32.225388, y: 23.443825, z: 68.59798}
+    m_Target: {x: 35.42878, y: 15.0013895, z: 62.697544}
     speed: 2
-    m_Value: {x: 32.225388, y: 23.443825, z: 68.59798}
+    m_Value: {x: 35.42878, y: 15.0013895, z: 62.697544}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1178,13 +1178,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.4997046, y: -0.1258999, z: 0.07368496, w: 0.8538388}
+    m_Target: {x: 0.26585567, y: -0.16044906, z: 0.044924483, w: 0.9495187}
     speed: 2
-    m_Value: {x: 0.49969822, y: -0.12589829, z: 0.07368402, w: 0.8538279}
+    m_Value: {x: 0.2658521, y: -0.1604469, z: 0.04492388, w: 0.94950587}
   m_Size:
-    m_Target: 7.531697
+    m_Target: 7.634911
     speed: 2
-    m_Value: 7.531697
+    m_Value: 7.634911
   m_Ortho:
     m_Target: 1
     speed: 2
