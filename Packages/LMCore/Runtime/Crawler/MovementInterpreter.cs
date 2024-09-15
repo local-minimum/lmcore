@@ -5,8 +5,13 @@ namespace LMCore.Crawler
 {
     /* KNOWN BUGS
      *
-     *  we are not carried by movable platforms
-     *  
+     * introducing the entity constraint teleports player way off map briefly
+     * 
+     * rotating on the moving platform makes player suspended in air... maybe the constraint
+     * should never leave off...
+     * 
+     * getting on platform is a bit too limited
+     * 
      */
 
     public delegate void MovementInterpretationEvent(

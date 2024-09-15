@@ -399,25 +399,13 @@ namespace LMCore.TiledDungeon
             }
 
             var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform)
+            if (platform != null)
             {
-                if (!platform.MayEnter(entity)) return false;
+                Debug.Log(PrefixLogMessage("We have a platform"));
+                return platform.MayEnter(entity);
             }
 
-
-            if (_occupants.Count == 0 || OccupationRules.MayCoexist(entity, _occupants))
-            {
-                if (platform)
-                {
-                    // TODO: This probably doesn't work
-                    // Also needs way to release entity
-                    platform.ConstrainEntity(entity);
-                }
-                return true;
-            }
-
-            return false;
-
+            return true;
         }
 
         IDungeonNode HandleTeleporter(GridEntity entity)
@@ -466,6 +454,20 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        void AddNewOccupant(GridEntity entity)
+        {
+            _occupants.Add(entity);
+            
+            if (entity.NodeAnchor != null)
+            {
+                var platform = entity.NodeAnchor.GetComponentInChildren<TDMovingPlatform>();
+                if (platform != null)
+                {
+                    platform.ConstrainEntity(entity);
+                }
+            }
+        }
+
         void HandleTraps(GridEntity entity)
         {
             IDungeonNode target = null;
@@ -492,7 +494,7 @@ namespace LMCore.TiledDungeon
 
             if (target == null || target == (IDungeonNode)this)
             {
-                _occupants.Add(entity);
+                AddNewOccupant(entity);
             } else
             {
                 target.AddOccupant(entity);
@@ -516,7 +518,7 @@ namespace LMCore.TiledDungeon
             if (IsTrap) {
                 HandleTraps(entity);
             } else {
-                _occupants.Add(entity);
+                AddNewOccupant(entity);
             }
             entity.transform.SetParent(transform);
         }
@@ -539,13 +541,6 @@ namespace LMCore.TiledDungeon
             if (entity.transform.parent == transform)
             {
                 entity.transform.SetParent(Dungeon.transform);
-            }
-
-            // TODO: This hack doesn't fully work
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform != null)
-            {
-                platform.FreeEntity(entity);
             }
         }
         #endregion
@@ -601,6 +596,8 @@ namespace LMCore.TiledDungeon
             return direction.Translate(Coordinates);
         }
 
+
+        /*
         #region EntityConstraints
         public void AssignConstraints(GridEntity entity, Direction direction)
         {
@@ -621,6 +618,7 @@ namespace LMCore.TiledDungeon
             }
         }
         #endregion
+        */
 
         public Anchor GetAnchor(Direction direction) => 
             GetComponentsInChildren<Anchor>()

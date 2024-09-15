@@ -142,6 +142,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             constrainedEntities.Add(entity);
 
+            Debug.Log(PrefixLogMessage($"Constraining {entity.name}"));
             return true;
         }
 
@@ -150,7 +151,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             constrainedEntities.Remove(entity);
 
             var constraint = entity.GetComponent<PositionConstraint>();
-            if (constraint == null) { return false; }
+            if (constraint == null) { 
+                Debug.LogWarning(PrefixLogMessage($"There's no constraint on {entity.name} to free"));
+                return false; 
+            }
 
             for (int i = 0, l = constraint.sourceCount; i < l; i++)
             {
@@ -163,10 +167,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     {
                         constraint.constraintActive = false;
                     }
+                    Debug.Log(PrefixLogMessage($"Freeing {entity.name}"));
                     return true;
                 }
             }
 
+            Debug.LogError(PrefixLogMessage($"Failed to free {entity.name}"));
             return false;
         }
 
@@ -180,9 +186,28 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 InitWaitToStart();
             }
 
+            // TODO: Figure out this managing moving cube face business
             var anchor = GetComponent<Anchor>();
             if (anchor != null) {
                 anchor.ManagingMovingCubeFace = this;
+            }
+        }
+
+        private void OnEnable()
+        {
+            GridEntity.OnMove += GridEntity_OnMove;
+        }
+
+        private void OnDisable()
+        {
+            GridEntity.OnMove -= GridEntity_OnMove;
+        }
+
+        private void GridEntity_OnMove(GridEntity entity)
+        {
+            if (entity.Moving && constrainedEntities.Contains(entity))
+            {
+                FreeEntity(entity);
             }
         }
 
@@ -317,13 +342,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     Dungeon[otherCoordinates].UpdateSide(dependent.Value, true);
                 }
 
+                // No need to update constrained entities, they should use the
+                // same anchor as us...
                 foreach (var entity in constrainedEntities)
                 {
-                    var offset = entity.Coordinates - currentNode.Coordinates;
-                    var newEntityCoordinates = coordinates + offset;
-
-                    entity.Coordinates = newEntityCoordinates;
+                    Debug.Log(PrefixLogMessage($"Managed entity now is {entity}"));
                 }
+
             } else
             {
                 Debug.LogWarning(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));

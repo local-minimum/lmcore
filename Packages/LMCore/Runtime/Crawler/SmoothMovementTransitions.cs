@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace LMCore.Crawler
 {
@@ -98,6 +99,12 @@ namespace LMCore.Crawler
                 activeInterpretation = null;
                 currentCheckpoint = null;
                 Entity.Moving = false;
+
+                var positionConstraint = GetComponent<PositionConstraint>();
+                if (positionConstraint != null)
+                {
+                    positionConstraint.weight = 1;
+                }
             }
         }
 
@@ -122,7 +129,7 @@ namespace LMCore.Crawler
             animationStartTime = Time.timeSinceLevelLoad;
             animationDuration = duration;
             animationInterpolationStart = 0;
-            Entity.Moving = false;
+            Entity.Moving = true;
 
             currentCheckpoint = activeInterpretation.First.Checkpoint;
 
@@ -144,9 +151,9 @@ namespace LMCore.Crawler
         {
             if (!Animating) { return; }
 
-            var progres = AnimationProgress;
+            var progress = AnimationProgress;
 
-            if (progres == 1)
+            if (progress == 1)
             {
                 FinalizeInterpretation();
                 return;
@@ -154,11 +161,18 @@ namespace LMCore.Crawler
 
             transform.position = activeInterpretation.Evaluate(
                 Entity, 
-                Mathf.Clamp01(progres / activeInterpretation.DurationScale), 
+                Mathf.Clamp01(progress / activeInterpretation.DurationScale), 
                 out var rotation, 
                 out var checkpoint);
 
             transform.rotation = rotation;
+
+            var positionConstraint = GetComponent<PositionConstraint>();
+            if (positionConstraint != null)
+            {
+                positionConstraint.weight = progress;
+            }
+
 
             if (currentCheckpoint != checkpoint)
             {

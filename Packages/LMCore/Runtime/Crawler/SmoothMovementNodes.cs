@@ -271,11 +271,11 @@ namespace LMCore.Crawler
                 }
                 /*
                 Dungeon[entity.Position]?.RemoveConstraints(entity, entity.Anchor);
-                */
                 if (states.Count > 1)
                 {
                     Dungeon[animationEnd.Coordinates]?.AssignConstraints(entity, animationEnd.Anchor);
                 }
+                */
 
                 positionConstraint = entity.GetComponent<PositionConstraint>();
                 if (positionConstraint != null && positionConstraint.constraintActive == false)

@@ -198,10 +198,18 @@ namespace LMCore.Crawler
         public TransportationMode TransportationMode;
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
-        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection} looking {LookDirection}: {message}";
+        private string AnchorMode
+        {
+            get {
+                if (NodeAnchor != null) return "Achor";
+                if (Node != null) return "Node";
+                return "Dungeon";
+            }
+        }
+        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection}/{AnchorMode} looking {LookDirection}: {message}";
 
         public override string ToString() => 
-            $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}) Down({Down}) Looking({LookDirection})";
+            $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}/{AnchorMode}) Down({Down}) Looking({LookDirection})";
 
         private bool _falling;
         public bool Falling
