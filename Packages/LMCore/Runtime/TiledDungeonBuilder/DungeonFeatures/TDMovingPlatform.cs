@@ -205,7 +205,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void GridEntity_OnMove(GridEntity entity)
         {
-            if (entity.Moving && constrainedEntities.Contains(entity))
+            if (entity.Moving.HasFlag(MovementType.Translating) && constrainedEntities.Contains(entity))
             {
                 FreeEntity(entity);
             }

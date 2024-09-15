@@ -11,6 +11,13 @@ namespace LMCore.Crawler
     public delegate void InteractEvent(GridEntity entity);
     public delegate void MoveEvent(GridEntity entity);
 
+    [System.Flags]
+    public enum MovementType {
+        Stationary, 
+        Translating,
+        Rotating
+    };
+
     public class GridEntity : MonoBehaviour
     {
         public static event InteractEvent OnInteract;
@@ -30,8 +37,8 @@ namespace LMCore.Crawler
         public IGridSizeProvider GridSizeProvider { get; set; }
         public IDungeon Dungeon { get; set; }
 
-        private bool _moving;
-        public bool Moving {
+        private MovementType _moving;
+        public MovementType Moving {
             get => _moving; 
             set
             {

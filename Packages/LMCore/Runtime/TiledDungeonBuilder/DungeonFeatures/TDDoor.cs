@@ -138,7 +138,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void GridEntity_OnMove(GridEntity entity)
         {
-            if (entity.Moving)
+            if (entity.Moving != MovementType.Stationary)
             {
                 activelyMovingEntities.Add(entity);
             } else

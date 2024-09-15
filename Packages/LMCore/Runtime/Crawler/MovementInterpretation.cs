@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace LMCore.Crawler
@@ -12,6 +11,20 @@ namespace LMCore.Crawler
         public MovementInterpretationOutcome Outcome { get; set; }
         public List<MovementCheckpointWithTransition> Steps { get; set; } = new List<MovementCheckpointWithTransition>();
 
+        public MovementType Movement
+        {
+            get
+            {
+                if (Steps.Count == 0) return MovementType.Stationary;
+                var origin = Steps.First();
+                var rotating = Steps.Any(s => s.Checkpoint.LookDirection != origin.Checkpoint.LookDirection);
+                var translating = Steps.Any(s => s.Checkpoint.Coordinates != origin.Checkpoint.Coordinates ||
+                    s.Checkpoint.AnchorDirection != origin.Checkpoint.AnchorDirection);
+
+                return (rotating ? MovementType.Rotating : MovementType.Stationary) |
+                    (translating ? MovementType.Translating : MovementType.Stationary);
+            }
+        }
         public override string ToString()
         {
             return $"MovementInterpretation: Direction {PrimaryDirection}, Outcome {Outcome}, Duration {DurationScale} - {string.Join(", ", Steps.Select(s => $"[{s}]"))}";

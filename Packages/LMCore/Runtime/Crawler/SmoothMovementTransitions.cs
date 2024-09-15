@@ -98,7 +98,7 @@ namespace LMCore.Crawler
                 animationTickId = -1;
                 activeInterpretation = null;
                 currentCheckpoint = null;
-                Entity.Moving = false;
+                Entity.Moving = MovementType.Stationary;
 
                 var positionConstraint = GetComponent<PositionConstraint>();
                 if (positionConstraint != null)
@@ -129,7 +129,7 @@ namespace LMCore.Crawler
             animationStartTime = Time.timeSinceLevelLoad;
             animationDuration = duration;
             animationInterpolationStart = 0;
-            Entity.Moving = true;
+            Entity.Moving = interpretation.Movement;
 
             currentCheckpoint = activeInterpretation.First.Checkpoint;
 
