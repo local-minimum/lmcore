@@ -3,14 +3,6 @@ using UnityEngine;
 
 namespace LMCore.Crawler
 {
-    /* KNOWN BUGS
-     *
-     * introducing the entity constraint teleports player way off map briefly
-     * 
-     * getting on platform is a bit too limited
-     * 
-     */
-
     public delegate void MovementInterpretationEvent(
         GridEntity entity, 
         MovementInterpretation interpretation,

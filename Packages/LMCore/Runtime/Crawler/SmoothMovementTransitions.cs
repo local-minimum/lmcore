@@ -101,7 +101,7 @@ namespace LMCore.Crawler
                 Entity.Moving = MovementType.Stationary;
 
                 var positionConstraint = GetComponent<PositionConstraint>();
-                if (positionConstraint != null)
+                if (positionConstraint != null && positionConstraint.constraintActive)
                 {
                     positionConstraint.weight = 1;
                 }
@@ -168,9 +168,10 @@ namespace LMCore.Crawler
             transform.rotation = rotation;
 
             var positionConstraint = GetComponent<PositionConstraint>();
-            if (positionConstraint != null)
+            if (positionConstraint != null && positionConstraint.constraintActive)
             {
-                positionConstraint.weight = progress;
+                positionConstraint.weight = activeInterpretation.Movement.HasFlag(MovementType.Translating)
+                    ? progress : 1f;
             }
 
 

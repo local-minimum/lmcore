@@ -30,6 +30,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         Vector3Int OriginCoordinates;
 
+        [SerializeField]
+        bool alwaysClaimToBeAligned;
+
         Vector3Int CurrentCoordinates => GetComponentInParent<TDNode>().Coordinates;
 
         TiledDungeon _dungeon;
@@ -75,6 +78,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             Interaction = platform.Interaction(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Automatic);
             moveSpeed = platform.Float(TiledConfiguration.instance.VelocityKey, moveSpeed);
             loopDelay = platform.Float(TiledConfiguration.instance.PauseKey, loopDelay);
+            alwaysClaimToBeAligned = platform.Bool(TiledConfiguration.instance.ClaimAlwaysAlignedKey, true);
         }
 
         [SerializeField, HideInInspector]
@@ -131,15 +135,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 constraint = entity.gameObject.AddComponent<PositionConstraint>();
             }
 
+            constraint.constraintActive = false;
             while (constraint.sourceCount > 0)
             {
                 constraint.RemoveSource(0);
             }
 
+            constraint.translationAtRest = Vector3.zero;
             constraint.AddSource(constraintSource);
             constraint.weight = 0;
             constraint.constraintActive = true;
-
             constrainedEntities.Add(entity);
 
             Debug.Log(PrefixLogMessage($"Constraining {entity.name}"));
@@ -361,7 +366,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             return false;
         }
 
-        public bool AlignedWithGrid { get; private set; }
+        bool _alignedWithGrid;
+        public bool AlignedWithGrid {
+            get => alwaysClaimToBeAligned ? true : _alignedWithGrid;
+            private set
+            {
+                _alignedWithGrid = value;
+            }
+        }
 
         void InitMoveStep()
         {
