@@ -596,30 +596,6 @@ namespace LMCore.TiledDungeon
             return direction.Translate(Coordinates);
         }
 
-
-        /*
-        #region EntityConstraints
-        public void AssignConstraints(GridEntity entity, Direction direction)
-        {
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform != null && direction == Direction.Down)
-            {
-                platform.ConstrainEntity(entity);
-            }
-        }
-
-        public void RemoveConstraints(GridEntity entity, Direction direction)
-        {
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            Debug.Log(PrefixLogMessage($"Free {entity.name} {platform != null} {direction == Direction.Down}"));
-            if (platform != null && direction == Direction.Down)
-            {
-                platform.FreeEntity(entity);
-            }
-        }
-        #endregion
-        */
-
         public Anchor GetAnchor(Direction direction) => 
             GetComponentsInChildren<Anchor>()
                 .FirstOrDefault(a => a.CubeFace == direction);

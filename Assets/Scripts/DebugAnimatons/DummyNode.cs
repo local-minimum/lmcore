@@ -42,11 +42,6 @@ public class DummyNode : MonoBehaviour, IDungeonNode
 
     public bool AllowsRotating(GridEntity entity) => true;
 
-    /*
-    public void AssignConstraints(GridEntity entity, Direction direction)
-    {
-    }
- */
     public bool CanAnchorOn(GridEntity entity, Direction anchor) => true;
 
     private Dictionary<Direction, Anchor> anchors;
@@ -91,11 +86,6 @@ public class DummyNode : MonoBehaviour, IDungeonNode
 
     public Vector3Int Neighbour(Direction direction) =>
         direction.Translate(Coordinates);
-
-    /*
-    public void RemoveConstraints(GridEntity entity, Direction direction)
-    {
-    }*/
 
     public void RemoveOccupant(GridEntity entity)
     {
