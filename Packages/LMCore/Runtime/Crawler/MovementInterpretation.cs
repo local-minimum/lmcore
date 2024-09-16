@@ -354,6 +354,42 @@ namespace LMCore.Crawler
             return segmentProgress;
         }
 
+        private void ValidateAndFinalizeMidpointTransition(GridEntity entity)
+        {
+            if (Steps.Count != 4) return;
+
+            var midStart = Steps[1];
+            var midEnd = Steps[2];
+            var delta = midEnd.Checkpoint.Position(entity.Dungeon) -
+            midStart.Checkpoint.Position(entity.Dungeon);
+
+            var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
+            if (midStart.Transition == MovementTransition.Jump)
+            {
+                var forward = PrimaryDirection.AsLookVector3D();
+                if (Vector3.Project(delta, forward).magnitude > entity.Abilities.maxForwardJump)
+                {
+                    RegretMovementDynamically();
+                }
+            } else if (midStart.Transition == MovementTransition.Grounded)
+            {
+                if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
+                {
+                    RegretMovementDynamically();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finalizes the evaluation making sure we are allowed to get to last.
+        /// </summary>
+        /// <param name="entity"></param>
+        public void Evaluate(GridEntity entity)
+        {
+            ValidateAndFinalizeMidpointTransition(entity);
+        }
+
+
         public Vector3 Evaluate(GridEntity entity, float progress, out Quaternion rotation, out MovementCheckpoint checkpoint)
         {
             // 1. Figure out segment active from total length and progressNumber of steps in a full tile
@@ -476,27 +512,11 @@ namespace LMCore.Crawler
                     2);
 
                 // Check if we should progress from first segment / that is commit to the entire movement
-                var midStart = Steps[1];
-                var midEnd = Steps[2];
-                var delta = midEnd.Checkpoint.Position(entity.Dungeon) - midStart.Checkpoint.Position(entity.Dungeon);
-                var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
                 if (candidateSegmentIdx > 0 && CurrentSegment == Segment.First)
                 {
-                    if (midStart.Transition == MovementTransition.Jump)
-                    {
-                        var forward = PrimaryDirection.AsLookVector3D();
-                        if (Vector3.Project(delta, forward).magnitude > entity.Abilities.maxForwardJump)
-                        {
-                            RegretMovementDynamically();
-                        }
-                    } else if (midStart.Transition == MovementTransition.Grounded)
-                    {
-                        if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
-                        {
-                            RegretMovementDynamically();
-                        }
-                    }
+                    ValidateAndFinalizeMidpointTransition(entity);
                 }
+
 
                 // perhaps best to recheck where we are after potential updates
                 var segmentIdx = Mathf.Min(
@@ -515,7 +535,9 @@ namespace LMCore.Crawler
                     segmentStartProgress = progress;
                     CurrentSegment = segment;
 
-                    delta = pt2.Checkpoint.Position(entity.Dungeon) - pt1.Checkpoint.Position(entity.Dungeon);
+                    var delta = pt2.Checkpoint.Position(entity.Dungeon) - pt1.Checkpoint.Position(entity.Dungeon);
+                    var midStart = Steps[1];
+                    var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
                     var climb = Vector3.Dot(delta, up);
                     if (CurrentSegment == Segment.Intermediary && pt1.Transition == MovementTransition.Grounded && climb < -entity.Abilities.maxScaleHeight)
                     {

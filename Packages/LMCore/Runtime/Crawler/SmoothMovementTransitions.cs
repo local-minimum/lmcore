@@ -1,3 +1,4 @@
+using LMCore.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -20,6 +21,21 @@ namespace LMCore.Crawler
             } 
         } 
         
+        private void Awake()
+        {
+            GameSettings.InstantMovement.OnChange += InstantMovement_OnChange;
+            enabled = !GameSettings.InstantMovement.Value;
+        }
+
+        private void OnDestroy()
+        {
+            GameSettings.InstantMovement.OnChange -= InstantMovement_OnChange;
+        }
+
+        private void InstantMovement_OnChange(bool value)
+        {
+            enabled = !value;
+        }
         private void OnEnable()
         {
             var interpreter = GetComponent<MovementInterpreter>();
@@ -27,8 +43,6 @@ namespace LMCore.Crawler
 
             ElasticGameClock.OnTickEnd += ElasticGameClock_OnTickEnd;
             ElasticGameClock.OnTickEndAdjustment += ElasticGameClock_OnTickEndAdjustment;
-            
-            // TODO: how about landing shake and active/inactive movers
         }
 
         private void OnDisable()
