@@ -80,7 +80,7 @@ namespace LMCore.Crawler
                     return Direction.North;
 
                 default:
-                    throw new System.ArgumentOutOfRangeException();
+                    throw new System.ArgumentOutOfRangeException($"{direction} is not a planar cardinal");
             }
         }
 
@@ -118,7 +118,7 @@ namespace LMCore.Crawler
                     return Direction.North;
 
                 default:
-                    throw new System.ArgumentOutOfRangeException();
+                    throw new System.ArgumentOutOfRangeException($"{direction} is not a planar cardinal");
             }
         }
 
@@ -246,7 +246,7 @@ namespace LMCore.Crawler
                     return new Vector2Int(1, 0);
 
                 default:
-                    throw new System.ArgumentException();
+                    throw new System.ArgumentException($"{direction} is not a planar look vector");
             }
         }
 
@@ -274,6 +274,9 @@ namespace LMCore.Crawler
 
                 case Direction.Down:
                     return new Vector3Int(0, -1, 0);
+
+                case Direction.None:
+                    return Vector3Int.zero;
 
                 default:
                     throw new System.ArgumentOutOfRangeException();
@@ -319,6 +322,12 @@ namespace LMCore.Crawler
 
                 case Movement.PitchDown:
                     return direction.PitchDown(down, out newDown);
+
+                case Movement.RollCCW:
+                case Movement.RollCW:
+                    Debug.LogError($"Rotation {movement} not supported yet");
+                    newDown = down;
+                    return direction;
 
                 default:
                     newDown = down;
@@ -458,7 +467,7 @@ namespace LMCore.Crawler
 
         public static bool IsPlanarCardinal(this Direction direction)
         {
-            return direction != Direction.Up && direction != Direction.Down;
+            return direction != Direction.Up && direction != Direction.Down && direction != Direction.None;
         }
 
         public static bool IsParallell(this Direction down, Direction other) =>

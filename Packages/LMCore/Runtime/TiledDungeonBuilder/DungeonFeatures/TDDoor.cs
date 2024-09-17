@@ -20,11 +20,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField, HideInInspector]
         Vector3Int _Position;
-        public Vector3Int Position => _Position;
+        public Vector3Int Coordinates => _Position;
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
-
 
         [SerializeField, HideInInspector]
         TDNode node;
@@ -42,6 +41,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool consumesKey;
 
         bool automaticTrapDoor;
+        public bool AutomaticTrapDoor => automaticTrapDoor;
 
         [SerializeField]
         float autoCloseTime = 0.5f;
@@ -79,6 +79,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        public bool FullyClosed => !isOpen && ActiveTransition == Transition.None;
 
         public DirectionAxis TraversalAxis
         {
@@ -124,29 +125,59 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void OnEnable()
         {
             GridEntity.OnInteract += GridEntity_OnInteract;
-
-            foreach (var mover in Movers.movers) {
-                mover.OnMoveStart += Mover_OnMoveStart;
-                mover.OnMoveEnd += Mover_OnMoveEnd;
-            }
-
-            Movers.OnActivateMover += Movers_OnActivateMover;
-            Movers.OnDeactivateMover += Movers_OnDeactivateMover;
+            GridEntity.OnMove += GridEntity_OnMove;
+            TDNode.OnNewOccupant += TDNode_OnNewOccupant;
         }
-
 
         private void OnDisable()
         {
-            GridEntity.OnInteract += GridEntity_OnInteract;
+            GridEntity.OnInteract -= GridEntity_OnInteract;
+            GridEntity.OnMove -= GridEntity_OnMove;
+            TDNode.OnNewOccupant -= TDNode_OnNewOccupant;
+        }
 
-            foreach (var mover in Movers.movers) {
-                mover.OnMoveStart -= Mover_OnMoveStart;
-                mover.OnMoveEnd -= Mover_OnMoveEnd;
+        private void GridEntity_OnMove(GridEntity entity)
+        {
+            if (entity.Moving != MovementType.Stationary)
+            {
+                activelyMovingEntities.Add(entity);
+            } else
+            {
+                activelyMovingEntities.Remove(entity);
+            }
+        }
+
+        HashSet<GridEntity> trapTriggeringEntities = new HashSet<GridEntity>();
+
+        private void TDNode_OnNewOccupant(TDNode node, GridEntity entity)
+        {
+            if (entity.Coordinates != Coordinates)
+            {
+                if (trapTriggeringEntities.Contains(entity))
+                {
+                    trapTriggeringEntities.Remove(entity);
+                    
+                    if (trapTriggeringEntities.Count == 0 && (isOpen || ActiveTransition == Transition.Opening))
+                    {
+                        StartCoroutine(AutoClose(PrefixLogMessage($"automatically closes after {entity.name}")));
+                    }
+                }
+
+                return;
             }
 
-            Movers.OnActivateMover -= Movers_OnActivateMover;
-            Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying)
+                || entity.AnchorDirection != Direction.Down) return;
+
+            if (automaticTrapDoor && ActiveTransition != Transition.Opening && !isOpen)
+            {
+                trapTriggeringEntities.Add(entity);
+                OpenDoor();
+                entity.Falling = true; 
+                Debug.Log(PrefixLogMessage($"automatically opens for {entity.name}"));
+            }
         }
+
 
         bool AutomaticTrapdoorAction(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors, out bool endsOnTrap)
         {
@@ -163,8 +194,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 && states.Any(b => b);
         }
 
-        HashSet<GridEntity> trapTriggeringEntities = new HashSet<GridEntity>();
-
         IEnumerator<WaitForSeconds> AutoClose(string logMessage)
         {
             yield return new WaitForSeconds(autoCloseTime);
@@ -175,63 +204,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors)
-        {
-            activelyMovingEntities.Add(entity);
-
-            if (AutomaticTrapdoorAction(entity, positions, anchors, out bool endsOnTrap))
-            {
-                if (endsOnTrap)
-                {
-                    trapTriggeringEntities.Add(entity);
-                } else
-                {
-                    trapTriggeringEntities.Remove(entity);
-                }
-
-                if (isOpen || ActiveTransition == Transition.Opening)
-                {
-                    StartCoroutine(AutoClose(PrefixLogMessage($"automatically closes after {entity.name}")));
-                }
-                else if (endsOnTrap)
-                {
-                    OpenDoor();
-                    Debug.Log(PrefixLogMessage($"automatically opens for {entity.name}"));
-                }
-                else {
-                    Debug.LogWarning(PrefixLogMessage($"No action for Open({isOpen}) ActiveTransition({ActiveTransition}) door"));
-                    return;
-                }
-
-            }
-        }
-
         HashSet<GridEntity> activelyMovingEntities = new();
-
-        private void Mover_OnMoveEnd(GridEntity entity, bool successful)
-        {
-            activelyMovingEntities.Remove(entity);
-            if (AutomaticTrapdoorAction(entity, new List<Vector3Int>() { entity.Position }, new List<Direction> { entity.Anchor }, out bool _))
-            {
-                entity.Falling = true; 
-            }
-        }
-        private void Movers_OnDeactivateMover(IEntityMover mover)
-        {
-            mover.OnMoveStart -= Mover_OnMoveStart;
-            mover.OnMoveEnd -= Mover_OnMoveEnd;
-        }
-
-        private void Movers_OnActivateMover(IEntityMover mover)
-        {
-            mover.OnMoveStart += Mover_OnMoveStart;
-            mover.OnMoveEnd += Mover_OnMoveEnd;
-        }
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
             var onTheMove = activelyMovingEntities.Contains(entity);
-            var validPosition = entity.LookDirection.Translate(entity.Position) == _Position;
+            var validPosition = entity.LookDirection.Translate(entity.Coordinates) == _Position;
 
             if (!onTheMove && validPosition)
             {

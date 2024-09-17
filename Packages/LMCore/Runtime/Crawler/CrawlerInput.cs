@@ -10,6 +10,8 @@ namespace LMCore.Crawler
 
     public class CrawlerInput : MonoBehaviour
     {
+        protected string PrefixLogMessage(string message) => $"Crawler input '{gEntity.name}': {message}";
+
         bool inputEnabled = true;
         public event MovementEvent OnMovement;
 
@@ -67,18 +69,6 @@ namespace LMCore.Crawler
 
         void EnqueueMovement(Movement movement)
         {
-            // TODO: Investigate if we really should both request later if failed and put 
-            // movment on nextMovement with an end adjustment
-            if (currentMovement == Movement.None)
-            {
-                currentMovement = movement;
-                requestTick = !ElasticGameClock.instance.RequestTick();
-                if (!requestTick)
-                {
-                    return;
-                }
-            }
-
             if (nextMovement == Movement.None)
             {
                 nextMovement = movement;
@@ -92,24 +82,14 @@ namespace LMCore.Crawler
 
         public void InjectMovement(Movement movement)
         {
-            ClearQueue(true);
-            EnqueueMovement(movement);
+            nextMovement = movement;
+            nextNextMovement = Movement.None;
         }
 
         void ShiftQueue()
         {
             currentMovement = nextMovement;
             nextMovement = nextNextMovement;
-            nextNextMovement = Movement.None;
-        }
-
-        void ClearQueue(bool includingCurrent = false)
-        {
-            if (includingCurrent)
-            {
-                currentMovement = Movement.None;
-            }
-            nextMovement = Movement.None;
             nextNextMovement = Movement.None;
         }
 
@@ -132,7 +112,6 @@ namespace LMCore.Crawler
 
         private void HandleCall(InputAction.CallbackContext context, Movement movement)
         {
-
             if (context.phase == InputActionPhase.Started)
             {
                 if (!inputEnabled) return;
@@ -147,7 +126,9 @@ namespace LMCore.Crawler
                 EnqueueMovement(movement);
 
                 if (replayTurns || movement.IsTranslation())
+                {
                     replayStack.Add(new HeldButtonInfo(movement));
+                }
             }
             else if (context.phase == InputActionPhase.Canceled)
             {
@@ -196,83 +177,85 @@ namespace LMCore.Crawler
 
         private void ElasticGameClock_OnTickStart(int tickId, float expectedDuration)
         {
+            ShiftQueue();
             if (currentMovement != Movement.None)
             {
-                Debug.Log($"{tickId}: {currentMovement} ({expectedDuration})");
+                Debug.Log(PrefixLogMessage($"Tick {tickId}: {currentMovement} ({expectedDuration})"));
                 OnMovement?.Invoke(tickId, currentMovement, expectedDuration);
+            } else
+            {
+                Debug.Log(PrefixLogMessage("No movement waiting, skipping turn"));
             }
         }
 
-        bool requestTick = false;
+        void AddReplayMove()
+        {
+            var replay = GetReplay(true);
+            if (replay != null)
+            {
+                replay.Replay();
+                EnqueueMovement(replay.movement);
+            }
+        }
 
         private void ElasticGameClock_OnTickEnd(int tickId)
         {
-            ShiftQueue();
-            if (currentMovement == Movement.None && inputEnabled)
+            currentMovement = Movement.None;
+            if (!MovesWaiting && inputEnabled)
             {
-                var replay = GetReplay(true);
-                if (replay != null)
-                {
-                    replay.Replay();
-                    EnqueueMovement(replay.movement);
-                }
-            }
-            else
-            {
-                requestTick = true;
+                AddReplayMove();
             }
         }
+         
+        bool Moving => currentMovement != Movement.None;
 
-        bool HasEmptyQueue => currentMovement == Movement.None 
-            || nextMovement == Movement.None 
-            || nextNextMovement == Movement.None;
+        bool MovesWaiting => nextMovement != Movement.None 
+            || nextNextMovement != Movement.None;
 
         private void Update()
         {
-            if (requestTick)
-            {
-                requestTick = !ElasticGameClock.instance.RequestTick();
-            }
-
-            if (HasEmptyQueue && inputEnabled)
-            {
-                var replay = GetReplay();
-                if (replay != null)
+            if (Moving) return;
+            
+            if (MovesWaiting) {
+                if (!ElasticGameClock.instance.RequestTick())
                 {
-                    replay.Replay();
-                    EnqueueMovement(replay.movement);
-
+                    if (!ElasticGameClock.instance.AdjustEndOfTick())
+                    {
+                        Debug.LogWarning(PrefixLogMessage("We have moves waiting but clock refuses both new ticks and adjusting end time of tick!"));
+                    }
                 }
+            } else if (inputEnabled)
+            {
+                AddReplayMove();
             }
         }
 
-        public void CauseFall(bool clearQueue)
+        public void CauseFall()
         {
-            Debug.Log($"{name}: Cause fall, clear queue: {clearQueue}");
-            inputEnabled = false; 
-            if (clearQueue) ClearQueue();
-            EnqueueMovement(Movement.AbsDown);
-            Debug.Log($"Fall {QueueInfo}");
+            InjectMovement(Movement.AbsDown);
+            Debug.Log(PrefixLogMessage($"Fall with queue {QueueInfo}"));
         }
 
         public void DisableInput(bool clearQueue)
         {
-            Debug.Log($"Disable input, clear queue:{clearQueue}");
             inputEnabled = false;
-            if (clearQueue) ClearQueue();
+            if (clearQueue) { 
+                nextMovement = Movement.None;
+                nextNextMovement = Movement.None;
+            }
+            Debug.Log(PrefixLogMessage($"Disable input"));
         }
 
         public void EnableInput()
         {
-            Debug.Log($"Enable input");
             inputEnabled = true;
+            Debug.Log(PrefixLogMessage("Enable input"));
         }
 
-        public void EndFall(bool clearQueue)
+        public void EndFall()
         {
-            Debug.Log($"{name}: End fall, clear queue: {clearQueue}");
-            if (clearQueue) ClearQueue(true);
             inputEnabled = true;
+            Debug.Log(PrefixLogMessage("End fall"));
         }
     }
 }

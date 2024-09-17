@@ -15,23 +15,25 @@ namespace LMCore.TiledDungeon
     {
         public static event NewOccupantEvent OnNewOccupant;
 
-        [SerializeField, HideInInspector]
-        TiledTile tile;
+        public static System.Func<TileModification, bool> IllusoryFilter = mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().IllusoryTileClass;
+        public static System.Func<TileModification, bool> DoorFilter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
 
-        [SerializeField]
-        TDSidesClass sides;
+        [HideInInspector]
+        public TiledTile tile;
+
+        public TDSidesClass sides;
         
         public void UpdateSide(Direction direction, bool value) 
             => sides.Set(direction, value);
 
-        [SerializeField, HideInInspector]
-        TileModification[] modifications;
+        [HideInInspector]
+        public TileModification[] modifications;
 
-        [SerializeField, HideInInspector]
-        TiledObjectLayer.Point[] Points;
+        [HideInInspector]
+        public TiledObjectLayer.Point[] Points;
 
-        [SerializeField, HideInInspector]
-        TiledObjectLayer.Rect[] Rects;
+        [HideInInspector]
+        public TiledObjectLayer.Rect[] Rects;
 
         TDNodeConfig _config;
         public TDNodeConfig Config { 
@@ -57,7 +59,7 @@ namespace LMCore.TiledDungeon
                 return _dungeon;
             }
 
-            private set { _dungeon = value; }
+            set { _dungeon = value; }
         }
 
         IOccupationRules OccupationRules => TDOccupancyRules.instance;
@@ -69,6 +71,10 @@ namespace LMCore.TiledDungeon
             get => _coordinates;
             set => _coordinates = value;
         }
+        public override string ToString() =>
+                $"TDNode {name} @ {Coordinates}";
+
+        public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
 
         TDContainer _container;
         TDContainer container 
@@ -84,7 +90,7 @@ namespace LMCore.TiledDungeon
         }
 
         TDDoor _door;
-        TDDoor door
+        public TDDoor Door
         {
             get
             {
@@ -108,7 +114,7 @@ namespace LMCore.TiledDungeon
                 return _spikes;
             }
         }
-
+        
         public bool Walkable => 
             !Obstructed 
             && tile.CustomProperties
@@ -120,7 +126,14 @@ namespace LMCore.TiledDungeon
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
         public bool HasFloor => 
-            sides.Down && (HasTrapDoor == false || door?.BlockingPassage == true) && !HasIllusion(Direction.Down);
+            sides.Down && (HasTrapDoor == false || Door?.FullyClosed == true) && !HasIllusion(Direction.Down);
+
+        public bool HasIllusorySurface(Direction direction)
+        {
+            return GetComponentsInChildren<TDIllusoryCubeSide>()
+                .Any(s => s.CubeFace == direction);
+        }
+
         public bool HasCeiling => sides.Up;
 
         public bool Obstructed =>
@@ -130,288 +143,53 @@ namespace LMCore.TiledDungeon
             .CustomProperties
             .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
             .Obstructing()) && 
-            (door == null ? true : door.BlockingPassage) || 
+            (Door == null ? true : Door.BlockingPassage) || 
             (spikes == null ? false : spikes.BlockingEntry) ||
             (container == null ? false : container.BlockingPassage);
 
 
-        string NodeStyle => 
+        public string NodeStyle => 
             Points.Select(pt => pt.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null) ??
             Rects.Select(r => r.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null);
 
-        void ConfigureGrates()
-        {
-            var grate = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.GrateClass);
-            if (grate == null) return;
-
-            Dungeon.Style.Get(
-                transform, 
-                TiledConfiguration.InstanceOrCreate().GrateClass, 
-                grate.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                NodeStyle
-            );
-        }
-
         protected string PrefixLogMessage(string message) => $"Node @ {Coordinates}: {message}";
+        public void Log(string message, System.Action<string> logFn) => logFn(PrefixLogMessage(message));
 
-        static System.Func<TileModification, bool> illusoryFilter = mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().IllusoryTileClass;
 
         public bool HasIllusion(Direction direction) =>
             modifications
-                .Any(mod => illusoryFilter(mod)
+                .Any(mod => IllusoryFilter(mod)
                     && mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection() == direction);
 
-
-        void ConfigureIllusory(Direction direction)
-        {
-            Debug.Log(PrefixLogMessage($"I have illusionary wall {direction}"));
-
-            var go = Dungeon.Style.Get(
-                transform,
-                TiledConfiguration.InstanceOrCreate().IllusoryTileClass,
-                direction,
-                NodeStyle
-            );
-
-            go.GetComponent<TDIllusoryCubeSide>().Configure(direction);
-        }
-
-        void ConfigureObstructions()
-        {
-            var obstruction = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.ObstructionClass);
-            if (obstruction == null) return;
-
-            Dungeon.Style.Get(
-                transform, 
-                TiledConfiguration.instance.ObstructionClass, 
-                obstruction.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                NodeStyle
-            );
-        }
-
-        static System.Func<TileModification, bool> doorFilter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
-
-        void ConfigureDoors()
-        {
-
-            var doorInfo = modifications.FirstOrDefault(doorFilter);
-            if (doorInfo == null) return;
-
-            Dungeon.Style.Get(
-                transform, 
-                TiledConfiguration.instance.DoorClass, 
-                doorInfo.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                doorInfo.Tile.CustomProperties.InteractionOrDefault(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Closed),
-                NodeStyle
-            );
-
-            door?.Configure(
-                this,
-                Coordinates, 
-                modifications.Where(doorFilter).ToArray()
-            );
-        }
-
-        void ConfigureLadders()
-        {
-            foreach (var tdDirection in TDEnumDirectionExtensions.PlanarDirections)
-            {
-                var direction = tdDirection.AsDirection();
-                if (!HasLadder(direction)) continue;
-
-                Dungeon.Style.Get(
-                    transform,
-                    TiledConfiguration.instance.LadderClass,
-                    direction,
-                    NodeStyle
-                );
-            }
-        }
-
-        bool IsSpinner => 
+        public bool IsSpinner => 
             modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.SpinnerClass);
 
-        bool IsTrap => 
+        public bool IsTrap => 
             modifications.Any(m => m.Tile.CustomProperties.Bool(TiledConfiguration.instance.TrapKey));
 
-        bool IsTeleporter => 
+        public bool IsTeleporter => 
             modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
 
-        bool HasActiveTeleporter => modifications.Any(m => {
+        public bool HasActiveTeleporter => modifications.Any(m => {
             if (m.Tile.Type != TiledConfiguration.instance.TeleporterClass) return false;
             return m.Tile.CustomProperties.Transition(TiledConfiguration.instance.TransitionKey).HasEntry();
         });
 
-        int teleporterWormholdId => 
+        public int TeleporterWormholdId => 
             Config
             .FirstObjectValue(
                 TiledConfiguration.instance.TeleporterClass, 
                 (props) => props == null ? 0 : props.Int(TiledConfiguration.instance.TeleporterIdProperty)
             );
 
-        bool HasSpikes(Direction direction) =>
+        public bool HasSpikes(Direction direction) =>
             modifications.Any(m => 
                 m.Tile.Type == TiledConfiguration.instance.SpikeTrapClass && 
                 m.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() == direction);
 
-        void ConfigureTeleporter()
-        {
-            var teleporterMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.TeleporterClass);
 
-            if (teleporterMod != null)
-            {
-                Dungeon.Style.Get(
-                    transform,
-                    TiledConfiguration.instance.TeleporterClass,
-                    teleporterMod.Tile.CustomProperties.Transition(TiledConfiguration.instance.TransitionKey),
-                    NodeStyle
-                    );
-                
-                Debug.Log(PrefixLogMessage($"Teleporter Entry({HasActiveTeleporter}) Id({teleporterWormholdId})"));
-            }
-        }
+        public TileModification RampModification => modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
 
-        void ConfigureCube()
-        {
-            if (sides == null)
-            {
-                Debug.LogError(PrefixLogMessage($"{tile} lacks a sides class, can't be used for layouting"));
-                return;
-            }
-
-            var hasTrapDoor = HasTrapDoor;
-            var aboveNode = Coordinates + Vector3Int.up;
-            var illusionMods = modifications.Where(illusoryFilter).ToList();
-
-            foreach (var direction in DirectionExtensions.AllDirections)
-            {
-                var upNode = direction == Direction.Up && Dungeon.HasNodeAt(aboveNode) ? Dungeon[aboveNode] : null;
-
-                if (direction == Direction.Down)
-                {
-                    if (hasTrapDoor)
-                    {
-                        var trapdoor = Dungeon.Style.Get(
-                            transform,
-                            TiledConfiguration.instance.TrapDoorClass,
-                            TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey),
-                            NodeStyle
-                        );
-                        if (trapdoor != null)
-                        {
-                            trapdoor.name = $"TrapDoor ({direction})";
-
-                            var door = trapdoor.GetComponent<TDDoor>();
-
-                            door?.Configure(
-                                this,
-                                Coordinates,
-                                modifications.Where(doorFilter).ToArray()
-                            );
-                            continue;
-                        }
-                    }
-                    else if (hasPressurePlate)
-                    {
-                        var plate = Dungeon.Style.Get(
-                            transform,
-                            TiledConfiguration.instance.PressurePlateClass,
-                            NodeStyle
-                        );
-
-                        if (plate != null)
-                        {
-                            plate.name = $"Pressure Plate ({direction})";
-
-                            var pressurePlate = plate.GetComponent<TDActuator>();
-
-                            pressurePlate?.Configure(this);
-                            continue;
-                        }
-                    }
-                } else if (direction == Direction.Up)
-                {
-                    if (sides.Up && upNode)
-                    {
-                        if (upNode.HasIllusion(Direction.Down)) {
-                            ConfigureIllusory(Direction.Up);
-                            continue;
-                        }
-
-                    }
-                }
-
-                if (illusionMods.Any(mod => mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection() == direction))
-                {
-                    ConfigureIllusory(direction);
-                    continue;
-                }
-
-                if (!sides.Has(direction)) continue;
-
-                if (HasSpikes(direction))
-                {
-                    var spikes = Dungeon.Style.Get(
-                        transform,
-                        TiledConfiguration.instance.SpikeTrapClass,
-                        direction,
-                        NodeStyle
-                    );
-
-                    if (spikes != null)
-                    {
-                        spikes.name = $"Spikes ({direction})";
-
-                        spikes.GetComponent<TDSpikeTrap>()?.Configure(this, Coordinates, modifications);
-                        continue;
-                    }
-                }
-
-                if (upNode != null && upNode.HasTrapDoor) continue;
-
-                if (direction.IsPlanarCardinal())
-                {
-                    var neighbour = direction.Translate(Coordinates);
-                    var neighbourConfig = Dungeon.GetNodeConfig(neighbour);
-                    var hasAlcove = neighbourConfig 
-                        ?.Modifications
-                        .Any(nMod => 
-                            nMod.Tile.Type == TiledConfiguration.instance.AlcoveClass
-                            && nMod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() == direction.Inverse()
-                        ) ?? false;
-
-                    if (hasAlcove)
-                    {
-                        // TODO: Possibly it should get its styling from the neighbour tile rather than this
-                        var alcove = Dungeon.Style.Get(transform, TiledConfiguration.instance.AlcoveClass, direction, NodeStyle);
-                        alcove.name = direction.ToString();
-
-                        ConfigureContainer(alcove, direction, direction.Inverse(), TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
-
-                        continue;
-                    } else if (ConfigureWallSpike(direction))
-                    {
-                        continue;
-                    }
-                }
-                var go = Dungeon.Style.Get(transform, TiledConfiguration.instance.BaseTileClass, direction, NodeStyle);
-                go.name = direction.ToString();
-
-                if (upNode != null)
-                {
-                    var upIsMovingFloor = upNode.GetComponentInChildren<TDMovingPlatform>();
-                    if (upIsMovingFloor != null)
-                    {
-                        upIsMovingFloor.AddAttachedObject(go.transform, direction);
-                    }
-                } else if (direction == Direction.Down)
-                {
-                    ConfigureMovingPlatform(go);
-                }
-            }
-        }
-
-        TileModification RampModification => modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
         public bool IsHighRamp
         {
             get
@@ -425,161 +203,7 @@ namespace LMCore.TiledDungeon
 
         public bool IsRamp => RampModification != null;
 
-        void ConfigureRamps()
-        {
-            var ramp = RampModification;
-            if (ramp == null) return;
-
-            Dungeon.Style.Get(
-                transform, 
-                TiledConfiguration.instance.RampClass, 
-                ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey),
-                ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection(),
-                NodeStyle
-            );
-
-        }
-
-        void ConfigureWallButtons()
-        {
-            var button = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallButtonClass);
-
-            if (button == null) return;
-
-            var go = Dungeon.Style.Get(
-                transform,
-                TiledConfiguration.instance.WallButtonClass,
-                button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection(),
-                NodeStyle
-            );
-
-            if (go == null) return;
-
-            go.GetComponent<TDActuator>()?.Configure(this);
-        }
-
-        bool ConfigureWallSpike(Direction directection)
-        {
-            var spikes = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallSpikeTrapClass);
-
-            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != directection) return false; 
-
-            var go = Dungeon.Style.Get(
-                transform,
-                TiledConfiguration.instance.WallSpikeTrapClass,
-                directection,
-                NodeStyle
-            );
-
-            if (go == null) return false;
-
-            go.GetComponent<TDSpikeTrap>()?.Configure(this, Coordinates, modifications);
-
-            return true;
-        }
-
-
-        GameObject ConfigurePotentiallyRotated(string className, string rotationClassName, TDNodeConfig config, out Direction direction)
-        {
-            if (config.Modifications.Any(mod => mod.Tile.Type == className))
-            {
-                direction = config.FirstObjectValue(
-                    rotationClassName, 
-                    props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey, TDEnumDirection.None).AsDirection()
-                );
-                if (direction == Direction.None)
-                {
-                    direction = config.FirstObjectValue(
-                        className, 
-                        props => props == null ? Direction.None : props.Direction(TiledConfiguration.instance.DirectionKey, TDEnumDirection.None).AsDirection()
-                    );
-                }
-
-                if (direction == Direction.None)
-                {
-                    Debug.Log(PrefixLogMessage($"Getting Un-Rotated version of {className}"));
-                    return Dungeon.Style.Get(
-                        transform,
-                        className,
-                        NodeStyle);
-                } else
-                {
-                    Debug.Log(PrefixLogMessage($"Getting Rotated {direction} version of {className}"));
-                    return Dungeon.Style.Get(
-                        transform,
-                        className,
-                        direction,
-                        NodeStyle);
-
-                }
-            }
-
-            direction = Direction.None;
-            return null;
-        }
-
-        void ConfigurePillar(TDNodeConfig config) => ConfigurePotentiallyRotated(
-            TiledConfiguration.instance.PillarClass, 
-            TiledConfiguration.instance.PillarClass, 
-            config, 
-            out Direction _);
-
-        void ConfigurePedistal(TDNodeConfig nodeConfig)
-        {
-            var pedistal = ConfigurePotentiallyRotated(
-                TiledConfiguration.instance.PedistalClass, 
-                TiledConfiguration.instance.ObjContainerClass,
-                nodeConfig, 
-                out Direction direction
-            );
-            ConfigureContainer(pedistal, Direction.Down, direction, TiledConfiguration.instance.PedistalClass, nodeConfig, true);
-        }
-
-        void ConfigureChest(TDNodeConfig nodeConfig)
-        {
-            var chest = ConfigurePotentiallyRotated(
-                TiledConfiguration.instance.ChestClass,
-                TiledConfiguration.instance.ObjContainerClass,
-                nodeConfig,
-                out Direction direction);
-
-            ConfigureContainer(chest, Direction.Down, direction, TiledConfiguration.instance.ChestClass, nodeConfig, true);
-        }
-
-        void ConfigureContainer(GameObject tile, Direction anchor, Direction facingDirection, string containerClass, TDNodeConfig nodeConfig, bool blockingPassage)
-        {
-            if (tile == null) return;
-
-            var container = tile.GetComponent<TDContainer>();
-
-            if (container == null) {
-                // Only error if it seems Tiled assumes there should be a chest
-                if (facingDirection != Direction.None) Debug.LogError(PrefixLogMessage("Container lacks script to configure"));
-                return;
-            };
-
-            container.Configure(
-                nodeConfig, 
-                Coordinates, 
-                anchor,
-                facingDirection, 
-                containerClass, 
-                modifications, 
-                blockingPassage);
-
-        }
-
-        void ConfigureMovingPlatform(GameObject floor)
-        {
-            var mover = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.MovingPlatformClass);
-            if (mover == null) { return; }
-
-            var conf = Dungeon.GetNodeConfig(Coordinates);
-            var platform = floor.AddComponent<TDMovingPlatform>();
-            platform.Configure(conf);
-        }
-
-        TileModification TrapdoorModification =>
+        public TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
         public bool HasTrapDoor => TrapdoorModification != null;
@@ -587,49 +211,15 @@ namespace LMCore.TiledDungeon
         TileModification PressurePlateModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.PressurePlateClass);
 
-        public bool hasPressurePlate => PressurePlateModification != null;
+        public bool HasPressurePlate => PressurePlateModification != null;
 
-        public void Configure(
-            TiledTile tile, 
-            TDNodeConfig config,
-            TiledDungeon dungeon
-        )
-        {
-            this.tile = tile;
-            modifications = config.Modifications;
-            Points = config.Points;
-            Rects = config.Rects;
-
-            Dungeon = dungeon;
-            sides = TDSidesClass.From(
-                tile.CustomProperties.Classes[TiledConfiguration.instance.SidesClassKey],
-                config.RoofRule 
-            );
-
-            transform.localPosition = Coordinates.ToPosition(dungeon.Scale);
-            name = $"TileNode Elevation {Coordinates.y} ({Coordinates.x}, {Coordinates.z})";
-
-            ConfigureCube();
-            ConfigureGrates();
-            ConfigureObstructions();
-            ConfigureDoors();
-            ConfigureLadders();
-            ConfigureTeleporter();
-            ConfigureRamps();
-            ConfigureWallButtons();
-            ConfigurePillar(config);
-            ConfigurePedistal(config);
-            ConfigureChest(config);
-
-            Debug.Log(PrefixLogMessage($"Generated"));
-        }
 
         private void OnDestroy()
         {
             Dungeon?.RemoveNode(this);
         }
 
-        bool HasLadder(Direction direction)
+        public bool HasLadder(Direction direction)
         {
             var tdDirection = TDEnumDirectionExtensions.FromDirection(direction);
 
@@ -693,7 +283,6 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
-
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
             if (entity == null && anchor == Direction.None)
@@ -755,13 +344,12 @@ namespace LMCore.TiledDungeon
                 return MovementOutcome.Refused;
             }
 
-            Debug.LogWarning(PrefixLogMessage($"{entity.name} is anchored {anchor}, don't know how to handle that"));
-            return MovementOutcome.Refused;
+            return ExitOrFallback(direction, MovementOutcome.Blocked);
         }
 
         public bool HasBlockingDoor(Direction direction)
         {
-            var door = this.door;
+            var door = Door;
 
             if (door == null) return false;
 
@@ -789,6 +377,8 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
+        public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction);
+
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
             if (HasWall(direction) || HasLadder(direction)) return false;
@@ -809,30 +399,14 @@ namespace LMCore.TiledDungeon
             }
 
             var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform)
+            if (platform != null)
             {
-                if (!platform.MayEnter(entity)) return false;
+                Debug.Log(PrefixLogMessage("We have a platform"));
+                return platform.MayEnter(entity);
             }
 
-
-            if (_occupants.Count == 0 || OccupationRules.MayCoexist(entity, _occupants))
-            {
-                if (platform)
-                {
-                    // TODO: This probably doesn't work
-                    // Also needs way to release entity
-                    platform.ConstrainEntity(entity);
-                }
-                return true;
-            }
-
-            return false;
-
+            return true;
         }
-
-        HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
-        HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
-
 
         IDungeonNode HandleTeleporter(GridEntity entity)
         {
@@ -846,18 +420,18 @@ namespace LMCore.TiledDungeon
             if (HasActiveTeleporter)
             {
                 var outlet = Dungeon
-                    .FindTeleportersById(teleporterWormholdId)
+                    .FindTeleportersById(TeleporterWormholdId)
                     .FirstOrDefault(n => n.Coordinates != Coordinates);
 
                 if (outlet == null)
                 {
-                    Debug.LogWarning(PrefixLogMessage($"teleporter doesn't have a partner in their wormhole {teleporterWormholdId}; ignoring teleportation"));
+                    Debug.LogWarning(PrefixLogMessage($"teleporter doesn't have a partner in their wormhole {TeleporterWormholdId}; ignoring teleportation"));
                     return null;
                 }
 
                 Debug.Log(PrefixLogMessage($"Teleporting {entity.name} to {outlet.Coordinates}"));
-                entity.Position = outlet.Coordinates;
-                entity.Anchor = Direction.Down;
+                entity.Coordinates = outlet.Coordinates;
+                entity.AnchorDirection = Direction.Down;
                 entity.TransportationMode = entity.TransportationMode.RemoveFlag(TransportationMode.Climbing).AddFlag(TransportationMode.Teleporting);
                 entity.Sync();
                 return outlet;
@@ -868,7 +442,6 @@ namespace LMCore.TiledDungeon
 
         void HandleSpinner(GridEntity entity)
         {
-
             var spinMod = modifications.FirstOrDefault(m => m.Tile.Type == TiledConfiguration.instance.SpinnerClass);
 
             if (spinMod == null) { return; }
@@ -881,6 +454,20 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        void AddNewOccupant(GridEntity entity)
+        {
+            _occupants.Add(entity);
+            
+            if (entity.NodeAnchor != null)
+            {
+                var platform = entity.NodeAnchor.GetComponentInChildren<TDMovingPlatform>();
+                if (platform != null)
+                {
+                    platform.ConstrainEntity(entity);
+                }
+            }
+        }
+
         void HandleTraps(GridEntity entity)
         {
             IDungeonNode target = null;
@@ -890,26 +477,33 @@ namespace LMCore.TiledDungeon
                 target = HandleTeleporter(entity);
             }
 
-            if (entity.Anchor == Direction.Down && IsSpinner)
+            if (entity.AnchorDirection == Direction.Down)
             {
-                if (_occupants.Contains(entity))
+                if (IsSpinner)
                 {
-
-                    Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
-                } else
-                {
-                    HandleSpinner(entity);
+                    if (_occupants.Contains(entity))
+                    {
+                        Debug.Log(PrefixLogMessage($"Skip spinning '{entity.name}' because don't know if already spun"));
+                    }
+                    else
+                    {
+                        HandleSpinner(entity);
+                    }
                 }
             }
 
             if (target == null || target == (IDungeonNode)this)
             {
-                _occupants.Add(entity);
+                AddNewOccupant(entity);
             } else
             {
                 target.AddOccupant(entity);
             }
         }
+
+        #region EntityOccupation
+        HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
+        HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
 
         public void AddOccupant(GridEntity entity)
         {
@@ -923,7 +517,7 @@ namespace LMCore.TiledDungeon
             if (IsTrap) {
                 HandleTraps(entity);
             } else {
-                _occupants.Add(entity);
+                AddNewOccupant(entity);
             }
             entity.transform.SetParent(transform);
         }
@@ -932,31 +526,29 @@ namespace LMCore.TiledDungeon
 
         public void Reserve(GridEntity entity)
         {
+            if (_occupants.Contains(entity)) return;
+
+            Debug.Log($"Reserving {entity.name} occupancy for {Coordinates}");
             _reservations.Add(entity);
         }
 
         public void RemoveOccupant(GridEntity entity)
         {
+            Debug.Log($"Removing {entity.name} occupancy from {Coordinates}");
             _occupants.Remove(entity);
             OccupationRules.HandleDeparture(entity, _occupants);
             if (entity.transform.parent == transform)
             {
                 entity.transform.SetParent(Dungeon.transform);
             }
-
-            // TODO: This hack doesn't fully work
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform != null)
-            {
-                platform.FreeEntity(entity);
-            }
         }
+        #endregion
 
         public bool AllowsRotating(GridEntity entity)
         {
-            if (entity.Anchor.IsPlanarCardinal())
+            if (entity.AnchorDirection.IsPlanarCardinal())
             {
-                if (HasLadder(entity.Anchor)) return false;
+                if (HasLadder(entity.AnchorDirection)) return false;
 
                 Debug.LogWarning(PrefixLogMessage($"Unhandled wall situation for {entity.name}"));
             }
@@ -966,6 +558,8 @@ namespace LMCore.TiledDungeon
         public bool CanAnchorOn(GridEntity entity, Direction anchor)
         {
             if (Obstructed) return false;
+
+            if (anchor == Direction.None) return entity.TransportationMode.HasFlag(TransportationMode.Flying);
 
             if (anchor == Direction.Down) return HasFloor || entity.TransportationMode.HasFlag(TransportationMode.Flying);
 
@@ -982,47 +576,6 @@ namespace LMCore.TiledDungeon
             ));
 
             return false;
-        }
-
-        public static Vector3 DefaultAnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection, float gridSize)
-        {
-            // TODO: Place magic number to be somewhat below ceiling somewhere 
-            if (anchor == Direction.Up) return rotationRespectsAnchorDirection ?
-                    Vector3.up * gridSize : Vector3.up * gridSize * 0.9f;
-
-
-            if (rotationRespectsAnchorDirection)
-            {
-                return Vector3.up * gridSize * 0.5f + anchor.AsLookVector3D().ToDirection() * gridSize * 0.5f;
-            }
-
-            // TODO: Place magic number to not get too close to wall somewhere
-            return Vector3.up * gridSize * 0.45f 
-                + anchor.AsLookVector3D().ToDirection() * gridSize * 0.45f;
-
-        }
-
-        public Vector3 AnchorOffset(Direction anchor, bool rotationRespectsAnchorDirection)
-        {
-            if (anchor == Direction.Down)
-            {
-                var ramp = RampModification;
-                if (ramp == null) return Vector3.zero;
-
-                switch (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey))
-                {
-                    case TDEnumElevation.Low:
-                        return Vector3.up * Dungeon.GridSize / 6f;
-                    case TDEnumElevation.Middle:
-                        return Vector3.up * Dungeon.GridSize * 0.5f;
-                    case TDEnumElevation.High:
-                        return Vector3.up * Dungeon.GridSize * 5f / 6f;
-                    default:
-                        return Vector3.zero;
-                }
-            }
-
-            return DefaultAnchorOffset(anchor, rotationRespectsAnchorDirection, Dungeon.GridSize);
         }
 
         public Vector3Int Neighbour(Direction direction)
@@ -1042,23 +595,26 @@ namespace LMCore.TiledDungeon
             return direction.Translate(Coordinates);
         }
 
-        public void AssignConstraints(GridEntity entity, Direction direction)
+        public Anchor GetAnchor(Direction direction) => 
+            GetComponentsInChildren<Anchor>()
+                .FirstOrDefault(a => a.CubeFace == direction);
+
+        public Vector3 GetEdge(Direction anchor)
         {
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            if (platform != null && direction == Direction.Down)
-            {
-                platform.ConstrainEntity(entity);
-            }
+            var a = GetAnchor(anchor);
+            if (a != null) return a.CenterPosition;
+
+            return CenterPosition + anchor.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
         }
 
-        public void RemoveConstraints(GridEntity entity, Direction direction)
+        public Vector3 GetEdge(Direction anchor, Direction edge)
         {
-            var platform = GetComponentInChildren<TDMovingPlatform>();
-            Debug.Log(PrefixLogMessage($"Free {entity.name} {platform != null} {direction == Direction.Down}"));
-            if (platform != null && direction == Direction.Down)
-            {
-                platform.FreeEntity(entity);
-            }
+            var a = GetAnchor(anchor);
+            if (a != null) return a.GetEdgePosition(edge);
+
+            return CenterPosition 
+                + anchor.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f)
+                + edge.AsLookVector3D().ToDirection(Dungeon.GridSize * 0.5f);
         }
     }   
 }

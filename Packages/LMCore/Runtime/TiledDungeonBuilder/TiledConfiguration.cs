@@ -44,6 +44,7 @@ namespace LMCore.TiledDungeon
         public string TrapKey = "Trap";
         public string ConusumesKeyKey = "ConsumesKey";
         public string OpenKey = "Open";
+        public string ClaimAlwaysAlignedKey = "ClaimAlwaysAligned";
 
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";

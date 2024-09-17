@@ -334,6 +334,7 @@ namespace LMCore.Extensions
         public static Vector3 ToDirectionFromXZPlane(this Vector2Int direction) => new Vector3(direction.x, 0, direction.y);
 
         public static Vector3 ToDirection(this Vector3Int direction) => new Vector3(direction.x, direction.y, direction.z);
+        public static Vector3 ToDirection(this Vector3Int direction, float scale) => new Vector3(direction.x * scale, direction.y * scale, direction.z * scale);
 
         #endregion World
 

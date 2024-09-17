@@ -12,8 +12,8 @@ namespace LMCore.Crawler
 
         public EntityState(GridEntity entity)
         {
-            Coordinates = entity.Position;
-            Anchor = entity.Anchor;
+            Coordinates = entity.Coordinates;
+            Anchor = entity.AnchorDirection;
             LookDirection = entity.LookDirection;
             RotationRespectsAnchorDirection = entity.RotationRespectsAnchorDirection;
             TransportationMode = entity.TransportationMode;
@@ -22,7 +22,7 @@ namespace LMCore.Crawler
         public EntityState(Vector3Int coordinates, GridEntity entity)
         {
             Coordinates = coordinates;
-            Anchor = entity.Anchor;
+            Anchor = entity.AnchorDirection;
             LookDirection = entity.LookDirection;
             RotationRespectsAnchorDirection = entity.RotationRespectsAnchorDirection;
             TransportationMode = entity.TransportationMode;

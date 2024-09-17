@@ -9,7 +9,7 @@ using UnityEngine.Animations;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDMovingPlatform : MonoBehaviour
+    public class TDMovingPlatform : MonoBehaviour, IMovingCubeFace
     {
         public enum Phase { 
             Initial, 
@@ -29,6 +29,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField, HideInInspector]
         Vector3Int OriginCoordinates;
+
+        [SerializeField]
+        bool alwaysClaimToBeAligned;
 
         Vector3Int CurrentCoordinates => GetComponentInParent<TDNode>().Coordinates;
 
@@ -52,6 +55,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         TDEnumInteraction Interaction = TDEnumInteraction.Automatic;
 
+        /// <summary>
+        /// World position of a virtual node center misaligned with the dungeon grid
+        /// </summary>
+        public Vector3 VirtualNodeCenter => transform.position + Vector3.up * (Dungeon?.GridSize ?? 3f) * 0.5f;
+
         protected string PrefixLogMessage(string message) => $"Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
         
         public void Configure(TDNodeConfig conf)
@@ -70,6 +78,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             Interaction = platform.Interaction(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Automatic);
             moveSpeed = platform.Float(TiledConfiguration.instance.VelocityKey, moveSpeed);
             loopDelay = platform.Float(TiledConfiguration.instance.PauseKey, loopDelay);
+            alwaysClaimToBeAligned = platform.Bool(TiledConfiguration.instance.ClaimAlwaysAlignedKey, true);
         }
 
         [SerializeField, HideInInspector]
@@ -101,12 +110,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         public bool MayEnter(GridEntity entity) { 
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return true;
 
-            if (entity.Anchor == Direction.Down) {
+            if (entity.AnchorDirection == Direction.Down) {
                 var myCoordinates = CurrentCoordinates;
                 foreach (var dependant in managedOffsetSides)
                 {
                     // We're part of the same platform!
-                    if (myCoordinates + dependant.Key == entity.Position && dependant.Value == Direction.Down)
+                    if (myCoordinates + dependant.Key == entity.Coordinates && dependant.Value == Direction.Down)
                     {
                         return true;
                     }
@@ -126,17 +135,19 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 constraint = entity.gameObject.AddComponent<PositionConstraint>();
             }
 
+            constraint.constraintActive = false;
             while (constraint.sourceCount > 0)
             {
                 constraint.RemoveSource(0);
             }
 
+            constraint.translationAtRest = Vector3.zero;
             constraint.AddSource(constraintSource);
             constraint.weight = 0;
             constraint.constraintActive = true;
-
             constrainedEntities.Add(entity);
 
+            Debug.Log(PrefixLogMessage($"Constraining {entity.name}"));
             return true;
         }
 
@@ -145,7 +156,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             constrainedEntities.Remove(entity);
 
             var constraint = entity.GetComponent<PositionConstraint>();
-            if (constraint == null) { return false; }
+            if (constraint == null) { 
+                Debug.LogWarning(PrefixLogMessage($"There's no constraint on {entity.name} to free"));
+                return false; 
+            }
 
             for (int i = 0, l = constraint.sourceCount; i < l; i++)
             {
@@ -158,10 +172,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     {
                         constraint.constraintActive = false;
                     }
+                    Debug.Log(PrefixLogMessage($"Freeing {entity.name}"));
                     return true;
                 }
             }
 
+            Debug.LogError(PrefixLogMessage($"Failed to free {entity.name}"));
             return false;
         }
 
@@ -173,6 +189,30 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 Debug.Log(PrefixLogMessage($"Starting platform Interaction({Interaction}) Loop({Loop}) MoveDirection({MoveDirection})"));
                 InitWaitToStart();
+            }
+
+            // TODO: Figure out this managing moving cube face business
+            var anchor = GetComponent<Anchor>();
+            if (anchor != null) {
+                anchor.ManagingMovingCubeFace = this;
+            }
+        }
+
+        private void OnEnable()
+        {
+            GridEntity.OnMove += GridEntity_OnMove;
+        }
+
+        private void OnDisable()
+        {
+            GridEntity.OnMove -= GridEntity_OnMove;
+        }
+
+        private void GridEntity_OnMove(GridEntity entity)
+        {
+            if (entity.Moving.HasFlag(MovementType.Translating) && constrainedEntities.Contains(entity))
+            {
+                FreeEntity(entity);
             }
         }
 
@@ -307,21 +347,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     Dungeon[otherCoordinates].UpdateSide(dependent.Value, true);
                 }
 
+                // No need to update constrained entities, they should use the
+                // same anchor as us...
                 foreach (var entity in constrainedEntities)
                 {
-                    var offset = entity.Position - currentNode.Coordinates;
-                    var newEntityCoordinates = coordinates + offset;
-
-                    if (Dungeon.HasNodeAt(entity.Position)) {
-                        Dungeon[entity.Position].RemoveOccupant(entity);
-                    }
-
-                    entity.Position = newEntityCoordinates;
-
-                    if (Dungeon.HasNodeAt(entity.Position)) {
-                        Dungeon[entity.Position].AddOccupant(entity);
-                    }
+                    Debug.Log(PrefixLogMessage($"Managed entity now is {entity}"));
                 }
+
             } else
             {
                 Debug.LogWarning(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));
@@ -334,7 +366,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             return false;
         }
 
-        public bool AlignedWithGrid { get; private set; }
+        bool _alignedWithGrid;
+        public bool AlignedWithGrid {
+            get => alwaysClaimToBeAligned ? true : _alignedWithGrid;
+            private set
+            {
+                _alignedWithGrid = value;
+            }
+        }
 
         void InitMoveStep()
         {
@@ -348,9 +387,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             var startCoordinates = CurrentCoordinates;
-            var startPosition = startCoordinates.ToPosition(Dungeon.Scale);
+            var startPosition = startCoordinates.ToPosition(Dungeon.GridSize);
             var targetCoordinates = MoveDirection.Translate(CurrentCoordinates);
-            var targetPosition = targetCoordinates.ToPosition(Dungeon.Scale);
+            var targetPosition = targetCoordinates.ToPosition(Dungeon.GridSize);
             var t0 = Time.timeSinceLevelLoad;
 
             ActivePhaseFunction = () =>

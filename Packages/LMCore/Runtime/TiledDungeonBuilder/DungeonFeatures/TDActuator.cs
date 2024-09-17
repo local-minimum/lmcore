@@ -72,16 +72,34 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                foreach (var mover in Movers.movers)
-                {
-                    mover.OnMoveStart += Mover_OnMoveStart;
-                    mover.OnMoveEnd += Mover_OnMoveEnd;
-                }
-
-                Movers.OnActivateMover += Movers_OnActivateMover;
-                Movers.OnDeactivateMover += Movers_OnDeactivateMover;
+                TDNode.OnNewOccupant += TDNode_OnNewOccupant;
             }
         }
+
+        private void TDNode_OnNewOccupant(TDNode node, GridEntity entity)
+        {
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) || 
+                entity.Coordinates != Coordinates
+                || entity.AnchorDirection != anchor)
+            {
+                var hadOccupant = occupants.Contains(entity);
+                occupants.Remove(entity);
+
+                if (lastActionWasPress && hadOccupant)
+                {
+                    Depress();
+                }
+                return;
+            }
+
+            bool wasEmpty = occupants.Count == 0;
+            occupants.Add(entity);
+
+            if (automaticallyResets || (!lastActionWasPress && wasEmpty))
+                Press();
+
+        }
+
         private void OnDisable()
         {
             if (interaction == TDEnumInteraction.Interactable)
@@ -90,66 +108,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                foreach (var mover in Movers.movers)
-                {
-                    mover.OnMoveStart -= Mover_OnMoveStart;
-                    mover.OnMoveEnd -= Mover_OnMoveEnd;
-                }
-
-                Movers.OnActivateMover -= Movers_OnActivateMover;
-                Movers.OnDeactivateMover -= Movers_OnDeactivateMover;
+                TDNode.OnNewOccupant += TDNode_OnNewOccupant;
             }
         }
-
-        private void Movers_OnActivateMover(IEntityMover mover)
-        {
-            mover.OnMoveStart += Mover_OnMoveStart;
-            mover.OnMoveEnd += Mover_OnMoveEnd;
-        }
-
-        private void Movers_OnDeactivateMover(IEntityMover mover)
-        {
-            mover.OnMoveStart -= Mover_OnMoveStart;
-            mover.OnMoveEnd -= Mover_OnMoveEnd;
-        }
-
 
         HashSet<GridEntity> occupants = new HashSet<GridEntity>();
-        private void Mover_OnMoveStart(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors)
-        {
-            if (!active) return;
-            var passesPlate = positions
-                .Zip(anchors, (pos, anch) => new { pos, anch })
-                .Skip(1)
-                .Any(state => state.pos == Coordinates && state.anch == anchor);
-
-            if (passesPlate)
-            {
-                bool wasEmpty = occupants.Count == 0;
-                occupants.Add(entity);
-
-                if (automaticallyResets || (!lastActionWasPress && wasEmpty))
-                    Press();
-            }
-        }
-
-        private void Mover_OnMoveEnd(GridEntity enity, bool successful)
-        {
-            if (!active) return;
-            if (occupants.Contains(enity) && (enity.Position != Coordinates || enity.Anchor != anchor))
-            {
-                occupants.Remove(enity);
-
-                if (lastActionWasPress)
-                {
-                    Depress();
-                }
-            }
-        }
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
-            if (!active || entity.Position != Coordinates) return;
+            if (!active || entity.Coordinates != Coordinates) return;
 
             if (lastActionWasPress && !automaticallyResets)
             {

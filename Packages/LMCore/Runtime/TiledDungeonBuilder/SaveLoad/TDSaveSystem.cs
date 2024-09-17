@@ -70,7 +70,7 @@ namespace LMCore.TiledDungeon.SaveLoad
                 levelSave.doors = new SerializableDictionary<Vector3Int, DoorSave>(
                     dungeon
                         .GetComponentsInChildren<TDDoor>()
-                        .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Position, door.Save()))
+                        .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Coordinates, door.Save()))
                 );
 
                 levelSave.spikes = new SerializableDictionary<Vector3Int, SpikeTrapSave>(

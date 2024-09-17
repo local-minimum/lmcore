@@ -64,7 +64,7 @@ namespace LMCore.Crawler
             OnTickEndAdjustment?.Invoke(TickId, TickProgressNonAdjusted, TickProgress, currentTickEnd);
             return true;
         }
-
+        
         public bool RequestTick()
         {
             if (ticking) return false;
@@ -86,6 +86,7 @@ namespace LMCore.Crawler
             OnTickStart?.Invoke(TickId, currentTickInitialDuration);
             return true;
         }
+        
 
         private void Update()
         {
