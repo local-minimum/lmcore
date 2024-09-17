@@ -64,6 +64,7 @@ namespace LMCore.Crawler
             }
 
             interpretation.Evaluate(Entity);
+            entity.Moving = interpretation.Movement; 
 
             Debug.Log(PrefixLogMessage($"Perform {interpretation}"));
 
@@ -74,7 +75,6 @@ namespace LMCore.Crawler
             }
 
             Entity.Sync(interpretation.Last.Checkpoint);
-            Entity.Moving = MovementType.Stationary;
 
             var positionConstraint = GetComponent<PositionConstraint>();
             if (positionConstraint != null && positionConstraint.constraintActive)
@@ -82,6 +82,7 @@ namespace LMCore.Crawler
                 positionConstraint.weight = 1;
             }
 
+            Entity.Moving = MovementType.Stationary;
         }
     }
 }

@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Game
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -351,7 +351,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 34036
+  m_LastSelectedObjectID: 37766
 --- !u!114 &14
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -573,7 +573,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder/DungeonFeatures
+    - Packages/se.localminimum.lmcore/Runtime/Crawler
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -581,16 +581,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder/DungeonFeatures
+  - Packages/se.localminimum.lmcore/Runtime/Crawler
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 558}
-    m_SelectedIDs: 8ccc0000
-    m_LastClickedID: 52364
-    m_ExpandedIDs: 0000000028ca00002aca00002cca00002eca000030ca000032ca000034ca000036ca000038ca00003aca0000
+    scrollPos: {x: 0, y: 270}
+    m_SelectedIDs: 80cc0000
+    m_LastClickedID: 52352
+    m_ExpandedIDs: 0000000028ca00002aca00002cca00002eca000030ca000032ca000034ca000036ca000038ca00003aca000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -643,8 +643,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 7e200000
-    m_LastClickedInstanceID: 8318
+    m_SelectedInstanceIDs: 58200000
+    m_LastClickedInstanceID: 8280
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000326dfffff2c30300
     m_RenameOverlay:
@@ -670,7 +670,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 0}
+    m_ScrollPosition: {x: 0, y: 89}
     m_GridSize: 16
   m_SkipHiddenPackages: 0
   m_DirectoriesAreaWidth: 294
@@ -760,9 +760,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: ccab0000
-      m_LastClickedID: 43980
-      m_ExpandedIDs: 2afbffff
+      m_SelectedIDs: 58200000
+      m_LastClickedID: 0
+      m_ExpandedIDs: 2afbffffe67d0000f48400000289000062940000ccab0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1178,13 +1178,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.55921334, y: -0.1142707, z: 0.07817675, w: 0.8173997}
+    m_Target: {x: 0.44407463, y: -0.35359457, z: 0.19639878, w: 0.7995238}
     speed: 2
-    m_Value: {x: 0.5592046, y: -0.114268914, z: 0.07817553, w: 0.8173869}
+    m_Value: {x: 0.44406527, y: -0.35358712, z: 0.19639464, w: 0.7995069}
   m_Size:
-    m_Target: 37.47716
+    m_Target: 16.720911
     speed: 2
-    m_Value: 37.47716
+    m_Value: 16.720911
   m_Ortho:
     m_Target: 1
     speed: 2
