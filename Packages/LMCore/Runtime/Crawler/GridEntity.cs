@@ -1,8 +1,6 @@
 using UnityEngine;
 using LMCore.Extensions;
 using LMCore.IO;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Events;
 using LMCore.Inventory;
 
@@ -240,25 +238,6 @@ namespace LMCore.Crawler
                 _falling = value;
             }
         }
-
-        #region Movers
-        public IEntityMovementInterpreter EntityMovementInterpreter => GetComponent<IEntityMovementInterpreter>();
-
-        private List<IEntityMover> _movers;
-        public List<IEntityMover> Movers
-        {
-            get
-            {
-                if (_movers == null )
-                {
-                    _movers = GetComponents<IEntityMover>().ToList();
-                }
-                return _movers;
-            }
-        }
-        public IEntityMover ActiveMover => Movers.Where(m => m.Enabled).FirstOrDefault();
-
-        #endregion Movers
 
         public CrawlerInput Input => GetComponent<CrawlerInput>();
 
