@@ -21,6 +21,11 @@ namespace LMCore.Crawler
         public static event InteractEvent OnInteract;
         public static event MoveEvent OnMove;
 
+        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection}/{AnchorMode} looking {LookDirection}: {message}";
+
+        public override string ToString() => 
+            $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}/{AnchorMode}) Down({Down}) Looking({LookDirection})";
+
         [SerializeField]
         private AbsInventory _inventory;
         public AbsInventory Inventory => _inventory;
@@ -44,6 +49,9 @@ namespace LMCore.Crawler
                 OnMove?.Invoke(this);
             }
         }
+
+        #region Anchorage
+        public bool RotationRespectsAnchorDirection { get; set; } = false;
 
         private Anchor _anchor;
         public Anchor NodeAnchor {
@@ -151,6 +159,16 @@ namespace LMCore.Crawler
             }
         }
 
+        private string AnchorMode
+        {
+            get {
+                if (NodeAnchor != null) return "Achor";
+                if (Node != null) return "Node";
+                return "Dungeon";
+            }
+        }
+        #endregion
+
         #region Coordinates
         /// <summary>
         /// Using XZ Plane, returns coordinates in 2D
@@ -200,21 +218,10 @@ namespace LMCore.Crawler
         }
         #endregion
 
+        public Direction LookDirection { get; set; }
+
         public TransportationMode TransportationMode;
-        public bool RotationRespectsAnchorDirection { get; set; } = false;
 
-        private string AnchorMode
-        {
-            get {
-                if (NodeAnchor != null) return "Achor";
-                if (Node != null) return "Node";
-                return "Dungeon";
-            }
-        }
-        protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection}/{AnchorMode} looking {LookDirection}: {message}";
-
-        public override string ToString() => 
-            $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}/{AnchorMode}) Down({Down}) Looking({LookDirection})";
 
         private bool _falling;
         public bool Falling
@@ -240,8 +247,6 @@ namespace LMCore.Crawler
         }
 
         public CrawlerInput Input => GetComponent<CrawlerInput>();
-
-        public Direction LookDirection { get; set; }
 
         /// <summary>
         /// Updates position and rotation as well as occupying dungeon node at coordinates possible
@@ -282,35 +287,6 @@ namespace LMCore.Crawler
             LookDirection = checkpoint.LookDirection;
 
             Sync();
-        }
-
-        /// <summary>
-        /// Update coordinates based on a movement.
-        /// 
-        /// Does not sync position
-        /// </summary>
-        public void Translate(Movement movement)
-        {
-            Coordinates = LookDirection.RelativeTranslation3D(AnchorDirection, movement).Translate(Coordinates);
-        }
-
-        /// <summary>
-        /// Update look direction and transportation mode climbing based on movement.
-        /// 
-        /// Does not sync rotation
-        /// </summary>
-        public void Rotate(Movement movement)
-        {
-            LookDirection = LookDirection.ApplyRotation(AnchorDirection, movement, out var anchorDirecition);
-            AnchorDirection = anchorDirecition;
-
-            if (AnchorDirection != Direction.Down && AnchorDirection != Direction.None)
-            {
-                TransportationMode = TransportationMode.AddFlag(TransportationMode.Climbing);
-            } else
-            {
-                TransportationMode = TransportationMode.RemoveFlag(TransportationMode.Climbing);
-            }
         }
 
         public void Interact()

@@ -505,7 +505,6 @@ namespace LMCore.TiledDungeon
         HashSet<GridEntity> _occupants = new HashSet<GridEntity>();
         HashSet<GridEntity> _reservations = new HashSet<GridEntity> ();
 
-
         public void AddOccupant(GridEntity entity)
         {
             Debug.Log(PrefixLogMessage($"Handling occupancy of {entity.name}"));
