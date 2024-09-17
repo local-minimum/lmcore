@@ -14,6 +14,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
     {
         public static event DiscoverIllusionEvent OnDiscoverIllusion;
 
+        public override string ToString() =>
+            $"Illusory {direction} Side of {Node.Coordinates} is {(Discovered ? "discovered" : "undiscovered")}";
+
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(ToString());
+        }
+
         [SerializeField, HideInInspector]
         Direction direction;
         public Direction CubeFace => direction;
@@ -66,9 +75,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool DidPassIllusion(Vector3Int movementEnd)
         {
-            var direction = (movementStart - movementEnd).AsDirection();
-            return movementStart != movementEnd && (movementStart == Coordinates || movementEnd == Coordinates)
-                && (direction == this.direction || direction.Inverse() == this.direction);
+            var direction = (movementEnd - movementStart).AsDirection();
+
+            // Debug.Log($"{this}: {direction}, start({movementStart}) end({movementEnd}) vs {Coordinates}");
+
+            return movementStart == Coordinates && direction == this.direction ||
+                movementEnd == Coordinates && direction.Inverse() == this.direction;
         }
 
         private void GridEntity_OnMove(GridEntity entity)
