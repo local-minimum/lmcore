@@ -80,6 +80,9 @@ namespace LMCore.TiledDungeon
         GameObject UpperRamp;
 
         [SerializeField]
+        GameObject Stairs;
+
+        [SerializeField]
         GameObject WallButton;
 
         protected string PrefixLogMessage(string message) => $"Dungeon Style {name}: {message}";
@@ -133,6 +136,7 @@ namespace LMCore.TiledDungeon
                 LogErrorUnknownDirection(classId, direction);
                 return null;
             }
+            if (classId == TiledConfiguration.InstanceOrCreate().StairsClass) return InstantiateWithRotation(parent, Stairs, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }
             if (classId == TiledConfiguration.InstanceOrCreate().PedistalClass) { return InstantiateWithRotation(parent, Pedistal, direction); }

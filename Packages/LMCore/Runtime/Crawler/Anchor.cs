@@ -48,7 +48,7 @@ namespace LMCore.Crawler
     public class Anchor : MonoBehaviour
     {
         protected string PrefixLogMessage(string message) =>
-            $"Anchor {CubeFace} @ {Node.Coordinates}: {message}";
+            $"Anchor {CubeFace} @ {Node?.Coordinates}: {message}";
 
         [HideInInspector]
         public AnchorYRotation PrefabRotation = AnchorYRotation.None;

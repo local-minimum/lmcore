@@ -357,9 +357,27 @@ namespace LMCore.TiledDungeon
                             ApplyAnchorRotation(plate, direction);
                             continue;
                         }
-                    } else if (ConfigureRamps(node))
+                    }
+                    else if (ConfigureRamps(node))
                     {
                         continue;
+                    }
+                    else if (node.HasStairs)
+                    {
+                        var stairsDirection = node.StairsModification.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey).AsDirection();
+                        var stairs = Dungeon.Style.Get(
+                            node.transform,
+                            TiledConfiguration.instance.StairsClass,
+                            stairsDirection,
+                            node.NodeStyle
+                        );
+                        if (stairs != null)
+                        {
+                            stairs.name = $"TrapDoor UpIs({stairsDirection})";
+
+                            ApplyAnchorRotation(stairs, stairsDirection);
+                            continue;
+                        }
                     }
                 } else if (direction == Direction.Up)
                 {

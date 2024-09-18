@@ -568,7 +568,7 @@
   </properties>
  </tile>
  <tile id="47" type="MovingPlatform"/>
- <tile id="48" type="Stairs">
+ <tile id="48" type="DEPRECATED">
   <properties>
    <property name="Direction" propertytype="Direction" value="Down"/>
    <property name="Entry" propertytype="Direction" value="South"/>
@@ -576,7 +576,7 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="49" type="Stairs">
+ <tile id="49" type="DEPRECATED">
   <properties>
    <property name="Direction" propertytype="Direction" value="Down"/>
    <property name="Entry" propertytype="Direction" value="West"/>
@@ -584,7 +584,7 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="50" type="Stairs">
+ <tile id="50" type="DEPRECATED">
   <properties>
    <property name="Direction" propertytype="Direction" value="Down"/>
    <property name="Entry" propertytype="Direction" value="North"/>
@@ -592,7 +592,7 @@
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
- <tile id="51" type="Stairs">
+ <tile id="51" type="DEPRECATED">
   <properties>
    <property name="Direction" propertytype="Direction" value="Down"/>
    <property name="Entry" propertytype="Direction" value="East"/>
@@ -602,32 +602,28 @@
  </tile>
  <tile id="52" type="Stairs">
   <properties>
-   <property name="Direction" propertytype="Direction" value="Up"/>
-   <property name="Entry" propertytype="Direction" value="South"/>
+   <property name="Direction" propertytype="Direction" value="North"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="53" type="Stairs">
   <properties>
-   <property name="Direction" propertytype="Direction" value="Up"/>
-   <property name="Entry" propertytype="Direction" value="West"/>
+   <property name="Direction" propertytype="Direction" value="East"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="54" type="Stairs">
   <properties>
-   <property name="Direction" propertytype="Direction" value="Up"/>
-   <property name="Entry" propertytype="Direction" value="North"/>
+   <property name="Direction" propertytype="Direction" value="South"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>
  </tile>
  <tile id="55" type="Stairs">
   <properties>
-   <property name="Direction" propertytype="Direction" value="Up"/>
-   <property name="Entry" propertytype="Direction" value="South"/>
+   <property name="Direction" propertytype="Direction" value="West"/>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Walkability" propertytype="Aspect" value="Always"/>
   </properties>

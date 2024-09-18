@@ -208,6 +208,11 @@ namespace LMCore.TiledDungeon
 
         public bool HasTrapDoor => TrapdoorModification != null;
 
+        public TileModification StairsModification =>
+            modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().StairsClass);
+
+        public bool HasStairs => StairsModification != null;
+
         TileModification PressurePlateModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.PressurePlateClass);
 
