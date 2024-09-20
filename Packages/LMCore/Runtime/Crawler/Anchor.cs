@@ -143,6 +143,17 @@ namespace LMCore.Crawler
             }
         }
 
+        bool TraversableEdge(GridEntity entity, Direction edge)
+        {
+            // Debug.Log($"{edge} on {CubeFace}: Has({HasEdge(edge)}), Sentinel({Sentinels.GetValueOrDefault(edge)})");
+            if (!HasEdge(edge)) return false;
+
+            var sentinel = Sentinels.GetValueOrDefault(edge);
+            if (sentinel == null) return true;
+
+            return (sentinel.Blocked & entity.TransportationMode) == TransportationMode.None;
+        }
+
 #if UNITY_EDITOR
         float edgeDirectionToSize(Direction direction)
         {
@@ -238,42 +249,128 @@ namespace LMCore.Crawler
         }
         #endregion
 
-        public Anchor GetNeighbour(Direction direction, out bool sameNode)
+        private Anchor GetNeighbour(Direction direction, Direction offset, GridEntity entity)
         {
-            if (!HasEdge(direction))
+            var dungeon = Dungeon;
+            var node = Node;
+            var neighbourCoordinates = offset.Translate(node.Neighbour(direction));
+
+            if (dungeon != null && dungeon.HasNodeAt(neighbourCoordinates))
             {
-                sameNode = true;
+                var neighbourNode = Dungeon[neighbourCoordinates];
+                if (neighbourNode != null )
+                {
+                    var neighbourAnchor = neighbourNode.GetAnchor(CubeFace);
+                    if (neighbourAnchor != null)
+                    {
+                        if (!neighbourAnchor.TraversableEdge(entity, direction.Inverse()))
+                        { 
+                            return null; 
+                        }
+                    }
+
+                    return neighbourAnchor;
+                }
+            }
+
+            return null;
+        }
+
+        public Anchor GetNeighbour(Direction direction, GridEntity entity, out MovementOutcome outcome)
+        {
+            if (!TraversableEdge(entity, direction))
+            {
+                outcome = MovementOutcome.Blocked;
                 return null;
             }
 
             var node = Node;
             if (node != null)
             {
-                var neighbourAnchor = node.GetAnchor(direction);
-                if (neighbourAnchor != null)
+                var sameNodeNeighbour = node.GetAnchor(direction);
+
+                var down = CubeFace.AsLookVector3D();
+                var edgePosition = GetEdgePosition(direction);
+
+                var candidates = new List<Direction>() {
+                    Direction.None,
+                    CubeFace,
+                    CubeFace.Inverse(),
+                }
+                    .Select(offset => new
+                    {
+                        offset,
+                        neighbour = GetNeighbour(direction, offset, entity)
+                    })
+                    .Where(candidate => candidate.neighbour != null)
+                    .Select(candidate => new {
+                        candidate.offset,
+                        candidate.neighbour,
+                        orthoDistance=Vector3.Project(
+                            candidate.neighbour.GetEdgePosition(direction.Inverse()) - edgePosition,
+                            down).magnitude
+                    })
+                    .OrderBy(candidate => candidate.orthoDistance)
+                    .ToList();
+
+                if (candidates.Count > 0)
                 {
-                    sameNode = true;
-                    return neighbourAnchor;
+                    var closest = candidates[0];
+
+                    // TODO: This magic number belongs somewhere else
+                    if (closest.offset == CubeFace.Inverse() && closest.orthoDistance < Dungeon.GridSize * 0.25f)
+                    {
+                        // We seem to be going "up" one level, but to be able to do that
+                        // we need the opposing of cube side to be free
+                        sameNodeNeighbour = node.GetAnchor(CubeFace.Inverse());
+                        if (sameNodeNeighbour != null)
+                        {
+                            outcome = MovementOutcome.NodeInternal;
+                            return sameNodeNeighbour;
+                        }
+
+                        outcome = MovementOutcome.NodeExit;
+                        return closest.neighbour;
+                    }
+
+                    // if we are going "down" we really can't have an anchor in
+                    // our exit direction
+                    if (sameNodeNeighbour)
+                    {
+                        outcome = MovementOutcome.NodeInternal;
+                        return sameNodeNeighbour;
+                    }
+
+                    // even if going "down" one elevation is closer, we can't have
+                    // something on the same level blocking our path
+                    if (closest.offset == CubeFace)
+                    {
+                        var directNeighbour = candidates.Find(candidate => candidate.offset == Direction.None);
+                        if (directNeighbour != null)
+                        {
+                            outcome = MovementOutcome.NodeExit;
+                            return directNeighbour.neighbour;
+                        }
+                    }
+
+                    // If the closest is "down" we should only count it as a neighbour
+                    // if it is close. Else we would void ladders and such.
+                    if (closest.offset == Direction.None || closest.orthoDistance < Dungeon.GridSize * 0.25f)
+                    {
+                        outcome = MovementOutcome.NodeExit;
+                        return closest.neighbour;
+                    }
                 }
 
-                // TODO: We need to check if entity can exit the node this way
-                // or it has to be checked somewhere else
-                var neighbourCoordinates = node.Neighbour(direction);
-                var dungeon = Dungeon;
-                if (dungeon != null && dungeon.HasNodeAt(neighbourCoordinates))
+
+                if (sameNodeNeighbour != null)
                 {
-                    var neighbourNode = Dungeon[neighbourCoordinates];
-                    if (neighbourNode != null )
-                    {
-                        // TODO: We need to check if entity can enter this
-                        // face from the direction in question
-                        sameNode = false;
-                        return neighbourNode.GetAnchor(CubeFace);
-                    }
+                    outcome = MovementOutcome.NodeInternal;
+                    return sameNodeNeighbour;
                 }
             }
 
-            sameNode = true;
+            outcome = MovementOutcome.NodeExit;
             return null;
         }
 

@@ -190,19 +190,6 @@ namespace LMCore.TiledDungeon
 
         public TileModification RampModification => modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.RampClass);
 
-        public bool IsHighRamp
-        {
-            get
-            {
-                var ramp = RampModification;
-                if (ramp == null) return false;
-
-                return ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) == TDEnumElevation.High;
-            }
-        }
-
-        public bool IsRamp => RampModification != null;
-
         public TileModification TrapdoorModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
@@ -270,24 +257,6 @@ namespace LMCore.TiledDungeon
             return MovementOutcome.NodeExit;
         }
 
-        bool RampOutcome(Direction direction, out MovementOutcome outcome)
-        {
-            if (!IsHighRamp) {
-                outcome = MovementOutcome.Refused;
-                return false;
-            }
-
-            var ramp = RampModification;
-            if (direction != ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection())
-            {
-                outcome = MovementOutcome.NodeExit;
-                return true;
-            }
-
-            outcome = MovementOutcome.Refused;
-            return false;
-        }
-
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
             if (entity == null && anchor == Direction.None)
@@ -297,20 +266,11 @@ namespace LMCore.TiledDungeon
 
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
             {
-                if (RampOutcome(direction, out MovementOutcome outcome))
-                {
-                    return outcome;
-                }
-
                 return ExitOrFallback(direction, MovementOutcome.Blocked);
             }
 
             if (anchor == Direction.Down)
             {
-                if (RampOutcome(direction, out MovementOutcome outcome))
-                {
-                    return outcome;
-                }
                 return PlanarOutcome(direction);
             } 
 
@@ -585,18 +545,6 @@ namespace LMCore.TiledDungeon
 
         public Vector3Int Neighbour(Direction direction)
         {
-            if (direction.IsPlanarCardinal() && IsHighRamp)
-            {
-                var downDirection = RampModification.Tile.CustomProperties
-                    .Direction(TiledConfiguration.instance.DownDirectionKey)
-                    .AsDirection();
-
-                if (downDirection != direction)
-                {
-                    return direction.Translate(Coordinates) + Vector3Int.up;
-                }
-            }
-
             return direction.Translate(Coordinates);
         }
 

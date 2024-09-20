@@ -55,6 +55,25 @@ namespace LMCore.Crawler
             throw new System.ArgumentException($"{lookDirection} is not a cardinal direction");
         }
 
+        /// <summary>
+        /// Convert a look direction to direction
+        /// </summary>
+        /// <param name="lookDirection"></param>
+        /// <returns>The direction if parsasble, else None</returns>
+        public static Direction AsDirectionOrNone(this Vector3Int lookDirection)
+        {
+            var cardinal = lookDirection.PrimaryCardinalDirection(false);
+
+            if (cardinal == Vector3Int.left) return Direction.West;
+            if (cardinal == Vector3Int.right) return Direction.East;
+            if (cardinal == Vector3Int.up) return Direction.Up;
+            if (cardinal == Vector3Int.down) return Direction.Down;
+            if (cardinal == Vector3Int.forward) return Direction.North;
+            if (cardinal == Vector3Int.back) return Direction.South;
+
+            return Direction.None;
+        }
+
         #endregion Making Directions
 
         /// <summary>

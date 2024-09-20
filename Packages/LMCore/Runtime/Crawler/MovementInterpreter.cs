@@ -245,12 +245,12 @@ namespace LMCore.Crawler
             return true;
         }
 
-        private void InterpretTargetNode(MovementInterpretation interpretation, IDungeonNode targetNode)
+        private void InterpretTargetNode(MovementInterpretation interpretation, IDungeonNode targetNode, bool allowEntry)
         {
             var direction = interpretation.PrimaryDirection;
             var origin = interpretation.Last;
 
-            if (targetNode.AllowsEntryFrom(Entity, direction.Inverse()))
+            if (allowEntry || targetNode.AllowsEntryFrom(Entity, direction.Inverse()))
             {
                 var wantedAnchorDirection = origin.Checkpoint.Anchor == null ? direction : origin.Checkpoint.Anchor.CubeFace;
                 if (targetNode.CanAnchorOn(Entity, wantedAnchorDirection))
@@ -373,7 +373,7 @@ namespace LMCore.Crawler
             if (Entity.Dungeon.HasNodeAt(targetCoordinates))
             {
                 // Going to a new tile / entering a dungeon
-                InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates]);
+                InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
             } else
             {
                 // Flying or falling outside the dungeon
@@ -454,6 +454,80 @@ namespace LMCore.Crawler
             return null;
         }
 
+        private void InterpretAnchorMovement(
+            MovementInterpretation interpretation,
+            Direction direction,
+            MovementOutcome outcome,
+            Anchor anchor,
+            Anchor targetAnchor,
+            bool trustExit)
+        {
+            // Intermediary step at edge of starting anchor
+            interpretation.Steps.Add(new MovementCheckpointWithTransition()
+            {
+                Checkpoint = MovementCheckpoint.From(interpretation.First.Checkpoint, direction, Entity.LookDirection),
+                Transition = MovementTransition.Grounded,
+            });
+
+            if (outcome == MovementOutcome.Blocked)
+            {
+                InterpretBlocked(interpretation);
+            } else if (outcome == MovementOutcome.Refused)
+            {
+                interpretation.Steps.Add(interpretation.First);
+            }
+            else if (outcome == MovementOutcome.NodeInternal)
+            {
+                // E.g. getting onto a ladder on the wall of the same node
+
+                if (targetAnchor == null)
+                {
+                    Debug.LogError(
+                        $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
+
+                    InterpretBlocked(interpretation);
+                    return ;
+
+                }
+                var lookDirection = Entity.LookDirection;
+                if (Entity.RotationRespectsAnchorDirection)
+                {
+                    if (Entity.LookDirection == direction)
+                    {
+                        lookDirection = direction.PitchUp(Entity.Down, out var _);
+                    }
+                    else if (Entity.LookDirection.Inverse() == direction)
+                    {
+                        lookDirection = direction.PitchDown(Entity.Down, out var _);
+                    }
+                }
+                else if (targetAnchor.CubeFace.IsPlanarCardinal())
+                {
+                    lookDirection = targetAnchor.CubeFace;
+                }
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
+                    Transition = MovementTransition.Grounded,
+                });
+            }
+            else if (trustExit || anchor.Node.AllowExit(Entity, direction))
+            {
+                if (targetAnchor == null)
+                {
+                    InterpretByDungeon(interpretation);
+                }
+                else
+                {
+                    InterpretTargetNode(interpretation, targetAnchor.Node, true);
+                }
+            }
+            else
+            {
+                InterpretBlocked(interpretation);
+            }
+        }
+
         public MovementInterpretation InterpretMovement(Direction direction)
         {
             var interpretation = new MovementInterpretation() { 
@@ -499,7 +573,7 @@ namespace LMCore.Crawler
                             InterpretByDungeon(interpretation);
                         } else 
                         {
-                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates]);
+                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
                         }
                     }
                 }
@@ -510,7 +584,39 @@ namespace LMCore.Crawler
                     Transition = MovementTransition.Grounded,
                 });
 
-                var outcome = anchor.Node.AllowsMovement(Entity, anchor.CubeFace, direction);
+                var neighbour = anchor.GetNeighbour(direction, Entity, out var outcome);
+
+                if (neighbour == null)
+                {
+                    if (outcome == MovementOutcome.Refused)
+                    {
+                        interpretation.Steps.Add(interpretation.First);
+                    }
+                    else if (outcome == MovementOutcome.Blocked)
+                    {
+                        Debug.LogWarning("Sentinel has said this is blocked");
+                        InterpretBlocked(interpretation);
+                    }
+                    // TODO: Do we need to handle these cases?
+                }
+                else
+                {
+                    // If we are not really exiting the normal way, we should already have checked this
+                    if ((neighbour.Node.Coordinates - anchor.Node.Coordinates).AsDirectionOrNone() == Direction.None)
+                    {
+                        InterpretAnchorMovement(
+                            interpretation,
+                            direction,
+                            outcome,
+                            anchor,
+                            neighbour,
+                            true);
+
+                        return interpretation;
+                    }
+                }
+
+                outcome = anchor.Node.AllowsMovement(Entity, anchor.CubeFace, direction);
                 if (outcome == MovementOutcome.Refused)
                 {
                     interpretation.Steps.Add(interpretation.First);
@@ -531,71 +637,20 @@ namespace LMCore.Crawler
                         }
                         else
                         {
-                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates]);
+                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
                         }
                     }
                     else
                     {
+                        var targetAnchor = anchor.GetNeighbour(direction, Entity, out outcome);
+                        InterpretAnchorMovement(
+                            interpretation,
+                            direction,
+                            outcome,
+                            anchor,
+                            targetAnchor,
+                            false);
 
-                        var targetAnchor = anchor.GetNeighbour(direction, out var sameNode);
-
-                        // Intermediary step at edge of starting anchor
-                        interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                        {
-                            Checkpoint = MovementCheckpoint.From(interpretation.First.Checkpoint, direction, Entity.LookDirection),
-                            Transition = MovementTransition.Grounded,
-                        });
-
-                        if (sameNode)
-                        {
-                            // E.g. getting onto a ladder on the wall of the same node
-
-                            if (targetAnchor == null)
-                            {
-                                Debug.LogError(
-                                    $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
-
-                                InterpretBlocked(interpretation);
-                                return interpretation;
-
-                            }
-                            var lookDirection = Entity.LookDirection;
-                            if (Entity.RotationRespectsAnchorDirection)
-                            {
-                                if (Entity.LookDirection == direction)
-                                {
-                                    lookDirection = direction.PitchUp(Entity.Down, out var _);
-                                }
-                                else if (Entity.LookDirection.Inverse() == direction)
-                                {
-                                    lookDirection = direction.PitchDown(Entity.Down, out var _);
-                                }
-                            }
-                            else if (targetAnchor.CubeFace.IsPlanarCardinal())
-                            {
-                                lookDirection = targetAnchor.CubeFace;
-                            }
-                            interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                            {
-                                Checkpoint = MovementCheckpoint.From(targetAnchor, Direction.None, lookDirection),
-                                Transition = MovementTransition.Grounded,
-                            });
-                        }
-                        else if (anchor.Node.AllowExit(Entity, direction))
-                        {
-                            if (targetAnchor == null)
-                            {
-                                InterpretByDungeon(interpretation);
-                            }
-                            else
-                            {
-                                InterpretTargetNode(interpretation, targetAnchor.Node);
-                            }
-                        }
-                        else
-                        {
-                            InterpretBlocked(interpretation);
-                        }
                     }
                 }
             }

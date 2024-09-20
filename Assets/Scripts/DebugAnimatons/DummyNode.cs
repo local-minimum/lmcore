@@ -22,10 +22,6 @@ public class DummyNode : MonoBehaviour, IDungeonNode
 
     public Vector3 CenterPosition => transform.position + Vector3.up * Dungeon.GridSize * 0.5f;
 
-    public bool IsHighRamp => false;
-
-    public bool IsRamp => false;
-
     public bool HasFloor => true;
 
     public void AddOccupant(GridEntity entity)

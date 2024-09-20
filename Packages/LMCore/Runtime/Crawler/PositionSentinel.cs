@@ -9,5 +9,8 @@ namespace LMCore.Crawler
 
         public TransportationMode Blocked;
         public Vector3 Position => transform.position;
+
+        public override string ToString() =>
+            $"Sentinal {name}({Direction}, {Blocked})";
     }
 }

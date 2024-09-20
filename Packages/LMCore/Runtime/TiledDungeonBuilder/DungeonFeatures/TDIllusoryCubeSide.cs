@@ -75,7 +75,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool DidPassIllusion(Vector3Int movementEnd)
         {
-            var direction = (movementEnd - movementStart).AsDirection();
+            var direction = (movementEnd - movementStart).AsDirectionOrNone();
 
             // Debug.Log($"{this}: {direction}, start({movementStart}) end({movementEnd}) vs {Coordinates}");
 
