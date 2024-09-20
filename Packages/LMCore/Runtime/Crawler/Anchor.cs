@@ -145,7 +145,7 @@ namespace LMCore.Crawler
 
         bool TraversableEdge(GridEntity entity, Direction edge)
         {
-            // Debug.Log($"{edge} on {CubeFace}: Has({HasEdge(edge)}), Sentinel({Sentinels.GetValueOrDefault(edge)})");
+            // Debug.Log($"{edge} on {CubeFace}: Has({HasEdge(edge)}), Sentinel({Sentinels.GetValueOrDefault(edge)}) for entity ({entity.TransportationMode})");
             if (!HasEdge(edge)) return false;
 
             var sentinel = Sentinels.GetValueOrDefault(edge);
