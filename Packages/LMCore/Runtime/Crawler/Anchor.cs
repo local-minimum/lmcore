@@ -13,7 +13,7 @@ namespace LMCore.Crawler
             switch (traversal)
             {
                 case AnchorTraversal.None:
-                    return TransportationMode.Flying;
+                    return TransportationMode.None;
                 case AnchorTraversal.Walk:
                 case AnchorTraversal.Converyor:
                 case AnchorTraversal.Scale:
@@ -23,7 +23,7 @@ namespace LMCore.Crawler
                     return TransportationMode.Climbing;
                 default:
                     Debug.LogWarning($"{traversal} conversion to transportation mode not known");
-                    return TransportationMode.Flying;
+                    return TransportationMode.None;
 
             }
         }
