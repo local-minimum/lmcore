@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="Mapping" tilewidth="32" tileheight="32" tilecount="128" columns="16">
+<tileset version="1.10" tiledversion="1.11.0" name="Mapping" tilewidth="32" tileheight="32" tilecount="128" columns="16">
  <image source="MappingSpriteSheet.png" width="512" height="256"/>
  <tile id="1" type="BaseTile">
   <properties>
@@ -568,38 +568,10 @@
   </properties>
  </tile>
  <tile id="47" type="MovingPlatform"/>
- <tile id="48" type="DEPRECATED">
-  <properties>
-   <property name="Direction" propertytype="Direction" value="Down"/>
-   <property name="Entry" propertytype="Direction" value="South"/>
-   <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Walkability" propertytype="Aspect" value="Always"/>
-  </properties>
- </tile>
- <tile id="49" type="DEPRECATED">
-  <properties>
-   <property name="Direction" propertytype="Direction" value="Down"/>
-   <property name="Entry" propertytype="Direction" value="West"/>
-   <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Walkability" propertytype="Aspect" value="Always"/>
-  </properties>
- </tile>
- <tile id="50" type="DEPRECATED">
-  <properties>
-   <property name="Direction" propertytype="Direction" value="Down"/>
-   <property name="Entry" propertytype="Direction" value="North"/>
-   <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Walkability" propertytype="Aspect" value="Always"/>
-  </properties>
- </tile>
- <tile id="51" type="DEPRECATED">
-  <properties>
-   <property name="Direction" propertytype="Direction" value="Down"/>
-   <property name="Entry" propertytype="Direction" value="East"/>
-   <property name="Flyability" propertytype="Aspect" value="Always"/>
-   <property name="Walkability" propertytype="Aspect" value="Always"/>
-  </properties>
- </tile>
+ <tile id="48" type="DEPRECATED"/>
+ <tile id="49" type="DEPRECATED"/>
+ <tile id="50" type="DEPRECATED"/>
+ <tile id="51" type="DEPRECATED"/>
  <tile id="52" type="Stairs">
   <properties>
    <property name="Direction" propertytype="Direction" value="North"/>
