@@ -74,6 +74,12 @@ namespace LMCore.Crawler
 
                     _node = null;
                     _anchorDirection = value.CubeFace;
+                    TransportationMode = value.Traversal.ToTransportationMode();
+                }
+                else
+                {
+                    // Only keep potential flying mode, we don't fly if we just fall
+                    TransportationMode &= TransportationMode.Flying;
                 }
 
                 _anchor = value;
@@ -149,6 +155,9 @@ namespace LMCore.Crawler
                     }
                     _node = value;
                     _anchor = null;
+
+                    // Only keep potential flying mode, we don't fly if we just fall
+                    TransportationMode &= TransportationMode.Flying;
                 }
 
                 if (addOccupant)

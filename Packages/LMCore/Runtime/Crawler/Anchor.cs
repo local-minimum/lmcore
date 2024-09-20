@@ -6,6 +6,29 @@ using UnityEngine;
 namespace LMCore.Crawler
 {
     public enum AnchorTraversal { None, Walk, Climb, Scale, Stairs, Converyor }
+    public static class AnchorTraversalExtensions
+    {
+        public static TransportationMode ToTransportationMode(this AnchorTraversal traversal)
+        {
+            switch (traversal)
+            {
+                case AnchorTraversal.None:
+                    return TransportationMode.Flying;
+                case AnchorTraversal.Walk:
+                case AnchorTraversal.Converyor:
+                case AnchorTraversal.Scale:
+                case AnchorTraversal.Stairs:
+                    return TransportationMode.Walking;
+                case AnchorTraversal.Climb:
+                    return TransportationMode.Climbing;
+                default:
+                    Debug.LogWarning($"{traversal} conversion to transportation mode not known");
+                    return TransportationMode.Flying;
+
+            }
+        }
+    }
+
     public enum AnchorYRotation { None, CW, CCW, OneEighty }
 
     public static class AnchorYRotationExtensions
