@@ -1,0 +1,16 @@
+{
+    "name": "se.localminimum.lmcore.extensions.Editor",
+    "rootNamespace": "LMCore.Extensions",
+    "references": [
+        "GUID:7133380fdf0a2554eb38dd774526b441"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

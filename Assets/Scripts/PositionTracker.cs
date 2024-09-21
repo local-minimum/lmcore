@@ -1,4 +1,4 @@
-using System.Collections;
+using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,6 +6,7 @@ using UnityEngine;
 public class PositionTracker : MonoBehaviour
 {
 #if UNITY_EDITOR
+    [HelpBox("This is a debugscript that tracks position", HelpBoxMessageType.Info)]
     [SerializeField]
     float sampleInterval = 0.02f;
 
