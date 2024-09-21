@@ -1,3 +1,4 @@
+using LMCore.Extensions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +13,7 @@ namespace LMCore.Crawler
             ByManualReset, 
             ByMovement };
 
+        [HelpBox("This script should be on a parent to the camera itself to work properly", HelpBoxMessageType.Warning)]
         [SerializeField, Header("Snapback")]
         protected SnapbackMode Snapback = SnapbackMode.ByActivationToggle;
         [SerializeField, Range(0, 1), Tooltip("0 = No snapback, 1 = Instant")]
