@@ -24,6 +24,9 @@ namespace LMCore.Crawler
         [SerializeField, Header("Freedom cone"), Tooltip("0=No looking 1=Crazy spinny"), Range(0,1)]
         float lookAmount = 1f;
 
+        [SerializeField, Range(0, 0.5f), Tooltip("The higher look amount is the lower this must be to avoid spinning bug")]
+        float verticalLookClamp = 0.1f;
+
         bool freeLooking;
 
         GridEntity _entity;
@@ -104,7 +107,10 @@ namespace LMCore.Crawler
             var entity = Entity;
             if (freeLooking) {
                 var lookat = cam.ScreenToWorldPoint(
-                    new Vector3(PointerCoordinates.x, PointerCoordinates.y, Entity.Dungeon.GridSize));
+                    new Vector3(
+                        PointerCoordinates.x,
+                        Mathf.Clamp(PointerCoordinates.y, Screen.height * -verticalLookClamp, Screen.height * (1f + verticalLookClamp)), 
+                        Entity.Dungeon.GridSize));
 
                 Debug.Log($"{PointerCoordinates} => {lookat}");
                 var target = Quaternion.LookRotation(lookat - transform.position, transform.up);
