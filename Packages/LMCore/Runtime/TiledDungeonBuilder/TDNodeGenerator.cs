@@ -188,12 +188,38 @@ namespace LMCore.TiledDungeon
                 var direction = tdDirection.AsDirection();
                 if (!node.HasLadder(direction)) continue;
 
-                var go = node.Dungeon.Style.Get(
-                    node.transform,
-                    TiledConfiguration.instance.LadderClass,
-                    direction,
-                    node.NodeStyle
-                );
+                var dungeon = node.Dungeon;
+                GameObject go = null;
+
+                var upCoordinates = Direction.Up.Translate(node.Coordinates);
+                if (!node.sides.Has(Direction.Up) && dungeon.HasNodeAt(upCoordinates))
+                {
+                    var aboveNode = dungeon[upCoordinates];
+                    var upForwardCoordinates = direction.Translate(upCoordinates);
+                    if (!aboveNode.sides.Has(direction) && !aboveNode.sides.Down && dungeon.HasNodeAt(upForwardCoordinates))
+                    {
+                        var upForwardNode = dungeon[upForwardCoordinates];
+                        if (upForwardNode.sides.Down)
+                        {
+                            go = node.Dungeon.Style.Get(
+                                node.transform,
+                                TiledConfiguration.instance.LadderTopClass,
+                                TiledConfiguration.instance.LadderClass,
+                                direction,
+                                node.NodeStyle
+                            );
+                        }
+                    }
+                }
+                if (go == null)
+                {
+                    go = node.Dungeon.Style.Get(
+                        node.transform,
+                        TiledConfiguration.instance.LadderClass,
+                        direction,
+                        node.NodeStyle
+                    );
+                }
 
                 ApplyAnchorRotation(go, direction);
             }

@@ -43,6 +43,9 @@ namespace LMCore.TiledDungeon
         [Header("Objects")]
         [SerializeField]
         GameObject Ladder;
+        
+        [SerializeField]
+        GameObject LadderTop;
 
         [SerializeField]
         GameObject Teleporter;
@@ -128,6 +131,7 @@ namespace LMCore.TiledDungeon
         {
             if (classId == TiledConfiguration.InstanceOrCreate().BaseTileClass) return InstantiateCubeSide(parent, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().LadderClass) return InstantiateWithRotation(parent, Ladder, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().LadderTopClass) return InstantiateWithRotation(parent, LadderTop, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass)
@@ -152,6 +156,11 @@ namespace LMCore.TiledDungeon
 
             LogErrorUnkownId(classId);
             return null;
+        }
+
+        public override GameObject Get(Transform parent, string classId, string fallbackClassId, Direction direction, string variant = null)
+        {
+            return Get(parent, classId, direction, variant) ?? Get(parent, fallbackClassId, direction, variant);
         }
 
         private GameObject InstantiateWithOrientation(Transform parent, GameObject prefab, TDEnumOrientation orientation)

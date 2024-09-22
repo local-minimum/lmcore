@@ -12,6 +12,7 @@ namespace LMCore.TiledDungeon
         public string ObstructionClass = "Obstruction";
         public string DoorClass = "Door";
         public string LadderClass = "Ladder";
+        public string LadderTopClass = "Ladder-Top";
         public string TeleporterClass = "Teleporter";
         public string SpinnerClass = "Spinner";
         public string RampClass = "Ramp";
