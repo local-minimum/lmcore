@@ -136,6 +136,7 @@ namespace LMCore.TiledDungeon
 
         public bool HasCeiling => sides.Up;
 
+        // Can't check doors this simply because they can be trapdoors
         public bool Obstructed =>
             modifications.Any(mod =>
                 mod
@@ -475,7 +476,7 @@ namespace LMCore.TiledDungeon
         {
             Debug.Log(PrefixLogMessage($"Handling occupancy of {entity.name}"));
 
-            bool newOccupation = _occupants.Contains(entity);
+            bool newOccupation = !_occupants.Contains(entity);
 
             if (newOccupation)
             {

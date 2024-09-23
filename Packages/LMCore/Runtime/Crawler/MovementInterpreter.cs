@@ -519,6 +519,7 @@ namespace LMCore.Crawler
                 }
                 else
                 {
+                    // Trusting exit is used when we step on to high ramps
                     InterpretTargetNode(interpretation, targetAnchor.Node, trustExit);
                 }
             }
