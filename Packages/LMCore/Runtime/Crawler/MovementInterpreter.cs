@@ -315,6 +315,12 @@ namespace LMCore.Crawler
 
                 if (targetNode.GetAnchor(wantedAnchorDirection) == null)
                 { 
+                    if (Entity.TransportationMode.HasFlag(TransportationMode.Climbing)) 
+                    { 
+                        InterpretBlocked(interpretation);
+                        return; 
+                    }
+
                     if (targetNode.HasIllusorySurface(wantedAnchorDirection))
                     {
                         interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
@@ -421,7 +427,7 @@ namespace LMCore.Crawler
                     }
                 }
 
-                Debug.Log($"Interpret {movement} for {Entity} is {direction}");
+                Debug.Log($"Interpret {movement} for {Entity} as {direction}");
                 return InterpretMovement(direction);
             } else if (movement.IsRotation())
             {
