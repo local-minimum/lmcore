@@ -519,7 +519,7 @@ namespace LMCore.Crawler
                 }
                 else
                 {
-                    InterpretTargetNode(interpretation, targetAnchor.Node, true);
+                    InterpretTargetNode(interpretation, targetAnchor.Node, trustExit);
                 }
             }
             else

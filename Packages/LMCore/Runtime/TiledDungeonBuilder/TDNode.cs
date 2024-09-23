@@ -77,7 +77,7 @@ namespace LMCore.TiledDungeon
         public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
 
         TDContainer _container;
-        TDContainer container 
+        TDContainer Container 
         {
             get
             {
@@ -103,7 +103,7 @@ namespace LMCore.TiledDungeon
         }
 
         TDSpikeTrap _spikes;
-        TDSpikeTrap spikes
+        TDSpikeTrap Spikes
         {
             get
             {
@@ -138,14 +138,13 @@ namespace LMCore.TiledDungeon
 
         public bool Obstructed =>
             modifications.Any(mod =>
-            mod
-            .Tile
-            .CustomProperties
-            .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
-            .Obstructing()) && 
-            (Door == null ? true : Door.BlockingPassage) || 
-            (spikes == null ? false : spikes.BlockingEntry) ||
-            (container == null ? false : container.BlockingPassage);
+                mod
+                .Tile
+                .CustomProperties
+                .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
+                .Obstructing()) || 
+            (Spikes == null ? false : Spikes.BlockingEntry) ||
+            (Container == null ? false : Container.BlockingPassage);
 
 
         public string NodeStyle => 
@@ -259,6 +258,8 @@ namespace LMCore.TiledDungeon
 
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
+            if (HasBlockingDoor(direction)) return MovementOutcome.Blocked;
+
             if (entity == null && anchor == Direction.None)
             {
                 return sides.Has(direction) ? MovementOutcome.Refused : MovementOutcome.NodeExit;
@@ -339,7 +340,7 @@ namespace LMCore.TiledDungeon
                 return true;
             }
 
-            return false;
+            return door.BlockingPassage;
         }
 
         public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction);
@@ -433,11 +434,11 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        void HandleTraps(GridEntity entity)
+        void HandleTraps(GridEntity entity, bool newOccupation)
         {
             IDungeonNode target = null;
 
-            if (IsTeleporter)
+            if (IsTeleporter && newOccupation)
             {
                 target = HandleTeleporter(entity);
             }
@@ -474,17 +475,23 @@ namespace LMCore.TiledDungeon
         {
             Debug.Log(PrefixLogMessage($"Handling occupancy of {entity.name}"));
 
-            OccupationRules.HandleMeeting(entity, _occupants);
+            bool newOccupation = _occupants.Contains(entity);
+
+            if (newOccupation)
+            {
+                OccupationRules.HandleMeeting(entity, _occupants);
+            }
             _reservations.Remove(entity);
 
-            OnNewOccupant?.Invoke(this, entity);
+            if (newOccupation) OnNewOccupant?.Invoke(this, entity);
 
             if (IsTrap) {
-                HandleTraps(entity);
+                HandleTraps(entity, newOccupation);
             } else {
                 AddNewOccupant(entity);
             }
-            entity.transform.SetParent(transform);
+
+            if (newOccupation) entity.transform.SetParent(transform);
         }
 
         public IEnumerable<GridEntity> Occupants => _occupants;

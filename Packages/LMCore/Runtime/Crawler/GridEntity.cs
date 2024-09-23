@@ -62,7 +62,10 @@ namespace LMCore.Crawler
                     _anchor?.RemoveAnchor(this);
                 }
 
-                bool addOccupant = false;
+                // We need to run add occupation checks even within node when changing
+                // cube face anchor
+                bool addOccupant = _anchor != value;
+
                 if (value != null)
                 {
                     value.AddAnchor(this);
