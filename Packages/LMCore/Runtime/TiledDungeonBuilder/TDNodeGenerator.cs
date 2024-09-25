@@ -108,20 +108,35 @@ namespace LMCore.TiledDungeon
 
         static void ConfigureWallButtons(TDNode node)
         {
-            var button = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallButtonClass);
+            var buttons = node.modifications.Where(mod => mod.Tile.Type == TiledConfiguration.instance.WallButtonClass);
 
-            if (button == null) return;
+            foreach (var button in buttons)
+            {
+                var go = node.Dungeon.Style.Get(
+                    node.transform,
+                    TiledConfiguration.instance.WallButtonClass,
+                    button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection(),
+                    node.NodeStyle
+                );
 
-            var go = node.Dungeon.Style.Get(
-                node.transform,
-                TiledConfiguration.instance.WallButtonClass,
-                button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection(),
-                node.NodeStyle
-            );
+                if (go != null) 
+                    go.GetComponent<TDActuator>()?.Configure(node);
+            }
+        }
 
-            if (go == null) return;
+        static void ConfigureFence(TDNode node)
+        {
+            var fences = node.modifications.Where(mod => mod.Tile.Type == TiledConfiguration.instance.FenceClass);
 
-            go.GetComponent<TDActuator>()?.Configure(node);
+            foreach (var fence in fences)
+            {
+                var go = node.Dungeon.Style.Get(
+                    node.transform,
+                    TiledConfiguration.instance.FenceClass,
+                    fence.Tile.CustomProperties.Direction(TiledConfiguration.instance.DirectionKey).AsDirection(),
+                    node.NodeStyle
+                );
+            }
         }
 
         static void ApplyAnchorRotation(GameObject obj, Direction direction)
@@ -528,6 +543,7 @@ namespace LMCore.TiledDungeon
             ConfigureObstructions(node);
             ConfigureDoors(node);
             ConfigureLadders(node);
+            ConfigureFence(node);
             ConfigureTeleporter(node);
             ConfigureWallButtons(node);
             ConfigurePillar(node, config);

@@ -26,6 +26,9 @@ namespace LMCore.TiledDungeon
         GameObject IllusoryFloor;
 
         [SerializeField]
+        GameObject Fence;
+
+        [SerializeField]
         GameObject Alcove;
 
         [SerializeField, Tooltip("Replacing a floor")]
@@ -134,12 +137,15 @@ namespace LMCore.TiledDungeon
             if (classId == TiledConfiguration.InstanceOrCreate().LadderTopClass) return InstantiateWithRotation(parent, LadderTop, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
+            if (classId == TiledConfiguration.InstanceOrCreate().FenceClass) return InstantiateWithRotation(parent, Fence, direction);
+
             if (classId == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass)
             {
                 if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, WallSpikes, direction);
                 LogErrorUnknownDirection(classId, direction);
                 return null;
             }
+
             if (classId == TiledConfiguration.InstanceOrCreate().StairsClass) return InstantiateWithRotation(parent, Stairs, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().SpikeTrapClass) return InstantiateWithRotation(parent, Spikes, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().PillarClass) { return InstantiateWithRotation(parent, Pillar, direction); }

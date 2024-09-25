@@ -344,7 +344,24 @@ namespace LMCore.TiledDungeon
             return door.BlockingPassage;
         }
 
-        public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction);
+        bool BlockEdgeTraversal(GridEntity entity, Direction direction) =>
+            modifications.Any(mod => {
+                var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
+                Debug.Log($"{mod.Tile.Type}: {modDirection} vs {direction}");
+                if (direction != modDirection) return false;
+                if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                {
+                    var flyability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().FlyabilityKey, TDEnumAspect.Always);
+                    Debug.Log($"Flyability {flyability}");
+                    return flyability == TDEnumAspect.Never;
+                }
+                var walkability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().WalkabilityKey, TDEnumAspect.Always);
+                Debug.Log($"Walkability {walkability}");
+                return walkability == TDEnumAspect.Never;
+            });
+
+        public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction) &&
+            !BlockEdgeTraversal(entity, direction);
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
@@ -364,6 +381,8 @@ namespace LMCore.TiledDungeon
                     return false;
                 }
             }
+
+            if (BlockEdgeTraversal(entity, direction)) return false;
 
             var platform = GetComponentInChildren<TDMovingPlatform>();
             if (platform != null)

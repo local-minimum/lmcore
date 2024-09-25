@@ -568,10 +568,30 @@
   </properties>
  </tile>
  <tile id="47" type="MovingPlatform"/>
- <tile id="48" type="DEPRECATED"/>
- <tile id="49" type="DEPRECATED"/>
- <tile id="50" type="DEPRECATED"/>
- <tile id="51" type="DEPRECATED"/>
+ <tile id="48" type="Fence">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="North"/>
+   <property name="Walkability" propertytype="Aspect" value="Never"/>
+  </properties>
+ </tile>
+ <tile id="49" type="Fence">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="East"/>
+   <property name="Walkability" propertytype="Aspect" value="Never"/>
+  </properties>
+ </tile>
+ <tile id="50" type="Fence">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="South"/>
+   <property name="Walkability" propertytype="Aspect" value="Never"/>
+  </properties>
+ </tile>
+ <tile id="51" type="Fence">
+  <properties>
+   <property name="Direction" propertytype="Direction" value="West"/>
+   <property name="Walkability" propertytype="Aspect" value="Never"/>
+  </properties>
+ </tile>
  <tile id="52" type="Stairs">
   <properties>
    <property name="Direction" propertytype="Direction" value="North"/>

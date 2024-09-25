@@ -13,25 +13,24 @@ namespace LMCore.TiledDungeon.Integration {
 
     public static class TDEnumAspecExtensions
     {
-        public static TDEnumAspect Aspect(this TiledCustomProperties props, string name = "Aspect")
+        public static TDEnumAspect Aspect(this TiledCustomProperties props, string name, TDEnumAspect defaultValue)
         {
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("Cannot construct a Aspect without specifying the enum key");
-                return TDEnumAspect.Unknown;
+                return defaultValue;
             }
 
             if (!props.StringEnums.ContainsKey(name))
             {
-                Debug.LogError($"Attempting to access Aspect enum on key {name}, but it doesn't exist");
-                return TDEnumAspect.Unknown;
+                return defaultValue;
             }
 
             var stringEnum = props.StringEnums[name];
             if (stringEnum.TypeName != "Aspect")
             {
                 Debug.LogError($"Attempting to access Aspect enum on key {name}, but it is {stringEnum.TypeName}");
-                return TDEnumAspect.Unknown;
+                return defaultValue;
             }
 
             switch (stringEnum.Value)
@@ -46,8 +45,20 @@ namespace LMCore.TiledDungeon.Integration {
                     return TDEnumAspect.Sometimes;
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Aspect");
-                    return TDEnumAspect.Unknown;
+                    return defaultValue;
             }
+        }
+
+        public static TDEnumAspect Aspect(this TiledCustomProperties props, string name = "Aspect")
+        {
+            var aspect = props.Aspect(name, TDEnumAspect.Unknown);
+
+            if (aspect == TDEnumAspect.Unknown)
+            {
+                 Debug.LogError($"Attempting to access Aspect enum on key {name}, probably it doesn't exist");
+            }
+
+            return aspect;
         }
     }
 }
