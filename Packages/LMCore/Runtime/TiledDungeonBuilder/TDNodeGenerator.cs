@@ -297,11 +297,34 @@ namespace LMCore.TiledDungeon
             platform.Configure(conf);
         }
 
+        static bool ConfigureShooter(TDNode node, Direction direction)
+        {
+            var shooter = node.modifications.FirstOrDefault(mod =>
+                mod.Tile.Type == TiledConfiguration.InstanceOrCreate().ShooterClass && 
+                mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().AnchorKey, TDEnumDirection.Unknown).AsDirection() == direction);
+
+            if (shooter == null) return false;
+
+            var go = node.Dungeon.Style.Get(
+                node.transform,
+                TiledConfiguration.InstanceOrCreate().ShooterClass,
+                direction,
+                node.NodeStyle
+            );
+
+            if (go == null) return false;
+
+            // TODO: Configure shit
+
+            ApplyAnchorRotation(go, direction);
+            return true;
+        }
+
         static bool ConfigureWallSpike(TDNode node, Direction direction)
         {
-            var spikes = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.WallSpikeTrapClass);
+            var spikes = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass);
 
-            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() != direction) return false; 
+            if (spikes == null || spikes.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().AnchorKey).AsDirection() != direction) return false; 
 
             var go = node.Dungeon.Style.Get(
                 node.transform,
@@ -485,7 +508,7 @@ namespace LMCore.TiledDungeon
                         ApplyAnchorRotation(alcove, direction);
 
                         continue;
-                    } else if (ConfigureWallSpike(node, direction))
+                    } else if (ConfigureWallSpike(node, direction) || ConfigureShooter(node, direction))
                     {
                         continue;
                     }

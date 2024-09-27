@@ -35,6 +35,9 @@ namespace LMCore.TiledDungeon
         GameObject TrapDoor;
 
         [SerializeField]
+        GameObject Shooter;
+
+        [SerializeField]
         GameObject WallSpikes;
 
         [SerializeField]
@@ -138,7 +141,7 @@ namespace LMCore.TiledDungeon
             if (classId == TiledConfiguration.InstanceOrCreate().WallButtonClass) return InstantiateWithRotation(parent, WallButton, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().AlcoveClass) return InstantiateWithRotation(parent, Alcove, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().FenceClass) return InstantiateWithRotation(parent, Fence, direction);
-
+            if (classId == TiledConfiguration.InstanceOrCreate().ShooterClass) return InstantiateWithRotation(parent, Shooter, direction);
             if (classId == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass)
             {
                 if (direction.IsPlanarCardinal()) return InstantiateWithRotation(parent, WallSpikes, direction);

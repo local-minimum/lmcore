@@ -21,6 +21,7 @@ namespace LMCore.TiledDungeon
         public string WallButtonClass = "Button";
         public string AlcoveClass = "Alcove";
         public string FenceClass = "Fence";
+        public string ShooterClass = "Shooter";
         public string WallSpikeTrapClass = "WallSpikes";
         public string SpikeTrapClass = "Spikes";
         public string PressurePlateClass = "PressurePlate";
