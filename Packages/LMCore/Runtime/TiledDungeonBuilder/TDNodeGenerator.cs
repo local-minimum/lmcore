@@ -314,7 +314,7 @@ namespace LMCore.TiledDungeon
 
             if (go == null) return false;
 
-            // TODO: Configure shit
+            go.GetComponentInChildren<TDProjectileShooter>()?.Configure(direction);
 
             ApplyAnchorRotation(go, direction);
             return true;

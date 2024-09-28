@@ -1,4 +1,6 @@
+using PlasticPipe.PlasticProtocol.Messages;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,6 +9,8 @@ namespace LMCore.Extensions
 {
     public static class UnityExtensions
     {
+        #region Children
+
         /// <summary>
         /// Destroy all children of parent
         /// </summary>
@@ -39,6 +43,8 @@ namespace LMCore.Extensions
         /// </summary>
         public static void ShowAllChildren(this Transform parent) => parent.SetAllChildrenVisibility(true);
 
+        #endregion
+
         public static Canvas GetCanvas(this RectTransform transform) => transform.GetComponentInParent<Canvas>();
 
         public static Vector2 CalculateSize(this RectTransform transform)
@@ -52,6 +58,7 @@ namespace LMCore.Extensions
             return size;
         }
 
+        #region Find By Interface
         // TODO: This doesn't seem to work
         /// <summary>
         /// Find all mono behaviours that implement an interface.
@@ -87,6 +94,9 @@ namespace LMCore.Extensions
         public static T FindObjectByInterfaceOrDefault<T>(Func<T, bool> filter) where T : class =>
             FindObjectsByInterface<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Where(filter).FirstOrDefault();
 
+        #endregion
+
+        #region Scene
         /// <summary>
         /// Get first instance of type in scene of the behaviour
         /// </summary>
@@ -125,7 +135,49 @@ namespace LMCore.Extensions
                 .Select(obj => obj.GetComponentInChildren<T>())
                 .Where(t => t != null && filter(t))
                 .FirstOrDefault();
+        #endregion
+
+        /// <summary>
+        /// Return inactive item out of list and activate it or instanciate a new item from the prefab
+        /// and put it into the list
+        /// </summary>
+        public static T GetInactiveOrInstantiate<T>(
+            this List<T> list,
+            T prefab,
+            System.Action<T> instanciationSetup = null) where T : MonoBehaviour
+        {
+            var recylced = list.FirstOrDefault(item => !item.gameObject.activeSelf);
+            if (recylced != null)
+            {
+                recylced.gameObject.SetActive(true);
+                return recylced;
+            }
+
+            var instance = GameObject.Instantiate(prefab);
+            list.Add(instance);
+            instanciationSetup?.Invoke(instance);
+
+            return instance;
+        }
+
+        /// <summary>
+        /// Populate list with specified number of copies of the prefab, all set as inactive
+        /// </summary>
+        public static void WarmUpFromPrefabs<T>(
+            this List<T> list,
+            T prefab,
+            int count,
+            System.Action<T> instanciationSetup = null
+        ) where T : MonoBehaviour
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var instance = GameObject.Instantiate(prefab);
+                instance.gameObject.SetActive(false);
+                instanciationSetup?.Invoke(instance);
+
+                list.Add(instance);
+            }
+        }
     }
-
-
 }
