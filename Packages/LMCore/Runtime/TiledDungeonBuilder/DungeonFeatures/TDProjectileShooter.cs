@@ -44,6 +44,7 @@ namespace LMCore.TiledDungeon
 
         private void SetupProjectile(Projectile projectile)
         {
+            projectile.transform.SetParent(Node.Dungeon.LevelParent); 
             projectile.OnRecycle += Projectile_OnRecycle;
         }
 

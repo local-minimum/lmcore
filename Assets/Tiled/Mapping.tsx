@@ -803,6 +803,7 @@
  <tile id="82" type="Fireplace">
   <properties>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
+   <property name="Walkabilit" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
  <tile id="83" type="NPC">
