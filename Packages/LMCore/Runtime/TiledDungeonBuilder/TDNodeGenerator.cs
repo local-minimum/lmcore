@@ -513,16 +513,25 @@ namespace LMCore.TiledDungeon
                         continue;
                     }
                 }
+
                 var go = Dungeon.Style.Get(
                     node.transform, 
                     TiledConfiguration.instance.BaseTileClass, 
                     direction, 
                     node.NodeStyle);
 
-                go.name = direction.ToString();
-                if (direction.IsPlanarCardinal())
+                if (go == null)
                 {
-                    ApplyAnchorRotation(go, direction);
+                    Debug.LogError($"Failed to generate {node.Coordinates} side {direction} with style '{node.NodeStyle}'");
+                }
+                else
+                {
+
+                    go.name = direction.ToString();
+                    if (direction.IsPlanarCardinal())
+                    {
+                        ApplyAnchorRotation(go, direction);
+                    }
                 }
 
                 if (upNode != null) 

@@ -144,8 +144,8 @@ namespace LMCore.TiledDungeon
 
 
         public string NodeStyle => 
-            Points.Select(pt => pt.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null) ??
-            Rects.Select(r => r.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => v != null);
+            Points.Select(pt => pt.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => !string.IsNullOrEmpty(v)) ??
+            Rects.Select(r => r.CustomProperties.String(TiledConfiguration.instance.ObjVariantStyleKey)).FirstOrDefault(v => !string.IsNullOrEmpty(v));
 
         protected string PrefixLogMessage(string message) => $"Node @ {Coordinates}: {message}";
         public void Log(string message, System.Action<string> logFn) => logFn(PrefixLogMessage(message));

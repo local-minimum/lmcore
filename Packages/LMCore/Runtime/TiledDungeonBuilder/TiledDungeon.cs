@@ -9,6 +9,7 @@ using System;
 using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
+using LMCore.TiledDungeon.Style;
 
 
 
@@ -67,7 +68,7 @@ namespace LMCore.TiledDungeon
         [SerializeField]
         Direction StartLookDirection;
 
-        public DungeonStyle Style;
+        public AbsDungeonStyle Style;
 
         TDNode[] instancedNodes => LevelParent.GetComponentsInChildren<TDNode>();
 

@@ -15,5 +15,5 @@ namespace LMCore.TiledImporter {
     public class SerializableNestedIntTiledStringEnumDictionaryDrawer : GenericSerializableDictionaryDrawer<string, SerializableDictionary<int, TiledEnum<int>>> { };
 
     [CustomPropertyDrawer(typeof(SerializableDictionary<string, TiledCustomClass>))]
-    public class SerializableIntTiledCustomClassDictionaryDrawer : GenericSerializableDictionaryDrawer<string, TiledCustomClass> { };
+    public class SerializableTiledCustomClassDictionaryDrawer : GenericSerializableDictionaryDrawer<string, TiledCustomClass> { };
 }

@@ -1,0 +1,18 @@
+{
+    "name": "se.localminimum.lmcore.tileddungeonbuilder.Editor",
+    "rootNamespace": "LMCore.TiledDungeon",
+    "references": [
+        "GUID:a6ba967b6a68f194f972ab61941a5ac3",
+        "GUID:a463a9aad0260134683866a83ff10a79",
+        "GUID:31a764d9d689f634296bbc08c8e404b1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
