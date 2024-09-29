@@ -83,6 +83,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     // We are a trapdoor we need to let player fall through
                     return false;
                 }
+                else if (ActiveTransition == Transition.Opening)
+                {
+                }
 
                 return !isOpen;
             }
@@ -264,6 +267,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        [SerializeField]
+        float considerOpenAfterProgress = 0.4f;
+
         void OpenDoor()
         {
             var transition = ActiveTransition;
@@ -272,10 +278,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (transition == Transition.Closing)
             {
                 MapOverActions(CloseActions, (action) => action.Abandon());
-                MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(() => isOpen = true));
+                MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(() => isOpen = true, (progress) => isOpen = progress > considerOpenAfterProgress));
             } else
             {
-                MapOverActions(OpenActions, (action) => action.Play(() => isOpen = true));
+                MapOverActions(OpenActions, (action) => action.Play(() => isOpen = true, (progress) => isOpen = progress > considerOpenAfterProgress));
             }
         }
 

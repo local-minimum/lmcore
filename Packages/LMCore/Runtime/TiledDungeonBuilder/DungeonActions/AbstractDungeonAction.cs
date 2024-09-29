@@ -8,9 +8,9 @@ namespace LMCore.TiledDungeon.Actions
         abstract public bool IsEasing { get; }
         abstract public void Abandon();
         abstract public void Finalise();
-        abstract public void Play(System.Action onDoneCallback);
+        abstract public void Play(System.Action onDoneCallback = null, System.Action<float> onProgress = null);
 
-        abstract public void PlayFromCurrentProgress(System.Action onDoneCallback);
+        abstract public void PlayFromCurrentProgress(System.Action onDoneCallback = null, System.Action<float> onProgress = null);
 
         public static float NewtonRaphson(System.Func<float, float> errorFunction, float acceptError, int maxDepth=20)
         {

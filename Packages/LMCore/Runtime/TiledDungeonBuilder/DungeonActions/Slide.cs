@@ -20,6 +20,7 @@ namespace LMCore.TiledDungeon.Actions {
             if (abandonned) { return; }
 
             target.transform.localPosition = easing.Evaluate();
+            OnProgressCallback?.Invoke(easing.Progress);
         }
 
         public override void Abandon()
@@ -33,24 +34,30 @@ namespace LMCore.TiledDungeon.Actions {
         }
 
         System.Action OnDoneCallback;
+        System.Action<float> OnProgressCallback;
 
         public override void Finalise()
         {
             easing.AbortEase();
             SyncSlide();
+            
             OnDoneCallback?.Invoke();
             OnDoneCallback = null;
+
+            OnProgressCallback = null;
         }
 
-        public override void Play(System.Action onDoneCallback)
+        public override void Play(System.Action onDoneCallback = null, System.Action<float> onProgress = null)
         {
+            OnProgressCallback = onProgress;
             OnDoneCallback = onDoneCallback;
             abandonned = false;
             easing.EaseStartToEnd();
         }
 
-        public override void PlayFromCurrentProgress(System.Action onDoneCallback)
+        public override void PlayFromCurrentProgress(System.Action onDoneCallback = null, System.Action<float> onProgress = null)
         {
+            OnProgressCallback = onProgress;
             OnDoneCallback = onDoneCallback;
 
             float startProgress = NewtonRaphson(
@@ -66,13 +73,23 @@ namespace LMCore.TiledDungeon.Actions {
         {
             if (abandonned) { return ; }
 
-            if (easing.IsEasing) 
+            if (easing.IsEasing)
             {
                 SyncSlide();
-            } else if (OnDoneCallback != null)
+            }
+            else
             {
-                OnDoneCallback();
-                OnDoneCallback = null;
+                if (OnProgressCallback != null)
+                {
+                    OnProgressCallback(1f);
+                    OnProgressCallback = null;
+                }
+
+                if (OnDoneCallback != null)
+                {
+                    OnDoneCallback();
+                    OnDoneCallback = null;
+                }
             }
         }
     }
