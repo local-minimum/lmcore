@@ -28,11 +28,11 @@ namespace LMCore.TiledDungeon
             TopLayer = topLayer;
 
             var layers = map
-                .FindLayers(layer => layer.CustomProperties.Ints[TiledConfiguration.instance.LayerElevationKey] == elevation)
+                .FindLayers(layer => layer.CustomProperties.Int(TiledConfiguration.instance.LayerElevationKey) == elevation)
                 .ToList();
 
             ObjectLayers = map
-                .FindObjectLayers(layer => layer.CustomProperties.Ints[TiledConfiguration.instance.LayerElevationKey] == elevation)
+                .FindObjectLayers(layer => layer.CustomProperties.Int(TiledConfiguration.instance.LayerElevationKey) == elevation)
                 .ToList();
 
             LayoutLayer = layers.FirstOrDefault(l => l.Name.StartsWith(TiledConfiguration.instance.LayoutLayerPrefix));

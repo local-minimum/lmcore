@@ -17,6 +17,7 @@ namespace LMCore.TiledDungeon
 
         public static System.Func<TileModification, bool> IllusoryFilter = mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().IllusoryTileClass;
         public static System.Func<TileModification, bool> DoorFilter = mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass;
+        public static System.Func<TileModification, bool> TrapDoorFilter = mod => mod.Tile.Type == TiledConfiguration.instance.TrapDoorClass;
 
         [HideInInspector]
         public TiledTile tile;

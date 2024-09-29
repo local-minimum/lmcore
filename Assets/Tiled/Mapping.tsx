@@ -620,6 +620,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
+   <property name="TraversalAxis" propertytype="Orientation" value="Transverse"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
@@ -627,6 +628,7 @@
   <properties>
    <property name="Flyability" propertytype="Aspect" value="Always"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
+   <property name="TraversalAxis" propertytype="Orientation" value="Transverse"/>
    <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>

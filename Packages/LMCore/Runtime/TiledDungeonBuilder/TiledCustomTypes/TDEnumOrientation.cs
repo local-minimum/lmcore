@@ -9,6 +9,7 @@ namespace LMCore.TiledDungeon.Integration
         None,
         Vertical,
         Horizontal,
+        Transverse,
         Unknown
     }
 
@@ -29,12 +30,15 @@ namespace LMCore.TiledDungeon.Integration
 
         public static DirectionAxis AsAxis(this TDEnumOrientation orientation)
         {
+            Debug.Log(orientation.ToString());
             switch (orientation)
             {
                 case TDEnumOrientation.Vertical:
                     return DirectionAxis.NorthSouth;
                 case TDEnumOrientation.Horizontal:
                     return DirectionAxis.WestEast;
+                case TDEnumOrientation.Transverse:
+                    return DirectionAxis.UpDown;
                 default:
                     return DirectionAxis.None;
             }
@@ -67,8 +71,9 @@ namespace LMCore.TiledDungeon.Integration
                     return TDEnumOrientation.Vertical;
                 case "Horizontal":
                     return TDEnumOrientation.Horizontal;
+                case "Transverse":
+                    return TDEnumOrientation.Transverse;
                 default:
-                    Debug.LogError($"'{stringEnum.Value}' is not a known Orientation");
                     return defaultValue;
             }
 

@@ -32,7 +32,7 @@ namespace LMCore.TiledDungeon
 
         [Header("String Enums")]
         public string OrientationKey = "Orientation";
-        public string TraversalAxisKey = "Traversal";
+        public string TraversalAxisKey = "TraversalAxis";
         public string WalkabilityKey = "Walkability";
         public string FlyabilityKey = "Flyability";
         public string AnchorKey = "Anchor";

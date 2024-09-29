@@ -41,7 +41,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool consumesKey;
 
         bool automaticTrapDoor;
-        public bool AutomaticTrapDoor => automaticTrapDoor;
 
         [SerializeField]
         float autoCloseTime = 0.5f;
@@ -79,6 +78,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 {
                     Debug.Log(PrefixLogMessage("closing"));
                     return true;
+                } else if (TraversalAxis == DirectionAxis.UpDown && ActiveTransition == Transition.Opening)
+                {
+                    // We are a trapdoor we need to let player fall through
+                    return false;
                 }
 
                 return !isOpen;
@@ -91,14 +94,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             get
             {
-                var mod = modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.DoorClass);
-                if (mod == null) return DirectionAxis.None;
-
-                return mod
+                return modifications
+                    .First()
                     .Tile
                     .CustomProperties
-                    .Orientation(TiledConfiguration.instance.OrientationKey)
-                    .Inverse()
+                    .Orientation(TiledConfiguration.instance.TraversalAxisKey)
                     .AsAxis();
             }
         }
@@ -185,19 +185,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         }
 
 
-        bool AutomaticTrapdoorAction(GridEntity entity, List<Vector3Int> positions, List<Direction> anchors, out bool endsOnTrap)
+        bool AutomaticTrapdoorAction(GridEntity entity)
         {
-            var states = positions
-                .Zip(anchors, (pos, anch) => new { pos, anch })
-                .Select(state => state.pos == _Position && state.anch == Direction.Down)
-                .ToArray();
-
-            endsOnTrap = states.LastOrDefault();
-            
             return automaticTrapDoor
+                && entity.Coordinates == Coordinates
+                && entity.AnchorDirection == Direction.Down
                 && !entity.TransportationMode.HasFlag(TransportationMode.Climbing)
-                && !entity.TransportationMode.HasFlag(TransportationMode.Flying)
-                && states.Any(b => b);
+                && !entity.TransportationMode.HasFlag(TransportationMode.Flying);
         }
 
         IEnumerator<WaitForSeconds> AutoClose(string logMessage)
@@ -346,7 +340,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             });
 
             isLocked = modifications.Any(
-                mod => mod.Tile.CustomProperties.Interaction(TiledConfiguration.instance.InteractionKey) == TDEnumInteraction.Locked
+                mod => mod.Tile.CustomProperties.InteractionOrDefault(
+                    TiledConfiguration.instance.InteractionKey,
+                    TDEnumInteraction.Open) == TDEnumInteraction.Locked
             );
 
             key = config.FirstObjectValue(
@@ -404,6 +400,18 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 OnLoadGameSave(save as GameSave);
             }
+        }
+
+        private void Update()
+        {
+            if (activelyMovingEntities.Any(AutomaticTrapdoorAction))
+            {
+                if (ActiveTransition != Transition.Opening && !isOpen)
+                {
+                    OpenDoor();
+                }
+            }
+
         }
     }
 }

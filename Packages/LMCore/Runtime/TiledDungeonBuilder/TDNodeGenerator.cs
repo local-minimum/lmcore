@@ -395,7 +395,7 @@ namespace LMCore.TiledDungeon
                             door?.Configure(
                                 node,
                                 node.Coordinates,
-                                node.modifications.Where(TDNode.DoorFilter).ToArray()
+                                node.modifications.Where(TDNode.TrapDoorFilter).ToArray()
                             );
 
                             ApplyAnchorRotation(trapdoor, orientation);

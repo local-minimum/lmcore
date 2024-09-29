@@ -136,7 +136,8 @@
             "values": [
                 "None",
                 "Vertical",
-                "Horizontal"
+                "Horizontal",
+                "Transverse"
             ],
             "valuesAsFlags": false
         },

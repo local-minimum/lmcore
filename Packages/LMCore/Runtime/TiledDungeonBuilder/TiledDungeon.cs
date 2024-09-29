@@ -174,7 +174,7 @@ namespace LMCore.TiledDungeon
         }
 
         public IEnumerable<int> Elevations => map
-            .FindInLayers(layer => layer.CustomProperties.Ints[TiledConfiguration.instance.LayerElevationKey])
+            .FindInLayers(layer => layer.CustomProperties.Int(TiledConfiguration.instance.LayerElevationKey))
             .ToHashSet()
             .OrderByDescending(x => x);
 

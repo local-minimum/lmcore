@@ -54,6 +54,10 @@ namespace LMCore.Crawler
                 yield break;
             }
             var total = Length(dungeon);
+            if (total == 0f)
+            {
+                total = 1f;
+            }
             foreach (var l in Lengths(dungeon))
             {
                 yield return l / total;
