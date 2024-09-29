@@ -112,7 +112,6 @@ namespace LMCore.Crawler
                         Mathf.Clamp(PointerCoordinates.y, Screen.height * -verticalLookClamp, Screen.height * (1f + verticalLookClamp)), 
                         Entity.Dungeon.GridSize));
 
-                Debug.Log($"{PointerCoordinates} => {lookat}");
                 var target = Quaternion.LookRotation(lookat - transform.position, transform.up);
                 cam.transform.rotation = Quaternion.Lerp(transform.rotation, target, lookAmount);
             }

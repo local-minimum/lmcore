@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="26" nextobjectid="29">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="26" nextobjectid="30">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0" visible="0" opacity="0.05" tintcolor="#00aaff">
   <properties>
@@ -233,7 +233,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,115,0,0,0,0,0,78,0,117,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,83,0,0,0,0,0,0,0,0,66,0,0,114,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,77,0,0,68,0,0,0,0,0,38,0,0,70,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,36,0,0,0,0,57,116,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,36,0,0,107,0,57,116,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,51,0,58,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,58,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -312,7 +312,7 @@
     </properties>
     <point/>
    </object>
-   <object id="8" name="Toggle Group 1" type="ToggleGroup" x="349.75" y="221.75" width="68" height="132">
+   <object id="8" name="Toggle Group 1" type="ToggleGroup" x="349.75" y="221.75" width="68" height="102.5">
     <properties>
      <property name="Group" type="int" value="1"/>
     </properties>
@@ -337,6 +337,14 @@
     </properties>
     <point/>
    </object>
+   <object id="29" name="Toggle Button Group 1" type="Actuator" x="399" y="209">
+    <properties>
+     <property name="Group" type="int" value="1"/>
+     <property name="Interaction" propertytype="Interaction" value="Automatic"/>
+     <property name="Repeatable" type="bool" value="true"/>
+    </properties>
+    <point/>
+   </object>
    <object id="13" name="Automatic Trap" type="TrapDoor" x="464" y="210">
     <properties>
      <property name="Interaction" propertytype="Interaction" value="Automatic"/>
@@ -345,7 +353,6 @@
    </object>
    <object id="14" name="Pressure Plate" type="Actuator" x="653" y="111">
     <properties>
-     <property name="Anchor" propertytype="Direction" value="Down"/>
      <property name="Group" type="int" value="2"/>
      <property name="Interaction" propertytype="Interaction" value="Automatic"/>
      <property name="Repeatable" type="bool" value="true"/>

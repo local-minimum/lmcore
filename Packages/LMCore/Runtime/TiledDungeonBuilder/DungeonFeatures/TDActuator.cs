@@ -34,6 +34,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool active = true;
         bool lastActionWasPress = false;
+
+        public override string ToString() =>
+            $"Actuator {name} @ {Coordinates}/{anchor} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
+
+        [ContextMenu("Info")]
+        void Info() => Debug.Log(this);
+
         public void Configure(TDNode node)
         {
             var props = node
@@ -47,7 +54,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.InteractionKey))
                 ?.Interaction(TiledConfiguration.instance.InteractionKey) ?? TDEnumInteraction.Interactable;
 
-            anchor = props
+            anchor = GetComponent<Anchor>()?.CubeFace ??
+                props
                 .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.AnchorKey))
                 ?.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() ?? Direction.None;
 
@@ -61,7 +69,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             Coordinates = node.Coordinates;
 
-            Debug.Log($"Actuator @ {Coordinates}: Interaction({interaction}) Anchor({anchor}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable})");
+            Debug.Log(this);
         }
 
         private void OnEnable()
@@ -89,11 +97,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 {
                     Depress();
                 }
+
                 return;
             }
 
             bool wasEmpty = occupants.Count == 0;
             occupants.Add(entity);
+            Debug.Log($"Actuator gains occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}");
 
             if (automaticallyResets || (!lastActionWasPress && wasEmpty))
                 Press();
