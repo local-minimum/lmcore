@@ -16,11 +16,6 @@ namespace LMCore.TiledDungeon.Integration
 
     public static class TDEnumInteractionExtensions
     {
-        public static bool Obstructing(this TDEnumInteraction interaction) =>
-            interaction == TDEnumInteraction.Closed || 
-            interaction == TDEnumInteraction.Locked || 
-            interaction == TDEnumInteraction.Obstruction;
-            
         public static TDEnumInteraction InteractionOrDefault(this TiledCustomProperties props, string name = "Interaction", TDEnumInteraction defaultValue = TDEnumInteraction.Unknown)
         {
             if (!props.StringEnums.ContainsKey(name)) { return defaultValue; }

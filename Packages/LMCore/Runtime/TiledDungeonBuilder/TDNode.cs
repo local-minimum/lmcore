@@ -138,12 +138,6 @@ namespace LMCore.TiledDungeon
 
         // Can't check doors this simply because they can be trapdoors
         public bool Obstructed =>
-            modifications.Any(mod =>
-                mod
-                .Tile
-                .CustomProperties
-                .InteractionOrDefault(TiledConfiguration.instance.InteractionKey)
-                .Obstructing()) || 
             (Spikes == null ? false : Spikes.BlockingEntry) ||
             (Container == null ? false : Container.BlockingPassage);
 
@@ -319,6 +313,7 @@ namespace LMCore.TiledDungeon
             var door = Door;
 
             if (door == null) return false;
+            Debug.Log(PrefixLogMessage($"{door} Trapdoor({HasTrapDoor})"));
 
             if (HasTrapDoor)
             {
@@ -347,16 +342,13 @@ namespace LMCore.TiledDungeon
         bool BlockEdgeTraversal(GridEntity entity, Direction direction) =>
             modifications.Any(mod => {
                 var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
-                Debug.Log($"{mod.Tile.Type}: {modDirection} vs {direction}");
-                if (direction != modDirection) return false;
+                if (direction != modDirection && modDirection != Direction.None) return false;
                 if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
                 {
                     var flyability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().FlyabilityKey, TDEnumAspect.Always);
-                    Debug.Log($"Flyability {flyability}");
                     return flyability == TDEnumAspect.Never;
                 }
                 var walkability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().WalkabilityKey, TDEnumAspect.Always);
-                Debug.Log($"Walkability {walkability}");
                 return walkability == TDEnumAspect.Never;
             });
 

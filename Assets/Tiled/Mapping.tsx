@@ -400,7 +400,6 @@
  </tile>
  <tile id="33" type="Door">
   <properties>
-   <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Closed"/>
    <property name="Orientation" propertytype="Orientation" value="Horizontal"/>
    <property name="Sides" type="class" propertytype="CubeSides">
@@ -411,7 +410,6 @@
     </properties>
    </property>
    <property name="TraversalAxis" propertytype="Orientation" value="Vertical"/>
-   <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
  <tile id="34" type="Grate">
@@ -462,7 +460,6 @@
  </tile>
  <tile id="37" type="Door">
   <properties>
-   <property name="Flyability" propertytype="Aspect" value="Sometimes"/>
    <property name="Interaction" propertytype="Interaction" value="Closed"/>
    <property name="Orientation" propertytype="Orientation" value="Vertical"/>
    <property name="Sides" type="class" propertytype="CubeSides">
@@ -473,7 +470,6 @@
     </properties>
    </property>
    <property name="TraversalAxis" propertytype="Orientation" value="Horizontal"/>
-   <property name="Walkability" propertytype="Aspect" value="Sometimes"/>
   </properties>
  </tile>
  <tile id="38" type="Grate">

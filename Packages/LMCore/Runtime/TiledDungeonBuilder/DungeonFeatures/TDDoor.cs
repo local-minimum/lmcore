@@ -46,7 +46,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         float autoCloseTime = 0.5f;
 
+        public override string ToString() =>
+            $"Door Axis({TraversalAxis}) Blocking({BlockingPassage}) Transition({ActiveTransition})";
+
         protected string PrefixLogMessage(string message) => $"Door @ {_Position}: {message}";
+
+        [ContextMenu("Info")]
+        void Info() => Debug.Log(this);
 
         Transition ActiveTransition
         {
