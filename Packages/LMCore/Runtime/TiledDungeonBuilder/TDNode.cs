@@ -195,7 +195,7 @@ namespace LMCore.TiledDungeon
 
         public bool HasStairs => StairsModification != null;
 
-        TileModification PressurePlateModification =>
+        public TileModification PressurePlateModification =>
             modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.PressurePlateClass);
 
         public bool HasPressurePlate => PressurePlateModification != null;

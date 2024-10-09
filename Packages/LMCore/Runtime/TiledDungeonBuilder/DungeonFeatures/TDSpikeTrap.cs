@@ -115,7 +115,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (anchor == Direction.None)
             {
-                Debug.LogWarning(PrefixLogMessage("lacks anchor direction, assuming down"));
+                Debug.Log(PrefixLogMessage("lacks anchor direction, assuming down"));
                 anchor = Direction.Down;
             }
 

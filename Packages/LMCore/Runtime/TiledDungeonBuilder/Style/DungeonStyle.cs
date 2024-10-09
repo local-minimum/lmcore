@@ -7,6 +7,9 @@ namespace LMCore.TiledDungeon.Style
 {
     public class DungeonStyle : AbsDungeonStyle
     {
+        [SerializeField]
+        bool warnIfPrefabIsMissing;
+
         [Header("Cube Side")]
         [SerializeField]
         GameObject Wall;
@@ -98,7 +101,9 @@ namespace LMCore.TiledDungeon.Style
         protected string PrefixLogMessage(string message) => $"Dungeon Style {name}: {message}";
 
         protected void LogErrorUnkownId(string classId) => Debug.LogError(PrefixLogMessage($"Don't know what a '{classId}' is."));
-        protected void LogWarningUnknownDirection(string classId, Direction direction, string variant) => Debug.LogWarning($"Unknown direction {direction} of '{classId}' variant '{variant}'");
+        protected void LogWarningUnknownDirection(string classId, Direction direction, string variant) {
+            if (warnIfPrefabIsMissing) Debug.LogWarning($"Unknown direction {direction} of '{classId}' variant '{variant}'");
+        }
         
         public override GameObject Get(Transform parent, string classId, string variant = null)
         {

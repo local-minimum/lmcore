@@ -11,6 +11,7 @@ namespace LMCore.TiledDungeon.Integration
         Locked,
         Obstruction,
         Automatic,
+        Managed,
         Unknown
     }
 
@@ -60,6 +61,8 @@ namespace LMCore.TiledDungeon.Integration
                     return TDEnumInteraction.Obstruction;
                 case "Automatic":
                     return TDEnumInteraction.Automatic;
+                case "Managed":
+                    return TDEnumInteraction.Managed;
                 default:
                     Debug.LogError($"'{stringEnum.Value}' is not a known Interaction");
                     return defaultValue;

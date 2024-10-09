@@ -378,7 +378,7 @@ namespace LMCore.TiledDungeon
                 {
                     if (hasTrapDoor)
                     {
-                        var orientation = node.TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey);
+                        var orientation = node.TrapdoorModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey, TDEnumOrientation.None);
                         var trapdoor = Dungeon.Style.Get(
                             node.transform,
                             TiledConfiguration.instance.TrapDoorClass,
@@ -399,6 +399,8 @@ namespace LMCore.TiledDungeon
                             );
 
                             ApplyAnchorRotation(trapdoor, orientation);
+
+                            ConfigureMovingPlatform(node, trapdoor);
                             continue;
                         }
                     }
@@ -418,7 +420,10 @@ namespace LMCore.TiledDungeon
 
                             pressurePlate?.Configure(node);
 
-                            ApplyAnchorRotation(plate, direction);
+                            var orientation = node.PressurePlateModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey, TDEnumOrientation.None);
+                            ApplyAnchorRotation(plate, orientation);
+
+                            ConfigureMovingPlatform(node, plate);
                             continue;
                         }
                     }
