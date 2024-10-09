@@ -78,6 +78,7 @@ namespace LMCore.TiledDungeon
         public string ObjSequenceStarter = "Start";
         public string ObjNextPhaseKey = "NextPhase";
         public string ObjRepeatableKey = "Repeatable";
+        public string ObjAutomaticUnsetKey = "AutomaticUnset";
         public string ObjAutomaticKey = "Automatic";
         public string ObjSpikelessKey = "Spikeless";
         public string ObjDelayTimeKey = "Delay";

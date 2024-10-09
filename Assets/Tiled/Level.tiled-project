@@ -112,7 +112,8 @@
                 "Interactable",
                 "Locked",
                 "Obstruction",
-                "Automatic"
+                "Automatic",
+                "Managed"
             ],
             "valuesAsFlags": false
         },

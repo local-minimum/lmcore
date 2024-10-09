@@ -19,6 +19,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool repeatable;
 
         [SerializeField, HideInInspector]
+        bool automaticUnset;
+
+        [SerializeField, HideInInspector]
         TDEnumInteraction interaction;
 
         [SerializeField, HideInInspector]
@@ -37,6 +40,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public override string ToString() =>
             $"Actuator {name} @ {Coordinates}/{anchor} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
+        protected string PrefixLogMessage(string message) =>
+            $"Actuator {name} @ {Coordinates}: {message}";
 
         [ContextMenu("Info")]
         void Info() => Debug.Log(this);
@@ -65,6 +70,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 .ToArray();
 
             repeatable = props
+                .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
+
+            automaticUnset = props
                 .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
 
             Coordinates = node.Coordinates;
@@ -103,7 +111,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             bool wasEmpty = occupants.Count == 0;
             occupants.Add(entity);
-            Debug.Log($"Actuator gains occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}");
+            Debug.Log(PrefixLogMessage($"Gained occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}"));
 
             if (automaticallyResets || (!lastActionWasPress && wasEmpty))
                 Press();
@@ -156,7 +164,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             foreach (var group in groups)
             {
                 ToggleGroup.Toggle(group);
-                Debug.Log($"Actuator {name} @ {Coordinates} is toggling group: {group}");
+                Debug.Log(PrefixLogMessage($"Is toggling group: {group}"));
             }
 
             foreach (var action in pressActions)
@@ -167,7 +175,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             lastActionWasPress = true;
 
             active = repeatable;
-            Debug.Log($"Actuator {name} @ {Coordinates} is {(active ? "active" : "inactive")} after interaction");
+            Debug.Log(PrefixLogMessage($"Is {(active ? "active" : "inactive")} after interaction"));
         }
 
         void Depress()
@@ -175,6 +183,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             foreach (var action in dePressAction)
             {
                 action.Play(null);
+            }
+
+            if (automaticUnset)
+            {
+                foreach (var group in groups)
+                {
+                    ToggleGroup.Toggle(group);
+                    Debug.Log(PrefixLogMessage($"Is toggling group via automatic unset: {group}"));
+                }
             }
 
             lastActionWasPress = false;
