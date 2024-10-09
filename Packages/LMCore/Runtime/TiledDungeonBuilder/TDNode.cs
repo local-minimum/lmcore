@@ -344,7 +344,7 @@ namespace LMCore.TiledDungeon
             modifications.Any(mod => {
                 var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
                 if (direction != modDirection && modDirection != Direction.None) return false;
-                if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                if (entity?.TransportationMode.HasFlag(TransportationMode.Flying) == true)
                 {
                     var flyability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().FlyabilityKey, TDEnumAspect.Always);
                     return flyability == TDEnumAspect.Never;

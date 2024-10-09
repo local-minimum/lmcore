@@ -11,23 +11,34 @@ namespace LMCore.TiledDungeon.Integration
     {
         public static TDEnumLoop Loop(this TiledCustomProperties props, string name = "Loop")
         {
+            var loop = Loop(props, name, TDEnumLoop.Unknown);
+
+            if (loop == TDEnumLoop.Unknown)
+            {
+                Debug.LogError($"Could not parse a loop by using key '{name}'");
+            }
+            
+            return loop;
+        }
+
+        public static TDEnumLoop Loop(this TiledCustomProperties props, string name, TDEnumLoop defaultValue = TDEnumLoop.Unknown)
+        {
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("Cannot construct a Loop without specifying the enum key");
-                return TDEnumLoop.Unknown;
+                return defaultValue;
             }
 
             if (!props.StringEnums.ContainsKey(name))
             {
-                Debug.LogError($"Attempting to access Loop enum on key {name}, but it doesn't exist");
-                return TDEnumLoop.Unknown;
+                return defaultValue;
             }
 
             var stringEnum = props.StringEnums[name];
             if (stringEnum.TypeName != "Loop")
             {
-                Debug.LogError($"Attempting to access Loop enum on key {name}, but it is {stringEnum.TypeName}");
-                return TDEnumLoop.Unknown;
+                Debug.LogWarning($"Attempting to access Loop enum on key {name}, but it is {stringEnum.TypeName}");
+                return defaultValue;
             }
 
             switch (stringEnum.Value)

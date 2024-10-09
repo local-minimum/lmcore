@@ -155,6 +155,18 @@
             "valuesAsFlags": false
         },
         {
+            "id": 11,
+            "name": "Sequence",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "Next",
+                "Previous",
+                "This"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "id": 4,
             "name": "Transition",
             "storageType": "string",

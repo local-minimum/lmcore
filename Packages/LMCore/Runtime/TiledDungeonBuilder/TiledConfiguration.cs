@@ -74,6 +74,8 @@ namespace LMCore.TiledDungeon
         public string ObjContainerClass = "Container";
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
+        public string ObjManagedByGroupKey = "ManagedByGroup";
+        public string ObjToggleEffectKey = "ToggleEffect";
         public string ObjPhaseKey = "Phase";
         public string ObjSequenceStarter = "Start";
         public string ObjNextPhaseKey = "NextPhase";

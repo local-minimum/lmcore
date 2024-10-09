@@ -11,12 +11,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public class TDMovingPlatform : MonoBehaviour, IMovingCubeFace
     {
-        public enum Phase { 
-            Initial, 
-            WaitingStart, 
-            Moving, 
+        public enum Phase {
+            Initial,
+            WaitingStart,
+            Moving,
             WaitingEnd,
-            Ended 
+            Ended
         };
 
         Phase phase;
@@ -30,20 +30,20 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         Vector3Int OriginCoordinates;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         bool alwaysClaimToBeAligned;
 
         Vector3Int CurrentCoordinates => GetComponentInParent<TDNode>().Coordinates;
 
         TiledDungeon _dungeon;
-        TiledDungeon Dungeon { 
-            get { 
+        TiledDungeon Dungeon {
+            get {
                 if (_dungeon == null)
                 {
-                    _dungeon = GetComponentInParent<TiledDungeon>(); 
+                    _dungeon = GetComponentInParent<TiledDungeon>();
                 }
                 return _dungeon;
-            } 
+            }
         }
 
         [SerializeField, HideInInspector]
@@ -55,18 +55,28 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         TDEnumInteraction Interaction = TDEnumInteraction.Automatic;
 
+        [SerializeField, HideInInspector]
+        int managedByGroup = -1;
+
+        [SerializeField, HideInInspector]
+        TDEnumLoop managedToggleEffect = TDEnumLoop.None;
+
         /// <summary>
         /// World position of a virtual node center misaligned with the dungeon grid
         /// </summary>
         public Vector3 VirtualNodeCenter => transform.position + Vector3.up * (Dungeon?.GridSize ?? 3f) * 0.5f;
 
-        protected string PrefixLogMessage(string message) => $"Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
-        
+        protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
+
+        public override string ToString() => PrefixLogMessage($"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned})");
+        [ContextMenu("Info")]
+        public void Info() => Debug.Log(this);
+
         public void Configure(TDNodeConfig conf)
         {
             OriginCoordinates = conf.Coordinates;
 
-            var platform = conf.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.MovingPlatformClass); 
+            var platform = conf.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.MovingPlatformClass);
             if (platform == null)
             {
                 Debug.LogWarning(PrefixLogMessage("Could not find any configuration"));
@@ -79,6 +89,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             moveSpeed = platform.Float(TiledConfiguration.instance.VelocityKey, moveSpeed);
             loopDelay = platform.Float(TiledConfiguration.instance.PauseKey, loopDelay);
             alwaysClaimToBeAligned = platform.Bool(TiledConfiguration.instance.ClaimAlwaysAlignedKey, true);
+            managedByGroup = platform.Int(TiledConfiguration.instance.ObjManagedByGroupKey, -1);
+            managedToggleEffect = platform.Loop(TiledConfiguration.instance.ObjToggleEffectKey, TDEnumLoop.None);
         }
 
         [SerializeField, HideInInspector]
@@ -107,7 +119,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             managedOffsetSides.Add(offset, cubeSide);
         }
 
-        public bool MayEnter(GridEntity entity) { 
+        public bool MayEnter(GridEntity entity) {
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return true;
 
             if (entity.AnchorDirection == Direction.Down) {
@@ -156,9 +168,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             constrainedEntities.Remove(entity);
 
             var constraint = entity.GetComponent<PositionConstraint>();
-            if (constraint == null) { 
+            if (constraint == null) {
                 Debug.LogWarning(PrefixLogMessage($"There's no constraint on {entity.name} to free"));
-                return false; 
+                return false;
             }
 
             for (int i = 0, l = constraint.sourceCount; i < l; i++)
@@ -198,14 +210,53 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        ToggleGroup toggleGroup => GetComponentInParent<ToggleGroup>();
+
         private void OnEnable()
         {
             GridEntity.OnMove += GridEntity_OnMove;
+            if (Interaction == TDEnumInteraction.Managed && managedByGroup >= 0)
+            {
+                Debug.Log(PrefixLogMessage($"Registering to toggle group {managedByGroup}"));
+                toggleGroup?.RegisterReciever(managedByGroup, OnToggleGroupToggle);
+            }
         }
 
         private void OnDisable()
         {
             GridEntity.OnMove -= GridEntity_OnMove;
+            if (Interaction == TDEnumInteraction.Managed && managedByGroup >= 0)
+            {
+                toggleGroup?.UnregisterReciever(managedByGroup, OnToggleGroupToggle);
+            }
+        }
+
+        // TODO: This needs to be saved, should probably also save current position, phase next phase what is needed
+        // but no real need to save where in the transition we are
+        bool isToggled = false;
+
+        private void OnToggleGroupToggle()
+        {
+
+            isToggled = !isToggled;
+            Debug.Log(PrefixLogMessage($"{isToggled} {managedToggleEffect} {phase}"));
+            if (isToggled && managedToggleEffect == TDEnumLoop.Bounce)
+            {
+                if (phase == Phase.Initial || phase == Phase.Ended)
+                {
+                    ActivePhaseFunction = null;
+                    InitMoveStep();
+                }
+            } else
+            {
+                if (managedToggleEffect == TDEnumLoop.Wrap)
+                {
+                    // TODO: Respawn at start
+                } else if (managedToggleEffect == TDEnumLoop.Bounce)
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Need to handle {managedToggleEffect} while untoggling"));
+                }
+            }
         }
 
         private void GridEntity_OnMove(GridEntity entity)
@@ -286,12 +337,23 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             // TODO: Handle offsets too!
             var source = Dungeon[CurrentCoordinates];
-            if (source.AllowsMovement(null, Direction.None, MoveDirection) != MovementOutcome.NodeExit)
+            var anchor = GetComponent<Anchor>();
+
+            var target = direction.Translate(CurrentCoordinates);
+
+            if (anchor != null && anchor.CubeFace == direction)
+            {
+                if (Dungeon.HasNodeAt(target))
+                {
+                    var node = Dungeon[target];
+                    return node.AllowsEntryFrom(null, direction.Inverse()) && !node.sides.Has(direction);
+                }
+                return true;
+            } else if (source.AllowsMovement(null, Direction.None, MoveDirection) != MovementOutcome.NodeExit)
             {
                 return false;
             }
 
-            var target = direction.Translate(CurrentCoordinates);
             if (Dungeon.HasNodeAt(target))
             {
                 var node = Dungeon[target];

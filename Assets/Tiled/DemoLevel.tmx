@@ -745,11 +745,13 @@
     <property name="Elevation" type="int" value="3"/>
     <property name="Imported" type="bool" value="true"/>
    </properties>
-   <object id="31" name="Elevator" type="MovingPlatform" x="330.5" y="499">
+   <object id="31" name="Elevator" type="MovingPlatform" x="328.136" y="494.636">
     <properties>
      <property name="Direction" propertytype="Direction" value="Down"/>
      <property name="Interaction" propertytype="Interaction" value="Managed"/>
      <property name="Loop" propertytype="Loop" value="None"/>
+     <property name="ManagedByGroup" type="int" value="3"/>
+     <property name="ToggleEffect" propertytype="Loop" value="Bounce"/>
     </properties>
     <point/>
    </object>
@@ -761,11 +763,6 @@
      <property name="Repeatable" type="bool" value="true"/>
     </properties>
     <point/>
-   </object>
-   <object id="33" name="Toggle Group 3" type="ToggleGroup" x="316" y="474.75" width="38.5" height="39">
-    <properties>
-     <property name="Group" type="int" value="3"/>
-    </properties>
    </object>
   </objectgroup>
  </group>
