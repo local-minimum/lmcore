@@ -1,7 +1,9 @@
+using Codice.Client.Common.TreeGrouper;
 using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -116,6 +118,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             var otherNode = attached.GetComponentInParent<TDNode>();
             var offset = otherNode.Coordinates - GetComponentInParent<TDNode>().Coordinates;
 
+            Debug.Log(PrefixLogMessage($"Is coordinating transform with offset {offset} cube face {cubeSide}"));
             managedOffsetSides.Add(offset, cubeSide);
         }
 
@@ -239,24 +242,42 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
 
             isToggled = !isToggled;
-            Debug.Log(PrefixLogMessage($"{isToggled} {managedToggleEffect} {phase}"));
             if (isToggled && managedToggleEffect == TDEnumLoop.Bounce)
             {
                 if (phase == Phase.Initial || phase == Phase.Ended)
                 {
                     ActivePhaseFunction = null;
+
+                    if (phase != Phase.Initial)
+                    {
+                        MoveDirection = MoveDirection.Inverse();
+                        Debug.Log(PrefixLogMessage("Inverting movement direction"));
+                    }
+
+                    Debug.Log(PrefixLogMessage($"Invoking bounce by entry, platform going {MoveDirection}"));
                     InitMoveStep();
                 }
-            } else
-            {
-                if (managedToggleEffect == TDEnumLoop.Wrap)
-                {
-                    // TODO: Respawn at start
-                } else if (managedToggleEffect == TDEnumLoop.Bounce)
-                {
-                    Debug.LogWarning(PrefixLogMessage($"Need to handle {managedToggleEffect} while untoggling"));
-                }
             }
+            else if (managedToggleEffect == TDEnumLoop.Bounce)
+            {
+                MoveDirection = MoveDirection.Inverse();
+                Debug.Log(PrefixLogMessage($"Invoking bounce by exit, platform going {MoveDirection}"));
+                InitWaitToStart();
+            }
+            else if (managedToggleEffect == TDEnumLoop.Wrap) { 
+            
+                if (!BecomeTile(OriginCoordinates, true))
+                {
+                    Debug.LogError(PrefixLogMessage("Failed to wrap around to spawn"));
+                }
+
+                ActivePhaseFunction = null;
+                phase = Phase.Ended;
+            }
+            else if (managedToggleEffect != TDEnumLoop.None && managedToggleEffect != TDEnumLoop.Unknown)
+            {
+                throw new NotImplementedException($"{managedToggleEffect} by exit platforms not implemented");
+            } 
         }
 
         private void GridEntity_OnMove(GridEntity entity)
@@ -317,7 +338,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     case TDEnumLoop.None:
                         phase = Phase.Ended;
                         ActivePhaseFunction = null;
-                        Debug.Log(PrefixLogMessage("Movements completed"));
+                        Debug.Log(PrefixLogMessage($"Movement phase {phase}"));
                         break;
                     case TDEnumLoop.Bounce:
                         MoveDirection = MoveDirection.Inverse();
@@ -333,24 +354,56 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        bool CanTranslate(Direction direction)
+        bool NodeSideIsPlatformOrEmpty(TDNode node, Direction direction) =>
+            NodeSideIsPlatformOrEmpty(node, direction, Vector3Int.zero);
+        bool NodeSideIsPlatformOrEmpty(TDNode node, Direction direction, Vector3Int offset)
         {
-            // TODO: Handle offsets too!
+            if (node == null) return true;
+
+            // TODO: This might require a bit more logic
+            if (node.Obstructed) return false;
+
+            if (!node.sides.Has(direction)) return true;
+
+            return managedOffsetSides.Any(managed => managed.Key == offset && managed.Value == direction);
+        }
+
+        bool CanTranslate(Direction moveDirection)
+        {
+            // TODO: Check if all managed full fill these checks
             var source = Dungeon[CurrentCoordinates];
             var anchor = GetComponent<Anchor>();
+            if (anchor == null)
+            {
+                Debug.LogError(PrefixLogMessage("We don't know the cube face of the platform because it lacks an anchor"));
+                return false;
+            }
 
-            var target = direction.Translate(CurrentCoordinates);
+            var target = moveDirection.Translate(CurrentCoordinates);
 
-            if (anchor != null && anchor.CubeFace == direction)
+            if (NodeSideIsPlatformOrEmpty(source, moveDirection))
             {
                 if (Dungeon.HasNodeAt(target))
                 {
                     var node = Dungeon[target];
-                    return node.AllowsEntryFrom(null, direction.Inverse()) && !node.sides.Has(direction);
+
+                    // We must allow the entry from our origin direction 
+                    if (NodeSideIsPlatformOrEmpty(node, moveDirection.Inverse(), moveDirection.AsLookVector3D()))
+                    {
+                        // We need to be able to occupy our cube face in the new node 
+                        if (NodeSideIsPlatformOrEmpty(node, anchor.CubeFace, moveDirection.AsLookVector3D()))
+                        {
+                            return true;
+                        }
+                        Debug.LogWarning(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
+                        return false;
+                    }
+
+                    Debug.LogWarning(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
+                    return false;
                 }
-                return true;
-            } else if (source.AllowsMovement(null, Direction.None, MoveDirection) != MovementOutcome.NodeExit)
-            {
+
+                // We don't allow dungeon escape
                 return false;
             }
 
@@ -358,10 +411,24 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 var node = Dungeon[target];
 
-                return !node.HasFloor;
+                // We must allow the entry from our origin direction 
+                if (NodeSideIsPlatformOrEmpty(node, moveDirection.Inverse(), moveDirection.AsLookVector3D()))
+                {
+                    // We need to be able to occupy our cube face in the new node 
+                    if (NodeSideIsPlatformOrEmpty(node, anchor.CubeFace, moveDirection.AsLookVector3D()))
+                    {
+                        return true;
+                    }
+                    Debug.LogWarning(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
+                    return false;
+                }
+
+                Debug.LogWarning(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
+                return false;
             }
 
-            return true;
+            // We don't allow us to escape the dungeon
+            return false;
         }
 
         bool BecomeTile(Vector3Int coordinates, bool translate = false)
@@ -379,6 +446,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return true;
             }
 
+            // Clear my position
             currentNode.UpdateSide(Direction.Down, false);
             foreach (var dependent in managedOffsetSides)
             {
@@ -418,7 +486,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             } else
             {
-                Debug.LogWarning(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));
+                Debug.LogError(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));
             }
 
             if (translate)
@@ -443,7 +511,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (!CanTranslate(MoveDirection))
             {
-                Debug.Log(PrefixLogMessage($"I've reached end of my movement at, can't move {MoveDirection} to {MoveDirection.Translate(CurrentCoordinates)}"));
+                Debug.Log(PrefixLogMessage($"I've reached end of my movement , can't move {MoveDirection} to {MoveDirection.Translate(CurrentCoordinates)}"));
                 InitWaitEnd();
                 return;
             }

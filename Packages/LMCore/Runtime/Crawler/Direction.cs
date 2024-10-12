@@ -484,6 +484,9 @@ namespace LMCore.Crawler
             }
         }
 
+        public static bool IsSameAxis(this Direction direction, Direction other) =>
+            direction == other || direction == other.Inverse();
+
         public static bool IsPlanarCardinal(this Direction direction)
         {
             return direction != Direction.Up && direction != Direction.Down && direction != Direction.None;
