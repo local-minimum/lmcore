@@ -70,7 +70,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
 
-        public override string ToString() => PrefixLogMessage($"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned})");
+        public override string ToString() => PrefixLogMessage(
+            $"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned}) Offsets({string.Join(", ", managedOffsetSides.Select(o => $"{o.Key} {o.Value}"))})");
+
         [ContextMenu("Info")]
         public void Info() => Debug.Log(this);
 
@@ -431,9 +433,27 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             return false;
         }
 
+        void SetManagedNodeCubeSides(Vector3Int coordinates, bool value)
+        {
+            foreach (var dependent in managedOffsetSides)
+            {
+                var otherCoordinates = dependent.Key + coordinates;
+                if (Dungeon.HasNodeAt(otherCoordinates))
+                {
+                    Dungeon[otherCoordinates].UpdateSide(dependent.Value, value);
+                }
+                else
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Can't set {dependent.Value} of node at {otherCoordinates} to {value} because outside dungeon"));
+                }
+            }
+        }
+
         bool BecomeTile(Vector3Int coordinates, bool translate = false)
         {
             var currentNode = GetComponentInParent<TDNode>();
+            var anchor = GetComponent<Anchor>();
+            var myFace = anchor?.CubeFace ?? Direction.Down;
 
             if (currentNode.Coordinates == coordinates)
             {
@@ -447,35 +467,19 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             // Clear my position
-            currentNode.UpdateSide(Direction.Down, false);
-            foreach (var dependent in managedOffsetSides)
-            {
-                var otherCoordinates = dependent.Key + currentNode.Coordinates;
-                if (!Dungeon.HasNodeAt(otherCoordinates)) continue;
+            currentNode.UpdateSide(myFace, false);
+            SetManagedNodeCubeSides(currentNode.Coordinates, false);
 
-                Dungeon[otherCoordinates].UpdateSide(dependent.Value, false);
-            }
-
+            // Gain new position
             if (Dungeon.HasNodeAt(coordinates))
             {
                 Debug.Log(PrefixLogMessage($"I'm becomming {coordinates}"));
                 var newNode = Dungeon[coordinates];
-
                 transform.SetParent(newNode.transform);
+                newNode.UpdateSide(myFace, true);
 
-                newNode.UpdateSide(Direction.Down, true);
-
-                foreach (var dependent in managedOffsetSides)
-                {
-                    var otherCoordinates = dependent.Key + currentNode.Coordinates;
-                    if (!Dungeon.HasNodeAt(otherCoordinates))
-                    {
-                        Debug.LogWarning(PrefixLogMessage($"Could not set dependent side {dependent.Value} because dungeon lacks node at {otherCoordinates}"));
-                        continue;
-                    }
-
-                    Dungeon[otherCoordinates].UpdateSide(dependent.Value, true);
-                }
+                // We really need to also ask those to update their own parenting so they are the correct nodes
+                SetManagedNodeCubeSides(coordinates, true);
 
                 // No need to update constrained entities, they should use the
                 // same anchor as us...
