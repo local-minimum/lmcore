@@ -13,6 +13,8 @@ namespace LMCore.Crawler
         public static event TickEndAjustmentEvent OnTickEndAdjustment;
         public static event TickEndEvent OnTickEnd;
 
+        public bool SlowMo = true;
+
         [Range(0, 2), Tooltip("Minimum pace of ticks")]
         public float minTickDuration = 0.2f;
 
@@ -90,6 +92,8 @@ namespace LMCore.Crawler
 
         private void Update()
         {
+            Time.timeScale = SlowMo ? 0.25f : 1f;
+
             if (ticking && TickProgress >= 1)
             {
                 ticking = false;

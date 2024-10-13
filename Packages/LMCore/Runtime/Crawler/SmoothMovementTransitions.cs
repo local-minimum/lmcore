@@ -188,7 +188,6 @@ namespace LMCore.Crawler
                     ? progress : 1f;
             }
 
-
             if (currentCheckpoint != checkpoint)
             {
                 if (checkpoint.Anchor != null)

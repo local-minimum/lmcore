@@ -50,6 +50,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField, HideInInspector]
         Direction MoveDirection = Direction.None;
+        Direction OriginalDirection;
 
         [SerializeField, HideInInspector]
         TDEnumLoop Loop = TDEnumLoop.None;
@@ -66,7 +67,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         /// <summary>
         /// World position of a virtual node center misaligned with the dungeon grid
         /// </summary>
-        public Vector3 VirtualNodeCenter => transform.position + Vector3.up * (Dungeon?.GridSize ?? 3f) * 0.5f;
+        public Vector3 VirtualNodeCenter => transform.position + (Dungeon?.GridSize ?? 3f) * 0.5f * Vector3.up;
 
         protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
 
@@ -146,6 +147,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public bool ConstrainEntity(GridEntity entity)
         {
+            if (constrainedEntities.Contains(entity)) return true;
+
             var constraint = entity.GetComponent<PositionConstraint>();
             if (constraint == null)
             {
@@ -158,8 +161,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 constraint.RemoveSource(0);
             }
 
-            constraint.translationAtRest = Vector3.zero;
+            constraint.translationOffset = Vector3.zero;
             constraint.AddSource(constraintSource);
+            constraint.translationAtRest = Vector3.zero;
             constraint.weight = 0;
             constraint.constraintActive = true;
             constrainedEntities.Add(entity);
@@ -202,6 +206,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void Start()
         {
+
             if (phase == Phase.Initial && Interaction == TDEnumInteraction.Automatic)
             {
                 Debug.Log(PrefixLogMessage($"Starting platform Interaction({Interaction}) Loop({Loop}) MoveDirection({MoveDirection})"));
@@ -219,7 +224,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void OnEnable()
         {
+            OriginalDirection = MoveDirection;
+
+            // We should free when we no longer occupy and or gain new anchor that isn't us rather
+            // than just any move perhaps and in either case if on move it should be when the move is progressed
+            // and final enough that we aren't on our anchors anymore
             GridEntity.OnMove += GridEntity_OnMove;
+            
             if (Interaction == TDEnumInteraction.Managed && managedByGroup >= 0)
             {
                 Debug.Log(PrefixLogMessage($"Registering to toggle group {managedByGroup}"));
@@ -242,22 +253,21 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void OnToggleGroupToggle()
         {
-
             isToggled = !isToggled;
+            Debug.Log(PrefixLogMessage($"Toggling the platform to {isToggled}"));
             if (isToggled && managedToggleEffect == TDEnumLoop.Bounce)
             {
-                if (phase == Phase.Initial || phase == Phase.Ended)
+                if (MoveDirection != OriginalDirection)
+                {
+                    MoveDirection = MoveDirection.Inverse();
+                    ActivePhaseFunction = null;
+                    InitMoveStep();
+                    Debug.Log(PrefixLogMessage($"Inverting movement direction, platform going {MoveDirection}"));
+                } else if (phase != Phase.Moving && phase != Phase.WaitingStart)
                 {
                     ActivePhaseFunction = null;
-
-                    if (phase != Phase.Initial)
-                    {
-                        MoveDirection = MoveDirection.Inverse();
-                        Debug.Log(PrefixLogMessage("Inverting movement direction"));
-                    }
-
-                    Debug.Log(PrefixLogMessage($"Invoking bounce by entry, platform going {MoveDirection}"));
                     InitMoveStep();
+                    Debug.Log(PrefixLogMessage($"Invoking bounce by entry, platform going {MoveDirection}"));
                 }
             }
             else if (managedToggleEffect == TDEnumLoop.Bounce)
@@ -290,7 +300,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        System.Action ActivePhaseFunction;
+        Action ActivePhaseFunction;
 
         void InitWaitToStart()
         {
@@ -466,6 +476,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return true;
             }
 
+            foreach (var entity in constrainedEntities)
+            {
+                entity.Node.RemoveOccupant(entity);
+            }
+
+
             // Clear my position
             currentNode.UpdateSide(myFace, false);
             SetManagedNodeCubeSides(currentNode.Coordinates, false);
@@ -481,10 +497,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 // We really need to also ask those to update their own parenting so they are the correct nodes
                 SetManagedNodeCubeSides(coordinates, true);
 
-                // No need to update constrained entities, they should use the
-                // same anchor as us...
+                // Constrained enemies must enter new node
                 foreach (var entity in constrainedEntities)
                 {
+                    // Since entity should be attached to us / our anchor it doesn't need to update its own node
+                    newNode.AddOccupant(entity);
                     Debug.Log(PrefixLogMessage($"Managed entity now is {entity}"));
                 }
 

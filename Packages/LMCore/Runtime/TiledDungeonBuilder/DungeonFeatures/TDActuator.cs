@@ -9,8 +9,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public class TDActuator : MonoBehaviour
     {
-        [SerializeField, HideInInspector]
-        Vector3Int Coordinates;
+        Vector3Int Coordinates => GetComponentInParent<TDNode>().Coordinates;   
 
         [SerializeField, HideInInspector]
         int[] groups = new int[0];
@@ -75,8 +74,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             automaticUnset = props
                 .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
 
-            Coordinates = node.Coordinates;
-
             Debug.Log(this);
         }
 
@@ -94,16 +91,23 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void TDNode_OnNewOccupant(TDNode node, GridEntity entity)
         {
-            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) || 
+            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) ||
                 entity.Coordinates != Coordinates
                 || entity.AnchorDirection != anchor)
             {
                 var hadOccupant = occupants.Contains(entity);
                 occupants.Remove(entity);
 
-                if (lastActionWasPress && hadOccupant)
-                {
-                    Depress();
+                if (hadOccupant) { 
+                    if (lastActionWasPress && occupants.Count() == 0)
+                    {
+                        Depress();
+                    }
+                    else
+                    {
+                        Debug.LogWarning(
+                            PrefixLogMessage($"Entity {entity.name} moved away but last action was press({lastActionWasPress}) and occupant ({occupants.Count()})"));
+                    }
                 }
 
                 return;
@@ -111,10 +115,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             bool wasEmpty = occupants.Count == 0;
             occupants.Add(entity);
-            Debug.Log(PrefixLogMessage($"Gained occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}"));
 
             if (automaticallyResets || (!lastActionWasPress && wasEmpty))
+            {
+                Debug.Log(PrefixLogMessage($"Gained occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}"));
                 Press();
+            } else
+            {
+                Debug.LogWarning(PrefixLogMessage($"Could not press: wasEmpty({wasEmpty}), last was press({lastActionWasPress}), automatic reset ({automaticallyResets})"));
+            }
 
         }
 
@@ -163,8 +172,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             foreach (var group in groups)
             {
-                ToggleGroup.Toggle(group);
                 Debug.Log(PrefixLogMessage($"Is toggling group: {group}"));
+                ToggleGroup.Toggle(group);
             }
 
             foreach (var action in pressActions)
@@ -189,8 +198,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 foreach (var group in groups)
                 {
-                    ToggleGroup.Toggle(group);
                     Debug.Log(PrefixLogMessage($"Is toggling group via automatic unset: {group}"));
+                    ToggleGroup.Toggle(group);
                 }
             }
 

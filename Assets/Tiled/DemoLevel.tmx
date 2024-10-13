@@ -757,7 +757,7 @@
    </object>
    <object id="32" name="Toggle Elevator" type="Actuator" x="345" y="504.5">
     <properties>
-     <property name="AutomaticUnset" type="bool" value="true"/>
+     <property name="AutomaticUnset" type="bool" value="false"/>
      <property name="Group" type="int" value="3"/>
      <property name="Interaction" propertytype="Interaction" value="Automatic"/>
      <property name="Repeatable" type="bool" value="true"/>
