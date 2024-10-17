@@ -1,6 +1,5 @@
 using UnityEngine;
 using LMCore.Extensions;
-using LMCore.IO;
 using UnityEngine.Events;
 using LMCore.Inventory;
 
@@ -8,6 +7,7 @@ namespace LMCore.Crawler
 {
     public delegate void InteractEvent(GridEntity entity);
     public delegate void MoveEvent(GridEntity entity);
+    public delegate void PositionTransitionEvent(GridEntity entity);
 
     [System.Flags]
     public enum MovementType {
@@ -20,6 +20,7 @@ namespace LMCore.Crawler
     {
         public static event InteractEvent OnInteract;
         public static event MoveEvent OnMove;
+        public static event PositionTransitionEvent OnPositionTransition;
 
         protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection}/{AnchorMode} looking {LookDirection}: {message}";
 
@@ -64,7 +65,8 @@ namespace LMCore.Crawler
 
                 // We need to run add occupation checks even within node when changing
                 // cube face anchor
-                bool addOccupant = _anchor != value;
+                bool newAnchor = _anchor != value;
+                bool addOccupant = false;
 
                 if (value != null)
                 {
@@ -91,6 +93,7 @@ namespace LMCore.Crawler
                     // This needs to happen last so that the entity is fully in sync
                     value.Node.AddOccupant(this);
                 }
+                if (newAnchor) OnPositionTransition?.Invoke(this);
             }
         }
 
@@ -104,6 +107,7 @@ namespace LMCore.Crawler
             }
             set
             {
+                bool newDirection = _anchorDirection != value;
                 if (Node != null)
                 {
                     var anchor = Node.GetAnchor(value);
@@ -118,6 +122,8 @@ namespace LMCore.Crawler
 
                 _anchorDirection = value;
                 _anchor = null;
+
+                if (newDirection) OnPositionTransition?.Invoke(this);
             }
         }
         
@@ -143,7 +149,7 @@ namespace LMCore.Crawler
 
             set
             {
-                bool addOccupant = false;
+                bool newNode = false;
                 var anchor = value?.GetAnchor(AnchorDirection);
                 if (anchor != null)
                 {
@@ -154,7 +160,7 @@ namespace LMCore.Crawler
                     {
                         _node?.RemoveOccupant(this);
                         _anchor?.RemoveAnchor(this);
-                        addOccupant = true;
+                        newNode = true;
                     }
                     _node = value;
                     _anchor = null;
@@ -163,10 +169,11 @@ namespace LMCore.Crawler
                     TransportationMode &= TransportationMode.Flying;
                 }
 
-                if (addOccupant)
+                if (newNode)
                 {
                     // This needs to happen last so that the entity is fully in sync
                     value?.AddOccupant(this);
+                    OnPositionTransition?.Invoke(this);
                 }
             }
         }
@@ -210,6 +217,8 @@ namespace LMCore.Crawler
             }
             set
             {
+                bool newCoords = _Coordinates != value;
+
                 _Coordinates = value;
                 if (Dungeon.HasNodeAt(_Coordinates))
                 {
@@ -226,6 +235,8 @@ namespace LMCore.Crawler
                 {
                     Node = null;
                 }
+
+                if (newCoords) OnPositionTransition?.Invoke(this);
             }
         }
         #endregion

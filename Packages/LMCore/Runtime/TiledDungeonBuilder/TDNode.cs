@@ -436,15 +436,6 @@ namespace LMCore.TiledDungeon
         void AddNewOccupant(GridEntity entity)
         {
             _occupants.Add(entity);
-            
-            if (entity.NodeAnchor != null)
-            {
-                var platform = entity.NodeAnchor.GetComponentInChildren<TDMovingPlatform>();
-                if (platform != null)
-                {
-                    platform.ConstrainEntity(entity);
-                }
-            }
         }
 
         void HandleTraps(GridEntity entity, bool newOccupation)

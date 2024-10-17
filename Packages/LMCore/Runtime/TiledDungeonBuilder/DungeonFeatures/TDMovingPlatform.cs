@@ -72,7 +72,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
 
         public override string ToString() => PrefixLogMessage(
-            $"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned}) Offsets({string.Join(", ", managedOffsetSides.Select(o => $"{o.Key} {o.Value}"))})");
+            $"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned}) Offsets({string.Join(", ", managedOffsetSides.Select(mo => $"{mo.Offset} {mo.AnchorDirection}"))})");
 
         [ContextMenu("Info")]
         public void Info() => Debug.Log(this);
@@ -98,15 +98,23 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             managedToggleEffect = platform.Loop(TiledConfiguration.instance.ObjToggleEffectKey, TDEnumLoop.None);
         }
 
+        [Serializable]
+        private struct ManagedOffset
+        {
+            public Vector3Int Offset;
+            public Direction AnchorDirection;
+            public Transform Transform;
+        }
+
         [SerializeField, HideInInspector]
-        SerializableDictionary<Vector3Int, Direction> managedOffsetSides = new SerializableDictionary<Vector3Int, Direction>();
+        List<ManagedOffset> managedOffsetSides = new List<ManagedOffset>();
 
         public bool IsSamePlatform(Vector3Int coordinates, Direction anchor)
         {
             var offset = coordinates - CurrentCoordinates;
             if (offset == Vector3Int.zero && anchor == Direction.Down) return true;
 
-            return managedOffsetSides.Any(kvp => kvp.Key == offset && kvp.Value == anchor);
+            return managedOffsetSides.Any(mo => mo.Offset == offset && mo.AnchorDirection == anchor);
         }
 
         ConstraintSource constraintSource => new ConstraintSource() { sourceTransform = transform, weight = 1 };
@@ -122,7 +130,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             var offset = otherNode.Coordinates - GetComponentInParent<TDNode>().Coordinates;
 
             Debug.Log(PrefixLogMessage($"Is coordinating transform with offset {offset} cube face {cubeSide}"));
-            managedOffsetSides.Add(offset, cubeSide);
+            managedOffsetSides.Add(new ManagedOffset()
+            {
+                Offset = offset,
+                AnchorDirection = cubeSide,
+                Transform = attached,
+            });
         }
 
         public bool MayEnter(GridEntity entity) {
@@ -130,10 +143,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (entity.AnchorDirection == Direction.Down) {
                 var myCoordinates = CurrentCoordinates;
-                foreach (var dependant in managedOffsetSides)
+                foreach (var mo in managedOffsetSides)
                 {
                     // We're part of the same platform!
-                    if (myCoordinates + dependant.Key == entity.Coordinates && dependant.Value == Direction.Down)
+                    if (myCoordinates + mo.Offset == entity.Coordinates && mo.AnchorDirection == Direction.Down)
                     {
                         return true;
                     }
@@ -145,61 +158,70 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         HashSet<GridEntity> constrainedEntities = new HashSet<GridEntity>();
 
-        public bool ConstrainEntity(GridEntity entity)
+        private PositionConstraint AddConstraint(
+            GridEntity entity,
+            PositionConstraint constraint,
+            Transform newConstrainer)
         {
-            if (constrainedEntities.Contains(entity)) return true;
-
-            var constraint = entity.GetComponent<PositionConstraint>();
             if (constraint == null)
             {
                 constraint = entity.gameObject.AddComponent<PositionConstraint>();
             }
 
-            constraint.constraintActive = false;
-            while (constraint.sourceCount > 0)
+            bool hasMyConstraint = false;
+            for (int i = 0, l = constraint.sourceCount; i < l; i++)
             {
-                constraint.RemoveSource(0);
+                if (constraint.GetSource(i).sourceTransform == newConstrainer)
+                {
+                    hasMyConstraint = true;
+                    break;
+                }
             }
 
-            constraint.translationOffset = Vector3.zero;
-            constraint.AddSource(constraintSource);
-            constraint.translationAtRest = Vector3.zero;
+            if (!hasMyConstraint)
+            {
+                constraint.constraintActive = false;
+
+                constraint.translationOffset = Vector3.zero;
+                constraint.AddSource(new ConstraintSource() { sourceTransform = newConstrainer, weight = 1f });
+                constraint.translationAtRest = Vector3.zero;
+            }
+
             constraint.weight = 0;
-            constraint.constraintActive = true;
-            constrainedEntities.Add(entity);
 
             Debug.Log(PrefixLogMessage($"Constraining {entity.name}"));
-            return true;
+            return constraint;
         }
 
-        public bool FreeEntity(GridEntity entity)
+        /// <summary>
+        /// Removes all constraints that are not needed
+        /// </summary>
+        public PositionConstraint RemoveConstraints(GridEntity entity, Transform newAnchor)
         {
-            constrainedEntities.Remove(entity);
-
             var constraint = entity.GetComponent<PositionConstraint>();
             if (constraint == null) {
-                Debug.LogWarning(PrefixLogMessage($"There's no constraint on {entity.name} to free"));
-                return false;
+                return constraint;
             }
 
             for (int i = 0, l = constraint.sourceCount; i < l; i++)
             {
                 var source = constraint.GetSource(i);
-                if (source.sourceTransform == transform)
+                if (source.sourceTransform != newAnchor && (
+                    source.sourceTransform == transform || managedOffsetSides.Any(mo => mo.Transform == source.sourceTransform)))
                 {
                     constraint.RemoveSource(i);
-                    constraint.constraintActive = constraint.sourceCount == 0;
-                    if (l == 1)
+                    i--;
+                    l--;
+
+                    if (l == 0)
                     {
-                        constraint.constraintActive = false;
+                        constraint.weight = 0f;
+                        break;
                     }
-                    Debug.Log(PrefixLogMessage($"Freeing {entity.name}"));
-                    return true;
                 }
             }
 
-            Debug.LogError(PrefixLogMessage($"Failed to free {entity.name}"));
-            return false;
+            return constraint;
         }
 
         float nextPhase;
@@ -229,7 +251,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             // We should free when we no longer occupy and or gain new anchor that isn't us rather
             // than just any move perhaps and in either case if on move it should be when the move is progressed
             // and final enough that we aren't on our anchors anymore
-            GridEntity.OnMove += GridEntity_OnMove;
+            GridEntity.OnPositionTransition += GridEntity_OnTransition;
             
             if (Interaction == TDEnumInteraction.Managed && managedByGroup >= 0)
             {
@@ -240,7 +262,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void OnDisable()
         {
-            GridEntity.OnMove -= GridEntity_OnMove;
+            GridEntity.OnPositionTransition -= GridEntity_OnTransition;
             if (Interaction == TDEnumInteraction.Managed && managedByGroup >= 0)
             {
                 toggleGroup?.UnregisterReciever(managedByGroup, OnToggleGroupToggle);
@@ -292,11 +314,54 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             } 
         }
 
-        private void GridEntity_OnMove(GridEntity entity)
+        private Transform ConstrainingTransform(GridEntity entity)
         {
-            if (entity.Moving.HasFlag(MovementType.Translating) && constrainedEntities.Contains(entity))
+            var entityAnchorTransform = entity.NodeAnchor?.transform;
+
+            var myCoords = CurrentCoordinates;
+            if (transform == entityAnchorTransform || entity.Coordinates == CurrentCoordinates && entity.AnchorDirection == Direction.Down)
             {
-                FreeEntity(entity);
+                return transform;
+            }
+
+            foreach (var mo in managedOffsetSides)
+            {
+                if (mo.Transform == entityAnchorTransform || entity.AnchorDirection == mo.AnchorDirection && entity.Coordinates == mo.Offset + myCoords)
+                {
+                    return mo.Transform;
+                } 
+            }
+            return null;
+        }
+
+        private void GridEntity_OnTransition(GridEntity entity)
+        {
+            if (entity.Moving.HasFlag(MovementType.Translating))
+            {
+                var newConstrainer = ConstrainingTransform(entity);
+
+                // Free all that are not new constraint
+                var constraint = RemoveConstraints(entity, newConstrainer);
+                // Add needed constraints
+
+                if (newConstrainer != null)
+                {
+                    constraint = AddConstraint(entity, constraint, newConstrainer);
+                }
+
+                // Update tracking list 
+                if (newConstrainer == null)
+                {
+                    constrainedEntities.Remove(entity);
+                } else
+                {
+                    constrainedEntities.Add(entity);
+                }
+
+                if (constraint != null)
+                {
+                    constraint.constraintActive = constraint.sourceCount > 0;
+                }
             }
         }
 
@@ -377,7 +442,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (!node.sides.Has(direction)) return true;
 
-            return managedOffsetSides.Any(managed => managed.Key == offset && managed.Value == direction);
+            return managedOffsetSides.Any(mo => mo.Offset == offset && mo.AnchorDirection == direction);
         }
 
         bool CanTranslate(Direction moveDirection)
@@ -445,16 +510,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         void SetManagedNodeCubeSides(Vector3Int coordinates, bool value)
         {
-            foreach (var dependent in managedOffsetSides)
+            foreach (var mo in managedOffsetSides)
             {
-                var otherCoordinates = dependent.Key + coordinates;
+                var otherCoordinates = mo.Offset + coordinates;
                 if (Dungeon.HasNodeAt(otherCoordinates))
                 {
-                    Dungeon[otherCoordinates].UpdateSide(dependent.Value, value);
+                    Dungeon[otherCoordinates].UpdateSide(mo.AnchorDirection, value);
                 }
                 else
                 {
-                    Debug.LogWarning(PrefixLogMessage($"Can't set {dependent.Value} of node at {otherCoordinates} to {value} because outside dungeon"));
+                    Debug.LogWarning(PrefixLogMessage($"Can't set {mo.AnchorDirection} of node at {otherCoordinates} to {value} because outside dungeon"));
                 }
             }
         }
