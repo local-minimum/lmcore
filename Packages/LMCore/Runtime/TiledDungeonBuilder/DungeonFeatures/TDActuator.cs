@@ -147,10 +147,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             if (lastActionWasPress && !automaticallyResets)
             {
+                Debug.Log(PrefixLogMessage("Entity depresses actuator"));
                 Depress();
             }
             else
             {
+                Debug.Log(PrefixLogMessage("Entity presses actuator"));
                 Press();
             }
         }

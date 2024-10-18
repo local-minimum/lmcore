@@ -9,6 +9,14 @@ using UnityEngine.Animations;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
+    /// <summary>
+    /// Dynamically added class to cause faces to move.
+    /// 
+    /// They can be Automatic or Managed by toggle groups.
+    /// 
+    /// See Configure function for what settings it respects
+    /// and documentation on the settings
+    /// </summary>
     public class TDMovingPlatform : MonoBehaviour, IMovingCubeFace
     {
         public enum Phase {
@@ -50,15 +58,35 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         Direction MoveDirection = Direction.None;
         Direction OriginalDirection;
 
+        /// <summary>
+        /// What happens when the platform can no longer continue in the move direction.
+        /// 
+        /// None leaves it at the end station.
+        /// Bounce inverts the direction.
+        /// Wrap makes it respawn at start.
+        /// </summary>
         [SerializeField, HideInInspector]
         TDEnumLoop Loop = TDEnumLoop.None;
 
+        /// <summary>
+        /// How the activity of the platform is controlled
+        /// 
+        /// Automatic makes it start when the game starts
+        /// Managed requires toggle group action to start it
+        /// </summary>
         [SerializeField, HideInInspector]
         TDEnumInteraction Interaction = TDEnumInteraction.Automatic;
 
         [SerializeField, HideInInspector]
         int managedByGroup = -1;
 
+        /// <summary>
+        /// What the effect is when the toggle is toggled.
+        /// 
+        /// None disables toggle group effects
+        /// Bounce inverts the directions
+        /// Wrap returns it to the original position
+        /// </summary>
         [SerializeField, HideInInspector]
         TDEnumLoop managedToggleEffect = TDEnumLoop.None;
 
