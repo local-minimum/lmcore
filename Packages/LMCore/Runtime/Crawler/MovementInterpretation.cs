@@ -31,7 +31,9 @@ namespace LMCore.Crawler
         }
 
         public MovementCheckpointWithTransition First => Steps[0];
+        public MovementCheckpointWithTransition Second => Steps[1];
         public MovementCheckpointWithTransition Last => Steps.Last();
+        public MovementCheckpointWithTransition SecondToLast => Steps[Steps.Count - 2];
 
         public IEnumerable<float> Lengths(IDungeon dungeon)
         {
@@ -394,7 +396,7 @@ namespace LMCore.Crawler
         }
 
 
-        public Vector3 Evaluate(GridEntity entity, float progress, out Quaternion rotation, out MovementCheckpoint checkpoint)
+        public Vector3 Evaluate(GridEntity entity, float progress, out Quaternion rotation, out MovementCheckpoint checkpoint, out float stepProgress)
         {
             // 1. Figure out segment active from total length and progressNumber of steps in a full tile
             //    Take into account freeze frames and step-up/downs and jumps for misaligned tiles
@@ -435,6 +437,8 @@ namespace LMCore.Crawler
                 rotation = Quaternion.Lerp(startRotation, endRotation, progress);
 
                 checkpoint = progress < 0.5f ? start.Checkpoint : end.Checkpoint;
+                stepProgress = progress;
+
                 return EvaluateSegment(
                     MovementTransition.Jump,
                     AnchorTraversal.None,
@@ -456,6 +460,7 @@ namespace LMCore.Crawler
                 {
                     var startPos = start.Checkpoint.Position(entity.Dungeon);
                     checkpoint = start.Checkpoint;
+                    stepProgress = progress / 0.5f;
 
                     return EvaluateSegment(
                         start.Transition,
@@ -464,7 +469,7 @@ namespace LMCore.Crawler
                         mid,
                         start.Checkpoint.Down,
                         entity,
-                        progress / 0.5f,
+                        stepProgress,
                         false
                     );
                 } else
@@ -472,6 +477,7 @@ namespace LMCore.Crawler
                     CurrentSegment = Segment.Last;
                     var endPos = end.Checkpoint.Position(entity.Dungeon);
                     checkpoint = end.Checkpoint;
+                    stepProgress = (progress - 0.5f) / 0.5f;
 
                     return EvaluateSegment(
                         transition,
@@ -480,7 +486,7 @@ namespace LMCore.Crawler
                         endPos,
                         end.Checkpoint.Down,
                         entity,
-                        (progress - 0.5f) / 0.5f,
+                        stepProgress,
                         true);
                 }
             } else 
@@ -499,6 +505,7 @@ namespace LMCore.Crawler
                     var endRotation = end.Checkpoint.Rotation(entity);
 
                     rotation = Quaternion.Lerp(startRotation, endRotation, progress);
+                    stepProgress = progress;
 
                     return Vector3.Lerp(
                         start.Checkpoint.Position(entity.Dungeon),
@@ -567,9 +574,9 @@ namespace LMCore.Crawler
                     }
                 }
 
-                var segmentProgress = Mathf.Clamp01(UnclampedSegmentProgress(entity, progress, segmentIdx));
+                stepProgress = Mathf.Clamp01(UnclampedSegmentProgress(entity, progress, segmentIdx));
 
-                checkpoint = segmentProgress < 0.5f ? pt1.Checkpoint : pt2.Checkpoint;
+                checkpoint = stepProgress < 0.5f ? pt1.Checkpoint : pt2.Checkpoint;
 
                 var pt2Rotation = pt2.Checkpoint.Rotation(entity);
 
@@ -582,7 +589,7 @@ namespace LMCore.Crawler
                     pt2.Checkpoint.Position(entity.Dungeon), 
                     pt1.Checkpoint.Down, 
                     entity, 
-                    segmentProgress,
+                    stepProgress,
                     CurrentSegment != Segment.First);
             }
         }

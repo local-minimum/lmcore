@@ -1,7 +1,5 @@
-using Codice.Client.Common.TreeGrouper;
 using LMCore.Crawler;
 using LMCore.Extensions;
-using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
 using System;
 using System.Collections.Generic;
@@ -184,9 +182,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 constraint.translationOffset = Vector3.zero;
                 constraint.AddSource(new ConstraintSource() { sourceTransform = newConstrainer, weight = 1f });
-                constraint.translationAtRest = Vector3.zero;
             }
 
+            constraint.translationAtRest = entity.transform.position - newConstrainer.position;
             constraint.weight = 0;
 
             Debug.Log(PrefixLogMessage($"Constraining {entity.name}"));

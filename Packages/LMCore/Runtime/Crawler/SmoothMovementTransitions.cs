@@ -124,6 +124,8 @@ namespace LMCore.Crawler
 
         MovementCheckpoint currentCheckpoint;
 
+        bool startConstrained;
+
         private void Interpreter_OnMovement(
             GridEntity entity, 
             MovementInterpretation interpretation, 
@@ -157,6 +159,13 @@ namespace LMCore.Crawler
                 }
             }
 
+            var positionConstraint = GetComponent<PositionConstraint>();
+            if (positionConstraint == null) { 
+                startConstrained = false;
+            } else
+            {
+                startConstrained = positionConstraint.constraintActive && positionConstraint.weight > 0; 
+            }
             Debug.Log(PrefixLogMessage($"Perform {activeInterpretation}"));
             Debug.Log(PrefixLogMessage($"Segment relative lengths: {string.Join(", ", activeInterpretation.RelativeSegmentLengths(Entity.Dungeon))}"));
         }
@@ -177,15 +186,30 @@ namespace LMCore.Crawler
                 Entity, 
                 Mathf.Clamp01(progress / activeInterpretation.DurationScale), 
                 out var rotation, 
-                out var checkpoint);
+                out var checkpoint,
+                out var stepProgress);
 
             transform.rotation = rotation;
 
             var positionConstraint = GetComponent<PositionConstraint>();
             if (positionConstraint != null && positionConstraint.constraintActive)
             {
-                positionConstraint.weight = activeInterpretation.Movement.HasFlag(MovementType.Translating)
-                    ? progress : 1f;
+                if (!activeInterpretation.Movement.HasFlag(MovementType.Translating))
+                {
+                    positionConstraint.weight = 1;
+                }
+                else if (startConstrained)
+                {
+                    var origin = activeInterpretation.Second.Checkpoint.Position(Entity.Dungeon);
+                    positionConstraint.translationAtRest = origin - positionConstraint.GetSource(0).sourceTransform.position;
+                    positionConstraint.weight = 1 - stepProgress;
+                }
+                else
+                {
+                    var origin = activeInterpretation.SecondToLast.Checkpoint.Position(Entity.Dungeon);
+                    positionConstraint.translationAtRest = origin - positionConstraint.GetSource(0).sourceTransform.position;
+                    positionConstraint.weight = stepProgress;
+                }
             }
 
             if (currentCheckpoint != checkpoint)

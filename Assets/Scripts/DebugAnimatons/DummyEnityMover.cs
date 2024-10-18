@@ -59,7 +59,7 @@ public class DummyEnityMover : MonoBehaviour
     {
         if (interp == null) { return; }
 
-        GridEntity.transform.position = interp.Evaluate(GridEntity, progress, out var rotation, out var checkpoint);
+        GridEntity.transform.position = interp.Evaluate(GridEntity, progress, out var rotation, out var checkpoint, out var stepProgress);
         GridEntity.transform.rotation = rotation;
     }
 }
