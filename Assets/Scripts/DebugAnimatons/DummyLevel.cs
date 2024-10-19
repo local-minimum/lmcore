@@ -29,7 +29,7 @@ public class DummyLevel : MonoBehaviour, IDungeon
 
     public List<IDungeonNode> FindTeleportersById(int id)
     {
-        throw new System.NotImplementedException();
+        return null;
     }
 
     public bool HasNodeAt(Vector3Int coordinates) => nodes.Any(n => n.Coordinates == coordinates);
@@ -42,5 +42,10 @@ public class DummyLevel : MonoBehaviour, IDungeon
     public Vector3 Position(Vector3Int coordinates, Direction anchor, bool rotationRespectsAnchorDirection)
     {
         return coordinates.ToPosition(GridSize) + anchor.AsLookVector3D().ToDirection(GridSize * 0.5f);
+    }
+
+    public GridEntity GetEntity(string identifier)
+    {
+        return null;
     }
 }

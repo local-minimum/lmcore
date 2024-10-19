@@ -246,11 +246,6 @@ namespace LMCore.TiledDungeon
         {
             Debug.Log(PrefixLogMessage("Source scene unloaded"));
             loadinSceneCamera.enabled = true;
-            var player = FindAnyObjectByType<GridEntity>();
-            if (player != null)
-            {
-                Debug.LogError(PrefixLogMessage($"We still have a player {player}"));
-            }
             InitiateLevelSceneLoading();
         }
 

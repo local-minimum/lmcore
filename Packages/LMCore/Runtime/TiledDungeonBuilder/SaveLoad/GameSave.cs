@@ -56,6 +56,36 @@ namespace LMCore.TiledDungeon.SaveLoad
     }
 
     [System.Serializable]
+    public class ConstrainedEntitySave
+    {
+        public string Identifier;
+        public Vector3Int Offset;
+        public Direction Anchor;
+    }
+
+    [System.Serializable]
+    public class MovingPlatformSave
+    {
+        public Vector3Int currentCoordinates;
+        public Direction moveDirection;
+        /// <summary>
+        /// How much before current time phase started
+        /// </summary>
+        public float phaseStartDelta;
+        /// <summary>
+        /// How much after current time phase ends
+        /// </summary>
+        public float nextPhaseDelay;
+        public bool isToggled;
+        public TDMovingPlatform.Phase phase;
+        public bool alignedWithGrid;
+        /// <summary>
+        /// Identifiers to constraint offsets
+        /// </summary>
+        public List<ConstrainedEntitySave> constrainedEntitites = new ();
+    }
+
+    [System.Serializable]
     public class GridEntitySave
     {
         public Vector3Int position;
@@ -150,6 +180,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
         public SerializableDictionary<Vector3Int, ActuatorSave> actuators = new ();
         public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
+        public SerializableDictionary<Vector3Int, MovingPlatformSave> movingPlatforms = new ();
         public List<IllusionSave> illusions = new ();
         public List<Vector3Int> playerPositions = new ();
     }

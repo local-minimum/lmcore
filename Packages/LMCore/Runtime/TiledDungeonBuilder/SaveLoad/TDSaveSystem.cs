@@ -84,6 +84,12 @@ namespace LMCore.TiledDungeon.SaveLoad
                         .Select(spike => spike.Save())
                 );
 
+                levelSave.movingPlatforms = new SerializableDictionary<Vector3Int, MovingPlatformSave>(
+                    dungeon
+                        .GetComponentsInChildren<TDMovingPlatform>()
+                        .Select(platform => platform.Save())
+                );
+
                 levelSave.illusions = dungeon
                     .GetComponentsInChildren<TDIllusoryCubeSide>()
                     .Select(illusion => illusion.Save())

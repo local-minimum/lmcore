@@ -1,6 +1,8 @@
 using LMCore.Crawler;
 using LMCore.Extensions;
+using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
+using LMCore.TiledDungeon.SaveLoad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +19,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
     /// See Configure function for what settings it respects
     /// and documentation on the settings
     /// </summary>
-    public class TDMovingPlatform : MonoBehaviour, IMovingCubeFace
+    public class TDMovingPlatform : TDFeature, IMovingCubeFace, IOnLoadSave
     {
+        [Serializable]
         public enum Phase {
             Initial,
             WaitingStart,
@@ -36,12 +39,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         float moveSpeed = 1f;
 
         [SerializeField, HideInInspector]
-        Vector3Int OriginCoordinates;
-
-        [SerializeField, HideInInspector]
         bool alwaysClaimToBeAligned;
-
-        Vector3Int CurrentCoordinates => GetComponentInParent<TDNode>().Coordinates;
 
         TiledDungeon _dungeon;
         TiledDungeon Dungeon {
@@ -95,18 +93,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         /// </summary>
         public Vector3 VirtualNodeCenter => transform.position + (Dungeon?.GridSize ?? 3f) * 0.5f * Vector3.up;
 
-        protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {CurrentCoordinates} (origin {OriginCoordinates}): {message}";
+        protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {Coordinates} (origin {StartCoordinates}): {message}";
 
         public override string ToString() => PrefixLogMessage(
-            $"ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned}) Offsets({string.Join(", ", managedOffsetSides.Select(mo => $"{mo.Offset} {mo.AnchorDirection}"))})");
+            $"Phase({phase}) ByGroup({managedByGroup}) AlwaysAlign({alwaysClaimToBeAligned}) Offsets({string.Join(", ", managedOffsetSides.Select(mo => $"{mo.Offset} {mo.AnchorDirection}"))})");
 
         [ContextMenu("Info")]
         public void Info() => Debug.Log(this);
 
         public void Configure(TDNodeConfig conf)
         {
-            OriginCoordinates = conf.Coordinates;
-
             var platform = conf.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.MovingPlatformClass);
             if (platform == null)
             {
@@ -137,7 +133,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public bool IsSamePlatform(Vector3Int coordinates, Direction anchor)
         {
-            var offset = coordinates - CurrentCoordinates;
+            var offset = coordinates - Coordinates;
             if (offset == Vector3Int.zero && anchor == Direction.Down) return true;
 
             return managedOffsetSides.Any(mo => mo.Offset == offset && mo.AnchorDirection == anchor);
@@ -153,7 +149,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (cubeSide == Direction.None) return;
 
             var otherNode = attached.GetComponentInParent<TDNode>();
-            var offset = otherNode.Coordinates - GetComponentInParent<TDNode>().Coordinates;
+            var offset = otherNode.Coordinates - Coordinates;
 
             Debug.Log(PrefixLogMessage($"Is coordinating transform with offset {offset} cube face {cubeSide}"));
             managedOffsetSides.Add(new ManagedOffset()
@@ -168,7 +164,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return true;
 
             if (entity.AnchorDirection == Direction.Down) {
-                var myCoordinates = CurrentCoordinates;
+                var myCoordinates = Coordinates;
                 foreach (var mo in managedOffsetSides)
                 {
                     // We're part of the same platform!
@@ -250,6 +246,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             return constraint;
         }
 
+        float phaseStart;
         float nextPhase;
 
         private void Start()
@@ -262,7 +259,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             // TODO: Figure out this managing moving cube face business
-            var anchor = GetComponent<Anchor>();
+            var anchor = Anchor;
             if (anchor != null) {
                 anchor.ManagingMovingCubeFace = this;
             }
@@ -295,8 +292,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        // TODO: This needs to be saved, should probably also save current position, phase next phase what is needed
-        // but no real need to save where in the transition we are
         bool isToggled = false;
 
         private void OnToggleGroupToggle()
@@ -326,7 +321,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (managedToggleEffect == TDEnumLoop.Wrap) { 
             
-                if (!BecomeTile(OriginCoordinates, true))
+                if (!BecomeTile(StartCoordinates, true))
                 {
                     Debug.LogError(PrefixLogMessage("Failed to wrap around to spawn"));
                 }
@@ -343,22 +338,26 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private Transform ConstrainingTransform(GridEntity entity)
         {
             var entityAnchorTransform = entity.NodeAnchor?.transform;
+            return ConstrainingTransform(entityAnchorTransform, entity.Coordinates - Coordinates, entity.AnchorDirection);
+        }
 
-            var myCoords = CurrentCoordinates;
-            if (transform == entityAnchorTransform || entity.Coordinates == CurrentCoordinates && entity.AnchorDirection == Direction.Down)
+        private Transform ConstrainingTransform(Transform entityAnchorTransform, Vector3Int offset, Direction anchor)
+        {
+            if (transform == entityAnchorTransform || offset == Vector3Int.zero && anchor == Direction.Down)
             {
                 return transform;
             }
 
             foreach (var mo in managedOffsetSides)
             {
-                if (mo.Transform == entityAnchorTransform || entity.AnchorDirection == mo.AnchorDirection && entity.Coordinates == mo.Offset + myCoords)
+                if (mo.Transform == entityAnchorTransform || anchor == mo.AnchorDirection && offset == mo.Offset)
                 {
                     return mo.Transform;
                 } 
             }
             return null;
         }
+
 
         private void GridEntity_OnTransition(GridEntity entity)
         {
@@ -397,6 +396,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             Debug.Log(PrefixLogMessage($"Init start wait before move {MoveDirection}"));
             phase = Phase.WaitingStart;
+            phaseStart = Time.timeSinceLevelLoad;
             nextPhase = Time.timeSinceLevelLoad + loopDelay / 2;
             ActivePhaseFunction = HandleWaitToStart;
         }
@@ -419,8 +419,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         void InitWaitEnd()
         {
-            Debug.Log(PrefixLogMessage($"Init move end wait at {CurrentCoordinates}"));
+            Debug.Log(PrefixLogMessage($"Init move end wait at {Coordinates}"));
             phase = Phase.WaitingEnd;
+            phaseStart = Time.timeSinceLevelLoad;
             nextPhase = Time.timeSinceLevelLoad + loopDelay / 2;
 
             ActivePhaseFunction = HandleWaitToEnd;
@@ -448,7 +449,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                         InitWaitToStart();
                         break;
                     case TDEnumLoop.Wrap:
-                        if (BecomeTile(OriginCoordinates, true))
+                        if (BecomeTile(StartCoordinates, true))
                         {
                             InitWaitToStart();
                         }
@@ -474,15 +475,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool CanTranslate(Direction moveDirection)
         {
             // TODO: Check if all managed full fill these checks
-            var source = Dungeon[CurrentCoordinates];
-            var anchor = GetComponent<Anchor>();
+            var source = Dungeon[Coordinates];
+            var anchor = Anchor;
             if (anchor == null)
             {
                 Debug.LogError(PrefixLogMessage("We don't know the cube face of the platform because it lacks an anchor"));
                 return false;
             }
 
-            var target = moveDirection.Translate(CurrentCoordinates);
+            var target = moveDirection.Translate(Coordinates);
 
             if (NodeSideIsPlatformOrEmpty(source, moveDirection))
             {
@@ -552,8 +553,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool BecomeTile(Vector3Int coordinates, bool translate = false)
         {
-            var currentNode = GetComponentInParent<TDNode>();
-            var anchor = GetComponent<Anchor>();
+            var currentNode = Node;
+            var anchor = Anchor;
             var myFace = anchor?.CubeFace ?? Direction.Down;
 
             if (currentNode.Coordinates == coordinates)
@@ -617,30 +618,44 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        void InitMoveStep()
+        public int OnLoadPriority => 10;
+
+        void InitMoveStep() => InitMoveStep(false);
+        void InitMoveStep(bool resume)
         {
             Debug.Log(PrefixLogMessage($"Init move {MoveDirection}"));
 
             if (!CanTranslate(MoveDirection))
             {
-                Debug.Log(PrefixLogMessage($"I've reached end of my movement , can't move {MoveDirection} to {MoveDirection.Translate(CurrentCoordinates)}"));
+                Debug.Log(PrefixLogMessage($"I've reached end of my movement , can't move {MoveDirection} to {MoveDirection.Translate(Coordinates)}"));
                 InitWaitEnd();
                 return;
             }
 
-            var startCoordinates = CurrentCoordinates;
+            var startCoordinates = Coordinates;
+            if (resume)
+            {
+                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - phaseStart) / moveSpeed);
+                if (progress > 0.5f)
+                {
+                    startCoordinates = MoveDirection.Inverse().Translate(Coordinates);
+                }
+            } else
+            {
+                phaseStart = Time.timeSinceLevelLoad;
+                phase = Phase.Moving;
+            }
             var startPosition = startCoordinates.ToPosition(Dungeon.GridSize);
-            var targetCoordinates = MoveDirection.Translate(CurrentCoordinates);
+            var targetCoordinates = MoveDirection.Translate(startCoordinates);
             var targetPosition = targetCoordinates.ToPosition(Dungeon.GridSize);
-            var t0 = Time.timeSinceLevelLoad;
 
             ActivePhaseFunction = () =>
             {
-                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - t0) / moveSpeed);
+                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - phaseStart) / moveSpeed);
 
                 AlignedWithGrid = progress < 0.1f || progress > 0.9f;
 
-                if (progress > 0.5f && CurrentCoordinates == startCoordinates)
+                if (progress > 0.5f && Coordinates == startCoordinates)
                 {
                     BecomeTile(targetCoordinates);
                 }
@@ -657,6 +672,105 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Update()
         {
             ActivePhaseFunction?.Invoke();
+        }
+
+        public KeyValuePair<Vector3Int, MovingPlatformSave> Save() =>
+            new KeyValuePair<Vector3Int, MovingPlatformSave>(
+                StartCoordinates,
+                new MovingPlatformSave()
+                {
+                    currentCoordinates = Coordinates,
+                    moveDirection = MoveDirection,
+                    phaseStartDelta = Time.timeSinceLevelLoad - phaseStart,
+                    nextPhaseDelay = nextPhase - Time.timeSinceLevelLoad,
+                    isToggled = isToggled,
+                    phase = phase,
+                    alignedWithGrid = _alignedWithGrid,
+                    constrainedEntitites = constrainedEntities.Select(e => 
+                        new ConstrainedEntitySave() {
+                            Identifier = e.Identifier, 
+                            Offset = e.Coordinates - Coordinates,
+                            Anchor = e.AnchorDirection,
+                        }).ToList(),
+                });
+
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null) return;
+
+            var lvl = GetComponentInParent<IDungeon>().MapName;
+            var platformSave = save.levels[lvl]?.movingPlatforms.GetValueOrDefault(StartCoordinates);
+
+            if (platformSave == null)
+            {
+                Debug.LogError(PrefixLogMessage("I have no saved state"));
+                return; 
+            }
+
+            BecomeTile(platformSave.currentCoordinates, true);
+            MoveDirection = platformSave.moveDirection;
+            phaseStart = Time.timeSinceLevelLoad - platformSave.phaseStartDelta;
+            nextPhase = platformSave.nextPhaseDelay + Time.timeSinceLevelLoad;
+            isToggled = platformSave.isToggled;
+            phase = platformSave.phase;
+            _alignedWithGrid = platformSave.alignedWithGrid;
+
+            constrainedEntities.Clear();
+            foreach (var constraintSave in platformSave.constrainedEntitites)
+            {
+                var entity = Dungeon.GetEntity(constraintSave.Identifier);
+                if (entity == null)
+                {
+                    Debug.LogError(PrefixLogMessage($"Could not locate/constrain {constraintSave.Identifier}"));
+                    continue;
+                }
+
+                // TODO: We might need to save the offsets too!
+                Transform newConstrainer = ConstrainingTransform(null, constraintSave.Offset, constraintSave.Anchor);
+
+                if (newConstrainer != null)
+                {
+                    var constraint = AddConstraint(entity, entity.GetComponent<PositionConstraint>(), newConstrainer);
+                    constraint.weight = 1f;
+                    constraint.constraintActive = constraint.sourceCount > 0;
+
+                    constrainedEntities.Add(entity);
+                }
+            }
+
+            switch (phase)
+            {
+                case Phase.Initial:
+                    ActivePhaseFunction = null;
+                    if (Interaction == TDEnumInteraction.Automatic)
+                    {
+                        InitWaitToStart();
+                    }
+                    break;
+                case Phase.WaitingStart:
+                    ActivePhaseFunction = HandleWaitToStart;
+                    break;
+                case Phase.WaitingEnd:
+                    ActivePhaseFunction = HandleWaitToEnd;
+                    break;
+                case Phase.Moving:
+                    InitMoveStep(true);
+                    break;
+                case Phase.Ended:
+                    ActivePhaseFunction = null;
+                    break;
+            }
+
+            ActivePhaseFunction?.Invoke();
+            Debug.Log(PrefixLogMessage($"Platform loaded into phase {phase} / {platformSave.phase}"));
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
         }
     }
 }

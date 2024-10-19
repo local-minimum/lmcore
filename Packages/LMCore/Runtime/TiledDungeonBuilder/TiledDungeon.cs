@@ -289,5 +289,14 @@ namespace LMCore.TiledDungeon
                 OnLoadGameSave(save as GameSave);
             }
         }
+
+        public GridEntity GetEntity(string identifier)
+        {
+            foreach (var entity in GetComponentsInChildren<GridEntity>())
+            {
+                if (entity.Identifier == identifier) return entity;
+            }
+            return null;
+        }
     }
 }

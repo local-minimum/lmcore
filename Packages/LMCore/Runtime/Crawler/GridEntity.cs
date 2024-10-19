@@ -22,6 +22,11 @@ namespace LMCore.Crawler
         public static event MoveEvent OnMove;
         public static event PositionTransitionEvent OnPositionTransition;
 
+        /// <summary>
+        /// Way to reference the entity in other systems like dialogs and saves
+        /// </summary>
+        public string Identifier;
+
         protected string PrefixLogMessage(string message) => $"Entity '{name}' @ {Coordinates} anchor {AnchorDirection}/{AnchorMode} looking {LookDirection}: {message}";
 
         public override string ToString() => 

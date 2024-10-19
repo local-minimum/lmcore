@@ -20,7 +20,7 @@ namespace LMCore.TiledDungeon
         /// <summary>
         /// Needs to be after item disposal init
         /// </summary>
-        public int OnLoadPriority => 1001;
+        public int OnLoadPriority => 5;
 
         public void OnLoadGameSave(GameSave save)
         {

@@ -7,8 +7,6 @@ using UnityEngine;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
 
-// TODO: Save for this one (press state, and active state and such)
-// And make save for moving plattis too
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public class TDActuator : TDFeature, IOnLoadSave
