@@ -59,6 +59,9 @@ namespace LMCore.Juice
         }
 
         
+        /// <summary>
+        /// Stop animation and set progression to 1
+        /// </summary>
         public void AbortEase()
         {
             if (!IsEasing) { return; }

@@ -1,4 +1,5 @@
 using LMCore.AbstractClasses;
+using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.Juice;
@@ -64,6 +65,7 @@ namespace LMCore.TiledDungeon
         /// <summary>
         /// Start a loading transition, supplying needed information later
         /// </summary>
+        /// <returns>Action to start loading save</returns>
         public System.Action<Scene, string, SaveLoader> LoadSceneAsync() 
         {
             if (transitioning)
@@ -244,6 +246,11 @@ namespace LMCore.TiledDungeon
         {
             Debug.Log(PrefixLogMessage("Source scene unloaded"));
             loadinSceneCamera.enabled = true;
+            var player = FindAnyObjectByType<GridEntity>();
+            if (player != null)
+            {
+                Debug.LogError(PrefixLogMessage($"We still have a player {player}"));
+            }
             InitiateLevelSceneLoading();
         }
 

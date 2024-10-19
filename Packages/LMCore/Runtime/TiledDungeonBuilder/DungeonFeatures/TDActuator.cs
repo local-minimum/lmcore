@@ -4,21 +4,32 @@ using System.Linq;
 using LMCore.TiledDungeon.Actions;
 using LMCore.TiledDungeon.Integration;
 using UnityEngine;
+using LMCore.IO;
+using LMCore.TiledDungeon.SaveLoad;
 
+// TODO: Save for this one (press state, and active state and such)
+// And make save for moving plattis too
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDActuator : MonoBehaviour
+    public class TDActuator : TDFeature, IOnLoadSave
     {
-        Vector3Int Coordinates => GetComponentInParent<TDNode>().Coordinates;   
-
-        [SerializeField, HideInInspector]
-        int[] groups = new int[0];
-
+        /// <summary>
+        /// Actuator can be interacted with many times
+        /// </summary>
         [SerializeField, HideInInspector]
         bool repeatable;
 
+        /// <summary>
+        /// Toggle groups that pressing (and potentially depressing) triggers
+        /// </summary>
         [SerializeField, HideInInspector]
-        bool automaticUnset;
+        int[] groups = new int[0];
+
+        /// <summary>
+        /// The ability to invoke toggle groups on unset
+        /// </summary>
+        [SerializeField, HideInInspector]
+        bool invokeToggleGroupOnUnset;
 
         [SerializeField, HideInInspector]
         TDEnumInteraction interaction;
@@ -58,7 +69,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.InteractionKey))
                 ?.Interaction(TiledConfiguration.instance.InteractionKey) ?? TDEnumInteraction.Interactable;
 
-            anchor = GetComponent<Anchor>()?.CubeFace ??
+            anchor = Anchor?.CubeFace ??
                 props
                 .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.AnchorKey))
                 ?.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() ?? Direction.None;
@@ -71,10 +82,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             repeatable = props
                 .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
 
-            automaticUnset = props
+            invokeToggleGroupOnUnset = props
                 .Any(prop => prop.Bool(TiledConfiguration.instance.ObjRepeatableKey));
 
             Debug.Log(this);
+        }
+
+        private void Start()
+        {
+            InitStartCoordinates();
         }
 
         private void OnEnable()
@@ -135,7 +151,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                TDNode.OnNewOccupant += TDNode_OnNewOccupant;
+                TDNode.OnNewOccupant -= TDNode_OnNewOccupant;
             }
         }
 
@@ -170,6 +186,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        public int OnLoadPriority => 500;
+
         void Press()
         {
             foreach (var group in groups)
@@ -196,7 +214,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 action.Play(null);
             }
 
-            if (automaticUnset)
+            if (invokeToggleGroupOnUnset)
             {
                 foreach (var group in groups)
                 {
@@ -206,6 +224,55 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             lastActionWasPress = false;
+        }
+
+        public KeyValuePair<Vector3Int, ActuatorSave> Save() =>
+            new KeyValuePair<Vector3Int, ActuatorSave>(
+                StartCoordinates,
+                new ActuatorSave() { 
+                    active = active,
+                    lastActionWasPress = lastActionWasPress,
+                });
+
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null) return;
+
+            var lvl = GetComponentInParent<IDungeon>().MapName;
+            var actuatorSave = save.levels[lvl]?.actuators.GetValueOrDefault(StartCoordinates);
+
+            if (actuatorSave == null)
+            {
+                Debug.LogError(PrefixLogMessage("I have no saved state"));
+                return; 
+            }
+
+            active = actuatorSave.active;
+            lastActionWasPress = actuatorSave.lastActionWasPress;
+
+            if (lastActionWasPress && !automaticallyResets)
+            {
+                foreach (var action in pressActions)
+                {
+                    action.Play();
+                    action.Finalise(false);
+                }
+            } else
+            {
+                foreach (var action in dePressAction)
+                {
+                    action.Play();
+                    action.Finalise(false);
+                }
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
         }
     }
 }

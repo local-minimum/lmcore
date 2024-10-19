@@ -42,8 +42,8 @@ namespace LMCore.TiledDungeon.SaveLoad
         [ContextMenu("Load AutoSave")]
         void LoadAutoSave()
         {
-            var continueLoading = levelManager.LoadSceneAsync();
-            if (continueLoading == null) return;
+            var startLoadingSave = levelManager.LoadSceneAsync();
+            if (startLoadingSave == null) return;
 
             var player = FindObjectOfType<TDPlayerEntity>();
             if (player == null) {
@@ -52,15 +52,15 @@ namespace LMCore.TiledDungeon.SaveLoad
 
             LoadSaveAsync(
                 0,
-                (save, invokeLoadSave) => 
-                    continueLoading(
+                (save, loadSave) => 
+                    startLoadingSave(
                         player.gameObject.scene, 
                         save.player.levelName, 
-                        continueLoading => { 
-                            invokeLoadSave();
-                            continueLoading();
+                        completeLoading => { 
+                            loadSave();
+                            completeLoading();
                         }),
-                () => continueLoading(player.gameObject.scene, FirstLevelSceneName, null)
+                () => startLoadingSave(player.gameObject.scene, FirstLevelSceneName, null)
             );
         }
 

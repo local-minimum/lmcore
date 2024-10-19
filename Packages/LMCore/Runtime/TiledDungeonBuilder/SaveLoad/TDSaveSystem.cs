@@ -1,7 +1,6 @@
 using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -70,13 +69,19 @@ namespace LMCore.TiledDungeon.SaveLoad
                 levelSave.doors = new SerializableDictionary<Vector3Int, DoorSave>(
                     dungeon
                         .GetComponentsInChildren<TDDoor>()
-                        .Select(door => new KeyValuePair<Vector3Int, DoorSave>(door.Coordinates, door.Save()))
+                        .Select(door => door.Save())
+                );
+
+                levelSave.actuators = new SerializableDictionary<Vector3Int, ActuatorSave>(
+                    dungeon
+                        .GetComponentsInChildren<TDActuator>()
+                        .Select(actuator => actuator.Save())
                 );
 
                 levelSave.spikes = new SerializableDictionary<Vector3Int, SpikeTrapSave>(
                     dungeon
                         .GetComponentsInChildren<TDSpikeTrap>()
-                        .Select(spike => new KeyValuePair<Vector3Int, SpikeTrapSave>(spike.Position, spike.Save()))
+                        .Select(spike => spike.Save())
                 );
 
                 levelSave.illusions = dungeon

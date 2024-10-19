@@ -66,7 +66,6 @@ namespace LMCore.TiledDungeon
 
             container.Configure(
                 nodeConfig, 
-                node.Coordinates, 
                 anchor,
                 facingDirection, 
                 containerClass, 
@@ -255,8 +254,6 @@ namespace LMCore.TiledDungeon
             );
 
             node.Door?.Configure(
-                node,
-                node.Coordinates, 
                 node.modifications.Where(TDNode.DoorFilter).ToArray()
             );
         }
@@ -335,7 +332,7 @@ namespace LMCore.TiledDungeon
 
             if (go == null) return false;
 
-            go.GetComponent<TDSpikeTrap>()?.Configure(node, node.Coordinates, node.modifications);
+            go.GetComponent<TDSpikeTrap>()?.Configure(node, node.modifications);
 
             ApplyAnchorRotation(go, direction);
             return true;
@@ -393,8 +390,6 @@ namespace LMCore.TiledDungeon
                             var door = trapdoor.GetComponent<TDDoor>();
 
                             door?.Configure(
-                                node,
-                                node.Coordinates,
                                 node.modifications.Where(TDNode.TrapDoorFilter).ToArray()
                             );
 
@@ -481,7 +476,7 @@ namespace LMCore.TiledDungeon
                     {
                         spikes.name = $"Spikes ({direction})";
 
-                        spikes.GetComponent<TDSpikeTrap>()?.Configure(node, node.Coordinates, node.modifications);
+                        spikes.GetComponent<TDSpikeTrap>()?.Configure(node, node.modifications);
 
                         // Spikes have no rotation so hopefully sentinells are like they should be
                         // ApplyAnchorRotation(spikes, direction);

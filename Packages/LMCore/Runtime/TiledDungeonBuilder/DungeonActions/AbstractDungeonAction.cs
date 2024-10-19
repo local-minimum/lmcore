@@ -6,8 +6,16 @@ namespace LMCore.TiledDungeon.Actions
     {
         abstract public bool Available { get; }
         abstract public bool IsEasing { get; }
+
+        /// <summary>
+        /// Stop easing and synchronize state with current position
+        /// </summary>
         abstract public void Abandon();
-        abstract public void Finalise();
+
+        /// <summary>
+        /// Stop easing, synchronize state as final position, and potentially invoke events
+        /// </summary>
+        abstract public void Finalise(bool invokeEvents = true);
         abstract public void Play(System.Action onDoneCallback = null, System.Action<float> onProgress = null);
 
         abstract public void PlayFromCurrentProgress(System.Action onDoneCallback = null, System.Action<float> onProgress = null);

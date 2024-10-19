@@ -36,16 +36,19 @@ namespace LMCore.TiledDungeon.Actions
             ApplyRotation(easing.Evaluate());
         }
 
-        System.Action OnDoneCallback;
-        System.Action<float> OnProgressCallback;
+        Action OnDoneCallback;
+        Action<float> OnProgressCallback;
 
-        public override void Finalise()
+        public override void Finalise(bool invokeEvents)
         {
             easing.AbortEase();
             ApplyRotation(easing.Evaluate());
 
-            OnProgressCallback?.Invoke(1f);
-            OnDoneCallback?.Invoke();
+            if (invokeEvents)
+            {
+                OnProgressCallback?.Invoke(1f);
+                OnDoneCallback?.Invoke();
+            }
 
             OnDoneCallback = null;
             OnProgressCallback = null;

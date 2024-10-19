@@ -9,7 +9,7 @@ using LMCore.TiledDungeon.SaveLoad;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDSpikeTrap : MonoBehaviour, IOnLoadSave
+    public class TDSpikeTrap : TDFeature, IOnLoadSave
     {
         enum Management { Automatic, ToggleGroup, Sequencer };
 
@@ -38,10 +38,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         Direction anchor;
 
-        [SerializeField, HideInInspector]
-        Vector3Int position;
-        public Vector3Int Position => position;
-
         [SerializeField]
         string ExtendTrigger = "Extend";
 
@@ -54,9 +50,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         string ExtendedTrigger = "Extended";
 
-        protected string PrefixLogMessage(string message) => $"Spikes @ {position}: {message}";
+        protected string PrefixLogMessage(string message) => $"Spikes @ {Coordinates}: {message}";
 
-        HashSet<int> ToggleGroups => node
+        HashSet<int> ToggleGroups => Node
             .Config
             .GetObjectValues(
                 TiledConfiguration.instance.ObjToggleGroupClass,
@@ -65,7 +61,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             .Where(group => group > 0)
             .ToHashSet();
 
-        TiledCustomProperties SequenceGroupProps => node
+        TiledCustomProperties SequenceGroupProps => Node
             .Config
             .FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.ObjSequencerGroupClass);
 
@@ -79,32 +75,18 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool managed => management != Management.Automatic;
 
-        TDNode _node;
-        TDNode node
-        {
-            get
-            {
-                if (_node == null)
-                {
-                    _node = GetComponentInParent<TDNode>();
-                }
-                return _node;
-            }
-        }
-
         void Start()
         {
+            InitStartCoordinates();
             Sync();
             SetNextPhaseTime();
         }
 
         public void Configure(
             TDNode node,
-            Vector3Int position,
             TileModification[] modifications
         )
         {
-            this.position = position;
             Spikeless = node.Config.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.WallSpikeTrapClass)
                 ?.Bool(TiledConfiguration.instance.ObjSpikelessKey) ?? false;
             
@@ -205,7 +187,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        public int OnLoadPriority => 100;
+        public int OnLoadPriority => 500;
 
         public void HandleAnimationDone()
         {
@@ -254,7 +236,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             if (Spikeless) return;
 
-            foreach (var occupant in node.Occupants)
+            foreach (var occupant in Node.Occupants)
             {
                 // TODO: Hurt them!
             }
@@ -264,7 +246,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             var push = anchor.Inverse();
 
-            foreach (var occupant in node.Occupants)
+            foreach (var occupant in Node.Occupants)
             {
                 var movement = push.AsMovement();
                 Debug.Log(PrefixLogMessage($"Push {occupant.name} {push} using {movement}"));
@@ -324,7 +306,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             var lvl = GetComponentInParent<IDungeon>().MapName;
 
-            var trapSave = save.levels[lvl]?.spikes?.GetValueOrDefault(position);
+            var trapSave = save.levels[lvl]?.spikes?.GetValueOrDefault(StartCoordinates);
 
             if (trapSave == null)
             {
@@ -355,7 +337,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        public SpikeTrapSave Save() => new SpikeTrapSave(phase);
+        public KeyValuePair<Vector3Int, SpikeTrapSave> Save() => 
+            new KeyValuePair<Vector3Int, SpikeTrapSave>(
+                StartCoordinates,
+                new SpikeTrapSave(phase));
 
         public void OnLoad<T>(T save) where T : new()
         {

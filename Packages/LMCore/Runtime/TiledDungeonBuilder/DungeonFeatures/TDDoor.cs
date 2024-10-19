@@ -10,8 +10,7 @@ using LMCore.IO;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    // TODO: Use configuration to present lock and button
-    public class TDDoor : MonoBehaviour, IOnLoadSave
+    public class TDDoor : TDFeature, IOnLoadSave
     {
         private enum Transition { None, Opening, Closing };
 
@@ -19,14 +18,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool isOpen = false;
 
         [SerializeField, HideInInspector]
-        Vector3Int _Position;
-        public Vector3Int Coordinates => _Position;
-
-        [SerializeField, HideInInspector]
         TileModification[] modifications;
-
-        [SerializeField, HideInInspector]
-        TDNode node;
 
         [SerializeField]
         AbstractDungeonAction[] OpenActions;
@@ -48,7 +40,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         public override string ToString() =>
             $"Door Axis({TraversalAxis}) Blocking({BlockingPassage}) Transition({ActiveTransition})";
 
-        protected string PrefixLogMessage(string message) => $"Door @ {_Position}: {message}";
+        protected string PrefixLogMessage(string message) => $"Door @ {Coordinates}: {message}";
 
         [ContextMenu("Info")]
         void Info() => Debug.Log(this);
@@ -112,21 +104,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void Start()
         {
-            if (node != null && !synced)
+            if (!synced)
             {
                 SyncDoor();
             }
         }
 
         public void Configure(
-            TDNode node,
-            Vector3Int position, 
             TileModification[] modifications
         )
         {
-            _Position = position;
             this.modifications = modifications;
-            this.node = node;
 
             SyncDoor();
         }
@@ -212,7 +200,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void GridEntity_OnInteract(GridEntity entity)
         {
             var onTheMove = activelyMovingEntities.Contains(entity);
-            var validPosition = entity.LookDirection.Translate(entity.Coordinates) == _Position;
+            var validPosition = entity.LookDirection.Translate(entity.Coordinates) == Coordinates;
 
             if (!onTheMove && validPosition)
             {
@@ -314,6 +302,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         void SyncDoor()
         {
+            if (synced) return;
+
+            var node = Node;
+            if (node == null) return;
+
+            InitStartCoordinates();
+
             var config = node.Config;
 
             var toggleGroups = config 
@@ -376,7 +371,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             var lvl = GetComponentInParent<IDungeon>().MapName;
 
-            var doorSave = save.levels[lvl]?.doors?.GetValueOrDefault(_Position);
+            var doorSave = save.levels[lvl]?.doors?.GetValueOrDefault(StartCoordinates);
 
             if (doorSave == null)
             {
@@ -395,10 +390,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             Debug.Log(PrefixLogMessage($"Loaded as isOpen({isOpen}) and isLocked({isLocked})"));
         }
 
-        public DoorSave Save()
-        {
-            return new DoorSave(isOpen, isLocked);
-        }
+        public KeyValuePair<Vector3Int, DoorSave> Save() => new KeyValuePair<Vector3Int, DoorSave>(
+            StartCoordinates,
+            new DoorSave(isOpen, isLocked));
 
         public void OnLoad<T>(T save) where T : new()
         {

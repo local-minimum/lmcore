@@ -49,6 +49,13 @@ namespace LMCore.TiledDungeon.SaveLoad
     }
 
     [System.Serializable]
+    public class ActuatorSave
+    {
+        public bool lastActionWasPress;
+        public bool active;
+    }
+
+    [System.Serializable]
     public class GridEntitySave
     {
         public Vector3Int position;
@@ -141,6 +148,7 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
         public SerializableDictionary<Vector3Int, DoorSave> doors = new ();
+        public SerializableDictionary<Vector3Int, ActuatorSave> actuators = new ();
         public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
         public List<IllusionSave> illusions = new ();
         public List<Vector3Int> playerPositions = new ();

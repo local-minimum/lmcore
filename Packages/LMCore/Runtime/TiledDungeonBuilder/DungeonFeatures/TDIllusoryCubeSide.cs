@@ -10,7 +10,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public delegate void DiscoverIllusionEvent(Vector3Int position, Direction direction);
 
-    public class TDIllusoryCubeSide : MonoBehaviour, IOnLoadSave
+    public class TDIllusoryCubeSide : TDFeature, IOnLoadSave
     {
         public static event DiscoverIllusionEvent OnDiscoverIllusion;
 
@@ -33,29 +33,21 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         string DiscoveredTrigger = "Discovered";
 
-        TDNode _node;
-        TDNode Node { 
-            get { 
-                if (_node == null)
-                {
-                    _node = GetComponentInParent<TDNode>();
-                }
-                return _node; 
-            } 
-        }
-
-        public Vector3Int Coordinates => Node.Coordinates;
-
         [SerializeField]
         Animator animator;
 
         bool Discovered;
 
-        int IOnLoadSave.OnLoadPriority => 100;
+        int IOnLoadSave.OnLoadPriority => 500;
 
         public void Configure(Direction direction)
         {
             this.direction = direction;
+        }
+
+        private void Start()
+        {
+            InitStartCoordinates();
         }
 
         private void OnEnable()
@@ -119,7 +111,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         }
 
         public IllusionSave Save() => new IllusionSave() { 
-            position = Coordinates,
+            position = StartCoordinates,
             discovered = Discovered,
             direction = direction,
         };
@@ -135,7 +127,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             Discovered = save.levels[lvl]
                 ?.illusions
-                .FirstOrDefault(ill => ill.position == Coordinates && ill.direction == direction)
+                .FirstOrDefault(ill => ill.position == StartCoordinates && ill.direction == direction)
                 ?.discovered ?? false;
 
            if (Discovered)

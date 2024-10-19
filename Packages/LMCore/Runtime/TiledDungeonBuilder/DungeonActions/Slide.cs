@@ -36,14 +36,18 @@ namespace LMCore.TiledDungeon.Actions {
         System.Action OnDoneCallback;
         System.Action<float> OnProgressCallback;
 
-        public override void Finalise()
+        public override void Finalise(bool invokeEvents)
         {
             easing.AbortEase();
             SyncSlide();
-            
-            OnDoneCallback?.Invoke();
-            OnDoneCallback = null;
 
+            if (invokeEvents)
+            {
+                OnProgressCallback?.Invoke(1f);
+                OnDoneCallback?.Invoke();
+            }
+
+            OnDoneCallback = null;
             OnProgressCallback = null;
         }
 

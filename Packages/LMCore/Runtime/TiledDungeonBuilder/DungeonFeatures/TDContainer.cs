@@ -11,7 +11,7 @@ using LMCore.IO;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDContainer : MonoBehaviour, IOnLoadSave
+    public class TDContainer : TDFeature, IOnLoadSave
     {
         [Serializable]
         public enum ContainerPhase { 
@@ -54,10 +54,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         string SyncDisplayCageTrigger;
 
-        [SerializeField, HideInInspector]
-        Vector3Int Position;
-
-        [SerializeField, HideInInspector]
         ContainerPhase phase;
 
         [SerializeField, HideInInspector]
@@ -80,7 +76,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public bool BlockingPassage => blockingPassage;
 
-        private string PrefixLogMessage(string message) => $"Container {name} @ {Position}: {message}";
+        private string PrefixLogMessage(string message) => $"Container {name} @ {Coordinates}: {message}";
 
         public string InventoryId => inventory?.FullId;
 
@@ -91,7 +87,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public void Configure(
             TDNodeConfig nodeConfig,
-            Vector3Int position,
             Direction anchor,
             Direction facingDirection,
             string containerClass,
@@ -100,7 +95,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             )
         {
             this.blockingPassage = blockingPassage;
-            Position = position;
             this.facingDirection = facingDirection;
             this.anchor = anchor;
 
@@ -230,6 +224,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
+        void Start()
+        {
+            InitStartCoordinates();
+        }
+
 
         private void OnEnable()
         {
@@ -243,23 +242,24 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private bool AllowInteractBy(GridEntity entity)
         {
-            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(Position)}) Same Elevation({entity.Coordinates.y == Position.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
+            var coordinates = Coordinates;
+            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(coordinates)}) Same Elevation({entity.Coordinates.y == coordinates.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
             if (anchor == Direction.Down && facingDirection == Direction.None)
             {
                 // TODO: Doesn't account for thin walls...
                 // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
-                return entity.Coordinates.y == Position.y && entity.Coordinates.ManhattanDistance(Position) == 1;
+                return entity.Coordinates.y == coordinates.y && entity.Coordinates.ManhattanDistance(coordinates) == 1;
             } 
 
             if (anchor == Direction.Down)
             {
-                return entity.Coordinates.y == Position.y 
-                    && entity.Coordinates.ManhattanDistance(Position) == 1 
+                return entity.Coordinates.y == coordinates.y 
+                    && entity.Coordinates.ManhattanDistance(coordinates) == 1 
                     && entity.LookDirection == facingDirection.Inverse();
             }
 
             // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
-            return entity.Coordinates == Position 
+            return entity.Coordinates == coordinates 
                 && entity.LookDirection == anchor;
         }
 
