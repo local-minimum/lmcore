@@ -71,6 +71,7 @@ namespace LMCore.TiledDungeon
         public string ObjToggleGroupClass = "ToggleGroup";
         public string ObjSequencerGroupClass = "Sequence";
         public string ObjActuatorClass = "Actuator";
+        public string ObjRelayClass = "Relay";
         public string ObjContainerClass = "Container";
         public string ObjVariantStyleKey = "Style";
         public string ObjGroupKey = "Group";
@@ -88,6 +89,10 @@ namespace LMCore.TiledDungeon
         public string ObjCapacityKey = "Capacity";
         public string ObjItemPatternKey = "Item%";
         public string ObjItemStackSizePatternKey = "Item%-StackSize";
+        public string ObjBidirectionalKey = "Bidirectional";
+        public string ObjRestKey = "Rest";
+        public string ObjInDirectionPatternKey = "In%";
+        public string ObjOutDirectionPatternKey = "Out%";
 
         [Header("Other")]
         public string LayoutLayerPrefix = "dungeon";

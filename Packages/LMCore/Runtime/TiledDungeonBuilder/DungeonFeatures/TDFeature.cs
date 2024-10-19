@@ -1,7 +1,7 @@
 using LMCore.Crawler;
 using UnityEngine;
 
-namespace LMCore.TiledDungeon
+namespace LMCore.TiledDungeon.DungeonFeatures
 {
     public abstract class TDFeature : MonoBehaviour
     {

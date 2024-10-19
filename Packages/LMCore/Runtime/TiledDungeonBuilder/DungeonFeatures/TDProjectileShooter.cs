@@ -3,9 +3,9 @@ using LMCore.Extensions;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LMCore.TiledDungeon
+namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDProjectileShooter : MonoBehaviour
+    public class TDProjectileShooter : TDFeature 
     {
         [SerializeField, HideInInspector]
         Direction ShootDirection;
@@ -20,17 +20,6 @@ namespace LMCore.TiledDungeon
 
         float lastShot;
 
-        TDNode _node;
-        TDNode Node {
-            get {
-                if (_node == null)
-                {
-                    _node = GetComponentInParent<TDNode>();
-                }
-                return _node;
-            } 
-        }
-
         public void Configure(Direction wallSide)
         {
             ShootDirection = wallSide.Inverse();
@@ -41,6 +30,11 @@ namespace LMCore.TiledDungeon
 
         private string PrefixLogMessage(string message) =>
             $"{this}: {message}";
+
+        private void Start()
+        {
+            InitStartCoordinates();
+        }
 
         private void SetupProjectile(Projectile projectile)
         {

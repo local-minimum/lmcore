@@ -499,11 +499,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                         {
                             return true;
                         }
-                        Debug.LogWarning(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
+                        Debug.Log(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
                         return false;
                     }
 
-                    Debug.LogWarning(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
+                    Debug.Log(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
                     return false;
                 }
 
@@ -523,11 +523,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     {
                         return true;
                     }
-                    Debug.LogWarning(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
+                    Debug.Log(PrefixLogMessage($"Can't enter {target} because it already has same side stuff at {anchor.CubeFace}"));
                     return false;
                 }
 
-                Debug.LogWarning(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
+                Debug.Log(PrefixLogMessage($"Refused because {target} doesn't allow entry from {moveDirection.Inverse()} or has a {moveDirection} side alreador has a {moveDirection} side blocking"));
                 return false;
             }
 
@@ -623,11 +623,22 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         void InitMoveStep() => InitMoveStep(false);
         void InitMoveStep(bool resume)
         {
-            Debug.Log(PrefixLogMessage($"Init move {MoveDirection}"));
+            var relay = Node.GetComponent<TDRelay>();
+            if (!resume && relay != null && relay.Relays(MoveDirection.Inverse(), out var newDirection))
+            {
+                Debug.Log(PrefixLogMessage($"Relay caused us to change direction from {MoveDirection} to {newDirection} with rest {relay.Rest}s"));
+                MoveDirection = newDirection;
+                if (relay.Rest > 0f)
+                {
+                    phaseStart = relay.Rest + Time.timeSinceLevelLoad;
+                    phase = Phase.Moving;
+                    resume = true;
+                }
+            }
 
             if (!CanTranslate(MoveDirection))
             {
-                Debug.Log(PrefixLogMessage($"I've reached end of my movement , can't move {MoveDirection} to {MoveDirection.Translate(Coordinates)}"));
+                Debug.Log(PrefixLogMessage($"I've reached end of my movement, can't move {MoveDirection} to {MoveDirection.Translate(Coordinates)}"));
                 InitWaitEnd();
                 return;
             }
@@ -725,7 +736,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     continue;
                 }
 
-                // TODO: We might need to save the offsets too!
                 Transform newConstrainer = ConstrainingTransform(null, constraintSave.Offset, constraintSave.Anchor);
 
                 if (newConstrainer != null)

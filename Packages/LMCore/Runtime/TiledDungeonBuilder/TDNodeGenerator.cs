@@ -581,6 +581,7 @@ namespace LMCore.TiledDungeon
             ConfigurePillar(node, config);
             ConfigurePedistal(node, config);
             ConfigureChest(node, config);
+            TDRelay.Configure(node);
 
             node.Log("Generated", Debug.Log);
         }
