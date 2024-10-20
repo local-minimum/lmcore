@@ -101,7 +101,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 anchor = Direction.Down;
             }
 
-            // TODO: Improve this logging
             Debug.Log(PrefixLogMessage($"Spikeless({Spikeless}) Anchor({anchor})"));
 
             Sync();

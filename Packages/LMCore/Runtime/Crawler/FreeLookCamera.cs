@@ -27,6 +27,12 @@ namespace LMCore.Crawler
         [SerializeField, Range(0, 0.5f), Tooltip("The higher look amount is the lower this must be to avoid spinning bug")]
         float verticalLookClamp = 0.1f;
 
+        [SerializeField, Range(0f, 3f)]
+        float forwardTranslation = 1f;
+
+        [SerializeField, Range(0, 1)]
+        float translationLerp = 0.05f;
+
         bool freeLooking;
 
         GridEntity _entity;
@@ -114,15 +120,29 @@ namespace LMCore.Crawler
 
                 var target = Quaternion.LookRotation(lookat - transform.position, transform.up);
                 cam.transform.rotation = Quaternion.Lerp(transform.rotation, target, lookAmount);
+
+                // Only translate forward when not on wall
+                var z = cam.transform.localPosition.z;
+                if (!Entity.AnchorDirection.IsPlanarCardinal())
+                {
+                    cam.transform.localPosition = Vector3.forward * Mathf.Lerp(z, forwardTranslation, translationLerp);
+                } else
+                {
+                    cam.transform.localPosition = Vector3.forward * Mathf.Lerp(z, 0, 0.5f);
+                }
             }
             else if (cam.transform.localRotation != Quaternion.identity)
             {
                 cam.transform.localRotation = Quaternion
                     .Lerp(cam.transform.localRotation, Quaternion.identity, snapbackLerp);
 
+                var z = cam.transform.localPosition.z;
+                cam.transform.localPosition = Vector3.forward * Mathf.Lerp(z, 0, 0.5f);
+
                 if (Quaternion.Angle(cam.transform.localRotation, Quaternion.identity) < identityThreshold)
                 {
                     cam.transform.localRotation = Quaternion.identity;
+                    cam.transform.localPosition = Vector3.zero;
                 }
             }
         }
