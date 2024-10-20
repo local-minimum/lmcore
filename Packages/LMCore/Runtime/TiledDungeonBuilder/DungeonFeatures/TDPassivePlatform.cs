@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDPassivePlatform :  TDFeature
+    public class TDPassivePlatform :  TDFeature, IMovingCubeFace
     {
         [SerializeField, HideInInspector]
         string movingPlatformId;
@@ -16,6 +16,9 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [HideInInspector]
         public Transform Backside;
+
+        public Vector3 VirtualNodeCenter =>
+            transform.position + (Dungeon?.GridSize ?? 3f) * 0.5f * Vector3.up;
 
         protected string PrefixLogMessage(string message) =>
             $"Plassive Platform to '{movingPlatformId}' @ {Coordinates}: {message}";
@@ -36,6 +39,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (Backside != null)
             {
                 platform.AddAttachedObject(Backside, cubeFace.Inverse()); 
+            }
+
+            var anchor = Anchor;
+            if (anchor != null) {
+                anchor.ManagingMovingCubeFace = this;
             }
         }
         

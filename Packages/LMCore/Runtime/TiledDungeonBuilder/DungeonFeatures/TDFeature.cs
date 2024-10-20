@@ -30,5 +30,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public TDNode Node => GetComponentInParent<TDNode>();
         public Anchor Anchor => GetComponentInParent<Anchor>();
+
+        TiledDungeon _dungeon;
+        protected TiledDungeon Dungeon {
+            get {
+                if (_dungeon == null)
+                {
+                    _dungeon = GetComponentInParent<TiledDungeon>();
+                }
+                return _dungeon;
+            }
+        }
     }
 }

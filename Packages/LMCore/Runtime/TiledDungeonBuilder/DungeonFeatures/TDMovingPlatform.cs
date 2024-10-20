@@ -41,17 +41,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         bool alwaysClaimToBeAligned;
 
-        TiledDungeon _dungeon;
-        TiledDungeon Dungeon {
-            get {
-                if (_dungeon == null)
-                {
-                    _dungeon = GetComponentInParent<TiledDungeon>();
-                }
-                return _dungeon;
-            }
-        }
-
         [SerializeField, HideInInspector]
         Direction MoveDirection = Direction.None;
         Direction OriginalDirection;
@@ -95,7 +84,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         /// <summary>
         /// World position of a virtual node center misaligned with the dungeon grid
         /// </summary>
-        public Vector3 VirtualNodeCenter => transform.position + (Dungeon?.GridSize ?? 3f) * 0.5f * Vector3.up;
+        public Vector3 VirtualNodeCenter => 
+            transform.position + (Dungeon?.GridSize ?? 3f) * 0.5f * Vector3.up;
 
         protected string PrefixLogMessage(string message) => $"{Interaction} Moving Platform {Coordinates} (origin {StartCoordinates}): {message}";
 
@@ -550,10 +540,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             foreach (var mo in managedOffsetSides)
             {
+                var otherAnchor = mo.Transform.GetComponent<Anchor>();
                 var otherCoordinates = mo.Offset + coordinates;
                 if (Dungeon.HasNodeAt(otherCoordinates))
                 {
-                    Dungeon[otherCoordinates].UpdateSide(mo.AnchorDirection, value);
+                    var otherNode = Dungeon[otherCoordinates];
+                    otherNode.UpdateSide(mo.AnchorDirection, value);
+                    if (value && otherAnchor != null)
+                    {
+                        mo.Transform.SetParent(otherNode.transform);
+                    }
                 }
                 else
                 {
@@ -564,11 +560,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         bool BecomeTile(Vector3Int coordinates, bool translate = false)
         {
-            var currentNode = Node;
+            var prevNode = Node;
             var anchor = Anchor;
-            var myFace = anchor?.CubeFace ?? Direction.Down;
+            var myFace = (anchor != null) ? anchor.CubeFace : Direction.Down;
 
-            if (currentNode.Coordinates == coordinates)
+            if (prevNode.Coordinates == coordinates)
             {
                 Debug.LogWarning(PrefixLogMessage($"I'm already at {coordinates}"));
 
@@ -579,15 +575,19 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return true;
             }
 
+            Dictionary<GridEntity, Vector3Int> entityOffsets = new Dictionary<GridEntity, Vector3Int>();
+
             foreach (var entity in constrainedEntities)
             {
-                entity.Node.RemoveOccupant(entity);
+                entityOffsets[entity] = entity.Coordinates - prevNode.Coordinates;
+                //entity.Node.RemoveOccupant(entity);
             }
 
+            Debug.LogWarning(string.Join(",", entityOffsets.Select(kvp => $"{kvp.Key.name} ({kvp.Key.Coordinates}) - {prevNode.Coordinates} = {kvp.Value}")));
 
             // Clear my position
-            currentNode.UpdateSide(myFace, false);
-            SetManagedNodeCubeSides(currentNode.Coordinates, false);
+            prevNode.UpdateSide(myFace, false);
+            SetManagedNodeCubeSides(prevNode.Coordinates, false);
 
             // Gain new position
             if (Dungeon.HasNodeAt(coordinates))
@@ -599,18 +599,24 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 // We really need to also ask those to update their own parenting so they are the correct nodes
                 SetManagedNodeCubeSides(coordinates, true);
-
-                // Constrained enemies must enter new node
-                foreach (var entity in constrainedEntities)
-                {
-                    // Since entity should be attached to us / our anchor it doesn't need to update its own node
-                    newNode.AddOccupant(entity);
-                    Debug.Log(PrefixLogMessage($"Managed entity now is {entity}"));
-                }
-
             } else
             {
                 Debug.LogError(PrefixLogMessage($"Could not become {coordinates} because dungeon lacks node"));
+            }
+
+            // Constrained enemies must enter new nodes
+            foreach (var entity in constrainedEntities)
+            {
+                var newEntityCoordinates = coordinates += entityOffsets[entity];
+                if (Dungeon.HasNodeAt(newEntityCoordinates))
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Managed entity {entity.name} is becoming {newEntityCoordinates}"));
+                    var newEntityNode = Dungeon[newEntityCoordinates];
+                    entity.transform.SetParent(newEntityNode.transform);
+                } else
+                {
+                    Debug.LogError(PrefixLogMessage($"Can't place {entity} at {newEntityCoordinates} because outside dungeon"));
+                }
             }
 
             if (translate)

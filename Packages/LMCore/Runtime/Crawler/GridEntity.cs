@@ -238,7 +238,9 @@ namespace LMCore.Crawler
                     }
                 } else
                 {
+                    _anchorDirection = AnchorDirection;
                     Node = null;
+                    NodeAnchor = null;
                 }
 
                 if (newCoords) OnPositionTransition?.Invoke(this);
