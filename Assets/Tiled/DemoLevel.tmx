@@ -160,7 +160,7 @@
    </object>
   </objectgroup>
  </group>
- <group id="7" name="Elevation 1" visible="0" opacity="0.99">
+ <group id="7" name="Elevation 1" opacity="0.99">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
@@ -552,7 +552,8 @@
    </object>
    <object id="44" name="Shuttle" type="PassivePlatform" x="691.333" y="84.6667">
     <properties>
-     <property name="MovingPlatform" value="TwoPartPlatform"/>
+     <property name="BelongsTo" value="TwoPartPlatform"/>
+     <property name="Direction" propertytype="Direction" value="Down"/>
     </properties>
     <point/>
    </object>

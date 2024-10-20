@@ -286,8 +286,16 @@ namespace LMCore.TiledDungeon
 
         static void ConfigureMovingPlatform(TDNode node, GameObject floor)
         {
+            if (floor.GetComponent<TDMovingPlatform>() != null)
+            {
+                return;
+            }
+
             var mover = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.instance.MovingPlatformClass);
-            if (mover == null) { return; }
+            if (mover == null) { 
+                TDPassivePlatform.Configure(node, Direction.Down, floor);
+                return;
+            }
 
             var conf = node.Dungeon.GetNodeConfig(node.Coordinates);
             var platform = floor.AddComponent<TDMovingPlatform>();
@@ -534,12 +542,17 @@ namespace LMCore.TiledDungeon
                     }
                 }
 
-                if (upNode != null) 
+                if (direction == Direction.Up && upNode != null) 
                 {
                     var upIsMovingFloor = upNode.GetComponentInChildren<TDMovingPlatform>();
                     if (upIsMovingFloor != null)
                     {
                         upIsMovingFloor.AddAttachedObject(go.transform, direction);
+                    }
+                    var upIsPassiveFloor = upNode.GetComponentInChildren<TDPassivePlatform>();
+                    if (upIsPassiveFloor != null)
+                    {
+                        upIsPassiveFloor.Backside = go.transform;
                     }
                 } else if (direction == Direction.Down)
                 {

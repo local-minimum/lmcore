@@ -88,6 +88,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         TDEnumLoop managedToggleEffect = TDEnumLoop.None;
 
+        [SerializeField, HideInInspector]
+        string _identifier;
+        public string Identifier => _identifier;
+
         /// <summary>
         /// World position of a virtual node center misaligned with the dungeon grid
         /// </summary>
@@ -103,21 +107,25 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public void Configure(TDNodeConfig conf)
         {
-            var platform = conf.FirstObjectProps(obj => obj.Type == TiledConfiguration.instance.MovingPlatformClass);
+            var tConf = TiledConfiguration.InstanceOrCreate();
+
+            var platform = conf.FirstObjectProps(obj => obj.Type == tConf.MovingPlatformClass);
             if (platform == null)
             {
                 Debug.LogWarning(PrefixLogMessage("Could not find any configuration"));
                 return;
             }
 
-            MoveDirection = platform.Direction(TiledConfiguration.instance.DirectionKey, TDEnumDirection.None).AsDirection();
-            Loop = platform.Loop(TiledConfiguration.instance.LoopKey);
-            Interaction = platform.Interaction(TiledConfiguration.instance.InteractionKey, TDEnumInteraction.Automatic);
-            moveSpeed = platform.Float(TiledConfiguration.instance.VelocityKey, moveSpeed);
-            loopDelay = platform.Float(TiledConfiguration.instance.PauseKey, loopDelay);
-            alwaysClaimToBeAligned = platform.Bool(TiledConfiguration.instance.ClaimAlwaysAlignedKey, true);
-            managedByGroup = platform.Int(TiledConfiguration.instance.ObjManagedByGroupKey, -1);
-            managedToggleEffect = platform.Loop(TiledConfiguration.instance.ObjToggleEffectKey, TDEnumLoop.None);
+
+            MoveDirection = platform.Direction(tConf.DirectionKey, TDEnumDirection.None).AsDirection();
+            Loop = platform.Loop(tConf.LoopKey);
+            Interaction = platform.Interaction(tConf.InteractionKey, TDEnumInteraction.Automatic);
+            moveSpeed = platform.Float(tConf.VelocityKey, moveSpeed);
+            loopDelay = platform.Float(tConf.PauseKey, loopDelay);
+            alwaysClaimToBeAligned = platform.Bool(tConf.ClaimAlwaysAlignedKey, true);
+            managedByGroup = platform.Int(tConf.ObjManagedByGroupKey, -1);
+            managedToggleEffect = platform.Loop(tConf.ObjToggleEffectKey, TDEnumLoop.None);
+            _identifier = platform.String(tConf.ObjIdKey, "");
         }
 
         [Serializable]
@@ -142,19 +150,22 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         ConstraintSource constraintSource => new ConstraintSource() { sourceTransform = transform, weight = 1 };
         public void AddAttachedObject(Transform attached, Direction cubeSide)
         {
+            var translationOffset = attached.position - transform.position;
             var constraint = attached.gameObject.AddComponent<PositionConstraint>();
             constraint.AddSource(constraintSource);
+            constraint.translationAtRest = translationOffset;
+            constraint.translationOffset = translationOffset;
             constraint.constraintActive = true;
 
             if (cubeSide == Direction.None) return;
 
             var otherNode = attached.GetComponentInParent<TDNode>();
-            var offset = otherNode.Coordinates - Coordinates;
+            var coordinatesOffset = otherNode.Coordinates - Coordinates;
 
-            Debug.Log(PrefixLogMessage($"Is coordinating transform with offset {offset} cube face {cubeSide}"));
+            Debug.Log(PrefixLogMessage($"Is coordinating transform with offset {coordinatesOffset} cube face {cubeSide}"));
             managedOffsetSides.Add(new ManagedOffset()
             {
-                Offset = offset,
+                Offset = coordinatesOffset,
                 AnchorDirection = cubeSide,
                 Transform = attached,
             });

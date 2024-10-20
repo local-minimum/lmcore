@@ -163,7 +163,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     var capacity = prop.Int(TiledConfiguration.instance.ObjCapacityKey, 0);
 
                     inventory.Configure(
-                        prop.String(TiledConfiguration.instance.ObjContainerIdKey),
+                        prop.String(TiledConfiguration.instance.ObjIdKey),
                         transform.parent?.GetComponentInParent<AbsInventory>(true),
                         capacity
                     );
