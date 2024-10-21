@@ -32,9 +32,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField, HideInInspector]
         TDEnumInteraction interaction;
 
-        [SerializeField, HideInInspector]
-        Direction anchor;
-
         [SerializeField]
         AbstractDungeonAction[] pressActions;
 
@@ -47,7 +44,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool lastActionWasPress = false;
 
         public override string ToString() =>
-            $"Actuator {name} @ {Coordinates}/{anchor} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
+            $"Actuator {name} @ {Coordinates}/{Anchor.CubeFace} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
         protected string PrefixLogMessage(string message) =>
             $"Actuator {name} @ {Coordinates}: {message}";
 
@@ -66,11 +63,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             interaction = props
                 .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.InteractionKey))
                 ?.Interaction(TiledConfiguration.instance.InteractionKey) ?? TDEnumInteraction.Interactable;
-
-            anchor = Anchor?.CubeFace ??
-                props
-                .FirstOrDefault(prop => prop.StringEnums.ContainsKey(TiledConfiguration.instance.AnchorKey))
-                ?.Direction(TiledConfiguration.instance.AnchorKey).AsDirection() ?? Direction.None;
 
             groups = props
                 .Select(prop => prop.Int(TiledConfiguration.instance.ObjGroupKey))
@@ -99,46 +91,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                TDNode.OnNewOccupant += TDNode_OnNewOccupant;
+                GridEntity.OnPositionTransition += GridEntity_OnPositionTransition;
             }
-        }
-
-        private void TDNode_OnNewOccupant(TDNode node, GridEntity entity)
-        {
-            if (entity.TransportationMode.HasFlag(TransportationMode.Flying) ||
-                entity.Coordinates != Coordinates
-                || entity.AnchorDirection != anchor)
-            {
-                var hadOccupant = occupants.Contains(entity);
-                occupants.Remove(entity);
-
-                if (hadOccupant) { 
-                    if (lastActionWasPress && occupants.Count() == 0)
-                    {
-                        Depress();
-                    }
-                    else
-                    {
-                        Debug.LogWarning(
-                            PrefixLogMessage($"Entity {entity.name} moved away but last action was press({lastActionWasPress}) and occupant ({occupants.Count()})"));
-                    }
-                }
-
-                return;
-            }
-
-            bool wasEmpty = occupants.Count == 0;
-            occupants.Add(entity);
-
-            if (automaticallyResets || (!lastActionWasPress && wasEmpty))
-            {
-                Debug.Log(PrefixLogMessage($"Gained occupant {wasEmpty} {automaticallyResets} {lastActionWasPress}"));
-                Press();
-            } else
-            {
-                Debug.LogWarning(PrefixLogMessage($"Could not press: wasEmpty({wasEmpty}), last was press({lastActionWasPress}), automatic reset ({automaticallyResets})"));
-            }
-
         }
 
         private void OnDisable()
@@ -149,7 +103,32 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                TDNode.OnNewOccupant -= TDNode_OnNewOccupant;
+                GridEntity.OnPositionTransition -= GridEntity_OnPositionTransition;
+            }
+        }
+
+        private void GridEntity_OnPositionTransition(GridEntity entity)
+        {
+            var flying = entity.TransportationMode.HasFlag(TransportationMode.Flying);
+            var onMe = entity.Coordinates == Coordinates && entity.AnchorDirection == Anchor.CubeFace;
+            if (occupants.Contains(entity))
+            {
+                if (flying || !onMe)
+                {
+                    occupants.Remove(entity);
+                }
+
+                if (occupants.Count() == 0 && lastActionWasPress)
+                {
+                    Depress();
+                }
+            } else if (onMe && !flying)
+            {
+                occupants.Add(entity);
+                if (occupants.Count() == 1 && (automaticallyResets || !lastActionWasPress))
+                {
+                    Press();
+                }
             }
         }
 

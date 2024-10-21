@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Console
+  m_Title: Game
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 54
+  controlID: 98
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -226,7 +226,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 55
+  controlID: 53
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -251,7 +251,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 56
+  controlID: 54
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -622,7 +622,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 1442438
+  m_LastSelectedObjectID: 35824
 --- !u!114 &15
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -645,9 +645,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 580
+    y: 581
     width: 1416
-    height: 429
+    height: 428
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -684,14 +684,14 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 1
-    - e00: 0.7415142
+    - e00: 1
       e01: 0
       e02: 0
-      e03: 262.67255
+      e03: -4
       e10: 0
-      e11: 0.7415142
+      e11: 1
       e12: 0
-      e13: 235.63564
+      e13: 123.5
       e20: 0
       e21: 0
       e22: 1
@@ -781,10 +781,10 @@ MonoBehaviour:
       e32: 0
       e33: 1
   m_PreviewAnimator: {fileID: 0}
-  m_AnimatorController: {fileID: 9100000, guid: 308dc047d6b2cd54bb54c410f2b93d87,
+  m_AnimatorController: {fileID: 9100000, guid: 706c8d68877a4024a82486e24dbd2510,
     type: 2}
   m_BreadCrumbs:
-  - m_Target: {fileID: -8894388473787376846, guid: 308dc047d6b2cd54bb54c410f2b93d87,
+  - m_Target: {fileID: 8912211369859363645, guid: 706c8d68877a4024a82486e24dbd2510,
       type: 2}
     m_ScrollPosition: {x: 0, y: 0}
   stateMachineGraph: {fileID: 0}
@@ -844,7 +844,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder/DungeonFeatures
+    - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -852,16 +852,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder/DungeonFeatures
+  - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 420}
-    m_SelectedIDs: 2ae70000
-    m_LastClickedID: 59178
-    m_ExpandedIDs: 00000000e6e40000e8e40000eae40000eee40000f0e4000000e7000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 388}
+    m_SelectedIDs: 7ee50000
+    m_LastClickedID: 58750
+    m_ExpandedIDs: 0000000076e5000078e500007ae500007ce500007ee5000080e5000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -889,7 +889,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000e6e40000e8e40000eae40000ece40000eee40000f0e40000
+    m_ExpandedIDs: 0000000076e5000078e500007ae500007ce500007ee5000080e50000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -914,24 +914,24 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: ec95fcff
-    m_LastClickedInstanceID: -223764
+    m_SelectedInstanceIDs: 0a0b0000
+    m_LastClickedInstanceID: 2826
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000326dfffff2c30300
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: TDProjectileShooter
-      m_OriginalName: TDProjectileShooter
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 2220
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 5}
     m_CreateAssetUtility:
@@ -966,8 +966,8 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1417
-    y: 73
+    x: -30583
+    y: -31970
     width: 502
     height: 936
   m_SerializedDataModeController:
@@ -1031,9 +1031,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 50faffff
-      m_LastClickedID: -1456
-      m_ExpandedIDs: ac46fcffa851fcffe695fcffec95fcffa4a4fcffeac4fcff387ffdff3e7ffdff88aefdff5ee7fdff72e7fdffaaf0fdffb0f0fdfffa1ffeff6cebfeff508afffff6b8ffff1efbfffff4ffffff709d000038f607009ef7070006f90700081808004a1a1600681d1600682616008240160004f2160036fa160036031700680b1700501d1700
+      m_SelectedIDs: f08b0000
+      m_LastClickedID: 35824
+      m_ExpandedIDs: f420faffc024faff5255faffce57faffda57faff0859faff3259faff545cfaff8c5cfaff9e5dfaff6c5efaff1e62faff0063faff7063faffa063faff669cfaff74c7fbffbec8fbff8cc9fbffdeaffcff28b1fcfff6b1fcfff025fdff0828fdff449bfdff5c9dfdffaae2feff78e3feffa8e8fefface8feff6c65ffffa46affff94abffffa8abffff54aeffff5eaeffff78aeffff9aaeffff24d2ffff2ed2ffff4cd2ffff12fbfffff4ffffffcc810000e29c0000b6bf0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1401,9 +1401,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 42.68396, y: 0.30576134, z: 61.93571}
+    m_Target: {x: 57.85384, y: -6.967419, z: 86.564606}
     speed: 2
-    m_Value: {x: 42.68396, y: 0.30576134, z: 61.93571}
+    m_Value: {x: 57.85384, y: -6.967419, z: 86.564606}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1449,13 +1449,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.1610845, y: -0.5538608, z: 0.110387035, w: -0.8096397}
+    m_Target: {x: 0.5699625, y: 0.16823763, z: -0.12058956, w: 0.7951721}
     speed: 2
-    m_Value: {x: -0.16105135, y: -0.55374676, z: 0.11036431, w: -0.80947304}
+    m_Value: {x: 0.569962, y: 0.16823749, z: -0.12058946, w: 0.79517144}
   m_Size:
-    m_Target: 15.322806
+    m_Target: 9.701331
     speed: 2
-    m_Value: 15.322806
+    m_Value: 9.701331
   m_Ortho:
     m_Target: 1
     speed: 2

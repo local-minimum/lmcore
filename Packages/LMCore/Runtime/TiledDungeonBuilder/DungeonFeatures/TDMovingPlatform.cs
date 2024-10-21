@@ -257,9 +257,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 Debug.Log(PrefixLogMessage($"Starting platform Interaction({Interaction}) Loop({Loop}) MoveDirection({MoveDirection})"));
                 InitWaitToStart();
+            } else if (Interaction == TDEnumInteraction.Managed && managedToggleEffect == TDEnumLoop.Bounce)
+            {
+                MoveDirection = MoveDirection.Inverse();
             }
 
-            // TODO: Figure out this managing moving cube face business
             var anchor = Anchor;
             if (anchor != null) {
                 anchor.ManagingMovingCubeFace = this;
@@ -299,26 +301,18 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             isToggled = !isToggled;
             Debug.Log(PrefixLogMessage($"Toggling the platform to {isToggled}"));
-            if (isToggled && managedToggleEffect == TDEnumLoop.Bounce)
-            {
-                if (MoveDirection != OriginalDirection)
-                {
-                    MoveDirection = MoveDirection.Inverse();
-                    ActivePhaseFunction = null;
-                    InitMoveStep();
-                    Debug.Log(PrefixLogMessage($"Inverting movement direction, platform going {MoveDirection}"));
-                } else if (phase != Phase.Moving && phase != Phase.WaitingStart)
-                {
-                    ActivePhaseFunction = null;
-                    InitMoveStep();
-                    Debug.Log(PrefixLogMessage($"Invoking bounce by entry, platform going {MoveDirection}"));
-                }
-            }
-            else if (managedToggleEffect == TDEnumLoop.Bounce)
+            if (managedToggleEffect == TDEnumLoop.Bounce)
             {
                 MoveDirection = MoveDirection.Inverse();
-                Debug.Log(PrefixLogMessage($"Invoking bounce by exit, platform going {MoveDirection}"));
-                InitWaitToStart();
+                Debug.Log(PrefixLogMessage($"Invoking platform action, platform going {MoveDirection}"));
+
+                if (isToggled)
+                {
+                    InitMoveStep();
+                } else
+                {
+                    InitWaitToStart();
+                }
             }
             else if (managedToggleEffect == TDEnumLoop.Wrap) { 
             
@@ -582,8 +576,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 entityOffsets[entity] = entity.Coordinates - prevNode.Coordinates;
                 //entity.Node.RemoveOccupant(entity);
             }
-
-            Debug.LogWarning(string.Join(",", entityOffsets.Select(kvp => $"{kvp.Key.name} ({kvp.Key.Coordinates}) - {prevNode.Coordinates} = {kvp.Value}")));
 
             // Clear my position
             prevNode.UpdateSide(myFace, false);

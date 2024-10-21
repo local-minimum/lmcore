@@ -118,6 +118,7 @@ namespace LMCore.Crawler
                 if (positionConstraint != null && positionConstraint.constraintActive)
                 {
                     positionConstraint.weight = 1;
+                    positionConstraint.enabled = true;
                 }
             }
         }
@@ -160,11 +161,8 @@ namespace LMCore.Crawler
             }
 
             var positionConstraint = GetComponent<PositionConstraint>();
-            if (positionConstraint == null) { 
-                startConstrained = false;
-            } else
-            {
-                startConstrained = positionConstraint.constraintActive && positionConstraint.weight > 0; 
+            if (positionConstraint != null) { 
+                positionConstraint.enabled = !activeInterpretation.Movement.HasFlag(MovementType.Translating);
             }
             Debug.Log(PrefixLogMessage($"Perform {activeInterpretation}"));
             Debug.Log(PrefixLogMessage($"Segment relative lengths: {string.Join(", ", activeInterpretation.RelativeSegmentLengths(Entity.Dungeon))}"));
@@ -191,27 +189,6 @@ namespace LMCore.Crawler
 
             transform.rotation = rotation;
 
-            var positionConstraint = GetComponent<PositionConstraint>();
-            if (positionConstraint != null && positionConstraint.constraintActive)
-            {
-                if (!activeInterpretation.Movement.HasFlag(MovementType.Translating))
-                {
-                    positionConstraint.weight = 1;
-                }
-                else if (startConstrained)
-                {
-                    var origin = activeInterpretation.Second.Checkpoint.Position(Entity.Dungeon);
-                    positionConstraint.translationAtRest = origin - positionConstraint.GetSource(0).sourceTransform.position;
-                    positionConstraint.weight = 1 - stepProgress;
-                }
-                else
-                {
-                    var origin = activeInterpretation.SecondToLast.Checkpoint.Position(Entity.Dungeon);
-                    positionConstraint.translationAtRest = origin - positionConstraint.GetSource(0).sourceTransform.position;
-                    positionConstraint.weight = stepProgress;
-                }
-            }
-
             if (currentCheckpoint != checkpoint)
             {
                 if (checkpoint.Anchor != null)
@@ -230,6 +207,12 @@ namespace LMCore.Crawler
 
                 currentCheckpoint = checkpoint;
                 Debug.Log(PrefixLogMessage($"Shift checkpoint: {checkpoint}"));
+            }
+
+            var positionConstraint = GetComponent<PositionConstraint>();
+            if (positionConstraint != null)
+            {
+                positionConstraint.enabled = !activeInterpretation.Movement.HasFlag(MovementType.Translating);
             }
         }
     }

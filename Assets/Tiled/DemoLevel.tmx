@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="27" nextobjectid="45">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="27" nextobjectid="46">
  <tileset firstgid="1" source="Mapping.tsx"/>
  <group id="9" name="Elevation 0" opacity="0.77" tintcolor="#00aaff">
   <properties>
@@ -487,15 +487,6 @@
     </properties>
     <point/>
    </object>
-   <object id="35" name="Toggle Elevator" type="Actuator" x="345" y="504.5">
-    <properties>
-     <property name="AutomaticUnset" type="bool" value="false"/>
-     <property name="Group" type="int" value="3"/>
-     <property name="Interaction" propertytype="Interaction" value="Automatic"/>
-     <property name="Repeatable" type="bool" value="true"/>
-    </properties>
-    <point/>
-   </object>
    <object id="36" name="Start Shuttle" type="Actuator" x="144" y="661.333">
     <properties>
      <property name="AutomaticUnset" type="bool" value="false"/>
@@ -559,7 +550,7 @@
    </object>
   </objectgroup>
  </group>
- <group id="17" name="Elevation 2" visible="0" tintcolor="#55ff7f">
+ <group id="17" name="Elevation 2" tintcolor="#55ff7f">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
@@ -680,7 +671,7 @@
 </data>
   </layer>
  </group>
- <group id="21" name="Elevation 3" visible="0" opacity="0.81">
+ <group id="21" name="Elevation 3" opacity="0.81">
   <properties>
    <property name="Imported" type="bool" value="true"/>
   </properties>
@@ -852,6 +843,15 @@
      <property name="Loop" propertytype="Loop" value="None"/>
      <property name="ManagedByGroup" type="int" value="3"/>
      <property name="ToggleEffect" propertytype="Loop" value="Bounce"/>
+    </properties>
+    <point/>
+   </object>
+   <object id="45" name="Toggle Elevator" type="Actuator" x="341.5" y="499">
+    <properties>
+     <property name="AutomaticUnset" type="bool" value="false"/>
+     <property name="Group" type="int" value="3"/>
+     <property name="Interaction" propertytype="Interaction" value="Automatic"/>
+     <property name="Repeatable" type="bool" value="true"/>
     </properties>
     <point/>
    </object>
