@@ -44,7 +44,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool lastActionWasPress = false;
 
         public override string ToString() =>
-            $"Actuator {name} @ {Coordinates}/{Anchor.CubeFace} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
+            $"Actuator {name} @ {Coordinates}/{Anchor?.CubeFace} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
         protected string PrefixLogMessage(string message) =>
             $"Actuator {name} @ {Coordinates}: {message}";
 

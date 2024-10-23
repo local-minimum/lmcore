@@ -54,13 +54,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         string SyncDisplayCageTrigger;
 
+        [SerializeField, HideInInspector]
         ContainerPhase phase;
 
         [SerializeField, HideInInspector]
         Direction facingDirection;
 
         [SerializeField, HideInInspector]
-        Direction anchor;
+        Direction cubeFace;
 
         [SerializeField, HideInInspector]
         string key;
@@ -76,10 +77,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public bool BlockingPassage => blockingPassage;
 
-        private string PrefixLogMessage(string message) => $"Container {name} @ {Coordinates}: {message}";
+        private string PrefixLogMessage(string message) => $"Container {name}/{InventoryId} @ {Coordinates}: {message}";
 
         public string InventoryId => inventory?.FullId;
 
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(PrefixLogMessage($"Is {phase} using key '{key}' consumes({consumesKey}) blocking passage({blockingPassage})"));
+        }
         /// <summary>
         /// Must be after the item disposal loading
         /// </summary>
@@ -96,7 +102,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             this.blockingPassage = blockingPassage;
             this.facingDirection = facingDirection;
-            this.anchor = anchor;
+            cubeFace = anchor;
 
             var tileProps = modifications.FirstOrDefault(mod =>
                 mod.Tile.Type == containerClass)?.Tile
@@ -243,15 +249,15 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private bool AllowInteractBy(GridEntity entity)
         {
             var coordinates = Coordinates;
-            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(coordinates)}) Same Elevation({entity.Coordinates.y == coordinates.y}) Entity Looks {entity.LookDirection} Anchor({anchor}) Facing({facingDirection})"));
-            if (anchor == Direction.Down && facingDirection == Direction.None)
+            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(coordinates)}) Same Elevation({entity.Coordinates.y == coordinates.y}) Entity Looks {entity.LookDirection} Anchor({cubeFace}) Facing({facingDirection})"));
+            if (cubeFace == Direction.Down && facingDirection == Direction.None)
             {
                 // TODO: Doesn't account for thin walls...
                 // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
                 return entity.Coordinates.y == coordinates.y && entity.Coordinates.ManhattanDistance(coordinates) == 1;
             } 
 
-            if (anchor == Direction.Down)
+            if (cubeFace == Direction.Down)
             {
                 return entity.Coordinates.y == coordinates.y 
                     && entity.Coordinates.ManhattanDistance(coordinates) == 1 
@@ -260,7 +266,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
             return entity.Coordinates == coordinates 
-                && entity.LookDirection == anchor;
+                && entity.LookDirection == cubeFace;
         }
 
         private void GridEntity_OnInteract(GridEntity entity)

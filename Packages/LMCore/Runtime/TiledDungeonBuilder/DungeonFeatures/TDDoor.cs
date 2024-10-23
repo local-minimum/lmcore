@@ -223,6 +223,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                         Debug.LogWarning(PrefixLogMessage($"Failed to consume key {key} from {keyHolder}"));
                     }
                     isLocked = false;
+                    isOpen = false;
                 }
 
                 Interact();
