@@ -1,3 +1,4 @@
+using Codice.CM.Client.Differences.Graphic;
 using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.IO;
@@ -304,8 +305,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (managedToggleEffect == TDEnumLoop.Bounce)
             {
                 MoveDirection = MoveDirection.Inverse();
-                Debug.Log(PrefixLogMessage($"Invoking platform action, platform going {MoveDirection}"));
+                Debug.Log(PrefixLogMessage($"Invoking platform action, platform going {MoveDirection} / {isToggled}"));
 
+                if (moveProgress > 0f && moveProgress < 1f)
+                {
+                    moveProgress = 1f - moveProgress;
+                }
                 if (isToggled)
                 {
                     InitMoveStep();
@@ -629,9 +634,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public int OnLoadPriority => 10;
 
-        void InitMoveStep() => InitMoveStep(false);
-        void InitMoveStep(bool resume)
+        float moveProgress;
+        void InitMoveStep()
         {
+            bool resume =  moveProgress != 0 && moveProgress != 1;
+
             var relay = Node.GetComponent<TDRelay>();
             if (!resume && relay != null && relay.Relays(MoveDirection.Inverse(), out var newDirection))
             {
@@ -645,44 +652,57 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 }
             }
 
-            if (!CanTranslate(MoveDirection))
+            if (!resume && !CanTranslate(MoveDirection))
             {
                 Debug.Log(PrefixLogMessage($"I've reached end of my movement, can't move {MoveDirection} to {MoveDirection.Translate(Coordinates)}"));
                 InitWaitEnd();
                 return;
             }
 
+            var becomeTileThreshold = 0.5f;
+            if (MoveDirection == Anchor.CubeFace)
+            {
+                becomeTileThreshold = 0.1f;
+            }
+            else if (MoveDirection.Inverse() == Anchor.CubeFace)
+            {
+                becomeTileThreshold = 0.9f;
+            }
+
             var startCoordinates = Coordinates;
             if (resume)
             {
-                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - phaseStart) / moveSpeed);
-                if (progress > 0.5f)
+                // The movement start / reference coordinates will have been the inverse direction of 
+                // our current movement if we already passed the threshold of moving...
+                phaseStart = Time.timeSinceLevelLoad - moveProgress * moveSpeed;
+                if (moveProgress > becomeTileThreshold)
                 {
                     startCoordinates = MoveDirection.Inverse().Translate(Coordinates);
                 }
             } else
             {
                 phaseStart = Time.timeSinceLevelLoad;
-                phase = Phase.Moving;
+                moveProgress = 0f;
             }
+            phase = Phase.Moving;
             var startPosition = startCoordinates.ToPosition(Dungeon.GridSize);
             var targetCoordinates = MoveDirection.Translate(startCoordinates);
             var targetPosition = targetCoordinates.ToPosition(Dungeon.GridSize);
 
             ActivePhaseFunction = () =>
             {
-                var progress = Mathf.Clamp01((Time.timeSinceLevelLoad - phaseStart) / moveSpeed);
+                moveProgress = Mathf.Clamp01((Time.timeSinceLevelLoad - phaseStart) / moveSpeed);
 
-                AlignedWithGrid = progress < 0.1f || progress > 0.9f;
+                AlignedWithGrid = moveProgress < 0.1f || moveProgress > 0.9f;
 
-                if (progress > 0.5f && Coordinates == startCoordinates)
+                if (moveProgress > becomeTileThreshold && Coordinates == startCoordinates)
                 {
                     BecomeTile(targetCoordinates);
                 }
 
-                transform.position = Vector3.Lerp(startPosition, targetPosition, progress);
+                transform.position = Vector3.Lerp(startPosition, targetPosition, moveProgress);
 
-                if (progress == 1)
+                if (moveProgress == 1)
                 {
                     ActivePhaseFunction = InitMoveStep;
                 }
@@ -773,7 +793,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     ActivePhaseFunction = HandleWaitToEnd;
                     break;
                 case Phase.Moving:
-                    InitMoveStep(true);
+                    InitMoveStep();
                     break;
                 case Phase.Ended:
                     ActivePhaseFunction = null;
