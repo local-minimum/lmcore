@@ -550,6 +550,7 @@ namespace LMCore.Crawler
                     var midStart = Steps[1];
                     var up = midStart.Checkpoint.Down.Inverse().AsLookVector3D();
                     var climb = Vector3.Dot(delta, up);
+                    // Check if we can't step down from this elevation, we must jump
                     if (CurrentSegment == Segment.Intermediary && pt1.Transition == MovementTransition.Grounded && climb < -entity.Abilities.maxScaleHeight)
                     {
                         pt1.Transition = MovementTransition.Jump;

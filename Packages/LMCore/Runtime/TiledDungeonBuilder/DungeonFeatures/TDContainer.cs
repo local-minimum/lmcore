@@ -76,16 +76,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool blockingPassage;
 
         public bool BlockingPassage => blockingPassage;
+        public string InventoryId => inventory?.FullId;
 
         private string PrefixLogMessage(string message) => $"Container {name}/{InventoryId} @ {Coordinates}: {message}";
 
-        public string InventoryId => inventory?.FullId;
-
         [ContextMenu("Info")]
-        void Info()
-        {
+        void Info() =>
             Debug.Log(PrefixLogMessage($"Is {phase} using key '{key}' consumes({consumesKey}) blocking passage({blockingPassage})"));
-        }
+
         /// <summary>
         /// Must be after the item disposal loading
         /// </summary>

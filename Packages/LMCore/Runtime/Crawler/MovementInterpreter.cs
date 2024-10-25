@@ -24,9 +24,9 @@ namespace LMCore.Crawler
             } 
         }
 
-        private void InterpretBlocked(MovementInterpretation interpretation)
+        private void InterpretBlocked(MovementInterpretation interpretation, string reason)
         {
-            Debug.LogWarning("Blocked movement detected");
+            Debug.LogWarning($"Blocked movement detected for {Entity.name} @ {Entity.Coordinates}: {reason}");
             var direction = interpretation.PrimaryDirection;
             var origin = interpretation.Last;
 
@@ -44,7 +44,10 @@ namespace LMCore.Crawler
         }
         
         /// <summary>
-        /// For example stepping off of the highest elevation of ramps
+        /// Checking for transition from one node via another to the target.
+        /// 
+        /// Climbing up from highest elevation ramp onto the next elevation
+        /// Moving onto a high elevation ramp from an above elevation
         /// 
         /// Note that there is no dynamic discovery of these once the interpretation 
         /// has been created.
@@ -317,7 +320,9 @@ namespace LMCore.Crawler
                 { 
                     if (Entity.TransportationMode.HasFlag(TransportationMode.Climbing)) 
                     { 
-                        InterpretBlocked(interpretation);
+                        InterpretBlocked(
+                            interpretation,
+                            $"There's no anchor {wantedAnchorDirection} while we are climbing");
                         return; 
                     }
 
@@ -366,7 +371,9 @@ namespace LMCore.Crawler
             } else
             {
                 // Refusing movement
-                InterpretBlocked(interpretation);
+                InterpretBlocked(
+                    interpretation, 
+                    $"Target node {targetNode.Coordinates} doesn't allow entry from {direction.Inverse()}");
             }
         }
 
@@ -477,7 +484,9 @@ namespace LMCore.Crawler
 
             if (outcome == MovementOutcome.Blocked)
             {
-                InterpretBlocked(interpretation);
+                InterpretBlocked(
+                    interpretation,
+                    $"Anchor {anchor.CubeFace} says movement is blocked");
             } else if (outcome == MovementOutcome.Refused)
             {
                 interpretation.Steps.Add(interpretation.First);
@@ -491,7 +500,9 @@ namespace LMCore.Crawler
                     Debug.LogError(
                         $"{anchor} says it has neighbour to {direction} in same node but there's no anchor there.");
 
-                    InterpretBlocked(interpretation);
+                    InterpretBlocked(
+                        interpretation, 
+                        "The movement is inside a node but there's no anchor to attach to");
                     return ;
 
                 }
@@ -531,7 +542,9 @@ namespace LMCore.Crawler
             }
             else
             {
-                InterpretBlocked(interpretation);
+                InterpretBlocked(
+                    interpretation, 
+                    $"Anchor {anchor.Node.Coordinates} {anchor.CubeFace} doesn't allow exit in direction {direction}");
             }
         }
 
@@ -571,7 +584,9 @@ namespace LMCore.Crawler
                         interpretation.Steps.Add(interpretation.First);
                     } else if (outcome == MovementOutcome.Blocked)
                     {
-                        InterpretBlocked(interpretation);
+                        InterpretBlocked(
+                            interpretation,
+                            $"Node says {direction} is blocked for airbourne entity");
                     } else if (!ElevationOffsetEdge(interpretation))
                     {
                         var targetCoordinates = node.Neighbour(direction);
@@ -602,7 +617,9 @@ namespace LMCore.Crawler
                     else if (outcome == MovementOutcome.Blocked)
                     {
                         Debug.LogWarning("Sentinel has said this is blocked");
-                        InterpretBlocked(interpretation);
+                        InterpretBlocked(
+                            interpretation,
+                            $"Anchor {anchor.CubeFace} lacked neighbour to {direction} and said movement was blocked");
                     }
                     // TODO: Do we need to handle these cases?
                 }
@@ -630,7 +647,9 @@ namespace LMCore.Crawler
                 }
                 else if (outcome == MovementOutcome.Blocked)
                 {
-                    InterpretBlocked(interpretation);
+                    InterpretBlocked(
+                        interpretation, 
+                        $"Current node considers moving on {anchor.CubeFace} in {direction} direction blocked");
                 }
                 else if (!ElevationOffsetEdge(interpretation))
                 {
