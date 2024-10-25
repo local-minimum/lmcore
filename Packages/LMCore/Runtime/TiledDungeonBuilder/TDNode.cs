@@ -6,9 +6,37 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
+using UnityEngine.UIElements;
 
 namespace LMCore.TiledDungeon
 {
+    public class SideOverride
+    {
+        private Dictionary<Direction, HashSet<MonoBehaviour>> sideOverrides = new Dictionary<Direction, HashSet<MonoBehaviour>>();
+
+        public void AddOverride(Direction direction, MonoBehaviour behaviour)
+        {
+            if (sideOverrides.ContainsKey(direction))
+            {
+                sideOverrides[direction].Add(behaviour);
+            } else
+            {
+                sideOverrides[direction] = new HashSet<MonoBehaviour>() { behaviour };
+            }
+        }
+
+        public void RemoveOverride(Direction direction, MonoBehaviour behaviour)
+        {
+            if (sideOverrides.ContainsKey(direction))
+            {
+                sideOverrides[direction].Remove(behaviour);
+            }
+        }
+
+        public bool Overrides(Direction direction) =>
+            sideOverrides.ContainsKey(direction) && sideOverrides[direction].Count > 0;
+
+    }
     public delegate void NewOccupantEvent(TDNode node, GridEntity entity);
 
     public class TDNode : MonoBehaviour, IDungeonNode
@@ -22,10 +50,33 @@ namespace LMCore.TiledDungeon
         [HideInInspector]
         public TiledTile tile;
 
-        public TDSidesClass sides;
-        
+        [HideInInspector, SerializeField]
+        public TDSidesClass _sides = new TDSidesClass();
+        private SideOverride temporarySideNegator = new SideOverride();
+        public bool HasSide(Direction direction) =>
+            _sides.Has(direction) && !temporaryEntryBlocker.Overrides(direction);
+
+        private SideOverride temporaryEntryBlocker = new SideOverride();
+        private SideOverride temporaryExitBlocker = new SideOverride();
+        public void AddEntryBlocker(Direction direction, MonoBehaviour behaviour) =>
+            temporaryEntryBlocker.AddOverride(direction, behaviour);
+        public void RemoveEntryBlocker(Direction direction, MonoBehaviour behaviour) =>
+            temporaryEntryBlocker.RemoveOverride(direction, behaviour);
+        public void AddExitBlocker(Direction direction, MonoBehaviour behaviour) =>
+            temporaryExitBlocker.AddOverride(direction, behaviour);
+        public void RemoveExitBlocker(Direction direction, MonoBehaviour behaviour) =>
+            temporaryExitBlocker.RemoveOverride(direction, behaviour);
+        public void AddSideNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporarySideNegator.AddOverride(direction, behaviour);
+        public void RemoveSideNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporarySideNegator.RemoveOverride(direction, behaviour);
+
         public void UpdateSide(Direction direction, bool value) 
-            => sides.Set(direction, value);
+            => _sides.Set(direction, value);
+        public void UpdateSides(TDSidesClass sides)
+        {
+            _sides = sides;
+        }
 
         [HideInInspector]
         public TileModification[] modifications;
@@ -127,7 +178,9 @@ namespace LMCore.TiledDungeon
             .Aspect(TiledConfiguration.instance.FlyabilityKey) == TDEnumAspect.Always;
 
         public bool HasFloor => 
-            sides.Down && (HasTrapDoor == false || Door?.FullyClosed == true) && !HasIllusion(Direction.Down);
+           HasSide(Direction.Down) &&
+            (HasTrapDoor == false || Door?.FullyClosed == true) &&
+            !HasIllusion(Direction.Down);
 
         public bool HasIllusorySurface(Direction direction)
         {
@@ -135,7 +188,7 @@ namespace LMCore.TiledDungeon
                 .Any(s => s.CubeFace == direction);
         }
 
-        public bool HasCeiling => sides.Up;
+        public bool HasCeiling => HasSide(Direction.Up);
 
         // Can't check doors this simply because they can be trapdoors
         public bool Obstructed =>
@@ -218,7 +271,7 @@ namespace LMCore.TiledDungeon
 
         bool HasWall(Direction direction)
         {
-            if (direction.IsPlanarCardinal()) return sides.Has(direction);
+            if (direction.IsPlanarCardinal()) return HasSide(direction);
             return false;
         }
 
@@ -258,7 +311,8 @@ namespace LMCore.TiledDungeon
 
             if (entity == null && anchor == Direction.None)
             {
-                return sides.Has(direction) ? MovementOutcome.Refused : MovementOutcome.NodeExit;
+                return HasSide(direction) || temporaryExitBlocker.Overrides(direction) ?
+                    MovementOutcome.Refused : MovementOutcome.NodeExit;
             }
 
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
@@ -353,12 +407,14 @@ namespace LMCore.TiledDungeon
                 return walkability == TDEnumAspect.Never;
             });
 
-        public bool AllowExit(GridEntity entity, Direction direction) => !sides.Has(direction) &&
+        public bool AllowExit(GridEntity entity, Direction direction) =>
+            !HasSide(direction) &&
+            !temporaryExitBlocker.Overrides(direction) &&
             !BlockEdgeTraversal(entity, direction);
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
-            if (HasWall(direction) || HasLadder(direction)) return false;
+            if (HasWall(direction) || temporaryEntryBlocker.Overrides(direction) || HasLadder(direction)) return false;
 
             if (HasBlockingDoor(direction)) return false;
 

@@ -466,7 +466,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             // TODO: This might require a bit more logic
             if (node.Obstructed) return false;
 
-            if (!node.sides.Has(direction)) return true;
+            if (!node.HasSide(direction)) return true;
 
             return managedOffsetSides.Any(mo => mo.Offset == offset && mo.AnchorDirection == direction);
         }
@@ -631,7 +631,102 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        public int OnLoadPriority => 10;
+        private struct TemporaryNodeSideAlteration
+        {
+            public enum Action { Entry, Exit, NegateSide }
+            public TDNode node;
+            public Direction direction;
+            /// <summary>
+            /// Relative offset to moving platform origin.
+            /// 
+            /// Doesn't care at all about where the platform is.
+            /// </summary>
+            public Vector3Int offset;
+            public Action action;
+
+            public static TemporaryNodeSideAlteration Entry(TDNode node, Direction direction, Vector3Int offset) =>
+                new TemporaryNodeSideAlteration() { 
+                    node = node, 
+                    direction = direction,
+                    action = Action.Entry,
+                    offset = offset,
+                };
+            public static TemporaryNodeSideAlteration Exit(TDNode node, Direction direction, Vector3Int offset) =>
+                new TemporaryNodeSideAlteration() {
+                    node = node,
+                    direction = direction,
+                    action = Action.Exit,
+                    offset = offset,
+                };
+
+            public static TemporaryNodeSideAlteration NegateSide(TDNode node, Direction direction, Vector3Int offset) =>
+                new TemporaryNodeSideAlteration() {
+                    node = node,
+                    direction = direction,
+                    action = Action.NegateSide,
+                    offset = offset,
+                };
+        }
+
+        List<TemporaryNodeSideAlteration> registeredBlockers = new List<TemporaryNodeSideAlteration>();
+
+        void ValidateEntryMovementBlockers(Vector3Int offset, bool blockEntry)
+        {
+            MonoBehaviour behaviour;
+            Direction direction;
+
+            if (offset == Vector3Int.zero)
+            {
+                behaviour = this;
+                direction = Anchor.CubeFace;
+            }
+            else
+            {
+                var off = managedOffsetSides.FirstOrDefault(o => o.Offset == offset);
+                if (off.Transform == null)
+                {
+                    Debug.LogError(PrefixLogMessage($"I don't manage offset {offset}, no way to validate entry blockers"));
+                    return;
+                }
+
+                behaviour = off.Transform.GetComponent<TDPassivePlatform>();
+                direction = off.AnchorDirection;
+
+                if (behaviour == null)
+                {
+                    // We are a negative side of the configured platform
+                    // lets try for an anchor, else we'll just be dealing with nulls
+                    behaviour = off.Transform.GetComponent<Anchor>();
+                }
+            }
+        }
+
+        void ValidateRegisteredBlockers()
+        {
+            if (MoveDirection == Anchor.CubeFace)
+            {
+            }
+        }
+
+        private void ClearAllBlockers()
+        {
+            foreach (var blocker in registeredBlockers)
+            {
+                switch (blocker.action)
+                {
+                    case TemporaryNodeSideAlteration.Action.Entry:
+                        blocker.node.RemoveEntryBlocker(blocker.direction, this);
+                        break;
+                    case TemporaryNodeSideAlteration.Action.Exit:
+                        blocker.node.RemoveExitBlocker(blocker.direction, this);
+                        break;
+                    case TemporaryNodeSideAlteration.Action.NegateSide:
+                        blocker.node.RemoveSideNegator(blocker.direction, this);
+                        break;
+                }
+            }
+            registeredBlockers.Clear();
+        }
 
         float moveProgress;
         void InitMoveStep()
@@ -711,6 +806,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void Update()
         {
             ActivePhaseFunction?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            ClearAllBlockers();
         }
 
         public KeyValuePair<Vector3Int, MovingPlatformSave> Save() =>
@@ -802,6 +902,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             ActivePhaseFunction?.Invoke();
             Debug.Log(PrefixLogMessage($"Platform loaded into phase {phase} / {platformSave.phase}"));
         }
+
+        public int OnLoadPriority => 10;
 
         public void OnLoad<T>(T save) where T : new()
         {

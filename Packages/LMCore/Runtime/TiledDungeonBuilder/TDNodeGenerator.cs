@@ -206,14 +206,15 @@ namespace LMCore.TiledDungeon
                 GameObject go = null;
 
                 var upCoordinates = Direction.Up.Translate(node.Coordinates);
-                if (!node.sides.Has(Direction.Up) && dungeon.HasNodeAt(upCoordinates))
+                if (!node.HasSide(Direction.Up) && dungeon.HasNodeAt(upCoordinates))
                 {
                     var aboveNode = dungeon[upCoordinates];
                     var upForwardCoordinates = direction.Translate(upCoordinates);
-                    if (!aboveNode.sides.Has(direction) && !aboveNode.sides.Down && dungeon.HasNodeAt(upForwardCoordinates))
+                    if (!aboveNode.HasSide(direction) && !aboveNode.HasSide(Direction.Down)
+                        && dungeon.HasNodeAt(upForwardCoordinates))
                     {
                         var upForwardNode = dungeon[upForwardCoordinates];
-                        if (upForwardNode.sides.Down)
+                        if (upForwardNode.HasSide(Direction.Down))
                         {
                             go = node.Dungeon.Style.Get(
                                 node.transform,
@@ -364,12 +365,6 @@ namespace LMCore.TiledDungeon
 
         static void ConfigureCube(TDNode node)
         {
-            if (node.sides == null)
-            {
-                node.Log($"{node.tile} lacks a sides class, can't be used for layouting", Debug.LogError);
-                return;
-            }
-
             var Dungeon = node.Dungeon;
             var hasTrapDoor = node.HasTrapDoor;
             var aboveNode = node.Coordinates + Vector3Int.up;
@@ -453,7 +448,7 @@ namespace LMCore.TiledDungeon
                     }
                 } else if (direction == Direction.Up)
                 {
-                    if (node.sides.Up && upNode)
+                    if (node.HasSide(Direction.Up) && upNode)
                     {
                         if (upNode.HasIllusion(Direction.Down)) {
                             ConfigureIllusory(node, Direction.Up);
@@ -469,7 +464,7 @@ namespace LMCore.TiledDungeon
                     continue;
                 }
 
-                if (!node.sides.Has(direction)) continue;
+                if (!node.HasSide(direction)) continue;
 
                 if (node.HasSpikes(direction))
                 {
@@ -575,10 +570,10 @@ namespace LMCore.TiledDungeon
 
             node.Dungeon = dungeon;
 
-            node.sides = TDSidesClass.From(
+            node.UpdateSides(TDSidesClass.From(
                 tile.CustomProperties.Classes[TiledConfiguration.instance.SidesClassKey],
                 config.RoofRule 
-            );
+            ));
 
             node.transform.localPosition = node.Coordinates.ToPosition(dungeon.GridSize);
             node.name = $"TileNode Elevation {node.Coordinates.y} ({node.Coordinates.x}, {node.Coordinates.z})";
