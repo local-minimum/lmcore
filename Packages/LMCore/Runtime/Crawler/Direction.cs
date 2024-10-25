@@ -1,6 +1,7 @@
 using LMCore.Extensions;
 using LMCore.IO;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.Crawler
@@ -16,6 +17,14 @@ namespace LMCore.Crawler
         public static Direction[] AllDirections = new Direction[] { 
             Direction.North, Direction.South, Direction.West, Direction.East, Direction.Up, Direction.Down
         };
+
+        public static IEnumerable<Direction> OrthogonalDirections(this Direction direction) =>
+            AllDirections.Where(d => d != direction && d != direction.Inverse());
+        public static IEnumerable<Direction> ParalellDirections(this Direction direction)
+        {
+            yield return direction;
+            yield return direction.Inverse();
+        }
 
         #region Making Directions
 

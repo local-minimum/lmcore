@@ -636,6 +636,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             public enum Action { Entry, Exit, NegateSide }
             public TDNode node;
             public Direction direction;
+            public MonoBehaviour behaviour;
             /// <summary>
             /// Relative offset to moving platform origin.
             /// 
@@ -644,41 +645,57 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             public Vector3Int offset;
             public Action action;
 
-            public static TemporaryNodeSideAlteration Entry(TDNode node, Direction direction, Vector3Int offset) =>
+            public bool IsMe(Vector3Int offset, Direction cubeFace) 
+                => this.offset == offset && direction == cubeFace;
+
+            public static TemporaryNodeSideAlteration Entry(
+                TDNode node,
+                Direction direction,
+                Vector3Int offset,
+                MonoBehaviour behaviour) =>
                 new TemporaryNodeSideAlteration() { 
+                    action = Action.Entry,
                     node = node, 
                     direction = direction,
-                    action = Action.Entry,
                     offset = offset,
+                    behaviour = behaviour,
                 };
-            public static TemporaryNodeSideAlteration Exit(TDNode node, Direction direction, Vector3Int offset) =>
+            public static TemporaryNodeSideAlteration Exit(
+                TDNode node, 
+                Direction direction, 
+                Vector3Int offset,
+                MonoBehaviour behaviour) =>
                 new TemporaryNodeSideAlteration() {
+                    action = Action.Exit,
                     node = node,
                     direction = direction,
-                    action = Action.Exit,
                     offset = offset,
+                    behaviour = behaviour,
                 };
 
-            public static TemporaryNodeSideAlteration NegateSide(TDNode node, Direction direction, Vector3Int offset) =>
+            public static TemporaryNodeSideAlteration NegateSide(
+                TDNode node, 
+                Direction direction, 
+                Vector3Int offset,
+                MonoBehaviour behaviour) =>
                 new TemporaryNodeSideAlteration() {
+                    action = Action.NegateSide,
                     node = node,
                     direction = direction,
-                    action = Action.NegateSide,
                     offset = offset,
+                    behaviour = behaviour,
                 };
         }
 
-        List<TemporaryNodeSideAlteration> registeredBlockers = new List<TemporaryNodeSideAlteration>();
+        List<TemporaryNodeSideAlteration> registeredAlterations = new List<TemporaryNodeSideAlteration>();
 
-        void ValidateEntryMovementBlockers(Vector3Int offset, bool blockEntry)
+        void CheckNodeSideAlterations(Vector3Int offset, Direction direction)
         {
             MonoBehaviour behaviour;
-            Direction direction;
 
             if (offset == Vector3Int.zero)
             {
                 behaviour = this;
-                direction = Anchor.CubeFace;
             }
             else
             {
@@ -690,7 +707,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 }
 
                 behaviour = off.Transform.GetComponent<TDPassivePlatform>();
-                direction = off.AnchorDirection;
 
                 if (behaviour == null)
                 {
@@ -699,35 +715,160 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     behaviour = off.Transform.GetComponent<Anchor>();
                 }
             }
-        }
 
-        void ValidateRegisteredBlockers()
-        {
-            if (MoveDirection == Anchor.CubeFace)
+            var nodeCoordinates = Coordinates + offset;
+            var node = Dungeon.HasNodeAt(nodeCoordinates) ? Dungeon[nodeCoordinates] : null;
+            bool hasStartCoordinates = moveStartCoordinates == Coordinates;
+            var startCoordinates = moveStartCoordinates + offset;
+            if (node == null)
             {
+                Debug.LogWarning(PrefixLogMessage($"There's no node at {nodeCoordinates}"));
+                return;
+            }
+
+            if (MoveDirection == direction)
+            {
+                Func<TemporaryNodeSideAlteration, bool> pred =
+                    a => a.action == TemporaryNodeSideAlteration.Action.NegateSide &&
+                        a.node == node &&
+                        a.IsMe(offset, direction);
+
+                var hasAlter = registeredAlterations.Any(pred);
+
+                if (!hasStartCoordinates)
+                {
+                    if (!hasAlter && moveProgress < 0.5f)
+                    {
+                        // Before we considered the next tile
+                        // but we haven't really moved far enought to be considered the side in question 
+                        Debug.Log(PrefixLogMessage($"Adding negator to node {node.Coordinates} {direction}"));
+                        node.AddSideNegator(direction, behaviour);
+                        registeredAlterations.Add(
+                            TemporaryNodeSideAlteration.NegateSide(node, direction, offset, behaviour));
+                    }
+                    else if (hasAlter && moveProgress > 0.5f)
+                    {
+                        node.RemoveSideNegator(direction, behaviour);
+                        registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
+                    }
+
+                    var moveStartNode = Dungeon.HasNodeAt(startCoordinates) ? Dungeon[startCoordinates] : null;
+                    if (moveStartNode != null)
+                    {
+                        foreach (var orthoDirection in MoveDirection.OrthogonalDirections())
+                        {
+                            pred =
+                                a => a.IsMe(offset, orthoDirection) &&
+                                a.action == TemporaryNodeSideAlteration.Action.Exit &&
+                                a.node == moveStartNode;
+
+                            hasAlter = registeredAlterations.Any(pred);
+
+                            // Debug.Log($"Consider Adding {orthoDirection} has from before {hasAlter} target has side {moveStartNode.HasSide(orthoDirection)} ");
+                            if (!hasAlter && moveProgress < 0.5f && moveStartNode.HasSide(orthoDirection))
+                            {
+                                Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {moveStartNode.Coordinates}"));
+                                moveStartNode.AddExitBlocker(orthoDirection, behaviour);
+                                registeredAlterations.Add(
+                                    TemporaryNodeSideAlteration.Exit(moveStartNode, orthoDirection, offset, behaviour));
+                            }
+                            else if (hasAlter && moveProgress > 0.5f)
+                            {
+                                moveStartNode.RemoveExitBlocker(orthoDirection, behaviour);
+                                registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
+                            }
+                        }
+                    }
+                }
+            } else if (MoveDirection == direction.Inverse())
+            {
+                Func<TemporaryNodeSideAlteration, bool> pred =
+                    a => a.action == TemporaryNodeSideAlteration.Action.NegateSide && 
+                        a.node == node &&
+                        a.IsMe(offset, direction);
+
+                var hasAlter = registeredAlterations.Any(pred);
+                if (direction == Direction.Up)
+                {
+                   // Debug.Log($"{offset} {direction} {hasAlter} {hasStartCoordinates} {moveProgress}");
+                }
+
+                if (!hasAlter && moveProgress < 0.5f && !hasStartCoordinates)
+                {
+                    // Before we considered the next tile
+                    // but we haven't really moved far enought to be considered the side in question 
+                    Debug.Log(PrefixLogMessage($"Adding negator to node {node.Coordinates} {direction}"));
+                    node.AddSideNegator(direction, behaviour);
+                    registeredAlterations.Add(
+                        TemporaryNodeSideAlteration.NegateSide(node, direction, offset, behaviour));
+                }
+                else if (hasAlter && moveProgress > 0.5f)
+                {
+                    node.RemoveSideNegator(direction, behaviour);
+                    registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
+                }
+
+                var endCoordinates = MoveDirection.Translate(startCoordinates);
+                var moveEndNode = Dungeon.HasNodeAt(endCoordinates) ? Dungeon[endCoordinates] : null;
+                if (moveEndNode != null)
+                {
+                    foreach (var orthoDirection in MoveDirection.OrthogonalDirections())
+                    {
+                        pred =
+                            a => a.IsMe(offset, orthoDirection) &&
+                            a.action == TemporaryNodeSideAlteration.Action.Exit &&
+                            a.node == moveEndNode;
+
+                        hasAlter = registeredAlterations.Any(pred);
+
+                        // Debug.Log($"Consider Adding {orthoDirection} has from before {hasAlter} target {moveEndNode.Coordinates} has side {moveEndNode.HasSide(orthoDirection)} ");
+                        if (!hasAlter && moveProgress > 0.5f && hasStartCoordinates && moveEndNode.HasSide(orthoDirection))
+                        {
+                            Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {moveEndNode.Coordinates}"));
+                            moveEndNode.AddExitBlocker(orthoDirection, behaviour);
+                            registeredAlterations.Add(
+                                TemporaryNodeSideAlteration.Exit(moveEndNode, orthoDirection, offset, behaviour));
+                        }
+                        else if (hasAlter && moveProgress > 0.5f && !hasStartCoordinates)
+                        {
+                            moveEndNode.RemoveExitBlocker(orthoDirection, behaviour);
+                            registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
+                        }
+                    }
+                }
             }
         }
 
-        private void ClearAllBlockers()
+        void CheckNodeSideAlterations()
         {
-            foreach (var blocker in registeredBlockers)
+            CheckNodeSideAlterations(Vector3Int.zero, Anchor.CubeFace);
+            foreach (var managed in managedOffsetSides)
+            {
+                CheckNodeSideAlterations(managed.Offset, managed.AnchorDirection);
+            }
+        }
+
+        private void ClearAllNodeSideAlterations()
+        {
+            foreach (var blocker in registeredAlterations)
             {
                 switch (blocker.action)
                 {
                     case TemporaryNodeSideAlteration.Action.Entry:
-                        blocker.node.RemoveEntryBlocker(blocker.direction, this);
+                        blocker.node.RemoveEntryBlocker(blocker.direction, blocker.behaviour);
                         break;
                     case TemporaryNodeSideAlteration.Action.Exit:
-                        blocker.node.RemoveExitBlocker(blocker.direction, this);
+                        blocker.node.RemoveExitBlocker(blocker.direction, blocker.behaviour);
                         break;
                     case TemporaryNodeSideAlteration.Action.NegateSide:
-                        blocker.node.RemoveSideNegator(blocker.direction, this);
+                        blocker.node.RemoveSideNegator(blocker.direction, blocker.behaviour);
                         break;
                 }
             }
-            registeredBlockers.Clear();
+            registeredAlterations.Clear();
         }
 
+        Vector3Int moveStartCoordinates;
         float moveProgress;
         void InitMoveStep()
         {
@@ -763,7 +904,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 becomeTileThreshold = 0.9f;
             }
 
-            var startCoordinates = Coordinates;
+            moveStartCoordinates = Coordinates;
             if (resume)
             {
                 // The movement start / reference coordinates will have been the inverse direction of 
@@ -771,7 +912,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 phaseStart = Time.timeSinceLevelLoad - moveProgress * moveSpeed;
                 if (moveProgress > becomeTileThreshold)
                 {
-                    startCoordinates = MoveDirection.Inverse().Translate(Coordinates);
+                    moveStartCoordinates = MoveDirection.Inverse().Translate(Coordinates);
                 }
             } else
             {
@@ -779,8 +920,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 moveProgress = 0f;
             }
             phase = Phase.Moving;
-            var startPosition = startCoordinates.ToPosition(Dungeon.GridSize);
-            var targetCoordinates = MoveDirection.Translate(startCoordinates);
+            var startPosition = moveStartCoordinates.ToPosition(Dungeon.GridSize);
+            var targetCoordinates = MoveDirection.Translate(moveStartCoordinates);
             var targetPosition = targetCoordinates.ToPosition(Dungeon.GridSize);
 
             ActivePhaseFunction = () =>
@@ -789,16 +930,20 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 AlignedWithGrid = moveProgress < 0.1f || moveProgress > 0.9f;
 
-                if (moveProgress > becomeTileThreshold && Coordinates == startCoordinates)
+                if (moveProgress > becomeTileThreshold && Coordinates == moveStartCoordinates)
                 {
                     BecomeTile(targetCoordinates);
                 }
 
                 transform.position = Vector3.Lerp(startPosition, targetPosition, moveProgress);
-
+                
                 if (moveProgress == 1)
                 {
+                    ClearAllNodeSideAlterations();
                     ActivePhaseFunction = InitMoveStep;
+                } else
+                {
+                    CheckNodeSideAlterations();
                 }
             };
         }
@@ -810,7 +955,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void OnDestroy()
         {
-            ClearAllBlockers();
+            ClearAllNodeSideAlterations();
         }
 
         public KeyValuePair<Vector3Int, MovingPlatformSave> Save() =>

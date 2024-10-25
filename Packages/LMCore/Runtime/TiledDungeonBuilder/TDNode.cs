@@ -126,6 +126,13 @@ namespace LMCore.TiledDungeon
         public override string ToString() =>
                 $"TDNode {name} @ {Coordinates}";
 
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(PrefixLogMessage(
+                $"{Occupants.Count()} Occupants ({_reservations.Count} reservations. Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({HasSide(d)})"))}"));
+        }
+
         public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
 
         TDContainer _container;
@@ -395,6 +402,7 @@ namespace LMCore.TiledDungeon
         }
 
         bool BlockEdgeTraversal(GridEntity entity, Direction direction) =>
+            !temporarySideNegator.Overrides(direction) &&
             modifications.Any(mod => {
                 var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
                 if (direction != modDirection && modDirection != Direction.None) return false;
