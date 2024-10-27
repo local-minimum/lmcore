@@ -723,6 +723,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             bool hasStartCoordinates = moveStartCoordinates == Coordinates;
             var startCoordinates = moveStartCoordinates + offset;
             var startNode = Dungeon.HasNodeAt(startCoordinates) ? Dungeon[startCoordinates] : null;
+            var endCoordinates = MoveDirection.Translate(startCoordinates);
+            var endNode = Dungeon.HasNodeAt(endCoordinates) ? Dungeon[endCoordinates] : null;
 
             // This predicate assumes there's only ever one negate per behaviour with the same offset
             Func<TemporaryNodeSideAlteration, bool> pred =
@@ -749,11 +751,6 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     !hasStartCoordinates &&
                     moveProgress < 0.5f;
 
-                if (direction == Direction.Up)
-                {
-                  // Debug.Log($"{offset} {direction} {hasAlter} {hasStartCoordinates} {moveProgress} {isNegativeSide} {inNegativeSideNegation}");
-                }
-                
                 if (!hasAlter && (inNegativeSideNegation || inPositiveSideNegation))
                 {
                     currentNode.AddEntryNegator(direction, behaviour);
@@ -770,43 +767,38 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
                 }
 
-                /*
-                var moveStartNode = Dungeon.HasNodeAt(startCoordinates) ? Dungeon[startCoordinates] : null;
-                if (moveStartNode != null)
+                if (startNode != null && !hasStartCoordinates)
                 {
                     foreach (var orthoDirection in MoveDirection.OrthogonalDirections())
                     {
                         pred =
                             a => a.IsMe(offset, orthoDirection) &&
                             a.action == TemporaryNodeSideAlteration.Action.Exit &&
-                            a.node == moveStartNode;
+                            a.node == endNode;
 
                         hasAlter = registeredAlterations.Any(pred);
 
-                        // Debug.Log($"Consider Adding {orthoDirection} has from before {hasAlter} target has side {moveStartNode.HasSide(orthoDirection)} ");
-                        if (!hasAlter && moveProgress < 0.5f && moveStartNode.HasSide(orthoDirection))
+                        if (!hasAlter && moveProgress < 0.6f && startNode.HasSide(orthoDirection))
                         {
-                            Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {moveStartNode.Coordinates}"));
-                            moveStartNode.AddExitBlocker(orthoDirection, behaviour);
+                            Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {endNode.Coordinates}"));
+                            endNode.AddExitBlocker(orthoDirection, behaviour);
                             registeredAlterations.Add(
-                                TemporaryNodeSideAlteration.Exit(moveStartNode, orthoDirection, offset, behaviour));
+                                TemporaryNodeSideAlteration.Exit(endNode, orthoDirection, offset, behaviour));
                         }
-                        else if (hasAlter && moveProgress > 0.5f)
+                        else if (hasAlter && moveProgress > 0.6f)
                         {
-                            moveStartNode.RemoveExitBlocker(orthoDirection, behaviour);
+                            var alter = registeredAlterations.First(pred);
+                            Debug.Log(PrefixLogMessage($"Removing exit block on node {alter.node} {alter.direction} with behaviour '{alter.behaviour}'"));
+                            alter.node.RemoveExitBlocker(alter.direction, alter.behaviour);
                             registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
                         }
                     }
-                }*/
+                }
             
             } else if (MoveDirection == direction.Inverse())
             {
                 var hasAlter = registeredAlterations.Any(pred);
                 var threshold = isNegativeSide ? 0.9f : 0.5f;
-                if (direction == Direction.Up)
-                {
-                  // Debug.Log($"inv {offset} {direction} {hasAlter} {hasStartCoordinates} {moveProgress} {threshold}");
-                }
 
                 var inNegativeSideNegation = isNegativeSide &&
                     !hasStartCoordinates &&
@@ -835,35 +827,33 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                         $"with behaviour '{alter.behaviour}'. Now side is {alter.node.HasSide(alter.direction)}"));
                 }
 
-                /*
-                var endCoordinates = MoveDirection.Translate(startCoordinates);
-                var moveEndNode = Dungeon.HasNodeAt(endCoordinates) ? Dungeon[endCoordinates] : null;
-                if (moveEndNode != null)
+                if (endNode != null)
                 {
                     foreach (var orthoDirection in MoveDirection.OrthogonalDirections())
                     {
                         pred =
                             a => a.IsMe(offset, orthoDirection) &&
                             a.action == TemporaryNodeSideAlteration.Action.Exit &&
-                            a.node == moveEndNode;
+                            a.node == startNode;
 
                         hasAlter = registeredAlterations.Any(pred);
 
-                        // Debug.Log($"Consider Adding {orthoDirection} has from before {hasAlter} target {moveEndNode.Coordinates} has side {moveEndNode.HasSide(orthoDirection)} ");
-                        if (!hasAlter && moveProgress > 0.5f && hasStartCoordinates && moveEndNode.HasSide(orthoDirection))
+                        if (!hasAlter && hasStartCoordinates && moveProgress > 0.4f && endNode.HasSide(orthoDirection))
                         {
-                            Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {moveEndNode.Coordinates}"));
-                            moveEndNode.AddExitBlocker(orthoDirection, behaviour);
+                            Debug.Log(PrefixLogMessage($"Adding exit block to {orthoDirection} on node at {endNode.Coordinates}"));
+                            startNode.AddExitBlocker(orthoDirection, behaviour);
                             registeredAlterations.Add(
-                                TemporaryNodeSideAlteration.Exit(moveEndNode, orthoDirection, offset, behaviour));
+                                TemporaryNodeSideAlteration.Exit(startNode, orthoDirection, offset, behaviour));
                         }
-                        else if (hasAlter && moveProgress > 0.5f && !hasStartCoordinates)
+                        else if (hasAlter && !hasStartCoordinates)
                         {
-                            moveEndNode.RemoveExitBlocker(orthoDirection, behaviour);
+                            var alter = registeredAlterations.First(pred);
+                            Debug.Log(PrefixLogMessage($"Removing exit block on node {alter.node} {alter.direction} with behaviour '{alter.behaviour}'"));
+                            alter.node.RemoveExitBlocker(alter.direction, alter.behaviour);
                             registeredAlterations.RemoveAll(new Predicate<TemporaryNodeSideAlteration>(pred));
                         }
                     }
-                }*/
+                }
             }
         }
 
