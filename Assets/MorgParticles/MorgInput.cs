@@ -104,7 +104,7 @@ public class MorgInput : MonoBehaviour
             }
         }
     }
-    
+
     public void ApplyColor(Color color)
     {
         foreach (ParticleSystem ps in ParticleSystems)
