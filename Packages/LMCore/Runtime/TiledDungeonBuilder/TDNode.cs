@@ -6,7 +6,6 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
-using UnityEngine.UIElements;
 
 namespace LMCore.TiledDungeon
 {
@@ -53,11 +52,32 @@ namespace LMCore.TiledDungeon
         [HideInInspector, SerializeField]
         public TDSidesClass _sides = new TDSidesClass();
         private SideOverride temporarySideNegator = new SideOverride();
+
+        public enum SideCheckMode { Has, Entry, Exit  };
         public bool HasSide(Direction direction) =>
-            _sides.Has(direction) && !temporaryEntryBlocker.Overrides(direction);
+            _sides.Has(direction) && !temporarySideNegator.Overrides(direction);
+        public bool HasSide(Direction direction, SideCheckMode sideCheckMode)
+        {
+            switch (sideCheckMode)
+            {
+                case SideCheckMode.Has:
+                    return HasSide(direction);
+                case SideCheckMode.Entry:
+                    if (temporaryEntryBlocker.Overrides(direction)) return true;
+                    if (temporaryEntryNegator.Overrides(direction)) return false;
+                    return HasSide(direction);
+                case SideCheckMode.Exit:
+                    if (temporaryExitBlocker.Overrides(direction)) return true;
+                    if (temporaryExitNegator.Overrides(direction)) return false;
+                    return HasSide(direction);
+            }
+            return false;
+        }
 
         private SideOverride temporaryEntryBlocker = new SideOverride();
+        private SideOverride temporaryEntryNegator = new SideOverride();
         private SideOverride temporaryExitBlocker = new SideOverride();
+        private SideOverride temporaryExitNegator = new SideOverride();
         public void AddEntryBlocker(Direction direction, MonoBehaviour behaviour) =>
             temporaryEntryBlocker.AddOverride(direction, behaviour);
         public void RemoveEntryBlocker(Direction direction, MonoBehaviour behaviour) =>
@@ -66,6 +86,14 @@ namespace LMCore.TiledDungeon
             temporaryExitBlocker.AddOverride(direction, behaviour);
         public void RemoveExitBlocker(Direction direction, MonoBehaviour behaviour) =>
             temporaryExitBlocker.RemoveOverride(direction, behaviour);
+        public void AddEntryNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporaryEntryNegator.AddOverride(direction, behaviour);
+        public void RemoveEntryNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporaryEntryNegator.RemoveOverride(direction, behaviour);
+        public void AddExitNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporaryExitNegator.AddOverride(direction, behaviour);
+        public void RemoveExitNegator(Direction direction, MonoBehaviour behaviour) =>
+            temporaryExitNegator.RemoveOverride(direction, behaviour);
         public void AddSideNegator(Direction direction, MonoBehaviour behaviour) =>
             temporarySideNegator.AddOverride(direction, behaviour);
         public void RemoveSideNegator(Direction direction, MonoBehaviour behaviour) =>
@@ -126,11 +154,25 @@ namespace LMCore.TiledDungeon
         public override string ToString() =>
                 $"TDNode {name} @ {Coordinates}";
 
+        string SideInfo(Direction direction)
+        {
+            var info = "";
+            if (_sides.Has(direction)) { info += "T"; } else { info += "F"; }
+            if (temporarySideNegator.Overrides(direction)) {  info +="-S"; }
+            if (temporaryEntryBlocker.Overrides(direction)) { info += "En"; }
+            if (temporaryEntryNegator.Overrides(direction)) { info += "-En"; }
+            if (temporaryExitBlocker.Overrides(direction)) { info += "Ex"; }
+            if (temporaryExitNegator.Overrides(direction)) { info += "-Ex"; }
+
+
+            return info;
+        }
+
         [ContextMenu("Info")]
         void Info()
         {
             Debug.Log(PrefixLogMessage(
-                $"{Occupants.Count()} Occupants ({_reservations.Count} reservations. Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({HasSide(d)})"))}"));
+                $"{Occupants.Count()} Occupants ({_reservations.Count} reservations. Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({SideInfo(d)})"))}"));
         }
 
         public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
@@ -276,9 +318,9 @@ namespace LMCore.TiledDungeon
                 );
         }
 
-        bool HasWall(Direction direction)
+        bool HasWall(Direction direction, SideCheckMode sideCheckMode)
         {
-            if (direction.IsPlanarCardinal()) return HasSide(direction);
+            if (direction.IsPlanarCardinal()) return HasSide(direction, sideCheckMode);
             return false;
         }
 
@@ -292,19 +334,19 @@ namespace LMCore.TiledDungeon
                 return HasFloor ? fallback : MovementOutcome.NodeExit;
             } else
             {
-                return HasWall(direction) || HasLadder(direction) ? fallback: MovementOutcome.NodeExit;
+                return HasWall(direction, SideCheckMode.Exit) || HasLadder(direction) ? fallback: MovementOutcome.NodeExit;
             }
 
         }
 
-        MovementOutcome PlanarOutcome(Direction direction)
+        MovementOutcome PlanarExitOutcome(Direction direction)
         {
             if (HasLadder(direction))
             {
                 return MovementOutcome.NodeInternal;
             }
 
-            if (HasWall(direction))
+            if (HasWall(direction, SideCheckMode.Exit))
             {
                 return MovementOutcome.Blocked;
             }
@@ -318,7 +360,7 @@ namespace LMCore.TiledDungeon
 
             if (entity == null && anchor == Direction.None)
             {
-                return HasSide(direction) || temporaryExitBlocker.Overrides(direction) ?
+                return HasSide(direction, SideCheckMode.Exit) || temporaryExitBlocker.Overrides(direction) ?
                     MovementOutcome.Refused : MovementOutcome.NodeExit;
             }
 
@@ -329,12 +371,12 @@ namespace LMCore.TiledDungeon
 
             if (anchor == Direction.Down)
             {
-                return PlanarOutcome(direction);
+                return PlanarExitOutcome(direction);
             } 
 
             if (anchor == Direction.Up)
             {
-                return PlanarOutcome(direction.Inverse());
+                return PlanarExitOutcome(direction.Inverse());
             }
 
             if (anchor.IsPlanarCardinal())
@@ -343,7 +385,7 @@ namespace LMCore.TiledDungeon
                 {
                     if (direction == Direction.Up)
                     {
-                        if (HasCeiling)
+                        if (HasCeiling && HasSide(direction, SideCheckMode.Exit))
                         {
                             return CanAnchorOn(entity, Direction.Up) ? MovementOutcome.NodeInternal : MovementOutcome.Blocked;
                         }
@@ -401,9 +443,16 @@ namespace LMCore.TiledDungeon
             return door.BlockingPassage;
         }
 
-        bool BlockEdgeTraversal(GridEntity entity, Direction direction) =>
-            !temporarySideNegator.Overrides(direction) &&
-            modifications.Any(mod => {
+        bool BlockEdgeTraversal(GridEntity entity, Direction direction, SideCheckMode sideCheckMode)
+        {
+            if (sideCheckMode == SideCheckMode.Has && temporarySideNegator.Overrides(direction)) return false;
+            if (sideCheckMode == SideCheckMode.Exit && temporaryExitNegator.Overrides(direction)) return false;
+            if (sideCheckMode == SideCheckMode.Entry && temporaryEntryNegator.Overrides(direction)) return false;
+            if (sideCheckMode == SideCheckMode.Exit && temporaryExitBlocker.Overrides(direction)) return true;
+            if (sideCheckMode == SideCheckMode.Entry && temporaryEntryBlocker.Overrides(direction)) return true;
+            
+            return modifications.Any(mod =>
+            {
                 var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
                 if (direction != modDirection && modDirection != Direction.None) return false;
                 if (entity?.TransportationMode.HasFlag(TransportationMode.Flying) == true)
@@ -414,19 +463,20 @@ namespace LMCore.TiledDungeon
                 var walkability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().WalkabilityKey, TDEnumAspect.Always);
                 return walkability == TDEnumAspect.Never;
             });
+        }
 
         public bool AllowExit(GridEntity entity, Direction direction) =>
-            !HasSide(direction) &&
+            !HasSide(direction, SideCheckMode.Exit) &&
             !temporaryExitBlocker.Overrides(direction) &&
-            !BlockEdgeTraversal(entity, direction);
+            !BlockEdgeTraversal(entity, direction, SideCheckMode.Exit);
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
-            if (HasWall(direction) || temporaryEntryBlocker.Overrides(direction) || HasLadder(direction)) return false;
+            if (HasWall(direction, SideCheckMode.Entry) || HasLadder(direction)) return false;
 
             if (HasBlockingDoor(direction)) return false;
 
-            if (Obstructed) return false;
+            if (!entity.Falling && Obstructed) return false;
 
             var ramp = RampModification;
             if (ramp != null && direction.IsPlanarCardinal())
@@ -435,11 +485,13 @@ namespace LMCore.TiledDungeon
                 if (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) != TDEnumElevation.Low &&
                     ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection().AsAxis() != axis)
                 {
+                    Debug.Log("Rampblock");
                     return false;
                 }
             }
 
-            if (BlockEdgeTraversal(entity, direction)) return false;
+            Debug.Log($"{BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)}");
+            if (BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)) return false;
 
             var platform = GetComponentInChildren<TDMovingPlatform>();
             if (platform != null)
