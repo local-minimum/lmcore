@@ -27,6 +27,9 @@ public class CritterSpawner : MonoBehaviour
     [SerializeField]
     float maxSpawnFromCamDistance = 10f;
 
+    [SerializeField]
+    LayerMask CollisionMask;
+
     void Start()
     {
         if (Pool == null)
@@ -41,7 +44,7 @@ public class CritterSpawner : MonoBehaviour
 
         var critter = Spawned.FirstOrDefault(c => !c.gameObject.activeSelf);
         if (critter != null) {
-            critter.enabled = true;
+            critter.gameObject.SetActive(true);
             return critter;
         }
 
@@ -93,8 +96,9 @@ public class CritterSpawner : MonoBehaviour
             if (recentRays.Count > 10) recentRays.Dequeue();
 
             Debug.Log($"Critter spawn {ray.direction}");
-            if (Physics.Raycast(ray, out var hitInfo, maxSpawnFromCamDistance))
+            if (Physics.Raycast(ray, out var hitInfo, maxSpawnFromCamDistance, CollisionMask))
             {
+                Debug.Log("Critter");
                 var critter = GetCritter();
                 // Probably better use navmeshes here or such thing
                 // not the right normal

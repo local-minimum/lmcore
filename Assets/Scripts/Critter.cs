@@ -68,6 +68,7 @@ public class Critter : MonoBehaviour
     
     public void SpawnToPlane(Rect surfaceSize, Vector3 origin, Vector3 normal)
     {
+        transform.rotation.SetLookRotation(normal, Vector3.up);
         despawnAt = Time.timeSinceLevelLoad + Random.Range(minLifeTime, maxLifeTime);
 
         this.origin = origin;
