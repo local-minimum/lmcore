@@ -98,7 +98,6 @@ public class CritterSpawner : MonoBehaviour
             Debug.Log($"Critter spawn {ray.direction}");
             if (Physics.Raycast(ray, out var hitInfo, maxSpawnFromCamDistance, CollisionMask))
             {
-                Debug.Log("Critter");
                 var critter = GetCritter();
                 // Probably better use navmeshes here or such thing
                 // not the right normal

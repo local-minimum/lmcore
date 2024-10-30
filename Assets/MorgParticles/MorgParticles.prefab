@@ -19728,7 +19728,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1849513503
+  m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_RenderMode: 4
@@ -19742,7 +19742,7 @@ ParticleSystemRenderer:
   m_SortingFudge: 0
   m_NormalDirection: 1
   m_ShadowBias: 0
-  m_RenderAlignment: 2
+  m_RenderAlignment: 1
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
   m_EnableGPUInstancing: 1
@@ -59354,7 +59354,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0968f836e664af14ea087fe0153cfa22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentVelocity: 0
   MorgBody: {fileID: 769740051770828471}
   MorgTail: {fileID: 4541119685455815858}
   MorgHead: {fileID: 1661301829372314054}
@@ -59367,3 +59366,4 @@ MonoBehaviour:
   MorgTendrilH1: {fileID: 3720507117496476204}
   MorgTendrilH2: {fileID: 3547664093179745119}
   MorgTendrilH3: {fileID: 3587215401461775794}
+  velocityScaling: 1

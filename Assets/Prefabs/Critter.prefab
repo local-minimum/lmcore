@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f973e679d776344f98d1a1e61629837, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minLifeTime: 1
-  maxLifeTime: 4
+  minLifeTime: 4
+  maxLifeTime: 10
   minSpeed: 0.4
   maxSpeed: 1
 --- !u!1001 &5575541220052358500
@@ -57,20 +57,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8079177887837276132}
     m_Modifications:
+    - target: {fileID: 4724129052491450761, guid: 0cb46fd8c59a6324a9cd69178c7446b1,
+        type: 3}
+      propertyPath: velocityScaling
+      value: 0.928
+      objectReference: {fileID: 0}
     - target: {fileID: 4731011257879053295, guid: 0cb46fd8c59a6324a9cd69178c7446b1,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4731011257879053295, guid: 0cb46fd8c59a6324a9cd69178c7446b1,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4731011257879053295, guid: 0cb46fd8c59a6324a9cd69178c7446b1,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4731011257879053295, guid: 0cb46fd8c59a6324a9cd69178c7446b1,
         type: 3}

@@ -5,8 +5,6 @@ using static UnityEngine.ParticleSystem;
 public class MorgInput : MonoBehaviour
 {
     [SerializeField]
-    float CurrentVelocity;
-    [SerializeField]
     ParticleSystem MorgBody;
     [SerializeField]
     ParticleSystem MorgTail;
@@ -32,7 +30,6 @@ public class MorgInput : MonoBehaviour
     [SerializeField]
     ParticleSystem MorgTendrilH3;
 
-    Vector2 CurrentPos;
     Vector2 LastPos;
 
     List<ParticleSystem> ParticleSystems = new List<ParticleSystem>();
@@ -72,7 +69,7 @@ public class MorgInput : MonoBehaviour
 
         tailShape = MorgTail.shape;
 
-        CurrentPos = transform.position;
+        LastPos = transform.position;
 
         var seed = (uint) Random.Range(0, uint.MaxValue);
         foreach (ParticleSystem ps in ParticleSystems)
@@ -83,26 +80,29 @@ public class MorgInput : MonoBehaviour
         }
     }
 
+    [SerializeField, Range(0, 2)]
+    float velocityScaling = 1f;
+
     void Update()
     {
-        LastPos = CurrentPos;
-        CurrentPos = transform.position;
-        CurrentVelocity = Vector3.Distance(LastPos, CurrentPos);
+        var scale = Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        var CurrentVelocity = Vector3.Distance(transform.position, LastPos) * velocityScaling;
 
         if (CurrentVelocity > 0)
         {
             //tailShape.radius = 0.28f + (CurrentVelocity);
-            tailShape.randomPositionAmount = 0.1f + CurrentVelocity;
+            tailShape.randomPositionAmount = (0.1f + CurrentVelocity) * scale;
             tailShape.radiusSpeed = 0.01f + (CurrentVelocity * 10f);
 
             for (int i = 0, l = TendrilShapeModules.Count; i < l; i++)
             {
                 var shape = TendrilShapeModules[i];
-                shape.randomPositionAmount = 0.002f + (CurrentVelocity * 0.1f);
+                shape.randomPositionAmount = (0.002f + (CurrentVelocity * 0.1f)) * scale;
                 shape.radiusSpeed = 0.2f + CurrentVelocity;
                 shape.arc = 20f + (CurrentVelocity * 20f);
             }
         }
+        LastPos = transform.position;
     }
 
     public void ApplyColor(Color color)
