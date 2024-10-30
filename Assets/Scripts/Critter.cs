@@ -38,8 +38,10 @@ public class Critter : MonoBehaviour
 
     void SetNewWalkTarget()
     {
-        var a = Random.Range(0f, 360f);
-        walkDirection = new Vector3(Mathf.Sin(a), Mathf.Cos(a), 0);
+        Vector3 tangent = Vector3.one;
+        Vector3.OrthoNormalize(ref normal, ref tangent);
+        var rotator = Quaternion.AngleAxis(Random.Range(0, 360f), normal);
+        walkDirection = rotator * tangent;
         walkSpeed = Random.Range(minSpeed, maxSpeed);
         walkEnd = Time.timeSinceLevelLoad + Random.Range(0.4f, 1.5f) / walkSpeed;
         transform.rotation = Quaternion.LookRotation(walkDirection, normal);
