@@ -6,6 +6,7 @@ using LMCore.TiledDungeon.Integration;
 using UnityEngine;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
+using LMCore.UI;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
@@ -38,21 +39,32 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         [SerializeField]
         AbstractDungeonAction[] dePressAction;
 
+        [SerializeField, HideInInspector]
+        Direction anchorDirection;
+
+        [SerializeField]
+        bool prompt;
+
+        [SerializeField]
+        string selfPromptReference = "button";
+
         bool automaticallyResets => dePressAction == null || dePressAction.Length == 0;
 
         bool active = true;
         bool lastActionWasPress = false;
 
         public override string ToString() =>
-            $"Actuator {name} @ {Coordinates}/{Anchor?.CubeFace} Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
+            $"Actuator {name} @ {Coordinates}/{Anchor?.CubeFace ?? anchorDirection}: Active({active}) LastWasPress({lastActionWasPress}) AutomaticReset({automaticallyResets}) Groups([{string.Join(", ", groups)}]) Repeatable({repeatable}) Interaction({interaction})";
         protected string PrefixLogMessage(string message) =>
             $"Actuator {name} @ {Coordinates}: {message}";
 
         [ContextMenu("Info")]
         void Info() => Debug.Log(this);
 
-        public void Configure(TDNode node)
+        public void Configure(TDNode node, Direction direction)
         {
+            anchorDirection = direction;
+
             var props = node
                 .Config
                 .GetObjectProps(o =>
@@ -88,10 +100,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (interaction == TDEnumInteraction.Interactable)
             {
                 GridEntity.OnInteract += GridEntity_OnInteract;
+                GridEntity.OnPositionTransition += CheckShowPrompt;
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                GridEntity.OnPositionTransition += GridEntity_OnPositionTransition;
+                GridEntity.OnPositionTransition += CheckPressureButton;
             }
         }
 
@@ -100,14 +113,53 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (interaction == TDEnumInteraction.Interactable)
             {
                 GridEntity.OnInteract -= GridEntity_OnInteract;
+                GridEntity.OnPositionTransition -= CheckShowPrompt;
             }
             else if (interaction == TDEnumInteraction.Automatic)
             {
-                GridEntity.OnPositionTransition -= GridEntity_OnPositionTransition;
+                GridEntity.OnPositionTransition -= CheckPressureButton;
             }
         }
 
-        private void GridEntity_OnPositionTransition(GridEntity entity)
+        string lastPrompt;
+        void HideLastPrompt()
+        {
+            if (!string.IsNullOrEmpty(lastPrompt))
+            {
+                PromptUI.instance.HideText(lastPrompt);
+                lastPrompt = null;
+            }
+        }
+
+        void CheckShowPrompt(GridEntity entity)
+        {
+            if (!prompt ||
+                interaction != TDEnumInteraction.Interactable ||
+                entity == null ||
+                entity.EntityType != GridEntityType.PlayerCharacter ||
+                entity.Coordinates != Coordinates ||
+                entity.LookDirection != anchorDirection)
+            {
+                HideLastPrompt();
+                return;
+            } 
+
+            if (!active)
+            {
+                lastPrompt = $"The {selfPromptReference} is offline";
+            }
+            else if (lastActionWasPress && !automaticallyResets)
+            {
+                lastPrompt = $"Un-press the {selfPromptReference}";
+            }
+            else
+            {
+                lastPrompt = $"Press the {selfPromptReference}";
+            }
+            PromptUI.instance.ShowText(lastPrompt);
+        }
+
+        private void CheckPressureButton(GridEntity entity)
         {
             var flying = entity.TransportationMode.HasFlag(TransportationMode.Flying);
             var onMe = entity.Coordinates == Coordinates && entity.AnchorDirection == Anchor.CubeFace;
@@ -120,14 +172,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
                 if (occupants.Count() == 0 && lastActionWasPress)
                 {
-                    Depress();
+                    Depress(null);
                 }
             } else if (onMe && !flying)
             {
                 occupants.Add(entity);
                 if (occupants.Count() == 1 && (automaticallyResets || !lastActionWasPress))
                 {
-                    Press();
+                    Press(null);
                 }
             }
         }
@@ -136,17 +188,18 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
-            if (!active || entity.Coordinates != Coordinates) return;
+            if (!active || entity.Coordinates != Coordinates || entity.LookDirection != anchorDirection) return;
 
+            HideLastPrompt();
             if (lastActionWasPress && !automaticallyResets)
             {
                 Debug.Log(PrefixLogMessage("Entity depresses actuator"));
-                Depress();
+                Depress(entity);
             }
             else
             {
                 Debug.Log(PrefixLogMessage("Entity presses actuator"));
-                Press();
+                Press(entity);
             }
         }
 
@@ -165,7 +218,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         public int OnLoadPriority => 500;
 
-        void Press()
+        void Press(GridEntity entity)
         {
             foreach (var group in groups)
             {
@@ -175,7 +228,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             foreach (var action in pressActions)
             {
-                action.Play(null);
+                action.Play(() =>
+                {
+                    CheckShowPrompt(entity);
+                });
             }
 
             lastActionWasPress = true;
@@ -184,11 +240,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             Debug.Log(PrefixLogMessage($"Is {(active ? "active" : "inactive")} after interaction"));
         }
 
-        void Depress()
+        void Depress(GridEntity entity)
         {
             foreach (var action in dePressAction)
             {
-                action.Play(null);
+                action.Play(() =>
+                {
+                    CheckShowPrompt(entity);
+                });
             }
 
             if (invokeToggleGroupOnUnset)

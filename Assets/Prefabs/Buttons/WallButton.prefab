@@ -151,10 +151,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 426c4907f873ccf45bb796908361ec01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Coordinates: {x: 0, y: 0, z: 0}
   repeatable: 0
+  groups: 
+  invokeToggleGroupOnUnset: 0
+  interaction: 0
   pressActions:
   - {fileID: 6952989323813920394}
+  dePressAction: []
+  anchorDirection: 0
+  prompt: 1
 --- !u!114 &6952989323813920394
 MonoBehaviour:
   m_ObjectHideFlags: 0

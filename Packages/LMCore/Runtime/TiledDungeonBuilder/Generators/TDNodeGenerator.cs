@@ -160,15 +160,17 @@ namespace LMCore.TiledDungeon
 
             foreach (var button in buttons)
             {
+                var direction = button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection();
+
                 var go = node.Dungeon.Style.Get(
                     node.transform,
                     TiledConfiguration.instance.WallButtonClass,
-                    button.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey).AsDirection(),
+                    direction,
                     node.NodeStyle
                 );
 
                 if (go != null) 
-                    go.GetComponent<TDActuator>()?.Configure(node);
+                    go.GetComponent<TDActuator>()?.Configure(node, direction);
             }
         }
 
@@ -465,7 +467,7 @@ namespace LMCore.TiledDungeon
 
                             var pressurePlate = plate.GetComponent<TDActuator>();
 
-                            pressurePlate?.Configure(node);
+                            pressurePlate?.Configure(node, direction);
 
                             var orientation = node.PressurePlateModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey, TDEnumOrientation.None);
                             ApplyAnchorRotation(plate, orientation);

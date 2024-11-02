@@ -347,15 +347,21 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 MapOverActions(OpenActions, (action) => action.Abandon());
                 MapOverActions(CloseActions, (action) => action.PlayFromCurrentProgress(() => {
-                    isOpen = false;
-                    ShowPrompt(entity);
+                    if (isOpen)
+                    {
+                        isOpen = false;
+                        ShowPrompt(entity);
+                    }
                 }));
             } else
             {
                 MapOverActions(CloseActions, (action) => action.Play(() =>
                 {
-                    isOpen = false;
-                    ShowPrompt(entity);
+                    if (isOpen)
+                    {
+                        isOpen = false;
+                        ShowPrompt(entity);
+                    }
                 }));
             }
         }
@@ -374,18 +380,37 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(
                     () =>
                     {
-                        isOpen = true;
-                        ShowPrompt(entity);
+                        if (!isOpen)
+                        {
+                            isOpen = true;
+                            ShowPrompt(entity);
+                        }
                     }, 
-                    (progress) => isOpen = progress > considerOpenAfterProgress));
+                    (progress) => {
+                        if (!isOpen && progress > considerOpenAfterProgress)
+                        {
+
+                            ShowPrompt(entity);
+                        }
+                    }));
             } else
             {
                 MapOverActions(OpenActions, 
-                    (action) => action.Play(() => {
-                        isOpen = true;
-                        ShowPrompt(entity);
+                    (action) => action.Play(() =>
+                    {
+                        if (!isOpen)
+                        {
+                            isOpen = true;
+                            ShowPrompt(entity);
+                        }
                     }, 
-                    (progress) => isOpen = progress > considerOpenAfterProgress));
+                    (progress) => {
+                        if (!isOpen && progress > considerOpenAfterProgress)
+                        {
+
+                            ShowPrompt(entity);
+                        }
+                    }));
             }
         }
 
