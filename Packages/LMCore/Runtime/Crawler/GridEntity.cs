@@ -59,6 +59,7 @@ namespace LMCore.Crawler
         #region Anchorage
         public bool RotationRespectsAnchorDirection { get; set; } = false;
 
+        [SerializeField, HideInInspector]
         private Anchor _anchor;
         public Anchor NodeAnchor {
             get => _anchor;
@@ -102,6 +103,7 @@ namespace LMCore.Crawler
             }
         }
 
+        [SerializeField, HideInInspector]
         private Direction _anchorDirection = Direction.Down;
         public Direction AnchorDirection
         {
@@ -144,6 +146,7 @@ namespace LMCore.Crawler
             }
         }
 
+        [SerializeField, HideInInspector]
         private IDungeonNode _node;
         public IDungeonNode Node { 
             get
@@ -211,6 +214,7 @@ namespace LMCore.Crawler
             }
         }
 
+        [SerializeField, HideInInspector]
         Vector3Int _Coordinates;
         public Vector3Int Coordinates
         {
@@ -248,7 +252,8 @@ namespace LMCore.Crawler
         }
         #endregion
 
-        public Direction LookDirection { get; set; }
+        [HideInInspector]
+        public Direction LookDirection;
 
         public TransportationMode TransportationMode;
 
@@ -317,6 +322,29 @@ namespace LMCore.Crawler
             LookDirection = checkpoint.LookDirection;
 
             Sync();
+        }
+
+        private void Start()
+        {
+            if (Node != null)
+            {
+                Debug.Log(PrefixLogMessage($"Waking up at {Node}"));
+                Node.AddOccupant(this);
+            }
+            else if (Dungeon != null)
+            {
+                if (Dungeon.HasNodeAt(Coordinates))
+                {
+                    Debug.Log(PrefixLogMessage($"Waking up at {Coordinates}"));
+                    Node = Dungeon[Coordinates];
+                } else
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Waking up outside dungeon at {Coordinates}"));
+                }
+            } else
+            {
+                Debug.LogWarning(PrefixLogMessage($"Waking up without a dungeon"));
+            }
         }
 
         public void Interact()

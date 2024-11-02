@@ -171,8 +171,13 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Info")]
         void Info()
         {
+            var occupants = Occupants.Count() == 0 ? 
+                "Empty tile" :
+                $"Occupants: {string.Join(", ", Occupants.Select(e => $"{e.Identifier} ({e.EntityType})"))} ({_reservations.Count} reservations)";
+
             Debug.Log(PrefixLogMessage(
-                $"{Occupants.Count()} Occupants ({_reservations.Count} reservations. Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({SideInfo(d)})"))}"));
+                $"{occupants}. " +
+                $"Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({SideInfo(d)})"))}"));
         }
 
         public Vector3 CenterPosition => Coordinates.ToPosition(Dungeon.GridSize) + Vector3.up * Dungeon.GridSize * 0.5f;
@@ -472,6 +477,8 @@ namespace LMCore.TiledDungeon
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
+            if (!OccupationRules.MayCoexist(entity, Occupants)) return false;
+
             if (HasWall(direction, SideCheckMode.Entry) || HasLadder(direction)) return false;
 
             if (HasBlockingDoor(direction)) return false;
