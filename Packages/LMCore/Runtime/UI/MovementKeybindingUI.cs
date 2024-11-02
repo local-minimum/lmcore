@@ -159,6 +159,30 @@ namespace LMCore.UI
             GetActions(action)
             .FirstOrDefault();
 
+        [SerializeField]
+        string unboundHint = "<UNBOUND>"; 
+
+        public string GetActionHint(GamePlayAction gpaction)
+        {
+            var keyHint = unboundHint;
+            var action = GetAction(gpaction);
+            if (action == null) return keyHint;
+
+            if (action != null)
+            {
+                var binding = GetActiveBinding(action);
+                if (binding != null)
+                {
+                    var bindingText = binding.HumanizePath();
+                    if (bindingText != null)
+                    {
+                        keyHint = $"[{bindingText}]";
+                    }
+                }
+            }
+            return keyHint;
+        }
+
 
         KeyBinding GetBinding(InputAction action) => bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
         KeyBinding GetBinding(Movement movement) => bindings.FirstOrDefault(b => b.movement == movement);

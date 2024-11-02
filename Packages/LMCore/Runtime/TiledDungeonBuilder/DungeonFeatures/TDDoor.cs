@@ -25,7 +25,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             set {
                 var newState = _isOpen != value;
                 _isOpen = value;
-                if (newState) HideLastPrompt();
+                //if (newState) HideLastPrompt();
             }
         }
 
@@ -174,20 +174,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
 
             var bindingsUI = MovementKeybindingUI.InstanceOrResource("Keybinding");
-            var action = bindingsUI.GetAction(GamePlayAction.Interact);
-            var keyHint = "<UNBOUND>";
-            if (action != null)
-            {
-                var binding = bindingsUI.GetActiveBinding(action);
-                if (binding != null)
-                {
-                    var bindingText = binding.HumanizePath();
-                    if (bindingText != null)
-                    {
-                        keyHint = $"[{bindingText}]";
-                    }
-                }
-            }
+            var keyHint = bindingsUI.GetActionHint(GamePlayAction.Interact);
 
             if (isLocked)
             {
@@ -212,6 +199,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             PromptUI.instance.ShowText(lastPrompt);
         }
+
         private void HideLastPrompt()
         {
             if (!string.IsNullOrEmpty(lastPrompt))

@@ -47,6 +47,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField]
         string selfPromptReference = "button";
+        [SerializeField]
+        string promptPress = "Press";
+        [SerializeField]
+        string promptDepress = "De-press";
 
         bool automaticallyResets => dePressAction == null || dePressAction.Length == 0;
 
@@ -144,17 +148,20 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return;
             } 
 
+            var bindingsUI = MovementKeybindingUI.InstanceOrResource("Keybinding");
+            var keyHint = bindingsUI.GetActionHint(GamePlayAction.Interact);
+
             if (!active)
             {
                 lastPrompt = $"The {selfPromptReference} is offline";
             }
             else if (lastActionWasPress && !automaticallyResets)
             {
-                lastPrompt = $"Un-press the {selfPromptReference}";
+                lastPrompt = $"{keyHint} {promptDepress} the {selfPromptReference}";
             }
             else
             {
-                lastPrompt = $"Press the {selfPromptReference}";
+                lastPrompt = $"{keyHint} {promptPress} the {selfPromptReference}";
             }
             PromptUI.instance.ShowText(lastPrompt);
         }
