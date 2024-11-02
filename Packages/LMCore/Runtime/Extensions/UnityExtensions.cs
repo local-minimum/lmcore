@@ -1,9 +1,9 @@
-using PlasticPipe.PlasticProtocol.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 namespace LMCore.Extensions
 {
@@ -57,6 +57,28 @@ namespace LMCore.Extensions
 
             return size;
         }
+
+        #region Humanize Input Binding Key
+        public static string HumanizePath(string path, string unbound = null)
+        {
+            if (string.IsNullOrEmpty(path)) return unbound;
+
+            var part = path
+                 .Split('/')
+                 .LastOrDefault();
+
+            if (part == null) return unbound;
+
+            return part
+                .ToUpper()
+                .Replace("NUMPAD", "NUM")
+                .Replace("ARROW", "");
+        }
+
+        public static string HumanizePath(this InputBinding binding, string unbound = null) =>
+            HumanizePath(binding.effectivePath, unbound);
+
+        #endregion
 
         #region Find By Interface
         // TODO: This doesn't seem to work

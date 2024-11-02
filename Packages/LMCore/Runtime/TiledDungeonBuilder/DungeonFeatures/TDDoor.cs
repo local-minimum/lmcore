@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.Actions;
 using LMCore.TiledDungeon.SaveLoad;
 using LMCore.IO;
+using LMCore.UI;
+using LMCore.Extensions;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
@@ -15,7 +18,16 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private enum Transition { None, Opening, Closing };
 
         [SerializeField, HideInInspector]
-        bool isOpen = false;
+        bool _isOpen = false;
+        public bool isOpen
+        {
+            get => _isOpen;
+            set {
+                var newState = _isOpen != value;
+                _isOpen = value;
+                if (newState) HideLastPrompt();
+            }
+        }
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
@@ -33,12 +45,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         bool consumesKey;
 
         bool automaticTrapDoor;
+        bool isTrapdoor;
 
         [SerializeField]
         float autoCloseTime = 0.5f;
 
         public override string ToString() =>
-            $"Door Axis({TraversalAxis}) Blocking({BlockingPassage}) Transition({ActiveTransition})";
+            $"{(isTrapdoor ? "Trap-" : "")}Door Axis({TraversalAxis}) Blocking({BlockingPassage}) Transition({ActiveTransition})";
 
         protected string PrefixLogMessage(string message) => $"Door @ {Coordinates}: {message}";
 
@@ -123,6 +136,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             GridEntity.OnInteract += GridEntity_OnInteract;
             GridEntity.OnMove += GridEntity_OnMove;
+            GridEntity.OnPositionTransition += GridEntity_OnPositionTransition;
             TDNode.OnNewOccupant += TDNode_OnNewOccupant;
         }
 
@@ -130,7 +144,81 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         {
             GridEntity.OnInteract -= GridEntity_OnInteract;
             GridEntity.OnMove -= GridEntity_OnMove;
+            GridEntity.OnPositionTransition -= GridEntity_OnPositionTransition;
             TDNode.OnNewOccupant -= TDNode_OnNewOccupant;
+        }
+
+        string lastPrompt;
+        private void GridEntity_OnPositionTransition(GridEntity entity)
+        {
+            if (isTrapdoor || entity.EntityType != GridEntityType.PlayerCharacter) return;
+
+            var validPosition = entity.LookDirection.Translate(entity.Coordinates) == Coordinates;
+            if (!validPosition)
+            {
+                HideLastPrompt();
+                return;
+            }
+
+            ShowPrompt(entity);
+        }
+
+        private void ShowPrompt(GridEntity entity)
+        { 
+            if (isTrapdoor) return;
+
+            if (entity != null)
+            {
+                var validPosition = entity.LookDirection.Translate(entity.Coordinates) == Coordinates;
+                if (!validPosition) return;
+            }
+
+            var bindingsUI = MovementKeybindingUI.InstanceOrResource("Keybinding");
+            var action = bindingsUI.GetAction(GamePlayAction.Interact);
+            var keyHint = "<UNBOUND>";
+            if (action != null)
+            {
+                var binding = bindingsUI.GetActiveBinding(action);
+                if (binding != null)
+                {
+                    var bindingText = binding.HumanizePath();
+                    if (bindingText != null)
+                    {
+                        keyHint = $"[{bindingText}]";
+                    }
+                }
+            }
+
+            if (isLocked)
+            {
+                var keyHolder = entity
+                    .GetComponentsInChildren<AbsInventory>()
+                    .FirstOrDefault(i => i.HasItem(key));
+
+                if (keyHolder == null)
+                {
+                    lastPrompt = "Door locked";
+                }
+                else
+                {
+                    lastPrompt = $"{keyHint} Unlock door";
+                }
+            } else if (isOpen)
+            {
+                lastPrompt = $"{keyHint} Close door";
+            } else
+            {
+                lastPrompt = $"{keyHint} Open door";
+            }
+            PromptUI.instance.ShowText(lastPrompt);
+        }
+        private void HideLastPrompt()
+        {
+            if (!string.IsNullOrEmpty(lastPrompt))
+            {
+                PromptUI.instance.HideText(lastPrompt);
+                lastPrompt = null;
+            }
         }
 
         private void GridEntity_OnMove(GridEntity entity)
@@ -169,7 +257,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (automaticTrapDoor && ActiveTransition != Transition.Opening && !isOpen)
             {
                 trapTriggeringEntities.Add(entity);
-                OpenDoor();
+                OpenDoor(null);
                 entity.Falling = true; 
                 Debug.Log(PrefixLogMessage($"automatically opens for {entity.name}"));
             }
@@ -190,7 +278,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             yield return new WaitForSeconds(autoCloseTime);
             if (isOpen || ActiveTransition == Transition.Opening)
             {
-                CloseDoor();
+                CloseDoor(null);
                 if (!string.IsNullOrEmpty(logMessage)) Debug.Log(logMessage);
             }
         }
@@ -199,6 +287,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
+            if (isTrapdoor) return;
+
             var onTheMove = activelyMovingEntities.Contains(entity);
             var validPosition = entity.LookDirection.Translate(entity.Coordinates) == Coordinates;
 
@@ -206,11 +296,13 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 Debug.Log(PrefixLogMessage("Attempting to open door"));
 
+                HideLastPrompt();
+
                 if (isLocked)
                 {
-                    var keyHolder = entity
+                    var keyHolder = entity != null ? entity
                         .GetComponentsInChildren<AbsInventory>()
-                        .FirstOrDefault(i => i.HasItem(key));
+                        .FirstOrDefault(i => i.HasItem(key)) : null;
 
                     if (keyHolder == null)
                     {
@@ -218,15 +310,20 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                         return;
                     }
 
-                    if (consumesKey && !keyHolder.Consume(key, out string _))
-                    {
-                        Debug.LogWarning(PrefixLogMessage($"Failed to consume key {key} from {keyHolder}"));
+                    if (consumesKey) { 
+                        if (keyHolder.Consume(key, out string _))
+                        {
+                            PromptUI.instance.ShowText("Lost key", 2);
+                        } else
+                        {
+                            Debug.LogWarning(PrefixLogMessage($"Failed to consume key {key} from {keyHolder}"));
+                        }
                     }
                     isLocked = false;
                     isOpen = false;
                 }
 
-                Interact();
+                Interact(entity);
             }
         }
 
@@ -241,7 +338,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
         }
 
-        void CloseDoor()
+        void CloseDoor(GridEntity entity)
         {
             var transition = ActiveTransition;
             if (transition == Transition.Closing) return;
@@ -249,17 +346,24 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (transition == Transition.Opening)
             {
                 MapOverActions(OpenActions, (action) => action.Abandon());
-                MapOverActions(CloseActions, (action) => action.PlayFromCurrentProgress(() => isOpen = false));
+                MapOverActions(CloseActions, (action) => action.PlayFromCurrentProgress(() => {
+                    isOpen = false;
+                    ShowPrompt(entity);
+                }));
             } else
             {
-                MapOverActions(CloseActions, (action) => action.Play(() => isOpen = false));
+                MapOverActions(CloseActions, (action) => action.Play(() =>
+                {
+                    isOpen = false;
+                    ShowPrompt(entity);
+                }));
             }
         }
 
         [SerializeField]
         float considerOpenAfterProgress = 0.4f;
 
-        void OpenDoor()
+        void OpenDoor(GridEntity entity)
         {
             var transition = ActiveTransition;
             if (transition == Transition.Opening) return;
@@ -267,15 +371,27 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             if (transition == Transition.Closing)
             {
                 MapOverActions(CloseActions, (action) => action.Abandon());
-                MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(() => isOpen = true, (progress) => isOpen = progress > considerOpenAfterProgress));
+                MapOverActions(OpenActions, (action) => action.PlayFromCurrentProgress(
+                    () =>
+                    {
+                        isOpen = true;
+                        ShowPrompt(entity);
+                    }, 
+                    (progress) => isOpen = progress > considerOpenAfterProgress));
             } else
             {
-                MapOverActions(OpenActions, (action) => action.Play(() => isOpen = true, (progress) => isOpen = progress > considerOpenAfterProgress));
+                MapOverActions(OpenActions, 
+                    (action) => action.Play(() => {
+                        isOpen = true;
+                        ShowPrompt(entity);
+                    }, 
+                    (progress) => isOpen = progress > considerOpenAfterProgress));
             }
         }
 
         [ContextMenu("Interact")]
-        public void Interact()
+        public void Interact() => Interact(null);
+        public void Interact(GridEntity entity)
         {
             Debug.Log(PrefixLogMessage($"Toggling door from Open({isOpen} / {ActiveTransition})"));
             switch (ActiveTransition)
@@ -283,17 +399,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 case Transition.None:
                     if (isOpen)
                     {
-                        CloseDoor();
+                        CloseDoor(entity);
                     } else
                     {
-                        OpenDoor();
+                        OpenDoor(entity);
                     }
                     break;
                 case Transition.Opening:
-                    CloseDoor();
+                    CloseDoor(entity);
                     break;
                 case Transition.Closing:
-                    OpenDoor();
+                    OpenDoor(entity);
                     break;
                 default:
                     Debug.LogError(PrefixLogMessage($"Unhandled transition: {ActiveTransition}"));
@@ -325,6 +441,8 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 toggleGroup.RegisterReciever(group, Interact);
             }
+
+            isTrapdoor = node.modifications.Any(m => m.Tile.Type == TiledConfiguration.instance.TrapDoorClass);
 
             automaticTrapDoor = config.GetObjectValues(
                 TiledConfiguration.instance.TrapDoorClass,
@@ -409,7 +527,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 if (ActiveTransition != Transition.Opening && !isOpen)
                 {
-                    OpenDoor();
+                    OpenDoor(null);
                 }
             }
 

@@ -1,4 +1,5 @@
 using LMCore.AbstractClasses;
+using LMCore.Extensions;
 using LMCore.IO;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,8 @@ namespace LMCore.UI
 
         [SerializeField]
         int bindingIndex;
+        public InputBinding GetActiveBinding(InputAction action) =>
+            action.bindings[bindingIndex];
 
         [Header("Bindings")]
         [SerializeField]
@@ -68,25 +71,9 @@ namespace LMCore.UI
 
 
         #region Update Button Text
-        void SetButtonText(SimpleButton button, string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                button.Text = "";
-            }
-            else
-            {
-                button.Text = text.ToUpper().Replace("NUMPAD", "NUM").Replace("ARROW", "");
-            }
-        }
-
         void SetButtonTextFromPath(SimpleButton button, string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                button.Text = "";
-            }
-            SetButtonText(button, path.Split('/').LastOrDefault());
+            button.Text = UnityExtensions.HumanizePath(path) ?? "";
         }
 
         void SetButtonText(SimpleButton button, InputBinding binding, bool actionBound = true)
@@ -94,12 +81,12 @@ namespace LMCore.UI
             if (!actionBound)
             {
                 Debug.LogWarning($"No binding for {button.name}");
-                SetButtonText(button, null);
+                button.Text = "";
                 return;
             }
 
             Debug.Log($"Syncing {button.name}: {binding.effectivePath}");
-            SetButtonTextFromPath(button, binding.effectivePath);
+            button.Text = binding.HumanizePath() ?? "";
         }
 
         [Header("Rebinding effects")]
@@ -163,17 +150,15 @@ namespace LMCore.UI
             return GetAction(binding);
         }
 
-        public InputAction GetAction(GamePlayAction action)
-        {
-            var binding = GetBinding(action);
-            if (binding == null) return null;
-            return GetAction(binding);
-        }
-
         public IEnumerable<InputAction> GetActions(GamePlayAction action) =>
             GetBindings(action)
             .Select(b => GetAction(b))
             .Where(a => a != null);
+
+        public InputAction GetAction(GamePlayAction action) =>
+            GetActions(action)
+            .FirstOrDefault();
+
 
         KeyBinding GetBinding(InputAction action) => bindings.FirstOrDefault(b => b.name == action.name || b.name == action.id.ToString());
         KeyBinding GetBinding(Movement movement) => bindings.FirstOrDefault(b => b.movement == movement);

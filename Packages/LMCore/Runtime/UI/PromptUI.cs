@@ -1,5 +1,7 @@
 using LMCore.AbstractClasses;
 using LMCore.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -8,7 +10,16 @@ namespace LMCore.UI
     public class PromptUI : Singleton<PromptUI, PromptUI>
     {
         [SerializeField]
-        private TextMeshProUGUI prompt;
+        private List<TextMeshProUGUI> prompts = new List<TextMeshProUGUI>();
+
+        [SerializeField]
+        Animator animator;
+
+        [SerializeField]
+        string showTrigger;
+
+        [SerializeField]
+        string hideTrigger;
 
         private void Start()
         {
@@ -17,16 +28,47 @@ namespace LMCore.UI
 
         public void ShowText(string text)
         {
-            prompt.text = text;
+            foreach (var prompt in prompts)
+            {
+                prompt.text = text;
+            }
             transform.ShowAllChildren();
+            if (animator != null)
+            {
+                animator.SetTrigger(showTrigger);
+            }
+        }
+        
+        public void ShowText(string text, float duration)
+        {
+            ShowText(text);
+            StartCoroutine(HideText(text, duration));
+        }
+
+        IEnumerator<WaitForSeconds> HideText(string text, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            HideText(text);
         }
 
         public void HideText(string text)
         {
-            if (prompt.text == text)
+            if (prompts.Any(prompt => prompt.text == text))
             {
-                transform.HideAllChildren();
+                if (animator != null)
+                {
+                    animator.SetTrigger(hideTrigger);
+                }
+                else
+                {
+                    transform.HideAllChildren();
+                }
             }
+        }
+
+        public void HideAllChildren()
+        {
+            transform.HideAllChildren();
         }
     }
 }

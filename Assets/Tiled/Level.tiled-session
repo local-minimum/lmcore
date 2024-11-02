@@ -6,9 +6,9 @@
     "activeFile": "DemoLevel.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        ".",
         "Automapping",
-        "Rules"
+        "Rules",
+        "."
     ],
     "fileStates": {
         ":/automap-tiles.tsx": {
@@ -24,16 +24,16 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
+                9,
                 21,
-                16,
                 7,
-                9
+                16
             ],
-            "scale": 8,
-            "selectedLayer": 19,
+            "scale": 3,
+            "selectedLayer": 9,
             "viewCenter": {
-                "x": 333.75,
-                "y": 467.3125
+                "x": 247.66666666666666,
+                "y": 174.83333333333331
             }
         },
         "Mapping.tsx": {
@@ -66,7 +66,7 @@
         "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "Aspect",
+    "property.type": "bool",
     "recentFiles": [
         "Mapping.tsx",
         "DemoLevel.tmx",

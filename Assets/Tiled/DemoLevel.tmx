@@ -328,6 +328,7 @@
    </properties>
    <object id="1" name="Locked" type="Lock" x="303.667" y="210">
     <properties>
+     <property name="ConsumesKey" type="bool" value="true"/>
      <property name="Key" value="GoldKey"/>
     </properties>
     <point/>

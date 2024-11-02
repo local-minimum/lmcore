@@ -252,8 +252,19 @@ namespace LMCore.Crawler
         }
         #endregion
 
-        [HideInInspector]
-        public Direction LookDirection;
+        [SerializeField, HideInInspector]
+        private Direction _LookDirection;
+        public Direction LookDirection
+        {
+            get => _LookDirection;
+            set
+            {
+                var newDirection = _LookDirection != value;
+                _LookDirection = value;
+                
+                if (newDirection) OnPositionTransition?.Invoke(this);
+            }
+        }
 
         public TransportationMode TransportationMode;
 
