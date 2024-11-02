@@ -1,3 +1,4 @@
+using Codice.CM.Common.Purge;
 using LMCore.AbstractClasses;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace LMCore.TiledDungeon
         public string WallButtonClass = "Button";
         public string AlcoveClass = "Alcove";
         public string FenceClass = "Fence";
+        public string NPCClass = "NPC";
         public string ShooterClass = "Shooter";
         public string WallSpikeTrapClass = "WallSpikes";
         public string SpikeTrapClass = "Spikes";

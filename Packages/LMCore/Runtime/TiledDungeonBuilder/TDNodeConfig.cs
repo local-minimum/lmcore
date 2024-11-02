@@ -67,6 +67,14 @@ namespace LMCore.TiledDungeon
         public TiledCustomProperties FirstObjectProps(System.Func<TiledObjectLayer.TObject, bool> filter) =>
             TObjects.FirstOrDefault(filter)?.CustomProperties;
 
+        /// <summary>
+        /// Get predicate values from all objects (points or rects) that covers the node given they are of
+        /// specified class
+        /// </summary>
+        /// <typeparam name="T">Return value type of the predicate</typeparam>
+        /// <param name="type">Tiled class of object</param>
+        /// <param name="predicate">Extractor of information from the object's custom properties</param>
+        /// <returns></returns>
         public IEnumerable<T> GetObjectValues<T>(string type, System.Func<TiledCustomProperties, T> predicate)
         {
             return TObjects

@@ -1,9 +1,18 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace LMCore.AbstractClasses
 {
-    public class Singleton<T, TSelf> : MonoBehaviour where T : MonoBehaviour where TSelf : Singleton<T, TSelf>
+    /// <summary>
+    /// Deriving from this ensures only one instance of the class will be
+    /// present at a time.
+    /// 
+    /// See static methods `InstanceOrCreate` and `InstanceOrResource` as ways to access it.
+    /// Only use the public static field `instance` if it can be absolutely certain there will
+    /// be an instance present, or null handling is included.
+    /// </summary>
+    /// <typeparam name="T">Type of the singleton class</typeparam>
+    /// <typeparam name="TSelf">To allow for generic classes this would be the subclass, else it should be the same as `T`</typeparam>
+    public abstract class Singleton<T, TSelf> : MonoBehaviour where T : MonoBehaviour where TSelf : Singleton<T, TSelf>
     {
         private static TSelf _instance;
 
