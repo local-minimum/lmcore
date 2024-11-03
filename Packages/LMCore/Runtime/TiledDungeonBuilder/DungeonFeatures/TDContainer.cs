@@ -241,6 +241,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             GridEntity.OnPositionTransition += CheckShowPrompt;
         }
 
+
         private void OnDisable()
         {
             GridEntity.OnInteract -= GridEntity_OnInteract;
@@ -258,18 +259,19 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             var bindingsUI = MovementKeybindingUI.InstanceOrResource("Keybinding");
             var keyHint = bindingsUI.GetActionHint(GamePlayAction.Interact);
+            string newPrompt = null;
             if (phase == ContainerPhase.Locked)
             {
                 if (EntityKeyHolder(entity) == null)
                 {
-                    lastPrompt = "Requires key";
+                    newPrompt = "Requires key";
                 } else
                 {
-                    lastPrompt = $"{keyHint} Unlock";
+                    newPrompt = $"{keyHint} Unlock";
                 }
             } else if (phase == ContainerPhase.Closed)
             {
-                lastPrompt = $"{keyHint} Open";
+                newPrompt = $"{keyHint} Open";
             } else if (phase == ContainerPhase.Opened)
             {
                 var items = inventory.Items.ToList();
@@ -277,17 +279,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 {
                     if (items.Count == 1)
                     {
-                        lastPrompt = $"{keyHint} Pick up {items[0].name}";
+                        newPrompt = $"{keyHint} Pick up {items[0].name}";
                     } else if (items.Count == 0)
                     {
-                        lastPrompt = "Nothing to pick up";
+                        newPrompt = "Nothing to pick up";
                     } else
                     {
-                        lastPrompt = $"{keyHint} Pick up {items.Count} items";
+                        newPrompt = $"{keyHint} Pick up {items.Count} items";
                     }
                 } else
                 {
-                    lastPrompt = $"{keyHint} Loot";
+                    newPrompt = $"{keyHint} Loot";
                 }
             } else
             {
@@ -295,7 +297,11 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return;
             }
 
-            PromptUI.instance.ShowText(lastPrompt);
+            if (newPrompt != lastPrompt)
+            {
+                lastPrompt = newPrompt;
+                PromptUI.instance.ShowText(lastPrompt);
+            }
         }
 
         string lastPrompt;

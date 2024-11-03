@@ -610,6 +610,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                     Debug.LogWarning(PrefixLogMessage($"Managed entity {entity.name} is becoming {newEntityCoordinates}"));
                     var newEntityNode = Dungeon[newEntityCoordinates];
                     entity.transform.SetParent(newEntityNode.transform);
+                    entity.TriggerPositionTransitionEvent();
                 } else
                 {
                     Debug.LogError(PrefixLogMessage($"Can't place {entity} at {newEntityCoordinates} because outside dungeon"));

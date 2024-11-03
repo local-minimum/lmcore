@@ -266,6 +266,9 @@ namespace LMCore.Crawler
             }
         }
 
+        public void TriggerPositionTransitionEvent() =>
+            OnPositionTransition?.Invoke(this);
+
         public TransportationMode TransportationMode;
 
 
