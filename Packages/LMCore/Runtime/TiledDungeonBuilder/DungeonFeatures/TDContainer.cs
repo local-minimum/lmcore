@@ -8,6 +8,7 @@ using LMCore.Extensions;
 using System;
 using LMCore.TiledDungeon.SaveLoad;
 using LMCore.IO;
+using LMCore.UI;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
@@ -237,39 +238,114 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private void OnEnable()
         {
             GridEntity.OnInteract += GridEntity_OnInteract;
+            GridEntity.OnPositionTransition += CheckShowPrompt;
         }
 
         private void OnDisable()
         {
             GridEntity.OnInteract -= GridEntity_OnInteract;
+            GridEntity.OnPositionTransition -= CheckShowPrompt;
         }
 
-        private bool AllowInteractBy(GridEntity entity)
+        private void CheckShowPrompt(GridEntity entity)
         {
-            var coordinates = Coordinates;
-            Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(coordinates)}) Same Elevation({entity.Coordinates.y == coordinates.y}) Entity Looks {entity.LookDirection} Anchor({cubeFace}) Facing({facingDirection})"));
-            if (cubeFace == Direction.Down && facingDirection == Direction.None)
+            if (entity.EntityType != GridEntityType.PlayerCharacter) return;
+            if (!EntityOrientedToAllowInteraction(entity))
             {
-                // TODO: Doesn't account for thin walls...
-                // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position.y({entity.Position.y == Position.y}) Distance({entity.Position.ManhattanDistance(Position)})");
-                return entity.Coordinates.y == coordinates.y && entity.Coordinates.ManhattanDistance(coordinates) == 1;
-            } 
-
-            if (cubeFace == Direction.Down)
-            {
-                return entity.Coordinates.y == coordinates.y 
-                    && entity.Coordinates.ManhattanDistance(coordinates) == 1 
-                    && entity.LookDirection == facingDirection.Inverse();
+                HideLastPrompt();
+                return;
             }
 
-            // Debug.Log($"Container @ {Position}: Checking if interaction is allowed Position({entity.Position == Position}) Direction({direction == entity.LookDirection})");
+            var bindingsUI = MovementKeybindingUI.InstanceOrResource("Keybinding");
+            var keyHint = bindingsUI.GetActionHint(GamePlayAction.Interact);
+            if (phase == ContainerPhase.Locked)
+            {
+                if (EntityKeyHolder(entity) == null)
+                {
+                    lastPrompt = "Requires key";
+                } else
+                {
+                    lastPrompt = $"{keyHint} Unlock";
+                }
+            } else if (phase == ContainerPhase.Closed)
+            {
+                lastPrompt = $"{keyHint} Open";
+            } else if (phase == ContainerPhase.Opened)
+            {
+                var items = inventory.Items.ToList();
+                if (autoLoot)
+                {
+                    if (items.Count == 1)
+                    {
+                        lastPrompt = $"{keyHint} Pick up {items[0].name}";
+                    } else if (items.Count == 0)
+                    {
+                        lastPrompt = "Nothing to pick up";
+                    } else
+                    {
+                        lastPrompt = $"{keyHint} Pick up {items.Count} items";
+                    }
+                } else
+                {
+                    lastPrompt = $"{keyHint} Loot";
+                }
+            } else
+            {
+                HideLastPrompt();
+                return;
+            }
+
+            PromptUI.instance.ShowText(lastPrompt);
+        }
+
+        string lastPrompt;
+        void HideLastPrompt()
+        {
+            if (!string.IsNullOrEmpty(lastPrompt))
+            {
+                PromptUI.instance.HideText(lastPrompt);
+                lastPrompt = null;
+            }
+        }
+
+        /// <summary>
+        /// Checks entity position and look direction and compares with the container
+        /// to see if they are compatible.
+        /// 
+        /// Note that it doesn't answer questions like if entity can unlock the container
+        /// </summary>
+        /// <param name="entity">The entity that wants to interact</param>
+        /// <returns>If interaction is permissable</returns>
+        private bool EntityOrientedToAllowInteraction(GridEntity entity)
+        {
+            var coordinates = Coordinates;
+            //Debug.Log(PrefixLogMessage($"Distance({entity.Coordinates.ManhattanDistance(coordinates)}) Same Elevation({entity.Coordinates.y == coordinates.y}) Entity Looks {entity.LookDirection} Anchor({cubeFace}) Facing({facingDirection})"));
+            var lookingAtWithinReach = entity.LookDirection.Translate(entity.Coordinates) == coordinates;
+            var entityNode = entity.Node;
+            var reachable = entityNode != null && entityNode.AllowExit(entity, entity.LookDirection);
+
+            // A floor chest that can be accessed from any direction
+            if (cubeFace == Direction.Down && facingDirection == Direction.None)
+            {
+                return lookingAtWithinReach && reachable;
+            } 
+
+            // A floor chest which can be accessed from one direction
+            if (cubeFace == Direction.Down)
+            {
+                return lookingAtWithinReach &&
+                    reachable &&
+                    entity.LookDirection == facingDirection.Inverse();
+            }
+
+            // A wall chest that can be accessed from the same tile
             return entity.Coordinates == coordinates 
                 && entity.LookDirection == cubeFace;
         }
 
         private void GridEntity_OnInteract(GridEntity entity)
         {
-            if  (AllowInteractBy(entity))
+            if  (EntityOrientedToAllowInteraction(entity))
             {
                 if (phase == ContainerPhase.Locked)
                 {
@@ -283,26 +359,42 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 } else if (phase == ContainerPhase.Opened)
                 {
                     HandleLoot(entity);
-                } else
-                {
                 }
+
+                CheckShowPrompt(entity);
             }
+            
         }
 
-        void HandleUnlock(GridEntity entity)
+        /// <summary>
+        /// Get the entity's inventory that holds the needed key
+        /// </summary>
+        /// <param name="entity">Entity to be checked for having key</param>
+        /// <returns>Inventory or null</returns>
+        AbsInventory EntityKeyHolder(GridEntity entity)
         {
             var keyHolder = entity
                 .GetComponentsInChildren<AbsInventory>()
                 .FirstOrDefault(i => i.HasItem(key));
+            return keyHolder;
+        }
 
+        void HandleUnlock(GridEntity entity)
+        {
+            var keyHolder = EntityKeyHolder(entity);
             if (keyHolder == null) {
                 Debug.LogWarning(PrefixLogMessage($"requires key ({key})"));
-                return;
             }
             
-            if (consumesKey && !keyHolder.Consume(key, out string _))
+            if (consumesKey)
             {
-                Debug.LogWarning(PrefixLogMessage($"Failed to consume {key} from {keyHolder}"));
+                if (keyHolder.Consume(key, out string _))
+                {
+                    PromptUI.instance.ShowText("Lost key", 2);
+                } else
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Failed to consume {key} from {keyHolder}"));
+                }
             }
 
             animator?.SetTrigger(UnlockOpenTrigger);

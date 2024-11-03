@@ -9,7 +9,6 @@ using LMCore.TiledDungeon.Actions;
 using LMCore.TiledDungeon.SaveLoad;
 using LMCore.IO;
 using LMCore.UI;
-using LMCore.Extensions;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
@@ -18,16 +17,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         private enum Transition { None, Opening, Closing };
 
         [SerializeField, HideInInspector]
-        bool _isOpen = false;
-        public bool isOpen
-        {
-            get => _isOpen;
-            set {
-                var newState = _isOpen != value;
-                _isOpen = value;
-                //if (newState) HideLastPrompt();
-            }
-        }
+        bool isOpen = false;
 
         [SerializeField, HideInInspector]
         TileModification[] modifications;
