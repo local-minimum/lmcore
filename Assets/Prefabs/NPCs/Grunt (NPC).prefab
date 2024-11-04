@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5811005756050799146}
   - component: {fileID: 7315342034932074877}
+  - component: {fileID: 34175688637494714}
   m_Layer: 0
   m_Name: Grunt (NPC)
   m_TagString: Untagged
@@ -70,7 +71,25 @@ MonoBehaviour:
     stairsStepsPerTransition: 0
   MovementInterpreter: {fileID: 0}
   EntityType: 1
+  _anchor: {fileID: 0}
+  _anchorDirection: 5
+  _Coordinates: {x: 0, y: 0, z: 0}
+  _LookDirection: 0
   TransportationMode: 0
+--- !u!114 &34175688637494714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969322599331611580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5ab73c95eb05a747b7942d87a78d0e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InkJSon: {fileID: 4900000, guid: 98a36f4a07594eb4db944a17cbb4534a, type: 3}
+  StoryInteractionVerb: Talk
 --- !u!1 &9005314257116889349
 GameObject:
   m_ObjectHideFlags: 0
