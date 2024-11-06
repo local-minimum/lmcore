@@ -16,10 +16,13 @@ public class StoryTrigger : TDFeature
     TextAsset InkJSon;
 
     public enum StoryMode { OneShot, RepeatableStateless, RepeatableStatefull };
+    int playCount;
 
     [SerializeField]
     StoryMode Mode = StoryMode.RepeatableStateless;
-    
+    [SerializeField, Tooltip("Leave empty if just restarting from the start of the story")]
+    string stateFullRepeatStartPath = "Start";
+
     Story _InkStory;
     Story InkStory
     {
@@ -70,7 +73,13 @@ public class StoryTrigger : TDFeature
                 InkStory = null;
             } else if (Mode == StoryMode.RepeatableStatefull)
             {
-                story.state.GoToStart();
+                if (string.IsNullOrEmpty(stateFullRepeatStartPath))
+                {
+                    InkStory.state.GoToStart();
+                } else
+                {
+                    InkStory.ChoosePathString(stateFullRepeatStartPath, false);
+                }
             }
             StartCoroutine(DelayReady());
         } else if (phase == StoryPhase.Start)
@@ -98,7 +107,9 @@ public class StoryTrigger : TDFeature
 
     string lastPrompt;
 
-    bool CanContinueStory => InkStory != null && InkStory.canContinue;
+    bool CanContinueStory => InkStory != null 
+        && InkStory.canContinue
+        && (playCount == 0 || Mode != StoryMode.OneShot);
 
     public GridEntity InteractingEntity { get; private set; }
 
@@ -112,6 +123,7 @@ public class StoryTrigger : TDFeature
             Debug.Log(PrefixLogMessage("Invoking story"));
             HidePrompt();
             InteractingEntity = entity;
+            playCount++;
             OnPlayStory?.Invoke(InkStory, this);
         }
     }
@@ -147,4 +159,12 @@ public class StoryTrigger : TDFeature
             lastPrompt = null;
         }
     }
+
+    /* Save state
+     * ----------
+     * InteractingEntity (if not null we need to be playing!)
+     * Story.state.toJson
+     * playCount
+     * 
+     */
 }

@@ -1,3 +1,5 @@
+-> Start
+=== Start ===
 You stare at the non-discript grey cylinder that seems left over from early stages of development.
 
 * [Hello?] -> Talk
@@ -6,6 +8,7 @@ You stare at the non-discript grey cylinder that seems left over from early stag
 === Talk ===
 Nothing happens. No response. Which is quite reasonable after all.
 * [Is any one in there? Hello!] -> Grunt
+* [Stare at the stupid cylinder...] -> Start
 * [Walk away with your world views intact] -> Walkaway
 
 === Grunt ===
