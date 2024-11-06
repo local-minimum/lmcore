@@ -2,6 +2,7 @@ using UnityEngine;
 using LMCore.Extensions;
 using UnityEngine.Events;
 using LMCore.Inventory;
+using System.Collections.Generic;
 
 namespace LMCore.Crawler
 {
@@ -55,6 +56,9 @@ namespace LMCore.Crawler
                 OnMove?.Invoke(this);
             }
         }
+        
+        public HashSet<MonoBehaviour> MovementBlockers {  get; set; } = new HashSet<MonoBehaviour>(); 
+        public bool MovementBlocked => MovementBlockers.Count > 0;
 
         #region Anchorage
         public bool RotationRespectsAnchorDirection { get; set; } = false;

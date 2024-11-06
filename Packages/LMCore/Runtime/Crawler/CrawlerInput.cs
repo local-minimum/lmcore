@@ -12,6 +12,19 @@ namespace LMCore.Crawler
     {
         protected string PrefixLogMessage(string message) => $"Crawler input '{gEntity.name}': {message}";
 
+        GridEntity _entity;
+        GridEntity entity
+        {
+            get
+            {
+                if (_entity == null)
+                {
+                    _entity = GetComponent<GridEntity>();
+                }
+                return _entity;
+            }
+        }
+        bool MovementBlocked => entity.MovementBlocked; 
         bool inputEnabled = true;
         public event MovementEvent OnMovement;
 
@@ -114,7 +127,7 @@ namespace LMCore.Crawler
         {
             if (context.phase == InputActionPhase.Started)
             {
-                if (!inputEnabled) return;
+                if (!inputEnabled || MovementBlocked) return;
 
                 var waitingButton = GetReplay();
                 if (waitingButton != null)

@@ -1,3 +1,4 @@
+using Ink.Runtime;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,15 +14,20 @@ public class StoryOption : MonoBehaviour
     TextMeshProUGUI OptionText;
     Button Button;
 
-    public void Configure(string optionText, UnityAction onSelect)
+    string PrefixLogMessage(string message) =>
+        $"StoryOption: {message}";
+
+    public void Configure(Choice choice, UnityAction onSelect)
     {
+        Debug.Log(PrefixLogMessage($"{choice.index}: {choice.text}"));
+
         if (Button == null)
         {
             Button = GetComponentInChildren<Button>();
         }
 
-        ShadowText.text = optionText;
-        OptionText.text = optionText;
+        ShadowText.text = choice.text;
+        OptionText.text = choice.text;
 
         Button.onClick.RemoveAllListeners();
 

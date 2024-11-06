@@ -3,6 +3,7 @@ using LMCore.Crawler;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.UI;
+using System.Collections;
 using UnityEngine;
 
 public delegate void PlayStoryEvent(Story story, StoryTrigger trigger);
@@ -13,6 +14,11 @@ public class StoryTrigger : TDFeature
 
     [SerializeField]
     TextAsset InkJSon;
+
+    public enum StoryMode { OneShot, RepeatableStateless, RepeatableStatefull };
+
+    [SerializeField]
+    StoryMode Mode = StoryMode.RepeatableStateless;
     
     Story _InkStory;
     Story InkStory
@@ -33,14 +39,58 @@ public class StoryTrigger : TDFeature
 
     private void OnEnable()
     {
-        GridEntity.OnPositionTransition += GridEntity_OnPositionTransition;
-        GridEntity.OnInteract += GridEntity_OnInteract;
+        GridEntity.OnPositionTransition += CheckCanSpawnStory;
+        GridEntity.OnInteract += SpawnStory;
+        StoryManager.OnStoryPhaseChange += StoryManager_OnStoryPhaseChange;
     }
 
     private void OnDisable()
     {
-        GridEntity.OnPositionTransition -= GridEntity_OnPositionTransition;
-        GridEntity.OnInteract -= GridEntity_OnInteract;
+        GridEntity.OnPositionTransition -= CheckCanSpawnStory;
+        GridEntity.OnInteract -= SpawnStory;
+        StoryManager.OnStoryPhaseChange -= StoryManager_OnStoryPhaseChange;
+    }
+
+    private void StoryManager_OnStoryPhaseChange(StoryPhase phase, Story story)
+    {
+        if (story != InkStory)
+        {
+            if (InteractingEntity != null)
+            {
+                InteractingEntity.MovementBlockers.Remove(this);
+                InteractingEntity = null;
+            }
+            return;
+        }
+
+        if (phase == StoryPhase.End)
+        {
+            if (Mode == StoryMode.RepeatableStateless)
+            {
+                InkStory = null;
+            } else if (Mode == StoryMode.RepeatableStatefull)
+            {
+                story.state.GoToStart();
+            }
+            StartCoroutine(DelayReady());
+        } else if (phase == StoryPhase.Start)
+        {
+            InteractingEntity.MovementBlockers.Add(this);
+        }
+    }
+
+    IEnumerator DelayReady()
+    {
+        yield return new WaitForEndOfFrame();
+
+        InteractingEntity.MovementBlockers.Remove(this);
+        var entity = InteractingEntity;
+        InteractingEntity = null;
+
+        if (Mode != StoryMode.OneShot)
+        {
+            CheckCanSpawnStory(entity);
+        }
     }
 
     [SerializeField]
@@ -50,17 +100,20 @@ public class StoryTrigger : TDFeature
 
     bool CanContinueStory => InkStory != null && InkStory.canContinue;
 
-    private void GridEntity_OnInteract(GridEntity entity)
+    public GridEntity InteractingEntity { get; private set; }
+
+    private void SpawnStory(GridEntity entity)
     {
-        if (CanContinueStory && entity.LookDirection.Translate(entity.Coordinates) == Coordinates)
+        if (InteractingEntity == null && CanContinueStory && entity.LookDirection.Translate(entity.Coordinates) == Coordinates)
         {
             Debug.Log("Invoking story");
             HidePrompt();
+            InteractingEntity = entity;
             OnPlayStory?.Invoke(InkStory, this);
         }
     }
 
-    private void GridEntity_OnPositionTransition(GridEntity entity)
+    private void CheckCanSpawnStory(GridEntity entity)
     {
         if (entity.EntityType != GridEntityType.PlayerCharacter) return;
 
