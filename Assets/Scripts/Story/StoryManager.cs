@@ -104,7 +104,6 @@ public class StoryManager : MonoBehaviour
         for (int i = 0, l = ActiveStory.currentChoices.Count; i < l; i++)
         {
             var choice = ActiveStory.currentChoices[i];
-
             StoryOption option = null;
             if (i < nOptionsBefore)
             {

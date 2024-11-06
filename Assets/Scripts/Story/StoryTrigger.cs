@@ -102,11 +102,14 @@ public class StoryTrigger : TDFeature
 
     public GridEntity InteractingEntity { get; private set; }
 
+    private string PrefixLogMessage(string message) =>
+        $"StoryTrigger {name}: {message}";
+
     private void SpawnStory(GridEntity entity)
     {
         if (InteractingEntity == null && CanContinueStory && entity.LookDirection.Translate(entity.Coordinates) == Coordinates)
         {
-            Debug.Log("Invoking story");
+            Debug.Log(PrefixLogMessage("Invoking story"));
             HidePrompt();
             InteractingEntity = entity;
             OnPlayStory?.Invoke(InkStory, this);
@@ -127,7 +130,7 @@ public class StoryTrigger : TDFeature
                 PromptUI.instance.ShowText(lastPrompt);
             } else
             {
-                Debug.Log("Out of story");
+                Debug.Log(PrefixLogMessage("Out of story"));
             }
         }
         else if (!string.IsNullOrEmpty(lastPrompt))
