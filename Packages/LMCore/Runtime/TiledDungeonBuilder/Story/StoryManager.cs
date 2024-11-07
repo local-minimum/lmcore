@@ -2,6 +2,7 @@ using Ink.Runtime;
 using LMCore.AbstractClasses;
 using LMCore.Crawler;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,13 @@ namespace LMCore.TiledDungeon.Narrative
     public class StoryManager : Singleton<StoryManager, StoryManager>
     {
         public static event StoryPhaseEvent OnStoryPhaseChange;
+
+        private enum ShowTextMode { Instant, WordByWord };
+        [SerializeField]
+        ShowTextMode TextMode = ShowTextMode.Instant;
+
+        [SerializeField, Range(0, 2), Tooltip("Delay between words")]
+        float wordByWordSpeed = 0.1f;
 
         [SerializeField]
         GameObject StoryUIRoot;
@@ -58,7 +66,11 @@ namespace LMCore.TiledDungeon.Narrative
         {
             if (entity != trigger?.InteractingEntity) return;
 
-            if (NextButton.gameObject.activeSelf)
+            if (AnimatingInWords)
+            {
+                showStoryWords = null;
+                ShowStoryInstant();
+            } else if (NextButton.gameObject.activeSelf)
             {
                 NextButton.onClick?.Invoke();
             }
@@ -99,13 +111,21 @@ namespace LMCore.TiledDungeon.Narrative
             }
 
             NextButton.gameObject.SetActive(true);
+        }
+
+        void HideAllProgressOptions()
+        {
+            NextButton.gameObject.SetActive(false);
             OptionsRoot.gameObject.SetActive(false);
+            for (int i = 0, l = Options.Count; i < l; i++)
+            {
+                Options[i].gameObject.SetActive(false);
+            }
         }
 
         void SyncOptionsProgress()
         {
             Debug.Log(PrefixLogMessage("Showing options"));
-            NextButton.gameObject.SetActive(false);
             OptionsRoot.gameObject.SetActive(true);
             var nOptionsBefore = Options.Count;
             for (int i = 0, l = ActiveStory.currentChoices.Count; i < l; i++)
@@ -132,16 +152,11 @@ namespace LMCore.TiledDungeon.Narrative
 
                 if (delayShowOptionsWith > 0)
                 {
-                    option.gameObject.SetActive(false);
                     StartCoroutine(DelayShowOption((choice.index + 1) * delayShowOptionsWith, option));
                 } else
                 {
                     option.gameObject.SetActive(true);
                 }
-            }
-            for (int i = ActiveStory.currentChoices.Count, l = Options.Count; i < l; i++)
-            {
-                Options[i].gameObject.SetActive(false);
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(OptionsRoot);
             var group = OptionsRoot.GetComponent<VerticalLayoutGroup>();
@@ -152,6 +167,36 @@ namespace LMCore.TiledDungeon.Narrative
             yield return new WaitForSeconds(delay);
             option.gameObject.SetActive(true);
             LayoutRebuilder.ForceRebuildLayoutImmediate(OptionsRoot);
+        }
+
+        void ShowProgressOptions()
+        {
+            if (ActiveStory.currentChoices.Count == 0)
+            {
+                SyncSimpleProgress();
+            }
+            else
+            {
+                SyncOptionsProgress();
+            }
+        }
+
+        void ShowStoryInstant()
+        {
+            StoryUI.text = ActiveStory.currentText;
+            HideAllProgressOptions();
+            ShowProgressOptions();
+        }
+
+        int showStoryWordsIndex;
+        string[] showStoryWords;
+
+        void ShowStoryWordByWord()
+        {
+            HideAllProgressOptions();
+            showStoryWords = ActiveStory.currentText.Split(" ");
+            showStoryWordsIndex = 0;
+            nextWord = Time.timeSinceLevelLoad;
         }
 
         void ContinueStory() => ContinueStory(false);
@@ -169,15 +214,16 @@ namespace LMCore.TiledDungeon.Narrative
                 ActiveStory.Continue();
             }
 
-            StoryUI.text = ActiveStory.currentText;
-
-            if (ActiveStory.currentChoices.Count == 0)
+            if (TextMode == ShowTextMode.Instant)
             {
-                SyncSimpleProgress();
+                ShowStoryInstant();
             }
-            else
+            else if (TextMode == ShowTextMode.WordByWord)
             {
-                SyncOptionsProgress();
+                ShowStoryWordByWord();
+            } else
+            {
+                Debug.LogError(PrefixLogMessage($"Unhandled mode {TextMode}"));
             }
         }
 
@@ -190,6 +236,26 @@ namespace LMCore.TiledDungeon.Narrative
             NextButton.onClick.RemoveListener(EndStory);
             StoryUIRoot.SetActive(false);
             OnStoryPhaseChange?.Invoke(StoryPhase.End, story);
+        }
+        float nextWord;
+
+        bool AnimatingInWords => TextMode == ShowTextMode.WordByWord &&
+            showStoryWords != null;
+
+        private void Update()
+        {
+            if (!AnimatingInWords || Time.timeSinceLevelLoad < nextWord) return;
+
+            showStoryWordsIndex++;
+            StoryUI.text = string.Join(" ", showStoryWords.Take(showStoryWordsIndex));
+            if (showStoryWordsIndex >= showStoryWords.Length)
+            {
+                ShowProgressOptions();
+                showStoryWords = null;
+            } else
+            {
+                nextWord = Time.timeSinceLevelLoad + wordByWordSpeed;
+            }
         }
     }
 }
