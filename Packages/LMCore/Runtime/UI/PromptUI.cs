@@ -23,11 +23,14 @@ namespace LMCore.UI
 
         private void Start()
         {
-            transform.HideAllChildren();
+            if (!showingText)
+                transform.HideAllChildren();
         }
 
+        bool showingText;
         public void ShowText(string text)
         {
+            showingText = true;
             foreach (var prompt in prompts)
             {
                 prompt.text = text;
@@ -63,6 +66,7 @@ namespace LMCore.UI
                 {
                     transform.HideAllChildren();
                 }
+                showingText = false;
             }
         }
 

@@ -174,6 +174,15 @@ namespace LMCore.TiledDungeon.SaveLoad
     }
 
     [System.Serializable]
+    public class StoryTriggerSave
+    {
+        public string Id;
+        public int PlayCount;
+        public string InteractingEntityId;
+        public string StoryState;
+    }
+
+    [System.Serializable]
     public class LevelSave
     {
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
@@ -182,6 +191,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public SerializableDictionary<Vector3Int, SpikeTrapSave> spikes = new ();
         public SerializableDictionary<Vector3Int, MovingPlatformSave> movingPlatforms = new ();
         public List<IllusionSave> illusions = new ();
+        public List<StoryTriggerSave> stories = new ();
         public List<Vector3Int> playerPositions = new ();
     }
 

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using LMCore.Crawler;
 using LMCore.Inventory;
 using LMCore.TiledDungeon.Integration;
@@ -483,7 +482,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             synced = true;
         }
 
-        public void OnLoadGameSave(GameSave save)
+        private void OnLoadGameSave(GameSave save)
         {
             if (save == null)
             {
@@ -491,7 +490,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             }
             if (!synced) SyncDoor();
 
-            var lvl = GetComponentInParent<IDungeon>().MapName;
+            var lvl = Dungeon.MapName;
 
             var doorSave = save.levels[lvl]?.doors?.GetValueOrDefault(StartCoordinates);
 

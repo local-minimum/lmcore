@@ -1,6 +1,7 @@
 using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
+using LMCore.TiledDungeon.Narrative;
 using System.Linq;
 using UnityEngine;
 
@@ -93,6 +94,12 @@ namespace LMCore.TiledDungeon.SaveLoad
                 levelSave.illusions = dungeon
                     .GetComponentsInChildren<TDIllusoryCubeSide>()
                     .Select(illusion => illusion.Save())
+                    .ToList();
+
+                levelSave.stories = dungeon
+                    .GetComponentsInChildren<StoryTrigger>()
+                    .Select(story => story.Save())
+                    .Where( story => story != null )
                     .ToList();
 
                 levelSave.playerPositions = dungeon.GetComponentInChildren<TDPlayerPositionTracker>()?.Save().ToList();
