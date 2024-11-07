@@ -3,6 +3,7 @@ using LMCore.AbstractClasses;
 using LMCore.Crawler;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,12 +18,24 @@ namespace LMCore.TiledDungeon.Narrative
     {
         public static event StoryPhaseEvent OnStoryPhaseChange;
 
-        private enum ShowTextMode { Instant, WordByWord };
+        private enum ShowTextMode { Instant, WordByWord, WordByWordlength, LetterByLetter };
         [SerializeField]
         ShowTextMode TextMode = ShowTextMode.Instant;
 
-        [SerializeField, Range(0, 2), Tooltip("Delay between words")]
-        float wordByWordSpeed = 0.1f;
+        [SerializeField, Range(0, 2), Tooltip("Delay between each piece shown")]
+        float showStorySpeed = 0.1f;
+
+        [SerializeField, Range(0, 1), Tooltip("Delay cost when doing word by word length per character")]
+        float showStoryCharacterSpeedCost = 0.05f;
+
+        [SerializeField]
+        bool extraCostOnPunctuaton = true;
+
+        [SerializeField, Range(0, 1), Tooltip("Delay cost when doing word by word length per punctuation")]
+        float showStoryPunctuationCost = 0.2f;
+
+        [SerializeField]
+        string punctuationCharacters = ".,:-?!";
 
         [SerializeField]
         GameObject StoryUIRoot;
@@ -66,9 +79,9 @@ namespace LMCore.TiledDungeon.Narrative
         {
             if (entity != trigger?.InteractingEntity) return;
 
-            if (AnimatingInWords)
+            if (AnimatingStory)
             {
-                showStoryWords = null;
+                showStoryParts = null;
                 ShowStoryInstant();
             } else if (NextButton.gameObject.activeSelf)
             {
@@ -188,16 +201,27 @@ namespace LMCore.TiledDungeon.Narrative
             ShowProgressOptions();
         }
 
-        int showStoryWordsIndex;
-        string[] showStoryWords;
+        int showStoryPartsIndex;
+        string[] showStoryParts;
 
         void ShowStoryWordByWord()
         {
             HideAllProgressOptions();
-            showStoryWords = ActiveStory.currentText.Split(" ");
-            showStoryWordsIndex = 0;
-            nextWord = Time.timeSinceLevelLoad;
+            showStoryParts = ActiveStory.currentText.Split(" ");
+            showStoryPartsIndex = 0;
+            nextShowTime = Time.timeSinceLevelLoad;
+            Debug.Log(PrefixLogMessage($"{showStoryParts.Length} parts to story"));
         }
+
+        void ShowStoryLetterByLetter()
+        {
+            HideAllProgressOptions();
+            showStoryParts = Regex.Split(ActiveStory.currentText, string.Empty);
+            showStoryPartsIndex = 0;
+            nextShowTime = Time.timeSinceLevelLoad;
+            Debug.Log(PrefixLogMessage($"{showStoryParts.Length} parts to story"));
+        }
+
 
         void ContinueStory() => ContinueStory(false);
         void ContinueStory(bool resume)
@@ -218,9 +242,11 @@ namespace LMCore.TiledDungeon.Narrative
             {
                 ShowStoryInstant();
             }
-            else if (TextMode == ShowTextMode.WordByWord)
+            else if (TextMode == ShowTextMode.WordByWord || TextMode == ShowTextMode.WordByWordlength)
             {
                 ShowStoryWordByWord();
+            } else if (TextMode == ShowTextMode.LetterByLetter) { 
+                ShowStoryLetterByLetter();
             } else
             {
                 Debug.LogError(PrefixLogMessage($"Unhandled mode {TextMode}"));
@@ -237,24 +263,46 @@ namespace LMCore.TiledDungeon.Narrative
             StoryUIRoot.SetActive(false);
             OnStoryPhaseChange?.Invoke(StoryPhase.End, story);
         }
-        float nextWord;
 
-        bool AnimatingInWords => TextMode == ShowTextMode.WordByWord &&
-            showStoryWords != null;
+        float nextShowTime;
+
+        bool AnimatingStory =>
+            TextMode != ShowTextMode.Instant &&
+            showStoryParts != null;
+
+        float CalculateDelay(string part)
+        {
+            var delay = showStorySpeed;
+
+            if (TextMode == ShowTextMode.WordByWordlength)
+            {
+                delay += part.Length * showStoryCharacterSpeedCost;
+            }
+            if (extraCostOnPunctuaton && (punctuationCharacters.Contains(part.LastOrDefault())))
+            {
+                delay += showStoryPunctuationCost;
+            }
+
+            return delay;
+        }
 
         private void Update()
         {
-            if (!AnimatingInWords || Time.timeSinceLevelLoad < nextWord) return;
+            if (!AnimatingStory || Time.timeSinceLevelLoad < nextShowTime) return;
 
-            showStoryWordsIndex++;
-            StoryUI.text = string.Join(" ", showStoryWords.Take(showStoryWordsIndex));
-            if (showStoryWordsIndex >= showStoryWords.Length)
+            showStoryPartsIndex++;
+            StoryUI.text = string.Join(
+                TextMode == ShowTextMode.LetterByLetter ? "" : " ", 
+                showStoryParts.Take(showStoryPartsIndex));
+
+            if (showStoryPartsIndex >= showStoryParts.Length)
             {
                 ShowProgressOptions();
-                showStoryWords = null;
+                showStoryParts = null;
             } else
             {
-                nextWord = Time.timeSinceLevelLoad + wordByWordSpeed;
+                nextShowTime = Time.timeSinceLevelLoad + CalculateDelay(
+                    showStoryParts.Take(showStoryPartsIndex).Last());
             }
         }
     }
