@@ -120,8 +120,10 @@ namespace LMCore.TiledDungeon.Narrative
                 OnStyle?.Invoke(this, Style.NoStyle);
             }
 
+            // Setting this false here forces sticky selection the second time
+            // an option is showed after it was selected the previous time.
+            Button.interactable = false;
             Button.onClick.RemoveAllListeners();
-
             if (onSelect != null)
             {
                 var events = parsedTags?.Where(kvp => kvp.Key == "EVENT").Select(kvp => kvp.Value).ToList();

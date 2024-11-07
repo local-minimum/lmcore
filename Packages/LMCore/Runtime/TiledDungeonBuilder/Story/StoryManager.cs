@@ -31,6 +31,9 @@ namespace LMCore.TiledDungeon.Narrative
         [SerializeField]
         StoryOption OptionPrefab;
 
+        [SerializeField]
+        float delayShowOptionsWith = 0.2f;
+
         List<StoryOption> Options = new List<StoryOption>();
 
         private void Start()
@@ -126,7 +129,15 @@ namespace LMCore.TiledDungeon.Narrative
                         ActiveStory.ChooseChoiceIndex(choice.index);
                         ContinueStory();
                     });
-                option.gameObject.SetActive(true);
+
+                if (delayShowOptionsWith > 0)
+                {
+                    option.gameObject.SetActive(false);
+                    StartCoroutine(DelayShowOption((choice.index + 1) * delayShowOptionsWith, option));
+                } else
+                {
+                    option.gameObject.SetActive(true);
+                }
             }
             for (int i = ActiveStory.currentChoices.Count, l = Options.Count; i < l; i++)
             {
@@ -134,6 +145,13 @@ namespace LMCore.TiledDungeon.Narrative
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(OptionsRoot);
             var group = OptionsRoot.GetComponent<VerticalLayoutGroup>();
+        }
+
+        IEnumerator<WaitForSeconds> DelayShowOption(float delay, StoryOption option)
+        {
+            yield return new WaitForSeconds(delay);
+            option.gameObject.SetActive(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(OptionsRoot);
         }
 
         void ContinueStory() => ContinueStory(false);
