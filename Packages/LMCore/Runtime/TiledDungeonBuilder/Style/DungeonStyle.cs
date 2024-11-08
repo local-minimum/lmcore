@@ -1,7 +1,6 @@
 using LMCore.Crawler;
 using UnityEngine;
 using LMCore.TiledDungeon.Integration;
-using UnityEditor.Graphs;
 
 namespace LMCore.TiledDungeon.Style
 {
@@ -51,6 +50,10 @@ namespace LMCore.TiledDungeon.Style
         GameObject Spikes;
 
         [Header("Objects")]
+
+        [SerializeField]
+        GameObject Firepit;
+
         [SerializeField]
         GameObject Ladder;
         
@@ -111,6 +114,7 @@ namespace LMCore.TiledDungeon.Style
             if (classId == TiledConfiguration.InstanceOrCreate().PillarClass && Pillar != null) { return Instantiate(Pillar, parent); }
             if (classId == TiledConfiguration.InstanceOrCreate().PedistalClass && Pedistal != null) { return Instantiate(Pedistal, parent); }
             if (classId == TiledConfiguration.InstanceOrCreate().ChestClass && Chest != null) { return Instantiate(Chest, parent); }
+            if (classId == TiledConfiguration.InstanceOrCreate().FirePlaceClass && Firepit != null) { return Instantiate(Firepit, parent); }
 
             LogErrorUnkownId(classId);
             return null;

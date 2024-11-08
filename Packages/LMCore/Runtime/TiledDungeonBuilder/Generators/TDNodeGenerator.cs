@@ -86,6 +86,15 @@ namespace LMCore.TiledDungeon
             ConfigureContainer(node, chest, Direction.Down, direction, TiledConfiguration.instance.ChestClass, nodeConfig, true);
         }
 
+        static void ConfigureFireplace(TDNode node)
+        {
+            if (!node.modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.FirePlaceClass)) return;
+            node.Dungeon.Style.Get(
+                node.transform,
+                TiledConfiguration.instance.FirePlaceClass,
+                node.NodeStyle);
+        }
+
         static void ConfigureNPC(TDNode node, TDNodeConfig nodeConfig)
         {
             if (!node.modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.NPCClass)) return;
@@ -634,6 +643,7 @@ namespace LMCore.TiledDungeon
             ConfigureObstructions(node);
             ConfigureDoors(node);
             ConfigureLadders(node);
+            ConfigureFireplace(node);
             ConfigureFence(node);
             ConfigureTeleporter(node);
             ConfigureWallButtons(node);

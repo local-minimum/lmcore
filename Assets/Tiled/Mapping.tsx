@@ -802,8 +802,9 @@
  </tile>
  <tile id="82" type="Fireplace">
   <properties>
+   <property name="Anchor" propertytype="Direction" value="Down"/>
    <property name="Interaction" propertytype="Interaction" value="Interactable"/>
-   <property name="Walkabilit" propertytype="Aspect" value="Never"/>
+   <property name="Walkability" propertytype="Aspect" value="Never"/>
   </properties>
  </tile>
  <tile id="83" type="NPC">

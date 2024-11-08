@@ -30,7 +30,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         }
 
         [ContextMenu("AutoSave")]
-        void AutoSave()
+        public void AutoSave()
         {
             Save(
                 0,

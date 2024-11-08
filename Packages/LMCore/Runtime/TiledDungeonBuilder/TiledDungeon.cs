@@ -60,7 +60,8 @@ namespace LMCore.TiledDungeon
 
 
         [SerializeField]
-        GridEntity Player;
+        GridEntity _Player;
+        public GridEntity Player => _Player;
 
         [SerializeField]
         TDNode SpawnTile;
@@ -208,17 +209,17 @@ namespace LMCore.TiledDungeon
         [ContextMenu("Spawn")]
         private void Spawn()
         {
-            if (Player.TransportationMode.HasFlag(TransportationMode.Flying) 
-                || !SpawnTile.CanAnchorOn(Player, Direction.Down))
+            if (_Player.TransportationMode.HasFlag(TransportationMode.Flying) 
+                || !SpawnTile.CanAnchorOn(_Player, Direction.Down))
             {
-                Player.Node = SpawnTile;
+                _Player.Node = SpawnTile;
             } else
             {
-                Player.NodeAnchor = SpawnTile.GetAnchor(Direction.Down);
+                _Player.NodeAnchor = SpawnTile.GetAnchor(Direction.Down);
             }
-            Player.LookDirection = StartLookDirection;
+            _Player.LookDirection = StartLookDirection;
             
-            Player.Sync();
+            _Player.Sync();
         }
 
         bool spawnPlayerAtLevelStart = true;
@@ -232,8 +233,8 @@ namespace LMCore.TiledDungeon
 
         private void OnEnable()
         {
-            Player.GridSizeProvider = this;
-            Player.Dungeon = this;
+            _Player.GridSizeProvider = this;
+            _Player.Dungeon = this;
 
             // TODO: replace with new systems
             /*

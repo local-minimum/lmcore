@@ -497,6 +497,9 @@ namespace LMCore.TiledDungeon
                 }
             }
 
+            // Cannot check if there's any modification blocking walking here because could be mod doesn't affect the cube face
+            // or edge transition we are interested in...
+
             Debug.Log($"{BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)}");
             if (BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)) return false;
 
@@ -664,6 +667,13 @@ namespace LMCore.TiledDungeon
 
             // Can't fly on a walls
             if (entity.TransportationMode.HasFlag(TransportationMode.Flying)) return false;
+
+            if (entity.TransportationMode.HasFlag(TransportationMode.Walking))
+            {
+
+                if (modifications.Any(mod => mod.Tile.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey, TDEnumDirection.None).AsDirection() == anchor &&
+                    mod.Tile.CustomProperties.Aspect(TiledConfiguration.instance.WalkabilityKey, TDEnumAspect.Always) == TDEnumAspect.Never)) return false;
+            }
 
             if (anchor.IsPlanarCardinal())
             {

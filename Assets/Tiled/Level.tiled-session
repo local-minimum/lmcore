@@ -24,16 +24,16 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                9,
+                16,
                 21,
                 7,
-                16
+                9
             ],
             "scale": 3,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": 204.83333333333331,
-                "y": 174.83333333333331
+                "x": 512.1666666666666,
+                "y": 512.1666666666666
             }
         },
         "Mapping.tsx": {
@@ -52,8 +52,8 @@
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 404.66666666666674,
-                "y": 510
+                "x": 512.6666666666666,
+                "y": 511.33333333333337
             }
         }
     },
@@ -67,7 +67,7 @@
         "Rules/ModernDungeonAutomapping.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "bool",
+    "property.type": "Direction",
     "recentFiles": [
         "Mapping.tsx",
         "Rules/ModernDungeonAutomapping.tmx",

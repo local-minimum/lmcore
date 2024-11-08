@@ -30,6 +30,7 @@ namespace LMCore.TiledDungeon
         public string PillarClass = "Pillar";
         public string PedistalClass = "Pedistal";
         public string ChestClass = "Chest";
+        public string FirePlaceClass = "Fireplace";
         public string MovingPlatformClass = "MovingPlatform";
 
         [Header("String Enums")]
