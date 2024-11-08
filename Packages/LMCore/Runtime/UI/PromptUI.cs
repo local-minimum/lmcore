@@ -21,6 +21,12 @@ namespace LMCore.UI
         [SerializeField]
         string hideTrigger;
 
+        string ActiveText => showingText ?
+            prompts.FirstOrDefault(prompt => !string.IsNullOrEmpty(prompt.text))?.text : null;
+
+        string PrefixLogMessage(string message) =>
+            $"PromptUI {(animator == null ? "simple" : "animated")} ({ActiveText}): {message}";
+
         private void Start()
         {
             if (!showingText)
@@ -30,6 +36,7 @@ namespace LMCore.UI
         bool showingText;
         public void ShowText(string text)
         {
+            Debug.Log(PrefixLogMessage($"Showing prompt: {text}"));
             showingText = true;
             foreach (var prompt in prompts)
             {
@@ -38,6 +45,7 @@ namespace LMCore.UI
             transform.ShowAllChildren();
             if (animator != null)
             {
+                animator.ResetTrigger(hideTrigger);
                 animator.SetTrigger(showTrigger);
             }
         }
@@ -54,13 +62,18 @@ namespace LMCore.UI
             HideText(text);
         }
 
+        string hideableText;
+
         public void HideText(string text)
         {
-            if (prompts.Any(prompt => prompt.text == text))
+            if (ActiveText == text)
             {
+                Debug.Log(PrefixLogMessage($"Hiding prompt: {text}"));
+                hideableText = text;
                 if (animator != null)
                 {
                     animator.SetTrigger(hideTrigger);
+                    animator.ResetTrigger(showTrigger);
                 }
                 else
                 {
@@ -72,7 +85,11 @@ namespace LMCore.UI
 
         public void HideAllChildren()
         {
-            transform.HideAllChildren();
+            if (ActiveText == hideableText)
+            {
+                Debug.Log(PrefixLogMessage($"Hiding UI: {hideableText}"));
+                transform.HideAllChildren();
+            }
         }
     }
 }
