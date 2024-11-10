@@ -1,9 +1,12 @@
 using Ink.Runtime;
 using LMCore.Crawler;
 using LMCore.Extensions;
+using LMCore.Inventory;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.Narrative;
 using LMCore.UI;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,6 +58,8 @@ namespace LMCore.TiledDungeon.Menus
         GridEntity player;
         TDSavingTrigger trigger;
 
+        List<TDPlayerCharacter> charactersThatCanEat = new List<TDPlayerCharacter>();
+        
         public void Configure(GridEntity player, TDSavingTrigger trigger)
         {
             this.player = player;
@@ -63,8 +68,22 @@ namespace LMCore.TiledDungeon.Menus
             ResumeButton.interactable = true;
             QuitButton.interactable = true;
 
-            // TODO: Check if needing food for health or status
-            EatButton.interactable = false;
+            var playerEntity = player?.GetComponent<TDPlayerEntity>();
+            if (playerEntity != null)
+            {
+
+                charactersThatCanEat = playerEntity.Party
+                        .Where(member => 
+                            !member.FullHealth
+                            && member.MainInventory.Items.Any(item => EdibleItem(item)))
+                        .ToList();
+
+            } else
+            {
+                charactersThatCanEat.Clear();
+            }
+
+            EatButton.interactable = charactersThatCanEat.Count > 0;
 
             storyTrigger = trigger?.GetComponent<StoryTrigger>();
             StoryButton.interactable = storyTrigger != null && storyTrigger.CanContinueStory;
@@ -87,7 +106,7 @@ namespace LMCore.TiledDungeon.Menus
         }
 
         Story CurrentStory;
-        private void StoryManager_OnStoryPhaseChange(StoryPhase phase, Ink.Runtime.Story story)
+        private void StoryManager_OnStoryPhaseChange(StoryPhase phase, Story story)
         {
             if (phase == StoryPhase.Start)
             {
@@ -107,10 +126,18 @@ namespace LMCore.TiledDungeon.Menus
             }
         }
 
+        // TODO: This is bogus ofc
+        bool EdibleItem(AbsItem item) => item.Id.Contains("Apple");
+
         public void Eat()
         {
-            // TODO: Probe inventories for edibles and consume them wisely over time
-            // might be own so this one is disabled
+            foreach (var character in charactersThatCanEat)
+            {
+                // TODO: Probe inventories for edibles and consume them wisely over time
+                // might be own so this one is disabled
+            }
+
+            charactersThatCanEat.Clear();
             EatButton.interactable = false;
         }
 

@@ -12,6 +12,9 @@ namespace LMCore.TiledDungeon
         public string CharacterId;
         public AbsInventory MainInventory;
 
+        public int Health { get; private set; } = 100;
+        public bool FullHealth => Health == 100;
+
         private void Awake()
         {
             if (MainInventory != null) { 
