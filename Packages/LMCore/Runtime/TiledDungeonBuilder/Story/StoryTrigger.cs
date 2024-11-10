@@ -25,6 +25,12 @@ namespace LMCore.TiledDungeon.Narrative
             storyId = System.Guid.NewGuid().ToString();
         }
 
+        [ContextMenu("Use filename as ID")]
+        void UseFileNameAsId()
+        {
+            storyId = InkJSon.name;
+        }
+
         [SerializeField]
         TextAsset InkJSon;
 
@@ -35,7 +41,10 @@ namespace LMCore.TiledDungeon.Narrative
         StoryMode Mode = StoryMode.RepeatableStateless;
 
         [SerializeField, Tooltip("Leave empty if just restarting from the start of the story")]
-        string stateFullRepeatStartPath = "Start";
+        string stateFullRepeatStartPath;
+
+        [SerializeField, Tooltip("If the trigger doesn't invok stories itself but must be triggered by 3rd party")]
+        bool Passive = false;
 
         Story _InkStory;
         Story InkStory
@@ -67,15 +76,21 @@ namespace LMCore.TiledDungeon.Narrative
 
         private void OnEnable()
         {
-            GridEntity.OnPositionTransition += CheckCanSpawnStory;
-            GridEntity.OnInteract += SpawnStory;
+            if (!Passive)
+            {
+                GridEntity.OnPositionTransition += CheckShowPrompt;
+                GridEntity.OnInteract += SpawnStory;
+            }
             StoryManager.OnStoryPhaseChange += StoryManager_OnStoryPhaseChange;
         }
 
         private void OnDisable()
         {
-            GridEntity.OnPositionTransition -= CheckCanSpawnStory;
-            GridEntity.OnInteract -= SpawnStory;
+            if (!Passive)
+            {
+                GridEntity.OnPositionTransition -= CheckShowPrompt;
+                GridEntity.OnInteract -= SpawnStory;
+            }
             StoryManager.OnStoryPhaseChange -= StoryManager_OnStoryPhaseChange;
         }
 
@@ -108,7 +123,8 @@ namespace LMCore.TiledDungeon.Narrative
                         InkStory.ChoosePathString(stateFullRepeatStartPath, false);
                     }
                 }
-                StartCoroutine(DelayReady());
+
+                if (!Passive) StartCoroutine(DelayReady());
             }
             else if (phase == StoryPhase.Start)
             {
@@ -126,7 +142,7 @@ namespace LMCore.TiledDungeon.Narrative
 
             if (Mode != StoryMode.OneShot)
             {
-                CheckCanSpawnStory(entity);
+                CheckShowPrompt(entity);
             }
         }
 
@@ -135,7 +151,7 @@ namespace LMCore.TiledDungeon.Narrative
 
         string lastPrompt;
 
-        bool CanContinueStory => InkStory != null
+        public bool CanContinueStory => InkStory != null
             && InkStory.canContinue
             && (playCount == 0 || Mode != StoryMode.OneShot);
 
@@ -144,11 +160,11 @@ namespace LMCore.TiledDungeon.Narrative
         private string PrefixLogMessage(string message) =>
             $"StoryTrigger {name}: {message}";
 
-        private void SpawnStory(GridEntity entity)
+        public void SpawnStory(GridEntity entity)
         {
             if (InteractingEntity == null
                 && CanContinueStory
-                && entity.LookDirection.Translate(entity.Coordinates) == Coordinates)
+                && (Passive || entity.LookDirection.Translate(entity.Coordinates) == Coordinates))
             {
                 Debug.Log(PrefixLogMessage("Invoking story"));
                 HidePrompt();
@@ -158,9 +174,9 @@ namespace LMCore.TiledDungeon.Narrative
             }
         }
 
-        private void CheckCanSpawnStory(GridEntity entity)
+        private void CheckShowPrompt(GridEntity entity)
         {
-            if (entity.EntityType != GridEntityType.PlayerCharacter) return;
+            if (entity.EntityType != GridEntityType.PlayerCharacter || Passive) return;
 
             if (entity.LookDirection.Translate(entity.Coordinates) == Coordinates
                 // This basically should only happen when loading a save or if we make multiplayer

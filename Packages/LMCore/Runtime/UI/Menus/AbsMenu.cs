@@ -1,3 +1,4 @@
+using LMCore.AbstractClasses;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,13 +6,16 @@ using UnityEngine;
 
 namespace LMCore.UI
 {
-    public delegate void ShowMenuEvent(AbsMenu menu);
+    public delegate void MenuEvent(AbsMenu menu);
     public delegate void HideMenusEvent();
 
-    public abstract class AbsMenu : MonoBehaviour
+    public abstract class AbsMenu: MonoBehaviour
     {
-        public static event ShowMenuEvent OnShowMenu;
+        public static event MenuEvent OnShowMenu;
+        public static event MenuEvent OnExitMenu;
         public static event HideMenusEvent OnHideMenus;
+
+        public abstract bool PausesGameplay { get; }
 
         /// <summary>
         /// Function called when a menu becomes the focused menu
@@ -29,8 +33,23 @@ namespace LMCore.UI
         /// exiting the most recent menu gives focus to the new
         /// top of the stack
         /// </summary>
-        private static List<AbsMenu> menus = new List<AbsMenu>();
+        private static List<AbsMenu> ActiveMenus = new List<AbsMenu>();
 
+        /// <summary>
+        /// If any menu in the stack pauses gameplay, we are paused
+        /// </summary>
+        public static bool PausingGameplay => ActiveMenus.Any(menu => menu.PausesGameplay);
+
+        /// <summary>
+        /// If the menu has been show, not neccesarily being focused
+        /// </summary>
+        public bool ActiveMenu => ActiveMenus.Contains(this);
+
+        /// <summary>
+        /// If current menu is the one being focused
+        /// </summary>
+        public bool Focused => ActiveMenus.LastOrDefault() == this;
+        
         protected string PrefixLogMessage(string message) =>
             $"Menu {name}: {message}";
 
@@ -47,8 +66,8 @@ namespace LMCore.UI
         public void Show()
         {
 
-            var previous = menus.LastOrDefault();
-            menus.Add(this);
+            var previous = ActiveMenus.LastOrDefault();
+            ActiveMenus.Add(this);
             Focus();
             previous?.Blur();
 
@@ -60,12 +79,12 @@ namespace LMCore.UI
         /// </summary>
         public void Exit()
         {
-            var idx = menus.LastIndexOf(this);
+            var idx = ActiveMenus.LastIndexOf(this);
             if (idx != -1)
             {
-                var currentLast = menus.LastOrDefault();
-                menus.RemoveAt(idx);
-                var newLast = menus.LastOrDefault();
+                var currentLast = ActiveMenus.LastOrDefault();
+                ActiveMenus.RemoveAt(idx);
+                var newLast = ActiveMenus.LastOrDefault();
                 if (newLast == null)
                 {
                     OnHideMenus?.Invoke();
@@ -83,7 +102,37 @@ namespace LMCore.UI
                 Debug.LogWarning(PrefixLogMessage("Shouldn't have exited myself since I wasn't registered in the stack"));
             }
             Blur();
+            OnExitMenu?.Invoke(this);
+        }
 
+        abstract protected string MenuId {  get; }
+
+        private static Dictionary<string, AbsMenu> AllMenus = new Dictionary<string, AbsMenu>();
+        public static AbsMenu GetMenu(string menuId) => AllMenus[menuId];
+
+        private void Awake()
+        {
+            if (string.IsNullOrEmpty(MenuId))
+            {
+                Debug.LogError(PrefixLogMessage("We don't have a name"));
+                Destroy(gameObject);
+            }
+            else if (AllMenus.ContainsKey(MenuId))
+            {
+                Debug.LogError(PrefixLogMessage("We already exist"));
+                Destroy(gameObject);
+            } else
+            {
+                AllMenus[MenuId] = this;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (AllMenus.ContainsKey(MenuId))
+            {
+                AllMenus.Remove(MenuId);
+            }
         }
     }
 }

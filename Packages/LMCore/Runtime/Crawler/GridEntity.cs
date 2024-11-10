@@ -3,6 +3,7 @@ using LMCore.Extensions;
 using UnityEngine.Events;
 using LMCore.Inventory;
 using System.Collections.Generic;
+using LMCore.UI;
 
 namespace LMCore.Crawler
 {
@@ -362,6 +363,31 @@ namespace LMCore.Crawler
             } else
             {
                 Debug.LogWarning(PrefixLogMessage($"Waking up without a dungeon"));
+            }
+        }
+
+        private void OnEnable()
+        {
+            AbsMenu.OnShowMenu += AbsMenu_OnShowMenu;
+            AbsMenu.OnExitMenu += AbsMenu_OnExitMenu;
+        }
+
+        private void OnDisable()
+        {
+            AbsMenu.OnShowMenu -= AbsMenu_OnShowMenu;
+            AbsMenu.OnExitMenu -= AbsMenu_OnExitMenu;
+        }
+
+        private void AbsMenu_OnExitMenu(AbsMenu menu)
+        {
+            MovementBlockers.Remove(menu);
+        }
+
+        private void AbsMenu_OnShowMenu(AbsMenu menu)
+        {
+            if (menu.PausesGameplay)
+            {
+                MovementBlockers.Add(menu);
             }
         }
 
