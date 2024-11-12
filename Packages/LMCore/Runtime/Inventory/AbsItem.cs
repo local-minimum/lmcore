@@ -26,12 +26,25 @@ namespace LMCore.Inventory
         }
     }
 
+    [System.Flags]
+    public enum ItemType
+    {
+        Nothing = 0,
+        Consumable = 1,
+        Wearable = 2,
+        Tool = 4,
+        Document = 8,
+        QuestItem = 16,
+    }
+
     public abstract class AbsItem : MonoBehaviour
     {
         public abstract string Id { get; }
         public abstract string Origin { get; }
 
         public string FullId => $"{Origin}-{Id}";
+
+        public abstract ItemType Type { get; }
 
         public abstract bool Stackable { get; }
         public abstract int StackSizeLimit { get; }

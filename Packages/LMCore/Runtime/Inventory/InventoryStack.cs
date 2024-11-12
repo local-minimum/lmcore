@@ -14,6 +14,12 @@ namespace LMCore.Inventory
         public bool Empty => items.Count == 0;
         public bool Full => !Empty && (!items[0].Stackable || items.Count >= items[0].StackSizeLimit);
 
+        public override string ToString()
+        {
+            if (Empty) return "[EMPTY]";
+
+            return $"{items.Count} {Id}{(Full ? " (Full)" : "")}";
+        }
         public IEnumerable<AbsItem> Items => items;
 
         public InventoryStack() { }

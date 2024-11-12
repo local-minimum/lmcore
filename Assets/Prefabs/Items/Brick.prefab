@@ -80,6 +80,7 @@ MonoBehaviour:
   _StackSizeLimit: 1
   _Id: 
   _Origin: 
+  _ItemType: 4
   _UIRoot: {fileID: 0}
   _WorldRoot: {fileID: 4525836469976594255}
 --- !u!1001 &1634655004902475170

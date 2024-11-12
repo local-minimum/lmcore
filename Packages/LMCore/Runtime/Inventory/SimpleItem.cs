@@ -16,6 +16,9 @@ namespace LMCore.Inventory
         string _Origin;
 
         [SerializeField]
+        ItemType _ItemType;
+
+        [SerializeField]
         RectTransform _UIRoot;
 
         [SerializeField]
@@ -39,5 +42,7 @@ namespace LMCore.Inventory
         public override bool Stackable => _StackSizeLimit > 1;
 
         public override int StackSizeLimit => _StackSizeLimit;
+
+        public override ItemType Type => _ItemType;
     }
 }

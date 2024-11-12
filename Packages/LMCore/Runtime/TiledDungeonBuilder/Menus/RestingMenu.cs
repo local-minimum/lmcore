@@ -126,8 +126,9 @@ namespace LMCore.TiledDungeon.Menus
             }
         }
 
-        // TODO: This is bogus ofc
-        bool EdibleItem(AbsItem item) => item.Id.Contains("Apple");
+        // TODO: This is a bit wild, it would be nice to have some order to what is being eaten
+        // TODO: We need to also figure out what effect eating this has
+        bool EdibleItem(AbsItem item) => item.Type.HasFlag(ItemType.Consumable);
 
         public void Eat()
         {
@@ -135,6 +136,88 @@ namespace LMCore.TiledDungeon.Menus
             {
                 // TODO: Probe inventories for edibles and consume them wisely over time
                 // might be own so this one is disabled
+                int neededHealth = character.HealableAmount;
+
+                List<Recipe> OutlawRecipes = new List<Recipe>();
+
+                while (neededHealth > 0)
+                {
+                    var consumables = character.MainInventory.Items.Where(item => item.Type.HasFlag(ItemType.Consumable));
+                    var tools = character.MainInventory.Items.Where(item => item.Type.HasFlag(ItemType.Tool));
+                    var recipe = RecipeCollection.instance.GetRecipesFor(consumables, tools)
+                        .Where(r => !OutlawRecipes.Contains(r))
+                        .OrderBy(r =>
+                        {
+                            var healing = r.TotalHealing;
+                            if (healing <= neededHealth)
+                            {
+                                return healing;
+                            }
+                            else
+                            {
+                                return neededHealth - healing;
+                            }
+                        })
+                        .FirstOrDefault();
+
+                    bool cookFail = false;
+
+                    if (recipe != null)
+                    {
+                        foreach (var ingredient in recipe.Ingredients)
+                        {
+                            for (var i=0; i<ingredient.Amount; i++)
+                            {
+                                if (character.MainInventory.Consume(ingredient.Id, out string origin))
+                                {
+                                    ItemDisposal.instance.Dispose(ingredient.Id, origin);
+                                } else
+                                {
+                                    Debug.LogError(PrefixLogMessage(
+                                        $"Failed to produce recipe {recipe}, some ingredients may have been wasted."));
+                                    cookFail = true;
+                                    break;
+                                }
+                            }
+
+                            if (cookFail) break;
+                        }
+
+                        foreach (var tool in recipe.Tools)
+                        {
+                            if (cookFail) break;
+                            if (!tool.Consumes) continue;
+
+                            for (var i=0; i<tool.Amount; i++)
+                            {
+                                if (character.MainInventory.Consume(tool.Id, out string origin))
+                                {
+                                    ItemDisposal.instance.Dispose(tool.Id, origin);
+                                } else
+                                {
+                                    Debug.LogError(PrefixLogMessage(
+                                        $"Failed to produce recipe {recipe}, some ingredients may have been wasted."));
+                                    cookFail = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!cookFail)
+                        {
+                            character.Heal(recipe.TotalHealing);
+                            neededHealth -= recipe.TotalHealing;
+                            Debug.Log(PrefixLogMessage(recipe.Humanize(character.Name)));
+                        } else
+                        {
+                            OutlawRecipes.Add(recipe);
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
 
             charactersThatCanEat.Clear();
