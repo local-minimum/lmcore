@@ -124,7 +124,14 @@ namespace LMCore.TiledDungeon.Narrative
                     }
                 }
 
-                if (!Passive) StartCoroutine(DelayReady());
+                if (!Passive)
+                {
+                    StartCoroutine(DelayReady());
+                } else
+                {
+                    InteractingEntity.MovementBlockers.Remove(this);
+                    InteractingEntity = null;
+                }
             }
             else if (phase == StoryPhase.Start)
             {

@@ -4,6 +4,7 @@ using LMCore.Extensions;
 using LMCore.Inventory;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.Narrative;
+using LMCore.TiledDungeon.SaveLoad;
 using LMCore.UI;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace LMCore.TiledDungeon.Menus
         protected override void Focus()
         {
             MenuRoot.transform.ShowAllChildren();
-            Configure(player, trigger);
+            if (player != null) Configure(player, trigger);
         }
 
         private void Start()
@@ -68,7 +69,7 @@ namespace LMCore.TiledDungeon.Menus
             ResumeButton.interactable = true;
             QuitButton.interactable = true;
 
-            var playerEntity = player?.GetComponent<TDPlayerEntity>();
+            var playerEntity = player?.GetComponentInChildren<TDPlayerEntity>();
             if (playerEntity != null)
             {
 
@@ -78,8 +79,14 @@ namespace LMCore.TiledDungeon.Menus
                             && member.MainInventory.Items.Any(item => EdibleItem(item)))
                         .ToList();
 
+                Debug.Log(PrefixLogMessage(
+                    $"{charactersThatCanEat.Count}/{playerEntity.Party.Count} characters are hungry and can eat." + 
+                    $" {playerEntity.Party.Count(p => !p.FullHealth)} need to eat." +
+                    $" {playerEntity.Party.Count(p => p.MainInventory.Items.Any(i => EdibleItem(i)))} has edibles in backpack" ));
+
             } else
             {
+                Debug.LogError(PrefixLogMessage($"There's no player entity on {player?.name}!"));
                 charactersThatCanEat.Clear();
             }
 
@@ -127,16 +134,14 @@ namespace LMCore.TiledDungeon.Menus
         }
 
         // TODO: This is a bit wild, it would be nice to have some order to what is being eaten
-        // TODO: We need to also figure out what effect eating this has
         bool EdibleItem(AbsItem item) => item.Type.HasFlag(ItemType.Consumable);
 
         public void Eat()
         {
             foreach (var character in charactersThatCanEat)
             {
-                // TODO: Probe inventories for edibles and consume them wisely over time
-                // might be own so this one is disabled
                 int neededHealth = character.HealableAmount;
+                Debug.Log(PrefixLogMessage($"{character.Name} needs {neededHealth}"));
 
                 List<Recipe> OutlawRecipes = new List<Recipe>();
 
@@ -162,8 +167,13 @@ namespace LMCore.TiledDungeon.Menus
 
                     bool cookFail = false;
 
-                    if (recipe != null)
+                    if (recipe == null)
                     {
+                        Debug.LogWarning(PrefixLogMessage($"{character.Name} has no recipe to cook"));
+                        break;
+                    } else {
+                        Debug.Log(PrefixLogMessage($"{character.Name} attempts to make recipe: {recipe.Name}"));
+
                         foreach (var ingredient in recipe.Ingredients)
                         {
                             for (var i=0; i<ingredient.Amount; i++)
@@ -213,15 +223,25 @@ namespace LMCore.TiledDungeon.Menus
                             OutlawRecipes.Add(recipe);
                         }
                     }
-                    else
-                    {
-                        break;
-                    }
                 }
             }
 
             charactersThatCanEat.Clear();
             EatButton.interactable = false;
+        }
+
+        public void Resume()
+        {
+            Exit();
+            if (trigger != null)
+            {
+                trigger.Save();
+            } else
+            {
+                BasicTDSaveSystem.instance.AutoSave();
+            }
+            trigger = null;
+            player = null;
         }
 
         public void ExitApp()

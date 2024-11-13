@@ -24,9 +24,18 @@ namespace LMCore.Crawler
                 return _entity;
             }
         }
+
         bool MovementBlocked => entity.MovementBlocked; 
         bool inputEnabled = true;
         public event MovementEvent OnMovement;
+
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(PrefixLogMessage($"Input Enabled ({inputEnabled})" +
+                $" Movement Blocked ({MovementBlocked})" +
+                $" Queue: {QueueInfo}"));
+        }
 
         private class HeldButtonInfo
         {

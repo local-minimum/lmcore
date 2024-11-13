@@ -96,7 +96,7 @@ namespace LMCore.TiledDungeon.Narrative
             $"StoryManager: {message}";
 
         StoryTrigger trigger;
-        private void StoryTrigger_OnPlayStory(Ink.Runtime.Story story, StoryTrigger trigger, bool resume)
+        private void StoryTrigger_OnPlayStory(Story story, StoryTrigger trigger, bool resume)
         {
             if (ActiveStory != null)
             {

@@ -58,7 +58,7 @@ namespace LMCore.Crawler
             }
         }
         
-        public HashSet<MonoBehaviour> MovementBlockers {  get; set; } = new HashSet<MonoBehaviour>(); 
+        public HashSet<MonoBehaviour> MovementBlockers { get; set; } = new HashSet<MonoBehaviour>(); 
         public bool MovementBlocked => MovementBlockers.Count > 0;
 
         #region Anchorage

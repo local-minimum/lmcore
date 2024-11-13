@@ -34,7 +34,7 @@ namespace LMCore.Inventory
         [ContextMenu("Info")]
         public void Info()
         {
-            Debug.Log($"Inventory size {Capacity} {(stacks.Count == 0 ? "is empty" : $"has stacks {string.Join(", ", stacks)}")}");
+            Debug.Log($"Inventory ({name}) size {Capacity} {(stacks.Count == 0 ? "is empty" : $"has stacks {string.Join(", ", stacks)}")}");
         }
 
         public bool Full => stacks.Count >= Capacity && stacks.All(stack => stack.Full);

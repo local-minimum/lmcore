@@ -48,12 +48,17 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             entity.LookDirection.Translate(entity.Coordinates) == Coordinates &&
             !AbsMenu.PausingGameplay;
 
+
+        public void Save()
+        {
+            BasicTDSaveSystem.instance.AutoSave();
+            PromptUI.instance.ShowText("Game saved", 2f);
+        }
         private void GridEntity_OnInteract(GridEntity entity)
         {
             if (CanInteract(entity))
             {
-                BasicTDSaveSystem.instance.AutoSave();
-                PromptUI.instance.ShowText("Game saved", 2f);
+                Save();
                 if (TriggerRestingMenu)
                 {
                     var menu = AbsMenu.GetMenu(RestingMenu.Id);

@@ -21,6 +21,8 @@ namespace LMCore.Inventory
             .Where(i => i != null && i.Type.HasFlag(ItemType.Consumable))
             .GroupBy(i => i.Id)
             .Select(g =>  new Ingredient(g.Key, g.Count()));
+
+        public override string ToString() => $"{Amount} {Id}";
     }
 
     [System.Serializable]
@@ -41,6 +43,8 @@ namespace LMCore.Inventory
             .Where(i => i != null && i.Type.HasFlag(ItemType.Tool))
             .GroupBy(i => i.Id)
             .Select(g => new Tool(g.Key, g.Count(), consumes));
+
+        public override string ToString() => $"{(Consumes ? "One-time ": "")}{Amount} {Id}";
     }
 
     [System.Serializable]
@@ -104,9 +108,29 @@ namespace LMCore.Inventory
 
         public int TotalHealing => effects.Sum(e => e.Health);
 
-        public bool CanMakeWith(List<Ingredient> availableIngredients, List<Tool> availableTools) =>
-            ingredients.All(ing => availableIngredients.Any(aIng => aIng.Id == ing.Id && ing.Amount <= aIng.Amount)) &&
-            tools.Any(tool => availableTools.Any(aTool => aTool.Id == tool.Id && tool.Amount <= aTool.Amount));
+        private static bool IngredientPredicate(Ingredient ing, List<Ingredient> availableIngredients) =>
+            availableIngredients.Any(aIng => aIng.Id == ing.Id && ing.Amount <= aIng.Amount);
+        private static bool ToolPredicate(Tool tool, List<Tool> availableTools) =>
+                availableTools.Any(aTool => aTool.Id == tool.Id && tool.Amount <= aTool.Amount);
+
+
+        public bool CanMakeWith(List<Ingredient> availableIngredients, List<Tool> availableTools)
+        {
+            var matchesIngredients = ingredients.All(ing => IngredientPredicate(ing, availableIngredients));
+            var matchesTools = tools.All(tool => ToolPredicate(tool, availableTools));
+
+            if (!matchesIngredients)
+            {
+                Debug.Log($"Recipe {Name} fails because don't have:" +
+                    $" {string.Join(", ", ingredients.Where(ing => !IngredientPredicate(ing, availableIngredients)))}");
+            }
+            if (!matchesTools)
+            {
+                Debug.Log($"Recipe {Name} fails because don't have tool:" +
+                    $" {string.Join(", ", tools.Where(tool => !ToolPredicate(tool, availableTools)))}");
+            }
+            return matchesIngredients && matchesTools;
+        }
    
         public IEnumerable<Ingredient> Ingredients => ingredients;
         public IEnumerable<Tool> Tools => tools;
@@ -162,6 +186,9 @@ namespace LMCore.Inventory
         public IEnumerable<Recipe> GetRecipesFor(IEnumerable<AbsItem> consumables, IEnumerable<AbsItem> tools) {
             var potentialIngredients = Ingredient.From(consumables).ToList();
             var potentialTools = Tool.From(tools).ToList();
+
+            Debug.Log($"Recipe Collection: Player has ingredients: {string.Join(", ", potentialIngredients)}");
+            Debug.Log($"Recipe Collection: Player has tools: {string.Join(", ", potentialTools)}");
 
             return recipes
                 .Where(r => r.CanMakeWith(potentialIngredients, potentialTools));
