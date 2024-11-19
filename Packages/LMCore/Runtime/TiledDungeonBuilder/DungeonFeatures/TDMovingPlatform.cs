@@ -1069,6 +1069,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             Debug.Log(PrefixLogMessage($"Platform loaded into phase {phase} / {platformSave.phase}"));
         }
 
+        // Needs to be lower than TDPassivePlatform
         public int OnLoadPriority => 10;
 
         public void OnLoad<T>(T save) where T : new()

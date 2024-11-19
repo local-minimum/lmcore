@@ -1,4 +1,5 @@
 using LMCore.Crawler;
+using LMCore.IO;
 using LMCore.TiledDungeon.Integration;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
-    public class TDPassivePlatform :  TDFeature, IMovingCubeFace
+    public class TDPassivePlatform :  TDFeature, IMovingCubeFace, IOnLoadSave
     {
         [SerializeField, HideInInspector]
         string movingPlatformId;
@@ -23,9 +24,12 @@ namespace LMCore.TiledDungeon.DungeonFeatures
         protected string PrefixLogMessage(string message) =>
             $"Plassive Platform to '{movingPlatformId}' @ {Coordinates}: {message}";
 
-        void Start()
+        bool registered = false;
+
+        void RegisterToPlatform()
         {
-            InitStartCoordinates();
+            if (registered) return; 
+
             var platform = Node.Dungeon.GetComponentsInChildren<TDMovingPlatform>()
                 .FirstOrDefault(mp => mp.Identifier == movingPlatformId);
 
@@ -40,13 +44,21 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 platform.AddAttachedObject(Backside, cubeFace.Inverse()); 
             }
+            
+            registered = true;
+        }
 
+        void Start()
+        {
+            InitStartCoordinates();
+
+            RegisterToPlatform();
             var anchor = Anchor;
             if (anchor != null) {
                 anchor.ManagingMovingCubeFace = this;
             }
         }
-        
+
         public static void Configure(TDNode node, Direction direction, GameObject go)
         {
             var tConf = TiledConfiguration.InstanceOrCreate();
@@ -66,6 +78,14 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             var platform = go.AddComponent<TDPassivePlatform>();
             platform.movingPlatformId = identifier;
             platform.cubeFace = direction;
+        }
+
+        // Needs to be higher than TDMovingPlatform
+        public int OnLoadPriority => 50;
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            RegisterToPlatform();
         }
     }
 }
