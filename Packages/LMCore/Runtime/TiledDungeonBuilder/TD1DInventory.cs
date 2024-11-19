@@ -89,9 +89,10 @@ namespace LMCore.TiledDungeon
             }
 
             // 4. Order inventory according to save
-            int stackIdx = 0;
-            foreach (var stack in stacks)
+            for (int stackIdx = 0, l = stacks.Count; stackIdx < l; stackIdx++)
             {
+                var stack = stacks[stackIdx];
+
                 foreach (var item in stack.Items.ToList()) { 
                     var info = container.items.FirstOrDefault(info => info.Equals(item));
                     if (info == null)
@@ -107,8 +108,6 @@ namespace LMCore.TiledDungeon
                         AddToStack(info.StackIndex, item);
                     }
                 }
-
-                stackIdx++;
             }
         }
 
