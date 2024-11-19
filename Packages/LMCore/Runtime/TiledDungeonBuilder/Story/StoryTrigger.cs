@@ -6,7 +6,6 @@ using LMCore.TiledDungeon.SaveLoad;
 using LMCore.UI;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace LMCore.TiledDungeon.Narrative
 {
@@ -28,11 +27,11 @@ namespace LMCore.TiledDungeon.Narrative
         [ContextMenu("Use filename as ID")]
         void UseFileNameAsId()
         {
-            storyId = InkJSon.name;
+            storyId = InkJson.name;
         }
 
         [SerializeField]
-        TextAsset InkJSon;
+        TextAsset InkJson;
 
         public enum StoryMode { OneShot, RepeatableStateless, RepeatableStatefull };
         int playCount;
@@ -51,16 +50,17 @@ namespace LMCore.TiledDungeon.Narrative
         {
             get
             {
-                if (_InkStory == null && InkJSon != null)
+                if (_InkStory == null && InkJson != null)
                 {
-                    _InkStory = new Story(InkJSon.text);
+                    _InkStory = new Story(InkJson.text);
                 }
                 return _InkStory;
             }
-            set
-            {
-                _InkStory = value;
-            }
+        }
+
+        public void SideLoadStory(Story story)
+        {
+            _InkStory = story;
         }
 
         private void ResetStoryTrigger()
@@ -110,7 +110,7 @@ namespace LMCore.TiledDungeon.Narrative
             {
                 if (Mode == StoryMode.RepeatableStateless)
                 {
-                    InkStory = null;
+                    _InkStory = null;
                 }
                 else if (Mode == StoryMode.RepeatableStatefull)
                 {
@@ -158,9 +158,18 @@ namespace LMCore.TiledDungeon.Narrative
 
         string lastPrompt;
 
-        public bool CanContinueStory => InkStory != null
-            && InkStory.canContinue
+        private bool HasContinuableStory =>
+            InkStory != null && InkStory.canContinue;
+
+        public bool CanContinueStory => 
+            HasContinuableStory
             && (playCount == 0 || Mode != StoryMode.OneShot);
+
+        public bool SideloadingStoryAllowed =>
+            InkStory == null && (
+                playCount == 0 && Mode == StoryMode.OneShot ||
+                Mode == StoryMode.RepeatableStateless
+            );
 
         public GridEntity InteractingEntity { get; private set; }
 

@@ -105,6 +105,17 @@ namespace LMCore.TiledDungeon.SaveLoad
                 levelSave.playerPositions = dungeon.GetComponentInChildren<TDPlayerPositionTracker>()?.Save().ToList();
             }
 
+            // Merge story collection saves
+            if (active != null)
+            {
+                save.storyCollections = new SerializableDictionary<string, int>(active.storyCollections);
+                foreach (var collection in StoryCollection.Collections)
+                {
+                    var (key, value) = collection.Save();
+                    save.storyCollections[key] = value; 
+                }
+            }
+
             // Merge disposed items
             save.disposedItems = active?.disposedItems == null ? 
                 ItemDisposal

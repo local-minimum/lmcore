@@ -410,6 +410,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6657659850972119914}
   - component: {fileID: 880116439437519005}
+  - component: {fileID: 5024771695584368418}
   m_Layer: 5
   m_Name: Resting Menu
   m_TagString: Untagged
@@ -455,6 +456,21 @@ MonoBehaviour:
   EatButton: {fileID: 1615764899286318447}
   StoryButton: {fileID: 5369345749303337285}
   QuitButton: {fileID: 2041486905070546367}
+  Stories: {fileID: 5024771695584368418}
+--- !u!114 &5024771695584368418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3493966741907619018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcf664c06cf4d754fb76f6d221bd2d4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InkJsons:
+  - {fileID: 4900000, guid: e23c75c898abb924a8f3f607c69da36b, type: 3}
 --- !u!1 &5683385164920815582
 GameObject:
   m_ObjectHideFlags: 0
@@ -844,8 +860,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 880116439437519005}
-        m_TargetAssemblyTypeName: LMCore.UI.AbsMenu, se.localminimum.lmcore.ui
-        m_MethodName: Exit
+        m_TargetAssemblyTypeName: LMCore.TiledDungeon.Menus.RestingMenu, se.localminimum.lmcore.tileddungeonbuilder
+        m_MethodName: Resume
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

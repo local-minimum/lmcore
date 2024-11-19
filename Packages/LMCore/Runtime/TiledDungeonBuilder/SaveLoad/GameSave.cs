@@ -201,6 +201,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public GameEnvironment environment;
         public List<ItemOrigin> disposedItems = new List<ItemOrigin>();
         public SerializableDictionary<string, LevelSave> levels = new SerializableDictionary<string, LevelSave>();
+        public SerializableDictionary<string, int> storyCollections = new SerializableDictionary<string, int>();
         public PlayerEntitySave player;
         public PlayerStatsSave playerStats;
 

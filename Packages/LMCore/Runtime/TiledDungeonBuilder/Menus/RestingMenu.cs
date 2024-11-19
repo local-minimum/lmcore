@@ -30,6 +30,13 @@ namespace LMCore.TiledDungeon.Menus
         [SerializeField]
         Button QuitButton;
 
+        /// <summary>
+        /// Only really works with oneshot story triggers or stateless
+        /// because we can't save the story state on the trigger
+        /// </summary>
+        [SerializeField, Tooltip("Use to override the stories of story triggers on the menu trigger")]
+        StoryCollection Stories;
+
         public override bool PausesGameplay =>
             true;
 
@@ -93,7 +100,20 @@ namespace LMCore.TiledDungeon.Menus
             EatButton.interactable = charactersThatCanEat.Count > 0;
 
             storyTrigger = trigger?.GetComponent<StoryTrigger>();
-            StoryButton.interactable = storyTrigger != null && storyTrigger.CanContinueStory;
+            if (storyTrigger != null && Stories != null)
+            {
+                if (storyTrigger.SideloadingStoryAllowed && Stories.ClaimStory(out var story)) {
+                    storyTrigger.SideLoadStory(story);
+
+                    StoryButton.interactable = storyTrigger.CanContinueStory;
+                } else
+                {
+                    StoryButton.interactable = storyTrigger != null && storyTrigger.CanContinueStory;
+                }
+            } else
+            {
+                StoryButton.interactable = storyTrigger != null && storyTrigger.CanContinueStory;
+            }
 
 #if PLATFORM_WEBGL
             QuitButton.gameObject.SetActive(false);

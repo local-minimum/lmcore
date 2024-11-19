@@ -54,6 +54,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             BasicTDSaveSystem.instance.AutoSave();
             PromptUI.instance.ShowText("Game saved", 2f);
         }
+
         private void GridEntity_OnInteract(GridEntity entity)
         {
             if (CanInteract(entity))
