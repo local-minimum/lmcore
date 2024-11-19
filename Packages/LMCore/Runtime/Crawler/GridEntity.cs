@@ -94,6 +94,7 @@ namespace LMCore.Crawler
                 }
                 else
                 {
+                    Node?.RemoveOccupant(this);
                     // Only keep potential flying mode, we don't fly if we just fall
                     TransportationMode &= TransportationMode.Flying;
                 }
@@ -169,9 +170,9 @@ namespace LMCore.Crawler
                     NodeAnchor = anchor;
                 } else
                 {
-                    if (_node != value)
+                    if (Node != value)
                     {
-                        _node?.RemoveOccupant(this);
+                        Node?.RemoveOccupant(this);
                         _anchor?.RemoveAnchor(this);
                         newNode = true;
                     }
@@ -185,7 +186,7 @@ namespace LMCore.Crawler
                 if (newNode)
                 {
                     // This needs to happen last so that the entity is fully in sync
-                    value?.AddOccupant(this);
+                    Node?.AddOccupant(this);
                     OnPositionTransition?.Invoke(this);
                 }
             }

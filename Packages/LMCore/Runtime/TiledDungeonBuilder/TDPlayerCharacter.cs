@@ -1,5 +1,4 @@
 using LMCore.Inventory;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon
@@ -22,9 +21,19 @@ namespace LMCore.TiledDungeon
         public int HealableAmount => MaxHealth - Health;
         public bool FullHealth => Health == MaxHealth;
 
+        protected string PrefixLogMessage(string message) =>
+            $"{Name} {Health}/{MaxHealth}HP: {message}";
+
         public void Heal(int amount)
         {
             Health = Mathf.Clamp(Health + amount, 0, MaxHealth);
+            Debug.Log(PrefixLogMessage($"Recieved {amount} health"));
+        }
+
+        public void Hurt(int amount)
+        {
+            Health = Mathf.Clamp(Health - amount, 0, MaxHealth);
+            Debug.Log(PrefixLogMessage($"Took {amount} damage"));
         }
 
         private void Awake()
@@ -35,6 +44,6 @@ namespace LMCore.TiledDungeon
         }
 
         [ContextMenu("Info")]
-        public void Info() => Debug.Log($"{Name} {Health}/{MaxHealth}HP");
+        public void Info() => Debug.Log(PrefixLogMessage("Nothing more to say"));
     }
 }

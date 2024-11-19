@@ -500,7 +500,6 @@ namespace LMCore.TiledDungeon
             // Cannot check if there's any modification blocking walking here because could be mod doesn't affect the cube face
             // or edge transition we are interested in...
 
-            Debug.Log($"{BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)}");
             if (BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)) return false;
 
             var platform = GetComponentInChildren<TDMovingPlatform>();

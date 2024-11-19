@@ -9,8 +9,11 @@ using LMCore.TiledDungeon.SaveLoad;
 
 namespace LMCore.TiledDungeon.DungeonFeatures
 {
+    public delegate void SpikeHitEvent(TDSpikeTrap trap, GridEntity entity);
+
     public class TDSpikeTrap : TDFeature, IOnLoadSave
     {
+        public static event SpikeHitEvent OnHit;
         enum Management { Automatic, ToggleGroup, Sequencer };
 
         [SerializeField]
@@ -49,6 +52,10 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         [SerializeField]
         string ExtendedTrigger = "Extended";
+
+        [SerializeField]
+        int _damage = 10;
+        public int Damage => _damage;
 
         protected string PrefixLogMessage(string message) => $"Spikes @ {Coordinates}: {message}";
 
@@ -237,7 +244,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
             foreach (var occupant in Node.Occupants)
             {
-                // TODO: Hurt them!
+                OnHit?.Invoke(this, occupant);
             }
         }
 

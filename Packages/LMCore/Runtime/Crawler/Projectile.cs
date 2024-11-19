@@ -42,6 +42,9 @@ namespace LMCore.Crawler
         private float gracePeriod = 0.25f;
         [SerializeField]
         private float recycleAfter = 0.4f;
+        [SerializeField]
+        private int _damage = 3;
+        public int Damage => _damage;
 
         public override string ToString() =>
             $"Projectile '{name}' flying {FlightDirection}";
