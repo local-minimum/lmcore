@@ -8,6 +8,9 @@ namespace LMCore.EntitySM
     {
         public override StateType State => StateType.Patrolling;
 
+        [SerializeField]
+        List<Transition> Transitions = new List<Transition>();
+
         public override bool CheckTransition(Personality personality, out StateType newStateType)
         {
             throw new System.NotImplementedException();
