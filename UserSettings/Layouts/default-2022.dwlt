@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Console
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 48
+  controlID: 94
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -271,8 +271,8 @@ MonoBehaviour:
     y: 0
     width: 1088
     height: 524
-  m_MinSize: {x: 202, y: 221}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 20}
   m_Panes:
   - {fileID: 20}
@@ -1064,7 +1064,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: -1276
+  m_LastSelectedObjectID: -11712
 --- !u!114 &16
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1303,7 +1303,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder
+    - Packages/se.localminimum.lmcore/Runtime/EntityStateMachine
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -1311,16 +1311,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Packages/se.localminimum.lmcore/Runtime/TiledDungeonBuilder
+  - Packages/se.localminimum.lmcore/Runtime/EntityStateMachine
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Admin\Documents\Unity\LMPackage
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 768}
-    m_SelectedIDs: aaf00000
-    m_LastClickedID: 61610
-    m_ExpandedIDs: 00000000a2f00000a4f00000a6f00000a8f00000aaf00000acf00000aef0000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 636}
+    m_SelectedIDs: 8af10000
+    m_LastClickedID: 61834
+    m_ExpandedIDs: 00000000a0f00000a2f00000a6f00000a8f00000aaf0000040f100008af1000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1348,7 +1348,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000a2f00000a4f00000a6f00000a8f00000aaf00000acf00000aef00000
+    m_ExpandedIDs: 00000000a0f00000a2f00000a4f00000a6f00000a8f00000aaf00000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1373,8 +1373,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 70730000
-    m_LastClickedInstanceID: 29552
+    m_SelectedInstanceIDs: 40d2ffff
+    m_LastClickedInstanceID: -11712
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000326dfffff2c30300
     m_RenameOverlay:
@@ -1400,7 +1400,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 9.5}
+    m_ScrollPosition: {x: 0, y: 0}
     m_GridSize: 16
   m_SkipHiddenPackages: 0
   m_DirectoriesAreaWidth: 294
@@ -1489,10 +1489,10 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 80}
-      m_SelectedIDs: 04fbffff
-      m_LastClickedID: -1276
-      m_ExpandedIDs: e81affffdc24ffff6ebbffff38d5ffff0afbffff16fbffff1efbfffff4ffffff008e00005693000048a1000066a3000066b70000b6c40000a6700200e67402004c8402008c86020084a80200522c050092300500f83f05003842050030640500
+      scrollPos: {x: 0, y: 0}
+      m_SelectedIDs: 40d2ffff
+      m_LastClickedID: -11712
+      m_ExpandedIDs: 2afbffffbc6f00000c90000026b200006ac40000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1860,9 +1860,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 430.9605, y: 208.27376, z: -3.3213282}
+    m_Target: {x: 33, y: 3, z: 72}
     speed: 2
-    m_Value: {x: 430.9605, y: 208.27376, z: -3.3213282}
+    m_Value: {x: 33, y: 3, z: 72}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1908,13 +1908,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.0014999724, y: -0.005999957, z: 0.000008999944, w: 0.99998087}
+    m_Target: {x: 0.4645901, y: -0.38517553, z: 0.23481475, w: 0.76202327}
     speed: 2
-    m_Value: {x: 0.0014999724, y: -0.005999957, z: 0.000008999944, w: 0.99998087}
+    m_Value: {x: 0.46458513, y: -0.38517138, z: 0.23481223, w: 0.7620151}
   m_Size:
-    m_Target: 280.30853
+    m_Target: 9.474584
     speed: 2
-    m_Value: 280.30853
+    m_Value: 9.066587
   m_Ortho:
     m_Target: 1
     speed: 2
