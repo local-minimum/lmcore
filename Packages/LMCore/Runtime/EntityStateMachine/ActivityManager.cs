@@ -14,9 +14,9 @@ namespace LMCore.EntitySM
         StateType EntryState = StateType.Patrolling;
 
         [SerializeField]
-        List<AbsState> States = new List<AbsState>();
+        List<ActivityState> States = new List<ActivityState>();
 
-        public AbsState ActiveState { get; private set; }
+        public ActivityState ActiveState { get; private set; }
 
         protected string PrefixLogMessage(string message) =>
             $"ActivityManager {name}: {message}";
@@ -36,19 +36,19 @@ namespace LMCore.EntitySM
 
         private void OnEnable()
         {
-            AbsState.OnEnterState += AbsState_OnEnterState;
-            AbsState.OnExitState += AbsState_OnExitState;
-            AbsState.OnStayState += AbsState_OnStayState;
+            ActivityState.OnEnterState += AbsState_OnEnterState;
+            ActivityState.OnExitState += AbsState_OnExitState;
+            ActivityState.OnStayState += AbsState_OnStayState;
         }
 
         private void OnDisable()
         {
-            AbsState.OnEnterState -= AbsState_OnEnterState;
-            AbsState.OnExitState -= AbsState_OnExitState;
-            AbsState.OnStayState -= AbsState_OnStayState;
+            ActivityState.OnEnterState -= AbsState_OnEnterState;
+            ActivityState.OnExitState -= AbsState_OnExitState;
+            ActivityState.OnStayState -= AbsState_OnStayState;
         }
 
-        private void AbsState_OnStayState(ActivityManager manager, AbsState state)
+        private void AbsState_OnStayState(ActivityManager manager, ActivityState state)
         {
             // TODO: how to regulate when this can happen, probably only once per
             // move / tick
@@ -58,7 +58,7 @@ namespace LMCore.EntitySM
             }
         }
 
-        private void AbsState_OnExitState(ActivityManager manager, AbsState state)
+        private void AbsState_OnExitState(ActivityManager manager, ActivityState state)
         {
             if (manager == this)
             {
@@ -66,7 +66,7 @@ namespace LMCore.EntitySM
             }
         }
 
-        private void AbsState_OnEnterState(ActivityManager manager, AbsState state)
+        private void AbsState_OnEnterState(ActivityManager manager, ActivityState state)
         {
             if (manager == this)
             {

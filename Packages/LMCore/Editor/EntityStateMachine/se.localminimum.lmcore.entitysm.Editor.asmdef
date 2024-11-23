@@ -1,0 +1,16 @@
+{
+    "name": "se.localminimum.lmcore.entitysm.Editor",
+    "rootNamespace": "LMCore.EntitySM",
+    "references": [
+        "GUID:54fcc3f615aa36140a297eec150b46e9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
