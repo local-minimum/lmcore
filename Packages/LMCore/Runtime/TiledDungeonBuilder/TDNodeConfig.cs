@@ -61,6 +61,14 @@ namespace LMCore.TiledDungeon
         public T FirstObjectValue<T>(string type, System.Func<TiledCustomProperties, T> predicate) =>
             predicate(TObjects.FirstOrDefault(o => o.Type == type)?.CustomProperties);
 
+        public IEnumerable<T> SelectWhen<T>(
+            string type,
+            System.Func<TiledCustomProperties, bool> filter,
+            System.Func<TiledCustomProperties, T> predicate) =>
+            TObjects
+                .Where(o => o.Type == type && filter(o.CustomProperties))
+                .Select(o => predicate(o.CustomProperties));
+
         public T FirstObjectValue<T>(System.Func<TiledObjectLayer.TObject, bool> filter, System.Func<TiledCustomProperties, T> predicate) =>
             predicate(TObjects.FirstOrDefault(filter)?.CustomProperties);
 

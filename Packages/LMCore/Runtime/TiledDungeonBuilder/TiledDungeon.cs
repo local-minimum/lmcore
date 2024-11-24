@@ -175,6 +175,14 @@ namespace LMCore.TiledDungeon
             return config;
         }
 
+        public IEnumerable<T> GetFromConfigs<T>(
+            Func<Vector3Int, TDNodeConfig, bool> filter, 
+            Func<Vector3Int, TDNodeConfig, T> predicate
+            ) =>
+            nodeConfigurations
+                .Where(kvp => filter(kvp.Key, kvp.Value))
+                .Select(kvp => predicate(kvp.Key, kvp.Value));
+
         public IEnumerable<int> Elevations => map
             .FindInLayers(layer => layer.CustomProperties.Int(TiledConfiguration.instance.LayerElevationKey))
             .ToHashSet()

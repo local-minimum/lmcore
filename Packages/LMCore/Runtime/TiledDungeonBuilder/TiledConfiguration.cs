@@ -23,6 +23,7 @@ namespace LMCore.TiledDungeon
         public string AlcoveClass = "Alcove";
         public string FenceClass = "Fence";
         public string NPCClass = "NPC";
+        public string EnemyClass = "Enemy";
         public string ShooterClass = "Shooter";
         public string WallSpikeTrapClass = "WallSpikes";
         public string SpikeTrapClass = "Spikes";
@@ -52,10 +53,13 @@ namespace LMCore.TiledDungeon
         public string ConusumesKeyKey = "ConsumesKey";
         public string OpenKey = "Open";
         public string ClaimAlwaysAlignedKey = "ClaimAlwaysAligned";
+        public string BounceKey = "Bounce";
 
         [Header("Ints")]
         public string TeleporterIdProperty = "Wormhole";
         public string LayerElevationKey = "Elevation";
+        public string PathLoopKey = "PathLoop";
+        public string RankKey = "Rank";
 
         [Header("Floats")]
         public string VelocityKey = "Velocity";
@@ -98,6 +102,10 @@ namespace LMCore.TiledDungeon
         public string ObjRestKey = "Rest";
         public string ObjInDirectionPatternKey = "In%";
         public string ObjOutDirectionPatternKey = "Out%";
+        public string ObjPathKey = "Path";
+        public string ObjHomeAreaKey = "HomeArea";
+        public string ObjEnemyClassIdKey = "EnemyClassId";
+        public string ObjEnemyIdKey = "EnemyId";
 
         [Header("Other")]
         public string LayoutLayerPrefix = "dungeon";
