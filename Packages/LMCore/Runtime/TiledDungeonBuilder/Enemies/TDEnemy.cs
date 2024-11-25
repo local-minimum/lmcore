@@ -136,6 +136,9 @@ namespace LMCore.TiledDungeon.Enemies
             public int Rank;
             public bool Bounce;
             public Vector3Int Checkpoint;
+
+            public override string ToString() =>
+                $"<{Loop}:{Rank} {Checkpoint}{(Bounce ? " (B)" : "")}>";
         }
 
         IEnumerable<EnemyPatrolPath> EnemyPathExtractor(Vector3Int position, TDNodeConfig config) =>
@@ -156,6 +159,22 @@ namespace LMCore.TiledDungeon.Enemies
 
         [SerializeField, HideInInspector]
         List<Vector3> HomeArea = new List<Vector3>();
+
+        [ContextMenu("Info")]
+        void Info()
+        {
+            var paths = PatrolPaths.Count() == 0 ? "None" : string.Join(" | ", PatrolPaths.Select(loop => string.Join(", ", loop)));
+            var areas = HomeArea.Count() == 0 ? "None" : string.Join(", ", HomeArea);
+
+            Debug.Log(PrefixLogMessage($"Home area: {areas} / Paths {paths}"));
+        }
+
+        [ContextMenu("Reconfigure")]
+        void Reconfigure()
+        {
+            Configure(id);
+        }
+
 
         public void Configure(string id)
         {
@@ -179,6 +198,8 @@ namespace LMCore.TiledDungeon.Enemies
                 .GroupBy(p => p.Loop)
                 .Select(g => g.ToList())
                 .ToList();
+
+            Info();
         }
     }
 }

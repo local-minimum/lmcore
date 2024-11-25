@@ -24,16 +24,16 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                16,
-                21,
                 7,
-                9
+                21,
+                9,
+                16
             ],
             "scale": 3,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": 205,
-                "y": 174.83333333333331
+                "x": 512.1666666666666,
+                "y": 512.1666666666666
             }
         },
         "Mapping.tsx": {
@@ -67,7 +67,7 @@
         "Rules/ModernDungeonAutomapping.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "Direction",
+    "property.type": "string",
     "recentFiles": [
         "Rules/ModernDungeonAutomapping.tmx",
         "DemoLevel.tmx",
