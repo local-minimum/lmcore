@@ -94,16 +94,81 @@ namespace LMCore.TiledDungeon
                 TiledConfiguration.instance.FirePlaceClass,
                 node.NodeStyle);
         }
+        /// <summary>
+        /// Position the entity in the level with its relevant anchor.
+        /// </summary>
+        static void ConfigureEntity(TDNode node, GridEntity entity)
+        {
+            if (entity != null)
+            {
+                if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                {
+                    entity.AnchorDirection = Direction.None;
+                    entity.Node = node;
+                } else if (entity.AnchorDirection != Direction.None)
+                {
+                    if (!node.CanAnchorOn(entity, entity.AnchorDirection))
+                    {
+                        entity.AnchorDirection = Direction.None;
+                        entity.Node = node;
+                    } else
+                    {
+                        entity.NodeAnchor = node.GetAnchor(entity.AnchorDirection);
+                    }
+                } else
+                {
+                    if (node.CanAnchorOn(entity, Direction.Down))
+                    {
+                        entity.NodeAnchor = node.GetAnchor(Direction.Down);
+                    } else
+                    {
+                        entity.AnchorDirection = Direction.None;
+                        entity.Node = node;
+                    }
+                }
+            } 
+        }
+
+        private struct EnemyInfo
+        {
+            public string ClassId;
+            public string Id;
+
+            public static EnemyInfo From(TiledCustomProperties props) =>
+                new EnemyInfo()
+                {
+                    ClassId = props.String(TiledConfiguration.instance.ObjEnemyClassIdKey, null),
+                    Id = props.String(TiledConfiguration.instance.ObjEnemyIdKey, null),
+                };
+        }
+
+        static void ConfigureEnemy(TDNode node, TDNodeConfig nodeConfig)
+        {
+            if (!node.modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.EnemyClass)) return;
+
+            var pool = TDEnemyPool.InstanceOrResource("EnemyPool");
+            if (pool == null) return;
+
+            foreach (var info in nodeConfig.GetObjectValues(
+                TiledConfiguration.instance.EnemyClass,
+                props => EnemyInfo.From(props)))
+            {
+                if (string.IsNullOrEmpty(info.ClassId)) continue;
+
+                var enemy = pool.GetInstance(info.ClassId, node.transform);
+                if (enemy == null) continue;
+
+                enemy.Configure(info.Id);
+                ConfigureEntity(node, enemy.GetComponent<GridEntity>());
+            }
+        }
 
         static void ConfigureNPC(TDNode node, TDNodeConfig nodeConfig)
         {
             if (!node.modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.NPCClass)) return;
 
             var roster = NPCRoster.InstanceOrResource("NPCRoster");
-            if (roster == null)
-            {
-                return;
-            }
+            if (roster == null) return;
 
             foreach (var npcId in nodeConfig.GetObjectValues(
                 TiledConfiguration.instance.NPCClass, 
@@ -112,35 +177,7 @@ namespace LMCore.TiledDungeon
                 var npc = roster.GetInstance(npcId, node.transform);
                 if (npc == null) continue;
 
-                var entity = npc.GetComponent<GridEntity>();
-                if (entity != null)
-                {
-                    if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
-                    {
-                        entity.AnchorDirection = Direction.None;
-                        entity.Node = node;
-                    } else if (entity.AnchorDirection != Direction.None)
-                    {
-                        if (!node.CanAnchorOn(entity, entity.AnchorDirection))
-                        {
-                            entity.AnchorDirection = Direction.None;
-                            entity.Node = node;
-                        } else
-                        {
-                            entity.NodeAnchor = node.GetAnchor(entity.AnchorDirection);
-                        }
-                    } else
-                    {
-                        if (node.CanAnchorOn(entity, Direction.Down))
-                        {
-                            entity.NodeAnchor = node.GetAnchor(Direction.Down);
-                        } else
-                        {
-                            entity.AnchorDirection = Direction.None;
-                            entity.Node = node;
-                        }
-                    }
-                } 
+                ConfigureEntity(node,  npc.GetComponent<GridEntity>());
             }
         }
 
@@ -651,6 +688,7 @@ namespace LMCore.TiledDungeon
             ConfigurePedistal(node, config);
             ConfigureChest(node, config);
             ConfigureNPC(node, config);
+            ConfigureEnemy(node, config);
             TDRelay.Configure(node);
 
             node.Log("Generated", Debug.Log);

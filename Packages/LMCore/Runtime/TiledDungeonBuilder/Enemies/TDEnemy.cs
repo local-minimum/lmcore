@@ -7,8 +7,11 @@ using UnityEngine;
 namespace LMCore.TiledDungeon.Enemies
 {
     /// <summary>
-    /// --- The Enemy ---
+    /// Coordinating script for each enemy.
     /// 
+    /// Various Tiled configurations that may interact with an enemy:
+    /// 
+    /// --- The Enemy ---
     /// Class/Type: TiledConfiguration.EnemyClass
     /// Custom Properties:
     /// * TiledConfigration.ObjEnemyClassIdKey (string): The type of enemy to spawn in. 
