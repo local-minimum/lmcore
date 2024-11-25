@@ -36,26 +36,17 @@ namespace LMCore.EntitySM
 
         private void OnEnable()
         {
+            // We don't handle stay taxation here at the moment because we
+            // don't want to manage when it can be applied like if entity has 
+            // moved or player has and such things.
             ActivityState.OnEnterState += AbsState_OnEnterState;
             ActivityState.OnExitState += AbsState_OnExitState;
-            ActivityState.OnStayState += AbsState_OnStayState;
         }
 
         private void OnDisable()
         {
             ActivityState.OnEnterState -= AbsState_OnEnterState;
             ActivityState.OnExitState -= AbsState_OnExitState;
-            ActivityState.OnStayState -= AbsState_OnStayState;
-        }
-
-        private void AbsState_OnStayState(ActivityManager manager, ActivityState state)
-        {
-            // TODO: how to regulate when this can happen, probably only once per
-            // move / tick
-            if (manager == this)
-            {
-                state.TaxStayPersonality(personality);
-            }
         }
 
         private void AbsState_OnExitState(ActivityManager manager, ActivityState state)

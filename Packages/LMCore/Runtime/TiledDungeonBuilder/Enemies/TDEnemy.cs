@@ -1,5 +1,6 @@
 using LMCore.Crawler;
 using LMCore.EntitySM;
+using LMCore.EntitySM.State;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -200,6 +201,25 @@ namespace LMCore.TiledDungeon.Enemies
                 .ToList();
 
             Info();
+        }
+
+        private void OnEnable()
+        {
+            ActivityState.OnStayState += ActivityState_OnStayState;
+        }
+
+        private void OnDisable()
+        {
+            ActivityState.OnStayState -= ActivityState_OnStayState;
+        }
+
+        bool mayTaxStay;
+
+        private void ActivityState_OnStayState(ActivityManager manager, ActivityState state)
+        {
+            if (manager != ActivityManager || !mayTaxStay) return;
+
+            state.TaxStayPersonality(Personality);
         }
     }
 }
