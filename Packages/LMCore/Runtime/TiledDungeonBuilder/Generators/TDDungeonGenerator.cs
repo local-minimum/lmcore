@@ -44,6 +44,25 @@ namespace LMCore.TiledDungeon
             return child;
         }
 
+        private static void GenerateAllNodeConfigsForLayer(TiledDungeon dungeon, int elevation)
+        {
+            var layerConfig = dungeon.GetLayerConfig(elevation);
+
+            for (int row = 0; row < layerConfig.LayerSize.y; row++)
+            {
+                for (int col = 0; col < layerConfig.LayerSize.x; col++)
+                {
+                    var coordinates = layerConfig.AsUnityCoordinates(col, row);
+                    var tile = layerConfig.GetTile(coordinates);
+
+                    if (tile == null) continue;
+
+                    /// Generate the node config
+                    dungeon.GetNodeConfig(coordinates);
+                }
+            }
+
+        }
 
         private static void GenerateLevel(TiledDungeon dungeon, int elevation)
         {
@@ -66,6 +85,13 @@ namespace LMCore.TiledDungeon
             dungeon.SyncNodes();
 
             dungeon.GetComponent<AbsInventory>()?.Configure(dungeon.MapName, null, -1);
+
+            // We actually need the configs in place before we start or things will get quite
+            // annoying in when spawning in stuff
+            foreach (var elevation in dungeon.Elevations)
+            {
+                GenerateAllNodeConfigsForLayer(dungeon, elevation);
+            }
 
             foreach (var elevation in dungeon.Elevations)
             {
