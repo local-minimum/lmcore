@@ -93,6 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3887786995638095679}
   - component: {fileID: 4631630865616605311}
+  - component: {fileID: 2690461587711765856}
   m_Layer: 0
   m_Name: Patrolling State
   m_TagString: Untagged
@@ -153,6 +154,18 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+--- !u!114 &2690461587711765856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069749110201355986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5e69ca38d9e0740ad596211ec64426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2964711258470124928
 GameObject:
   m_ObjectHideFlags: 0
@@ -198,6 +211,7 @@ GameObject:
   - component: {fileID: 6463157269237019217}
   - component: {fileID: 3410662639409345825}
   - component: {fileID: 5345502671274471669}
+  - component: {fileID: 3193900623386702382}
   m_Layer: 0
   m_Name: DemoEnemy
   m_TagString: Untagged
@@ -317,6 +331,18 @@ MonoBehaviour:
   States:
   - {fileID: 4631630865616605311}
   - {fileID: 3726375543191475081}
+--- !u!114 &3193900623386702382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7372993661751114034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6557f60b13d7ab04da82dca1d7680647, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8148090245210938216
 GameObject:
   m_ObjectHideFlags: 0

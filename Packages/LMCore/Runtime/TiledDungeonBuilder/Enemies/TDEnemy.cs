@@ -206,11 +206,13 @@ namespace LMCore.TiledDungeon.Enemies
         private void OnEnable()
         {
             ActivityState.OnStayState += ActivityState_OnStayState;
+            ActivityState.OnEnterState += ActivityState_OnEnterState;
         }
 
         private void OnDisable()
         {
             ActivityState.OnStayState -= ActivityState_OnStayState;
+            ActivityState.OnEnterState -= ActivityState_OnEnterState;
         }
 
         bool mayTaxStay;
@@ -220,6 +222,61 @@ namespace LMCore.TiledDungeon.Enemies
             if (manager != ActivityManager || !mayTaxStay) return;
 
             state.TaxStayPersonality(Personality);
+            mayTaxStay = false;
+        }
+
+        /// <summary>
+        /// Call this whenever the enemy has done something or the player
+        /// </summary>
+        void UpdateActivity()
+        {
+            mayTaxStay = true;
+            ActivityManager.CheckTransition();
+        }
+
+        private void ActivityState_OnEnterState(ActivityManager manager, ActivityState state)
+        {
+            if (manager != ActivityManager) return;
+
+            switch (state.State)
+            {
+                case StateType.Patrolling:
+                    SetPatrolGoal();
+                    break;
+                case StateType.Guarding:
+                    SetGuardBehavior();
+                    break;
+            }
+        }
+
+        void SetPatrolGoal()
+        {
+            var patrol = GetComponentInChildren<TDEnemyPatrolling>(true);
+            if (patrol == null)
+            {
+                Debug.LogError(PrefixLogMessage("I don't have a patrolling pattern"));
+                return;
+            }
+            // 1. Realize all complete paths, not just checkpoints
+            // 2. Find smallest movement sequence to get onto a path
+            // 3. Record the checkpoint aim
+            var checkpoint = PatrolPaths.First().First().Checkpoint;
+
+            if (Dungeon.ClosestPath(Entity, Entity.Coordinates, checkpoint, 100, out var path))
+            {
+                Debug.Log(PrefixLogMessage($"Found path from {Entity.Coordinates}: {string.Join(", ", path)}"));
+            }
+            else
+            {
+                Debug.LogError(PrefixLogMessage($"Found no path from {Entity.Coordinates} to {checkpoint}"));
+            }
+
+            patrol.SetCheckpointArea(new List<Vector3Int> { checkpoint });
+        }
+
+        void SetGuardBehavior()
+        {
+
         }
     }
 }

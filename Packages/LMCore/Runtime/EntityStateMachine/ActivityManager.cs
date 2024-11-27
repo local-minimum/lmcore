@@ -65,7 +65,7 @@ namespace LMCore.EntitySM
             }
         }
 
-        void CheckTransition()
+        public void CheckTransition()
         {
             if (ActiveState.CheckTransition(personality, out StateType newStateType))
             {

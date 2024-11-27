@@ -10,6 +10,8 @@ using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
 using LMCore.TiledDungeon.Style;
+using UnityEngine.Rendering;
+
 
 
 
@@ -244,17 +246,6 @@ namespace LMCore.TiledDungeon
             _Player.GridSizeProvider = this;
             _Player.Dungeon = this;
 
-            // TODO: replace with new systems
-            /*
-            var movementInterpreter = Player.EntityMovementInterpreter;
-            movementInterpreter.Dungeon = this;
-
-            foreach (var mover in Player.Movers)
-            {
-                mover.GridSizeProvider = this;
-                mover.Dungeon = this;
-            }*/
-
             Debug.Log(PrefixLogMessage("Enabled"));
         }
 
@@ -306,6 +297,75 @@ namespace LMCore.TiledDungeon
                 if (entity.Identifier == identifier) return entity;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Closest path for the entity to get to target. Not regarding cost of turns.
+        /// </summary>
+        /// <param name="entity">Who wants to travel</param>
+        /// <param name="start">Start of the search</param>
+        /// <param name="target">Search target</param>
+        /// <param name="maxDepth">Abort search if not found with these may steps</param>
+        /// <param name="path">The path to the target excluding the start coordinates</param>
+        /// <returns></returns>
+        public bool ClosestPath(
+            GridEntity entity, 
+            Vector3Int start, 
+            Vector3Int target, 
+            int maxDepth,
+            out List<Vector3Int> path)
+        {
+            var seen = new Dictionary<Vector3Int, List<Vector3Int>>();
+            var seenQueue = new Queue<Vector3Int>();
+            var visited = new HashSet<Vector3Int>();
+
+            seenQueue.Enqueue(start);
+
+            while (seenQueue.Count > 0)
+            {
+                var coordinates = seenQueue.Dequeue();
+                if (visited.Contains(coordinates)) continue;
+
+                visited.Add(coordinates);
+
+                var pathHere = seen.GetValueOrDefault(coordinates) ?? new List<Vector3Int>();
+                
+                // Stop searching if we are too deep in
+                if (pathHere.Count > maxDepth)
+                {
+                    path = null;
+                    return false;
+                }
+
+                var node = this[coordinates];
+
+                foreach (var direction in DirectionExtensions.AllDirections)
+                {
+                    // TODO: For now we only check allowed exits and not if we may enter
+                    // this is because we would need to consider the neuances of if we
+                    // should respect rules about letting entities coexits or not.
+                    if (!node.AllowExit(entity, direction)) continue;
+
+                    var neigbour = direction.Translate(coordinates);
+
+                    if (seen.ContainsKey(neigbour)) continue;
+
+                    var neighbourPath = new List<Vector3Int>(pathHere);
+                    neighbourPath.Add(neigbour);
+
+                    if (neigbour == target)
+                    {
+                        path = neighbourPath;
+                        return true;
+                    }
+                    
+                    seen[neigbour] = neighbourPath; 
+                    seenQueue.Enqueue(neigbour);
+                }
+            }
+
+            path = null;
+            return false;
         }
     }
 }
