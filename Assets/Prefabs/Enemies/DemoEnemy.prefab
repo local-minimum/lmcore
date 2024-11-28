@@ -212,6 +212,7 @@ GameObject:
   - component: {fileID: 3410662639409345825}
   - component: {fileID: 5345502671274471669}
   - component: {fileID: 3193900623386702382}
+  - component: {fileID: 1252019101318263246}
   m_Layer: 0
   m_Name: DemoEnemy
   m_TagString: Untagged
@@ -341,6 +342,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6557f60b13d7ab04da82dca1d7680647, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1252019101318263246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7372993661751114034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87f0a0af42b80824ca60e325ac0d77fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8148090245210938216

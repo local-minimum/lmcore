@@ -686,18 +686,35 @@ namespace LMCore.Crawler
 
         private void OnEnable()
         {
-            GetComponent<CrawlerInput>().OnMovement += MovementInterpreter_OnMovement;
+            var crawlerInput = GetComponent<CrawlerInput>();
+            if (crawlerInput != null)
+            {
+                crawlerInput.OnMovement += MovementInterpreter_OnMovement;
+            }
         }
 
         private void OnDisable()
         {
-           GetComponent<CrawlerInput>().OnMovement -= MovementInterpreter_OnMovement;
+            var crawlerInput = GetComponent<CrawlerInput>();
+            if (crawlerInput != null)
+            {
+                crawlerInput.OnMovement -= MovementInterpreter_OnMovement;
+            }
         }
 
+        int tickId;
         private void MovementInterpreter_OnMovement(int tickId, Movement movement, float duration)
+        {
+            this.tickId = tickId;
+            var interpretation = InterpretMovement(movement);
+            if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
+        }
+
+        public void InvokeMovement(Movement movement, float duration)
         {
             var interpretation = InterpretMovement(movement);
             if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
+            tickId++;
         }
     }
 }

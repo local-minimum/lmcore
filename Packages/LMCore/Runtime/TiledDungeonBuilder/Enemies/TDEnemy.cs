@@ -1,6 +1,7 @@
 using LMCore.Crawler;
 using LMCore.EntitySM;
 using LMCore.EntitySM.State;
+using LMCore.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -67,7 +68,7 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         Personality _personality;
-        Personality Personality
+        public Personality Personality
         {
             get { 
                 if (_personality == null)
@@ -79,7 +80,7 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         GridEntity _Entity;
-        GridEntity Entity
+        public GridEntity Entity
         {
             get
             {
@@ -94,7 +95,7 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         TiledDungeon _TiledDungeon;
-        TiledDungeon Dungeon
+        public TiledDungeon Dungeon
         {
             get
             {
@@ -131,7 +132,7 @@ namespace LMCore.TiledDungeon.Enemies
         Vector3 CoordinatesExtractor(Vector3Int position, TDNodeConfig config) => position;
 
         [System.Serializable]
-        class EnemyPatrolPath
+        public class EnemyPatrolPath
         {
             public int Loop;
             public int Rank;
@@ -216,13 +217,24 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         bool mayTaxStay;
+        ActivityState activeState;
 
         private void ActivityState_OnStayState(ActivityManager manager, ActivityState state)
         {
             if (manager != ActivityManager || !mayTaxStay) return;
 
+            activeState = state;
             state.TaxStayPersonality(Personality);
             mayTaxStay = false;
+        }
+
+        private void Update()
+        {
+            if (activeState == null)
+            {
+                Debug.Log(PrefixLogMessage("Updating activity"));
+                UpdateActivity();
+            }
         }
 
         /// <summary>
@@ -249,6 +261,87 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
+        EnemyPatrolPath ClosestCheckpoint(int loop = -1)
+        {
+            var entity = Entity;
+            var dungeon = Dungeon;
+            EnemyPatrolPath closest = null;
+            int closestDistance = int.MaxValue;
+
+            for (int i = 0, l = PatrolPaths.Count; i < l; i++)
+            {
+                var loopPath = PatrolPaths[i];
+                for (int j = 0, m = loopPath.Count; j < m; j++)
+                {
+                    var path = loopPath[j];
+                    if (path.Loop == loop || loop < 0)
+                    {
+                        if (entity.Coordinates.ManhattanDistance(path.Checkpoint) >= closestDistance)
+                        {
+                            continue;
+                        }
+
+                        if (dungeon.ClosestPath(
+                            entity,
+                            entity.Coordinates,
+                            path.Checkpoint,
+                            closestDistance,
+                            out var currentPath))
+                        {
+                            if (currentPath.Count() < closestDistance)
+                            {
+                                closest = path;
+                                closestDistance = currentPath.Count();
+                            }
+                        }
+                    }
+                }
+            }
+
+            return closest;
+        }
+
+        public IEnumerable<EnemyPatrolPath> GetCheckpoints(int loop, int rank)
+        {
+            for (int i = 0, l = PatrolPaths.Count; i < l; i++)
+            {
+                var loopPath = PatrolPaths[i];
+                for (int j = 0, m = loopPath.Count; j < m; j++)
+                {
+                    var path = loopPath[j];
+                    if (path.Loop == loop && path.Rank == rank) yield return path;
+                }
+            }
+        }
+
+        int LoopMaxRank(int loop) =>
+            PatrolPaths.Max(loopPath => loopPath.Max(path => path.Rank));
+
+        public IEnumerable<EnemyPatrolPath> GetNextCheckpoints(
+            EnemyPatrolPath current, 
+            int direction,
+            out int newDirection)
+        {
+            if (current.Bounce)
+            {
+                direction *= -1;
+            }
+            var nextRank = current.Rank + direction;
+
+            var loopMax = LoopMaxRank(current.Loop);
+            if (nextRank < 0)
+            {
+                nextRank = loopMax;
+            }
+            else if (nextRank > loopMax)
+            {
+                nextRank = 0;
+            }
+
+            newDirection = direction;
+            return GetCheckpoints(current.Loop, nextRank);
+        }
+
         void SetPatrolGoal()
         {
             var patrol = GetComponentInChildren<TDEnemyPatrolling>(true);
@@ -257,26 +350,20 @@ namespace LMCore.TiledDungeon.Enemies
                 Debug.LogError(PrefixLogMessage("I don't have a patrolling pattern"));
                 return;
             }
-            // 1. Realize all complete paths, not just checkpoints
-            // 2. Find smallest movement sequence to get onto a path
-            // 3. Record the checkpoint aim
-            var checkpoint = PatrolPaths.First().First().Checkpoint;
 
-            if (Dungeon.ClosestPath(Entity, Entity.Coordinates, checkpoint, 100, out var path))
+            var  pathCheckpoint = ClosestCheckpoint();
+            if (pathCheckpoint == null)
             {
-                Debug.Log(PrefixLogMessage($"Found path from {Entity.Coordinates}: {string.Join(", ", path)}"));
-            }
-            else
+                Debug.LogError(PrefixLogMessage("There's no closest checkpoint for me"));
+                Info();
+            } else
             {
-                Debug.LogError(PrefixLogMessage($"Found no path from {Entity.Coordinates} to {checkpoint}"));
+                patrol.SetCheckpointFromPatrolPath(pathCheckpoint);
             }
-
-            patrol.SetCheckpointArea(new List<Vector3Int> { checkpoint });
         }
 
         void SetGuardBehavior()
         {
-
         }
     }
 }

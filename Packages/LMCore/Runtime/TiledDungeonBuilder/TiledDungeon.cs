@@ -315,6 +315,9 @@ namespace LMCore.TiledDungeon
             int maxDepth,
             out List<Vector3Int> path)
         {
+            // TODO: We don't account for just waiting on a moving platform to reach a goal either
+            // nor do we have a way to attatch goals to faces that can move...
+
             var seen = new Dictionary<Vector3Int, List<Vector3Int>>();
             var seenQueue = new Queue<Vector3Int>();
             var visited = new HashSet<Vector3Int>();
@@ -341,11 +344,15 @@ namespace LMCore.TiledDungeon
 
                 foreach (var direction in DirectionExtensions.AllDirections)
                 {
+                    // TODO: If we want enemies to be able to climb stairs we need to check
+                    // be able to move inside a node too and check what directions to ignor
+                    // based on anchor and down directions
+                    if (direction == Direction.Up && !entity.TransportationMode.HasFlag(TransportationMode.Flying)) continue;
+
                     // TODO: For now we only check allowed exits and not if we may enter
                     // this is because we would need to consider the neuances of if we
                     // should respect rules about letting entities coexits or not.
                     if (!node.AllowExit(entity, direction)) continue;
-
                     var neigbour = direction.Translate(coordinates);
 
                     if (seen.ContainsKey(neigbour)) continue;
