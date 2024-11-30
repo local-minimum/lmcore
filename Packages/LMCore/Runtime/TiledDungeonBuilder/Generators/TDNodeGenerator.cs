@@ -163,6 +163,52 @@ namespace LMCore.TiledDungeon
             }
         }
 
+        /// <summary>
+        /// Add any checkpoint or area marker on either a TDNode or an Anchor game object 
+        /// </summary>
+        static void ConfigureCheckpointsAndAreaMarkers(GameObject gameObject, TDNodeConfig nodeConfig)
+        {
+            // Inform user that their level is weirdly configured
+            Direction direction = Direction.None;
+            if (gameObject.GetComponent<TDNode>() != null)
+            {
+
+            }
+            else
+            {
+                var anchor = gameObject.GetComponent<Anchor>();
+                if (anchor == null)
+                {
+                    Debug.LogWarning($"{gameObject} is neither a TDNode or an Anchor so can't have checkpoints or area markers");
+                    return;
+                }
+                direction = anchor.CubeFace;
+            }
+
+            var checkpoints = nodeConfig.GetObjectProps(obj => 
+                obj.Type == TiledConfiguration.instance.ObjPathKey &&
+                obj.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey, TDEnumDirection.None).AsDirection() == direction);
+
+            foreach (var checkpoint in checkpoints)
+            {
+                gameObject
+                    .AddComponent<TDPathCheckpoint>()
+                    .Configure(checkpoint);
+            }
+
+            var areas = nodeConfig.GetObjectProps(obj => 
+                obj.Type == TiledConfiguration.instance.ObjHomeAreaKey &&
+                obj.CustomProperties.Direction(TiledConfiguration.instance.AnchorKey, TDEnumDirection.None).AsDirection() == direction);
+
+            foreach (var area in areas)
+            {
+                gameObject
+                    .AddComponent<TDAreaMarker>()
+                    .Configure(area);
+            }
+
+        }
+
         static void ConfigureNPC(TDNode node, TDNodeConfig nodeConfig)
         {
             if (!node.modifications.Any(mod => mod.Tile.Type == TiledConfiguration.instance.NPCClass)) return;
@@ -235,7 +281,10 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        static void ApplyAnchorRotation(GameObject obj, Direction direction)
+        /// <summary>
+        /// Updates anchor and checks for checkpoints or area markers that should be applied
+        /// </summary>
+        static void ApplyAnchorRotation(GameObject obj, Direction direction, TDNodeConfig config)
         {
             if (obj == null) return;
 
@@ -243,9 +292,14 @@ namespace LMCore.TiledDungeon
             if (anchor == null) return;
 
             anchor.PrefabRotation = direction.AsYRotation();
+
+            ConfigureCheckpointsAndAreaMarkers(obj, config);
         }
 
-        static void ApplyAnchorRotation(GameObject obj, TDEnumOrientation orientation)
+        /// <summary>
+        /// Updates anchor and checks for checkpoints or area markers that should be applied
+        /// </summary>
+        static void ApplyAnchorRotation(GameObject obj, TDEnumOrientation orientation, TDNodeConfig config)
         {
             if (obj == null) return;
 
@@ -253,9 +307,11 @@ namespace LMCore.TiledDungeon
             if (anchor == null) return;
 
             anchor.PrefabRotation = orientation == TDEnumOrientation.Horizontal ? AnchorYRotation.CW : AnchorYRotation.None;
+
+            ConfigureCheckpointsAndAreaMarkers(obj, config);
         }
 
-        static bool ConfigureRamps(TDNode node)
+        static bool ConfigureRamps(TDNode node, TDNodeConfig config)
         {
             var ramp = node.RampModification;
             if (ramp == null) return false;
@@ -270,7 +326,7 @@ namespace LMCore.TiledDungeon
                 node.NodeStyle
             );
 
-            ApplyAnchorRotation(go, downSlopeDirection.Inverse());
+            ApplyAnchorRotation(go, downSlopeDirection.Inverse(), config);
 
             return true;
         }
@@ -292,7 +348,7 @@ namespace LMCore.TiledDungeon
             }
         }
 
-        static void ConfigureLadders(TDNode node)
+        static void ConfigureLadders(TDNode node, TDNodeConfig config)
         {
             foreach (var tdDirection in TDEnumDirectionExtensions.PlanarDirections)
             {
@@ -333,7 +389,7 @@ namespace LMCore.TiledDungeon
                     );
                 }
 
-                ApplyAnchorRotation(go, direction);
+                ApplyAnchorRotation(go, direction, config);
             }
         }
 
@@ -400,7 +456,7 @@ namespace LMCore.TiledDungeon
             platform.Configure(conf);
         }
 
-        static bool ConfigureShooter(TDNode node, Direction direction)
+        static bool ConfigureShooter(TDNode node, TDNodeConfig config, Direction direction)
         {
             var shooter = node.modifications.FirstOrDefault(mod =>
                 mod.Tile.Type == TiledConfiguration.InstanceOrCreate().ShooterClass && 
@@ -419,11 +475,11 @@ namespace LMCore.TiledDungeon
 
             go.GetComponentInChildren<TDProjectileShooter>()?.Configure(direction);
 
-            ApplyAnchorRotation(go, direction);
+            ApplyAnchorRotation(go, direction, config);
             return true;
         }
 
-        static bool ConfigureWallSpike(TDNode node, Direction direction)
+        static bool ConfigureWallSpike(TDNode node, TDNodeConfig config, Direction direction)
         {
             var spikes = node.modifications.FirstOrDefault(mod => mod.Tile.Type == TiledConfiguration.InstanceOrCreate().WallSpikeTrapClass);
 
@@ -440,11 +496,11 @@ namespace LMCore.TiledDungeon
 
             go.GetComponent<TDSpikeTrap>()?.Configure(node, node.modifications);
 
-            ApplyAnchorRotation(go, direction);
+            ApplyAnchorRotation(go, direction, config);
             return true;
         }
 
-        static void ConfigureIllusory(TDNode node, Direction direction)
+        static void ConfigureIllusory(TDNode node, TDNodeConfig config, Direction direction)
         {
             node.Log($"I have illusionary wall {direction}", Debug.Log);
 
@@ -457,10 +513,10 @@ namespace LMCore.TiledDungeon
 
             go.GetComponent<TDIllusoryCubeSide>().Configure(direction);
 
-            ApplyAnchorRotation(go, direction);
+            ApplyAnchorRotation(go, direction, config);
         }
 
-        static void ConfigureCube(TDNode node)
+        static void ConfigureCube(TDNode node, TDNodeConfig config)
         {
             var Dungeon = node.Dungeon;
             var hasTrapDoor = node.HasTrapDoor;
@@ -493,10 +549,13 @@ namespace LMCore.TiledDungeon
                                 node.modifications.Where(TDNode.TrapDoorFilter).ToArray()
                             );
 
-                            ApplyAnchorRotation(trapdoor, orientation);
+                            ApplyAnchorRotation(trapdoor, orientation, config);
 
                             ConfigureMovingPlatform(node, trapdoor);
                             continue;
+                        } else
+                        {
+                            Debug.LogWarning($"Failed to spawn trapdoor at {node.Coordinates} with orientation {orientation} and style {node.NodeStyle}");
                         }
                     }
                     else if (node.HasPressurePlate)
@@ -516,13 +575,17 @@ namespace LMCore.TiledDungeon
                             pressurePlate?.Configure(node, direction);
 
                             var orientation = node.PressurePlateModification.Tile.CustomProperties.Orientation(TiledConfiguration.instance.OrientationKey, TDEnumOrientation.None);
-                            ApplyAnchorRotation(plate, orientation);
+                            ApplyAnchorRotation(plate, orientation, config);
 
                             ConfigureMovingPlatform(node, plate);
                             continue;
+                        } else
+                        {
+                            Debug.LogWarning($"Failed to spawn preasure plate at {node.Coordinates} with style {node.NodeStyle}");
                         }
                     }
-                    else if (ConfigureRamps(node))
+                    // Area markers and checkpoints configured inside
+                    else if (ConfigureRamps(node, config))
                     {
                         continue;
                     }
@@ -539,8 +602,12 @@ namespace LMCore.TiledDungeon
                         {
                             stairs.name = $"TrapDoor UpIs({stairsDirection})";
 
-                            ApplyAnchorRotation(stairs, stairsDirection);
+                            ApplyAnchorRotation(stairs, stairsDirection, config);
+
                             continue;
+                        } else
+                        {
+                            Debug.LogWarning($"Failed to spawn stairs at {node.Coordinates} {stairsDirection} with style {node.NodeStyle}");
                         }
                     }
                 } else if (direction == Direction.Up)
@@ -548,7 +615,7 @@ namespace LMCore.TiledDungeon
                     if (node.HasSide(Direction.Up) && upNode)
                     {
                         if (upNode.HasIllusion(Direction.Down)) {
-                            ConfigureIllusory(node, Direction.Up);
+                            ConfigureIllusory(node, config, Direction.Up);
                             continue;
                         }
 
@@ -557,7 +624,7 @@ namespace LMCore.TiledDungeon
 
                 if (illusionMods.Any(mod => mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection() == direction))
                 {
-                    ConfigureIllusory(node, direction);
+                    ConfigureIllusory(node, config, direction);
                     continue;
                 }
 
@@ -578,9 +645,11 @@ namespace LMCore.TiledDungeon
 
                         spikes.GetComponent<TDSpikeTrap>()?.Configure(node, node.modifications);
 
-                        // Spikes have no rotation so hopefully sentinells are like they should be
-                        // ApplyAnchorRotation(spikes, direction);
+                        // Spikes don't have any rotation but could have anchor with checkpoint / area marker
+                        ConfigureCheckpointsAndAreaMarkers(spikes, config);
                         continue;
+                    } else { 
+                        Debug.LogWarning($"Failed to spawn spikes at {node.Coordinates} {direction} with style {node.NodeStyle}");
                     }
                 }
 
@@ -605,10 +674,10 @@ namespace LMCore.TiledDungeon
 
                         ConfigureContainer(node, alcove, direction, direction.Inverse(), TiledConfiguration.instance.AlcoveClass, neighbourConfig, false);
                         
-                        ApplyAnchorRotation(alcove, direction);
+                        ApplyAnchorRotation(alcove, direction, config);
 
                         continue;
-                    } else if (ConfigureWallSpike(node, direction) || ConfigureShooter(node, direction))
+                    } else if (ConfigureWallSpike(node, config, direction) || ConfigureShooter(node, config, direction))
                     {
                         continue;
                     }
@@ -630,7 +699,7 @@ namespace LMCore.TiledDungeon
                     go.name = direction.ToString();
                     if (direction.IsPlanarCardinal())
                     {
-                        ApplyAnchorRotation(go, direction);
+                        ApplyAnchorRotation(go, direction, config);
                     }
                 }
 
@@ -675,11 +744,11 @@ namespace LMCore.TiledDungeon
             node.transform.localPosition = node.Coordinates.ToPosition(dungeon.GridSize);
             node.name = $"TileNode Elevation {node.Coordinates.y} ({node.Coordinates.x}, {node.Coordinates.z})";
 
-            ConfigureCube(node);
+            ConfigureCube(node, config);
             ConfigureGrates(node);
             ConfigureObstructions(node);
             ConfigureDoors(node);
-            ConfigureLadders(node);
+            ConfigureLadders(node, config);
             ConfigureFireplace(node);
             ConfigureFence(node);
             ConfigureTeleporter(node);
@@ -690,6 +759,7 @@ namespace LMCore.TiledDungeon
             ConfigureNPC(node, config);
             ConfigureEnemy(node, config);
             TDRelay.Configure(node);
+            ConfigureCheckpointsAndAreaMarkers(node.gameObject, config);
 
             node.Log("Generated", Debug.Log);
         }

@@ -2,6 +2,7 @@ using LMCore.Crawler;
 using LMCore.EntitySM;
 using LMCore.EntitySM.State;
 using LMCore.Extensions;
+using LMCore.TiledDungeon.DungeonFeatures;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -110,63 +111,34 @@ namespace LMCore.TiledDungeon.Enemies
         #endregion
 
         protected string PrefixLogMessage(string message) =>
-            $"Enemy {ClassId} - {id}: {message}";
+            $"Enemy {ClassId} - {Id}: {message}";
 
         [SerializeField, HideInInspector]
         string id;
+        public string Id => id;
 
         bool MyHomeAreasFilter(Vector3Int position, TDNodeConfig config)
         {
             return config.HasObject(
                 TiledConfiguration.InstanceOrCreate().ObjHomeAreaKey,
-                props => props.String(TiledConfiguration.instance.ObjEnemyIdKey) == id);
+                props => props.String(TiledConfiguration.instance.ObjEnemyIdKey) == Id);
         }
 
         bool MyPathFilter(Vector3Int position, TDNodeConfig config)
         {
             return config.HasObject(
                 TiledConfiguration.InstanceOrCreate().ObjPathKey,
-                props => props.String(TiledConfiguration.instance.ObjEnemyIdKey) == id);
+                props => props.String(TiledConfiguration.instance.ObjEnemyIdKey) == Id);
         }
 
         Vector3 CoordinatesExtractor(Vector3Int position, TDNodeConfig config) => position;
 
-        [System.Serializable]
-        public class EnemyPatrolPath
-        {
-            public int Loop;
-            public int Rank;
-            public bool Bounce;
-            public Vector3Int Checkpoint;
-
-            public override string ToString() =>
-                $"<{Loop}:{Rank} {Checkpoint}{(Bounce ? " (B)" : "")}>";
-        }
-
-        IEnumerable<EnemyPatrolPath> EnemyPathExtractor(Vector3Int position, TDNodeConfig config) =>
-            config.SelectWhen(
-                TiledConfiguration.InstanceOrCreate().ObjPathKey,
-                props => props.String(TiledConfiguration.instance.ObjEnemyIdKey) == id,
-                props => new EnemyPatrolPath()
-                {
-                    Loop = props.Int(TiledConfiguration.instance.PathLoopKey, 0),
-                    Rank = props.Int(TiledConfiguration.instance.RankKey),
-                    Bounce = props.Bool(TiledConfiguration.instance.BounceKey, false),
-                    Checkpoint = position,
-                }
-            );
-
-        [SerializeField, HideInInspector]
-        List<List<EnemyPatrolPath>> PatrolPaths = new ();
-
-        [SerializeField, HideInInspector]
-        List<Vector3> HomeArea = new List<Vector3>();
 
         [ContextMenu("Info")]
         void Info()
         {
-            var paths = PatrolPaths.Count() == 0 ? "None" : string.Join(" | ", PatrolPaths.Select(loop => string.Join(", ", loop)));
-            var areas = HomeArea.Count() == 0 ? "None" : string.Join(", ", HomeArea);
+            var paths = string.Join(", ", TDPathCheckpoint.GetAll(this).OrderBy(c => c.Loop).ThenBy(c => c.Rank));
+            var areas = string.Join(", ", TDAreaMarker.GetAll(this).OrderBy(c => c.Coordinates));
 
             Debug.Log(PrefixLogMessage($"Home area: {areas} / Paths {paths}"));
         }
@@ -174,33 +146,13 @@ namespace LMCore.TiledDungeon.Enemies
         [ContextMenu("Reconfigure")]
         void Reconfigure()
         {
-            Configure(id);
+            Configure(Id);
         }
 
 
         public void Configure(string id)
         {
             this.id = id;
-            var dungeon = Dungeon;
-
-            if (dungeon == null)
-            {
-                Debug.LogError(PrefixLogMessage("Can't configure an enemy that is not in a dungeon"));
-                return;
-            }
-
-            HomeArea = dungeon
-                .GetFromConfigs(MyHomeAreasFilter, CoordinatesExtractor)
-                .ToList();
-
-            PatrolPaths = dungeon
-                .GetFromConfigs(MyPathFilter, EnemyPathExtractor)
-                .SelectMany(p => p)
-                .OrderBy(p => p.Rank)
-                .GroupBy(p => p.Loop)
-                .Select(g => g.ToList())
-                .ToList();
-
             Info();
         }
 
@@ -226,6 +178,11 @@ namespace LMCore.TiledDungeon.Enemies
             activeState = state;
             state.TaxStayPersonality(Personality);
             mayTaxStay = false;
+        }
+
+        private void Start()
+        {
+            Entity.Dungeon = Dungeon;
         }
 
         private void Update()
@@ -261,39 +218,32 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
-        EnemyPatrolPath ClosestCheckpoint(int loop = -1)
+        TDPathCheckpoint ClosestCheckpoint(int loop = -1)
         {
             var entity = Entity;
             var dungeon = Dungeon;
-            EnemyPatrolPath closest = null;
+            TDPathCheckpoint closest = null;
             int closestDistance = int.MaxValue;
+            var points = loop < 0 ? TDPathCheckpoint.GetAll(this) : TDPathCheckpoint.GetLoop(this, loop);
 
-            for (int i = 0, l = PatrolPaths.Count; i < l; i++)
+            foreach (var path in points)
             {
-                var loopPath = PatrolPaths[i];
-                for (int j = 0, m = loopPath.Count; j < m; j++)
+                if (entity.Coordinates.ManhattanDistance(path.Coordinates) >= closestDistance)
                 {
-                    var path = loopPath[j];
-                    if (path.Loop == loop || loop < 0)
-                    {
-                        if (entity.Coordinates.ManhattanDistance(path.Checkpoint) >= closestDistance)
-                        {
-                            continue;
-                        }
+                    continue;
+                }
 
-                        if (dungeon.ClosestPath(
-                            entity,
-                            entity.Coordinates,
-                            path.Checkpoint,
-                            closestDistance,
-                            out var currentPath))
-                        {
-                            if (currentPath.Count() < closestDistance)
-                            {
-                                closest = path;
-                                closestDistance = currentPath.Count();
-                            }
-                        }
+                if (dungeon.ClosestPath(
+                    entity,
+                    entity.Coordinates,
+                    path.Coordinates,
+                    closestDistance,
+                    out var currentPath))
+                {
+                    if (currentPath.Count() < closestDistance)
+                    {
+                        closest = path;
+                        closestDistance = currentPath.Count();
                     }
                 }
             }
@@ -301,24 +251,14 @@ namespace LMCore.TiledDungeon.Enemies
             return closest;
         }
 
-        public IEnumerable<EnemyPatrolPath> GetCheckpoints(int loop, int rank)
-        {
-            for (int i = 0, l = PatrolPaths.Count; i < l; i++)
-            {
-                var loopPath = PatrolPaths[i];
-                for (int j = 0, m = loopPath.Count; j < m; j++)
-                {
-                    var path = loopPath[j];
-                    if (path.Loop == loop && path.Rank == rank) yield return path;
-                }
-            }
-        }
+        public IEnumerable<TDPathCheckpoint> GetCheckpoints(int loop, int rank) =>
+            TDPathCheckpoint.GetAll(this, loop, rank);
 
         int LoopMaxRank(int loop) =>
-            PatrolPaths.Max(loopPath => loopPath.Max(path => path.Rank));
+            TDPathCheckpoint.GetLoop(this, loop).Max(c => c.Rank);
 
-        public IEnumerable<EnemyPatrolPath> GetNextCheckpoints(
-            EnemyPatrolPath current, 
+        public IEnumerable<TDPathCheckpoint> GetNextCheckpoints(
+            TDPathCheckpoint current,
             int direction,
             out int newDirection)
         {

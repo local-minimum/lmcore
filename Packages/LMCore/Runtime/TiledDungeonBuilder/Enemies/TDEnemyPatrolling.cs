@@ -1,4 +1,5 @@
 using LMCore.Crawler;
+using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.Enemies;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,14 +23,14 @@ namespace LMCore.TiledDungeon
         float walkDuration = 1f;
 
         bool patrolling;
-        TDEnemy.EnemyPatrolPath target;
+        TDPathCheckpoint target;
         int direction;
 
         string PrefixLogMessage(string message) =>
             $"Patrolling {Enemy.name} ({patrolling}, {target}): {message}";
 
 
-        public void SetCheckpointFromPatrolPath(TDEnemy.EnemyPatrolPath path)
+        public void SetCheckpointFromPatrolPath(TDPathCheckpoint path)
         {
             target = path;
             patrolling = path != null;
@@ -43,13 +44,13 @@ namespace LMCore.TiledDungeon
             var entity = Enemy.Entity;
             if (entity.Moving != Crawler.MovementType.Stationary) return;
             
-            if (entity.Coordinates == target.Checkpoint)
+            if (entity.Coordinates == target.Coordinates)
             {
                 GetNextCheckpoint();
             }
 
             var dungeon = Enemy.Dungeon;
-            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Checkpoint, 100, out var path))
+            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, 100, out var path))
             {
                 if (path.Count > 0)
                 {

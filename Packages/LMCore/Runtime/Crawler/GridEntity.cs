@@ -42,7 +42,19 @@ namespace LMCore.Crawler
         public UnityEvent ContinueFall;
         public UnityEvent OnLand;
         public EntityAbilities Abilities;
-        public MovementInterpreter MovementInterpreter;
+        
+        MovementInterpreter _MovementInterpreter;
+        public MovementInterpreter MovementInterpreter
+        {
+            get
+            {
+                if (_MovementInterpreter == null)
+                {
+                    _MovementInterpreter = GetComponentInChildren<MovementInterpreter>();
+                }
+                return _MovementInterpreter;
+            }
+        }
 
         public GridEntityType EntityType;
         public IGridSizeProvider GridSizeProvider { get; set; }

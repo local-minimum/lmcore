@@ -144,7 +144,7 @@ namespace LMCore.Crawler
             activeInterpretation = interpretation;
             animationTickId = tickId;
             animationStartTime = Time.timeSinceLevelLoad;
-            animationDuration = duration;
+            animationDuration = Mathf.Max(duration, ANIMATION_EPSILON_DURATION);
             animationInterpolationStart = 0;
             Entity.Moving = interpretation.Movement;
 
