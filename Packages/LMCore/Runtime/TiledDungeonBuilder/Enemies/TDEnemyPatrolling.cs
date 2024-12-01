@@ -1,13 +1,14 @@
 using LMCore.Crawler;
+using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.Enemies;
-using System.Collections.Generic;
+using LMCore.TiledDungeon.SaveLoad;
 using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon
 {
-    public class TDEnemyPatrolling : MonoBehaviour
+    public class TDEnemyPatrolling : MonoBehaviour, IOnLoadSave
     {
         TDEnemy _enemy;
         TDEnemy Enemy { 
@@ -20,11 +21,25 @@ namespace LMCore.TiledDungeon
             } 
         }
 
-        float walkDuration = 1f;
+        TiledDungeon _dungeon;
+        protected TiledDungeon Dungeon {
+            get {
+                if (_dungeon == null)
+                {
+                    _dungeon = GetComponentInParent<TiledDungeon>();
+                }
+                return _dungeon;
+            }
+        }
 
+        [SerializeField, Tooltip("Note that the turn durations are scaled by Entity abilities")]
+        float movementDuration = 2f;
+
+        #region SaveState
         bool patrolling;
         TDPathCheckpoint target;
         int direction;
+        #endregion
 
         string PrefixLogMessage(string message) =>
             $"Patrolling {Enemy.name} ({patrolling}, {target}): {message}";
@@ -57,13 +72,32 @@ namespace LMCore.TiledDungeon
                     var nextCoordinates = path[0];
                     if (entity.LookDirection.Translate(entity.Coordinates) == nextCoordinates)
                     {
-                        entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, 1f);
+                        entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
                     } else
                     {
                         var offset = nextCoordinates - entity.Coordinates;
                         var wantedLook = offset.AsDirection();
                         var movement = wantedLook.AsMovement(entity.LookDirection, entity.Down);
-                        entity.MovementInterpreter.InvokeMovement(movement, 0.5f);
+                        if (movement == IO.Movement.Up && entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                        {
+                            // Flying up or climbing up
+                            entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                        } else if (movement == IO.Movement.Down)
+                        {
+                            // Falling or flying down
+                            entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                        } else
+                        {
+                            movement = wantedLook.AsPlanarRotation(entity.LookDirection, entity.Down);
+                            if (movement != IO.Movement.None)
+                            {
+                                // We are turning
+                                entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                            } else
+                            {
+                                Debug.LogError(PrefixLogMessage($"We ave no movement based on needed direction {wantedLook} while looking {entity.LookDirection}"));
+                            }
+                        } 
                     }
                 } else
                 {
@@ -82,6 +116,57 @@ namespace LMCore.TiledDungeon
             {
                 direction = newDirection;
                 target = options.First();
+            }
+        }
+
+        public EnemyPatrollingSave Save() =>
+            patrolling ? 
+                new EnemyPatrollingSave() { 
+                    active = patrolling,
+                    direction = direction,
+                    loop = target?.Loop ?? 0,
+                    rank = target?.Rank ?? 0,
+                } : 
+                null;
+
+        public int OnLoadPriority => 500;
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            var lvl = Dungeon.MapName;
+
+            var lvlSave = save.levels[lvl];
+            if (lvlSave != null)
+            {
+                return;
+            }
+
+            var patrollingSave = lvlSave.enemies.FirstOrDefault(s => s.Id == Enemy.Id)?.patrolling;
+            if (patrollingSave != null)
+            {
+                target = TDPathCheckpoint.GetAll(Enemy, patrollingSave.loop, patrollingSave.rank).FirstOrDefault();
+                if (target == null)
+                {
+                    Debug.LogError(PrefixLogMessage($"Could not find target (loop {patrollingSave.loop}, rank {patrollingSave.rank})"));
+                    patrolling = false; 
+                }
+                else
+                {
+                    patrolling = patrollingSave.active;
+                }
+                direction = patrollingSave.direction;
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
             }
         }
     }

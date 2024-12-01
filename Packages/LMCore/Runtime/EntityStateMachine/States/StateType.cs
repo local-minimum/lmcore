@@ -3,6 +3,11 @@ namespace LMCore.EntitySM.State
     public enum StateType
     {
         /// <summary>
+        /// No decided state
+        /// </summary>
+        None,
+
+        /// <summary>
         /// Following a set path or pattern in "home" area
         /// </summary>
         Patrolling,

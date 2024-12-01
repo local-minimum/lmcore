@@ -1,6 +1,7 @@
 using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
+using LMCore.TiledDungeon.Enemies;
 using LMCore.TiledDungeon.Narrative;
 using System.Linq;
 using UnityEngine;
@@ -60,7 +61,12 @@ namespace LMCore.TiledDungeon.SaveLoad
                 }
                 var levelSave = levels[dungeon.MapName];
 
-                // Update inventories
+                levelSave.enemies =
+                    dungeon
+                        .GetComponentsInChildren<TDEnemy>()
+                        .Select(enemy => enemy.Save())
+                        .ToList();
+                
                 levelSave.TD1DInventories = new SerializableDictionary<string, ContainerSave<StackedItemInfo>>(
                     dungeon
                         .GetComponentsInChildren<TDContainer>()

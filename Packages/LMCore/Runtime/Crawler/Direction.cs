@@ -473,6 +473,15 @@ namespace LMCore.Crawler
             return Movement.None;
         }
 
+        public static Movement AsPlanarRotation(this Direction direction, Direction lookDirection, Direction down)
+        {
+            if (lookDirection == direction) return Movement.None;
+            if (lookDirection.Inverse() == direction) return Random.value < 0.5f ? Movement.YawCCW : Movement.YawCW;
+            if (lookDirection.Rotate3DCCW(down) == direction) return Movement.YawCCW;
+            if (lookDirection.Rotate3DCW(down) == direction) return Movement.YawCW;
+            return Movement.None;
+        }
+
         public static Movement AsMovement(this Direction direction) { 
             switch (direction)
             {

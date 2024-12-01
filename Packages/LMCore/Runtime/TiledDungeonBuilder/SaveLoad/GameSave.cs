@@ -183,6 +183,23 @@ namespace LMCore.TiledDungeon.SaveLoad
     }
 
     [System.Serializable]
+    public class EnemyPatrollingSave
+    {
+        public bool active;
+        public int loop;
+        public int rank;
+        public int direction;
+    }
+
+    [System.Serializable]
+    public class EnemySave
+    {
+        public string Id;
+        public GridEntitySave entity;
+        public EnemyPatrollingSave patrolling;
+    }
+
+    [System.Serializable]
     public class LevelSave
     {
         public SerializableDictionary<string, ContainerSave<StackedItemInfo>> TD1DInventories = new ();
@@ -193,6 +210,7 @@ namespace LMCore.TiledDungeon.SaveLoad
         public List<IllusionSave> illusions = new ();
         public List<StoryTriggerSave> stories = new ();
         public List<Vector3Int> playerPositions = new ();
+        public List<EnemySave> enemies = new ();
     }
 
     [System.Serializable]

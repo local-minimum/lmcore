@@ -3,6 +3,7 @@ using LMCore.EntitySM;
 using LMCore.EntitySM.State;
 using LMCore.Extensions;
 using LMCore.TiledDungeon.DungeonFeatures;
+using LMCore.TiledDungeon.SaveLoad;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -305,5 +306,12 @@ namespace LMCore.TiledDungeon.Enemies
         void SetGuardBehavior()
         {
         }
+
+        public EnemySave Save() => new EnemySave()
+        {
+            Id = Id,
+            entity = new GridEntitySave(Entity),
+            patrolling = GetComponentInChildren<TDEnemyPatrolling>(true)?.Save(),
+        };
     }
 }
