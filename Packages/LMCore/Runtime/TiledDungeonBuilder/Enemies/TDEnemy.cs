@@ -64,7 +64,7 @@ namespace LMCore.TiledDungeon.Enemies
             get { 
                 if (_ActivityManager == null)
                 {
-                    _ActivityManager = GetComponentInChildren<ActivityManager>();
+                    _ActivityManager = GetComponentInChildren<ActivityManager>(true);
                 }
                 return _ActivityManager; 
             }
@@ -76,7 +76,7 @@ namespace LMCore.TiledDungeon.Enemies
             get { 
                 if (_personality == null)
                 {
-                    _personality = GetComponentInChildren<Personality>();
+                    _personality = GetComponentInChildren<Personality>(true);
                 }
                 return _personality; 
             }
@@ -108,6 +108,32 @@ namespace LMCore.TiledDungeon.Enemies
                 }
 
                 return _TiledDungeon;
+            }
+        }
+
+        TDEnemyPatrolling _Patrolling;
+        TDEnemyPatrolling Patrolling
+        {
+            get
+            {
+                if (_Patrolling == null)
+                {
+                    _Patrolling = GetComponentInChildren<TDEnemyPatrolling>(true);
+                }
+                return _Patrolling;
+            }
+        }
+
+        TDEnemyGuarding _Guarding;
+        TDEnemyGuarding Guarding
+        {
+            get
+            {
+                if (_Guarding == null)
+                {
+                    _Guarding = GetComponentInChildren<TDEnemyGuarding>(true);
+                }
+                return _Guarding;
             }
         }
         #endregion
@@ -162,6 +188,7 @@ namespace LMCore.TiledDungeon.Enemies
         {
             ActivityState.OnStayState += ActivityState_OnStayState;
             ActivityState.OnEnterState += ActivityState_OnEnterState;
+            if (activeState == null) UpdateActivity();
         }
 
         private void OnDisable()
@@ -191,22 +218,15 @@ namespace LMCore.TiledDungeon.Enemies
         private void Start()
         {
             Entity.Dungeon = Dungeon;
-        }
-
-        private void Update()
-        {
-            if (activeState == null)
-            {
-                Debug.Log(PrefixLogMessage("Updating activity"));
-                UpdateActivity();
-            }
+            Entity.GridSizeProvider = Dungeon;
         }
 
         /// <summary>
         /// Call this whenever the enemy has done something or the player
         /// </summary>
-        void UpdateActivity()
+        public void UpdateActivity()
         {
+            Debug.Log(PrefixLogMessage("Checking for new state"));
             ActivityManager.CheckTransition();
         }
 
@@ -214,15 +234,20 @@ namespace LMCore.TiledDungeon.Enemies
         {
             if (manager != ActivityManager) return;
 
+            Debug.Log(PrefixLogMessage($"Getting state {state.State}"));
             activeState = state;
 
             switch (state.State)
             {
                 case StateType.Patrolling:
-                    SetPatrolGoal();
+                    Patrolling.enabled = true;
+                    Guarding.enabled = false;
+                    if (!Patrolling.HasTarget) SetPatrolGoal();
                     break;
                 case StateType.Guarding:
-                    SetGuardBehavior();
+                    Patrolling.enabled = false;
+                    Guarding.enabled = true;
+                    Guarding.InitGuarding();
                     break;
             }
         }
@@ -293,8 +318,8 @@ namespace LMCore.TiledDungeon.Enemies
 
         void SetPatrolGoal()
         {
-            var patrol = GetComponentInChildren<TDEnemyPatrolling>(true);
-            if (patrol == null)
+            var patrolling = Patrolling;
+            if (patrolling == null)
             {
                 Debug.LogError(PrefixLogMessage("I don't have a patrolling pattern"));
                 return;
@@ -307,14 +332,11 @@ namespace LMCore.TiledDungeon.Enemies
                 Info();
             } else
             {
-                patrol.SetCheckpointFromPatrolPath(pathCheckpoint);
+                patrolling.SetCheckpointFromPatrolPath(pathCheckpoint);
             }
         }
 
-        void SetGuardBehavior()
-        {
-        }
-
+        #region Save / Load
         public EnemySave Save() => new EnemySave()
         {
             Id = Id,
@@ -325,7 +347,7 @@ namespace LMCore.TiledDungeon.Enemies
             mayTaxStay = MayTaxStay,
             activeStateActiveDuration = activeState?.ActiveDuration ?? 0,
 
-            patrolling = GetComponentInChildren<TDEnemyPatrolling>(true)?.Save(),
+            patrolling = Patrolling?.Save(),
         };
 
         public int OnLoadPriority => 750;
@@ -397,5 +419,6 @@ namespace LMCore.TiledDungeon.Enemies
                 OnLoadGameSave(save as GameSave);
             }
         }
+        #endregion
     }
 }

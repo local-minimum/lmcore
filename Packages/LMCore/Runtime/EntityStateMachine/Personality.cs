@@ -73,7 +73,10 @@ namespace LMCore.EntitySM
 
         public override string ToString()
         {
-            return $"{_Agressivity}\n{_Activity}\n{_Explorativity}\n{_Sociability}";
+            return $"{_Agressivity}\t{GetState(TraitType.Agressivity)}\n" +
+                $"{_Activity}\t{GetState(TraitType.Activity)}\n" +
+                $"{_Explorativity}\t{GetState(TraitType.Explorativity)}\n" +
+                $"{_Sociability}\t{GetState(TraitType.Sociability)}";
         }
 
         [ContextMenu("Info")]

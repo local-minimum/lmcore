@@ -9,6 +9,7 @@ namespace LMCore.EntitySM
     {
         [SerializeField]
         Personality personality;
+        public Personality Personality => personality;
 
         [SerializeField]
         StateType EntryState = StateType.Patrolling;
@@ -21,7 +22,7 @@ namespace LMCore.EntitySM
         protected string PrefixLogMessage(string message) =>
             $"ActivityManager {name}: {message}";
 
-        private void Start()
+        bool InitState()
         {
             if (ActiveState == null) {
                 ActiveState = States.FirstOrDefault(s => s.State == EntryState);
@@ -31,7 +32,15 @@ namespace LMCore.EntitySM
                     ActiveState = States.FirstOrDefault();
                     Debug.LogError(PrefixLogMessage($"No {EntryState} configured, fell back on {ActiveState}"));
                 }
+
+                if (ActiveState != null)
+                {
+                    ActiveState.Enter();
+                    return true;
+                }
             }
+
+            return false;
         }
 
         private void OnEnable()
@@ -67,6 +76,8 @@ namespace LMCore.EntitySM
 
         public void CheckTransition()
         {
+            if (InitState()) return;
+
             if (ActiveState.CheckTransition(personality, out StateType newStateType))
             {
                 var newState = States.FirstOrDefault(s => s.State == newStateType);
@@ -75,6 +86,8 @@ namespace LMCore.EntitySM
                     Debug.LogError(PrefixLogMessage($"{ActiveState} wanted to transition to {newStateType}, but we don't know it"));
                     return;
                 }
+
+                if (ActiveState == newState) return;
 
                 //Taxing personality is done by 
                 ActiveState.Exit();

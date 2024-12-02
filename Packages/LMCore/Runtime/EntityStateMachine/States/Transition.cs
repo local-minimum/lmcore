@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using LMCore.EntitySM.State.Critera;
+using System.Text;
 
 namespace LMCore.EntitySM.State
 {
@@ -12,6 +13,10 @@ namespace LMCore.EntitySM.State
         StateType _Target;
         public StateType Target => _Target;
 
+        [SerializeField]
+        List<LessCriteria> _LessCriteria = new List<LessCriteria>();
+        [SerializeField]
+        List<MoreCriteria> _MoreCriteria = new List<MoreCriteria>();
         [SerializeField]
         List<OvershootsCriteria> _OvershootsCriteria = new List<OvershootsCriteria>();
         [SerializeField]
@@ -27,6 +32,14 @@ namespace LMCore.EntitySM.State
         {
             get
             {
+                for (int i = 0, l = _LessCriteria.Count; i < l; i++)
+                {
+                    yield return _LessCriteria[i];
+                }
+                for (int i = 0, l = _MoreCriteria.Count; i < l; i++)
+                {
+                    yield return _MoreCriteria[i];
+                }
                 for (int i = 0, l = _OvershootsCriteria.Count; i < l; i++)
                 {
                     yield return _OvershootsCriteria[i];
@@ -73,6 +86,24 @@ namespace LMCore.EntitySM.State
                 weight = 0f;
                 return false;
             }
+        }
+
+        public string ToString(Personality personality)
+        {
+            var msg = new List<string>();
+            foreach (var c in criteria)
+            {
+                if (c.Permissable(personality, out float w))
+                {
+                    msg.Add($"<{c} weight: {w}>");
+                }
+                else
+                {
+                    msg.Add($"<{c} FAIL>");
+                }
+            }
+
+            return string.Join(" ", msg);
         }
     }
 }

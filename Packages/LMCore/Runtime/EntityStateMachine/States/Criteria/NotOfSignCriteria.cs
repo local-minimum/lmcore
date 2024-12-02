@@ -26,8 +26,8 @@ namespace LMCore.EntitySM.State.Critera
             var state = personality.GetState(Trait) + Random.Range(-0.5f, 0.5f) * Noise;
             var sign = Mathf.Sign(state);
             if (sign == 0 
-                || sign == 1 && Sign == SignType.Positive
-                || sign == -1 && Sign == SignType.Negative)
+                || sign == 1 && Sign == SignType.Negative
+                || sign == -1 && Sign == SignType.Positive)
             {
                 weight = PassingWeight;
                 return true;

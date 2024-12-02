@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5654849040361368933}
   - component: {fileID: 3726375543191475081}
+  - component: {fileID: 7799530359741664091}
   m_Layer: 0
   m_Name: Guarding State
   m_TagString: Untagged
@@ -52,37 +53,56 @@ MonoBehaviour:
     Sociability: 0
   ExitTax:
     Agressivity: 0
-    Activity: 0
+    Activity: -0.4
     Explorativity: 0
     Sociability: 0
   StayTax:
     Agressivity: 0
     Activity: -0.1
-    Explorativity: 0
+    Explorativity: -0.1
     Sociability: 0
   Transitions:
   - _Target: 2
+    _LessCriteria: []
+    _MoreCriteria:
+    - Trait: 1
+      Noise: 0
+      Amount: 0
+      MinWeight: 0.5
     _OvershootsCriteria: []
-    _UndershootsCriteria:
-    - Trait: 0
-      Amount: 0.1
-      Noise: 0.01
+    _UndershootsCriteria: []
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
   - _Target: 1
+    _LessCriteria:
+    - Trait: 1
+      Noise: 0
+      Amount: 0
+      MinWeight: 0.5
+    _MoreCriteria: []
     _OvershootsCriteria: []
-    _UndershootsCriteria:
-    - Trait: 0
-      Amount: 0.1
-      Noise: 0.01
+    _UndershootsCriteria: []
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
-    _NotOfSignCriteria:
-    - Trait: 1
-      Sign: 0
-      Noise: 0
-      PassingWeight: 0.3
+    _NotOfSignCriteria: []
+--- !u!114 &7799530359741664091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134111026260185223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b10823cb136e764d89941f845c75120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minGuardTickTime: 2
+  maxGuardTickTime: 4
+  movementDuration: 1
+  minSightDirection: 1
+  maxSightThreshold: 0.4
 --- !u!1 &2069749110201355986
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,17 +160,32 @@ MonoBehaviour:
     Explorativity: 0
     Sociability: 0
   StayTax:
-    Agressivity: -0.05
-    Activity: 0.05
-    Explorativity: -0.05
+    Agressivity: 0
+    Activity: 0.08
+    Explorativity: -0.1
     Sociability: 0
   Transitions:
   - _Target: 1
-    _OvershootsCriteria: []
-    _UndershootsCriteria:
+    _LessCriteria:
     - Trait: 1
+      Noise: 0
       Amount: 0
-      Noise: 0.05
+      MinWeight: 0.5
+    _MoreCriteria: []
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
+    _RangeCriteria: []
+    _NotOpposingSignCriteria: []
+    _NotOfSignCriteria: []
+  - _Target: 2
+    _LessCriteria: []
+    _MoreCriteria:
+    - Trait: 1
+      Noise: 0.1
+      Amount: 0.1
+      MinWeight: 0.5
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []

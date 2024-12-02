@@ -176,5 +176,11 @@ namespace LMCore.EntitySM.State
 
             return true;
         }
+
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log(string.Join("\n", Transitions.Select(t => t.ToString(Manager.Personality))));
+        }
     }
 }

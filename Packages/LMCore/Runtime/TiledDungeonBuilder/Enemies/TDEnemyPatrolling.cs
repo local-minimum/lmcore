@@ -36,32 +36,46 @@ namespace LMCore.TiledDungeon
         float movementDuration = 2f;
 
         #region SaveState
-        bool patrolling;
+        bool Patrolling { get; set; }
         TDPathCheckpoint target;
         int direction;
         #endregion
+        
+        public bool HasTarget => target != null;
 
         string PrefixLogMessage(string message) =>
-            $"Patrolling {Enemy.name} ({patrolling}, {target}): {message}";
+            $"Patrolling {Enemy.name} ({Patrolling}, {target}): {message}";
 
 
         public void SetCheckpointFromPatrolPath(TDPathCheckpoint path)
         {
             target = path;
-            patrolling = path != null;
+            Patrolling = path != null;
             direction = 1;
             Debug.Log(PrefixLogMessage("Starting"));
         }
 
+        private void OnEnable()
+        {
+            Patrolling = target != null;
+        }
+
+        private void OnDisable()
+        {
+            Patrolling = false;
+        }
+
         private void Update()
         {
-            if (!patrolling) return;
+            if (!Patrolling) return;
             var entity = Enemy.Entity;
             if (entity.Moving != Crawler.MovementType.Stationary) return;
             
             if (entity.Coordinates == target.Coordinates)
             {
                 GetNextCheckpoint();
+                Enemy.UpdateActivity();
+                if (!Patrolling) return;
             }
 
             var dungeon = Enemy.Dungeon;
@@ -95,15 +109,21 @@ namespace LMCore.TiledDungeon
                                 entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
                             } else
                             {
+                                // TODO: Consider better fallback / force getting off patrol
                                 Debug.LogError(PrefixLogMessage($"We ave no movement based on needed direction {wantedLook} while looking {entity.LookDirection}"));
+                                entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
                             }
                         } 
                     }
                 } else
                 {
+                    // TODO: Consider better fallback / force getting off patroll
                     Debug.LogWarning(PrefixLogMessage("Didn't find a path to target"));
+                    entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
                 }
             }
+
+            Enemy.MayTaxStay = true;
         }
 
         void GetNextCheckpoint()
@@ -120,9 +140,9 @@ namespace LMCore.TiledDungeon
         }
 
         public EnemyPatrollingSave Save() =>
-            patrolling ? 
+            Patrolling ? 
                 new EnemyPatrollingSave() { 
-                    active = patrolling,
+                    active = Patrolling,
                     direction = direction,
                     loop = target?.Loop ?? 0,
                     rank = target?.Rank ?? 0,
@@ -152,11 +172,11 @@ namespace LMCore.TiledDungeon
                 if (target == null)
                 {
                     Debug.LogError(PrefixLogMessage($"Could not find target (loop {patrollingSave.loop}, rank {patrollingSave.rank})"));
-                    patrolling = false; 
+                    Patrolling = false; 
                 }
                 else
                 {
-                    patrolling = patrollingSave.active;
+                    Patrolling = patrollingSave.active;
                 }
                 direction = patrollingSave.direction;
             }
