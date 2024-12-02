@@ -434,7 +434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   personality: {fileID: 3410662639409345825}
-  EntryState: 0
+  EntryState: 1
   States:
   - {fileID: 4631630865616605311}
   - {fileID: 3726375543191475081}

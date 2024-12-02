@@ -65,6 +65,12 @@ namespace LMCore.EntitySM.State
         public float ActiveDuration =>
             isAcitveState ? Time.timeSinceLevelLoad - entryTime : 0f;
 
+        public void Load(bool isActiveSate, float timeSinceEntry)
+        {
+            this.isAcitveState = isActiveSate;
+            entryTime = Time.timeSinceLevelLoad - timeSinceEntry;
+        }
+
         public void Enter()
         {
             entryTime = Time.timeSinceLevelLoad;

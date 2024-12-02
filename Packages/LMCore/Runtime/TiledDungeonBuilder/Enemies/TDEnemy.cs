@@ -2,6 +2,7 @@ using LMCore.Crawler;
 using LMCore.EntitySM;
 using LMCore.EntitySM.State;
 using LMCore.Extensions;
+using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.SaveLoad;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace LMCore.TiledDungeon.Enemies
     /// * TiledConfiguration.BounceKey (bool): If upon reaching this checkpoint, the path
     /// should be inverted. Typically for non looping paths, both ends should have this set.
     /// </summary>
-    public class TDEnemy : MonoBehaviour
+    public class TDEnemy : MonoBehaviour, IOnLoadSave
     {
         [SerializeField, Tooltip("Identifier when instancing, not to confuse with identifier for defining individual's areas and checkpoints")]
         string _classId = System.Guid.NewGuid().ToString();
@@ -112,7 +113,7 @@ namespace LMCore.TiledDungeon.Enemies
         #endregion
 
         protected string PrefixLogMessage(string message) =>
-            $"Enemy {ClassId} - {Id}: {message}";
+            $"Enemy {ClassId} - {Id} ({activeState?.State ?? StateType.None}): {message}";
 
         [SerializeField, HideInInspector]
         string id;
@@ -169,16 +170,22 @@ namespace LMCore.TiledDungeon.Enemies
             ActivityState.OnEnterState -= ActivityState_OnEnterState;
         }
 
-        bool mayTaxStay;
+        #region SaveState
+        /// <summary>
+        /// Next frame will invoke active states taxation
+        /// </summary>
+        public bool MayTaxStay { get; set; }
+
         ActivityState activeState;
+        #endregion
 
         private void ActivityState_OnStayState(ActivityManager manager, ActivityState state)
         {
-            if (manager != ActivityManager || !mayTaxStay) return;
+            if (manager != ActivityManager || !MayTaxStay) return;
 
             activeState = state;
             state.TaxStayPersonality(Personality);
-            mayTaxStay = false;
+            MayTaxStay = false;
         }
 
         private void Start()
@@ -200,13 +207,14 @@ namespace LMCore.TiledDungeon.Enemies
         /// </summary>
         void UpdateActivity()
         {
-            mayTaxStay = true;
             ActivityManager.CheckTransition();
         }
 
         private void ActivityState_OnEnterState(ActivityManager manager, ActivityState state)
         {
             if (manager != ActivityManager) return;
+
+            activeState = state;
 
             switch (state.State)
             {
@@ -311,7 +319,83 @@ namespace LMCore.TiledDungeon.Enemies
         {
             Id = Id,
             entity = new GridEntitySave(Entity),
+
+            activeState = activeState?.name,
+            activeStateType = activeState?.State ?? StateType.None,
+            mayTaxStay = MayTaxStay,
+            activeStateActiveDuration = activeState?.ActiveDuration ?? 0,
+
             patrolling = GetComponentInChildren<TDEnemyPatrolling>(true)?.Save(),
         };
+
+        public int OnLoadPriority => 750;
+
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            var lvl = Dungeon.MapName;
+
+            var lvlSave = save.levels[lvl];
+            if (lvlSave == null)
+            {
+                return;
+            }
+
+            var enemySave = lvlSave.enemies.FirstOrDefault(s => s.Id == Id);
+            if (enemySave != null)
+            {
+                MayTaxStay = enemySave.mayTaxStay;
+                
+                // Reinstate the active state from save info
+                if (enemySave.activeState == null)
+                {
+                    activeState = null;
+                    Debug.LogWarning(PrefixLogMessage("Entity loads into no active state"));
+                } else
+                {
+                    var states = GetComponentsInChildren<ActivityState>()
+                        .Where(s => s.State == enemySave.activeStateType)
+                        .ToList();
+
+                    if (states.Count == 0)
+                    {
+                        Debug.LogError(PrefixLogMessage($"Could not load enemy into {enemySave.activeStateType} because I don't have one"));
+                    } else if (states.Count == 1)
+                    {
+                        activeState = states[0];
+                    } else
+                    {
+                        activeState = states
+                             .OrderBy(s => s.name.LevenshteinDistance(enemySave.activeState))
+                             .First();
+                    }
+
+                    activeState?.Load(true, enemySave.activeStateActiveDuration);
+                }
+
+                // Restore entity
+                enemySave.entity.LoadOntoEntity(Entity);
+                Entity.Sync();
+                // TODO: Check if falling must be set some other way and if it needs to be before sync or after
+                Entity.Falling = enemySave.entity.falling;
+
+                Debug.Log(PrefixLogMessage("Loaded"));
+            } else
+            {
+                Debug.LogWarning(PrefixLogMessage("Could not find my save state"));
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
+        }
     }
 }

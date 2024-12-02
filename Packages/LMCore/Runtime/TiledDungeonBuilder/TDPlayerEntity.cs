@@ -38,15 +38,8 @@ namespace LMCore.TiledDungeon
             var playerSave = save.player;
 
             // Load entity state
-            Entity.Dungeon = UnityExtensions.FindObjectByInterfaceOrDefault<IDungeon>(dung => dung.MapName == playerSave.entity.mapName);
-            Entity.AnchorDirection = playerSave.entity.anchor;
-            Entity.LookDirection = playerSave.entity.lookDirection;
-            Entity.Coordinates = playerSave.entity.position;
-            Entity.TransportationMode = playerSave.entity.transportationMode;
-            Entity.RotationRespectsAnchorDirection = playerSave.entity.rotationRespectsAnchorDirection;
-
+            playerSave.entity.LoadOntoEntity(Entity);
             Entity.Sync();
-
             // TODO: Check if falling must be set some other way and if it needs to be before sync or after
             Entity.Falling = playerSave.entity.falling;
 

@@ -1,7 +1,10 @@
 using LMCore.Crawler;
+using LMCore.EntitySM.State;
+using LMCore.Extensions;
 using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
+using LMCore.UI;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -106,6 +109,19 @@ namespace LMCore.TiledDungeon.SaveLoad
             falling = entity.Falling;
             mapName = entity.Dungeon.MapName;
         }
+
+        /// <summary>
+        /// Sets the save data to the entity, but doesn't actualy sync it.
+        /// </summary>
+        public void LoadOntoEntity(GridEntity entity)
+        {
+            entity.Dungeon = UnityExtensions.FindObjectByInterfaceOrDefault<IDungeon>(dung => dung.MapName == mapName);
+            entity.AnchorDirection = anchor;
+            entity.LookDirection = lookDirection;
+            entity.Coordinates = position;
+            entity.TransportationMode = transportationMode;
+            entity.RotationRespectsAnchorDirection = rotationRespectsAnchorDirection;
+        }
     }
 
     [System.Serializable]
@@ -196,6 +212,12 @@ namespace LMCore.TiledDungeon.SaveLoad
     {
         public string Id;
         public GridEntitySave entity;
+
+        public string activeState;
+        public StateType activeStateType;
+        public float activeStateActiveDuration;
+        public bool mayTaxStay;
+
         public EnemyPatrollingSave patrolling;
     }
 

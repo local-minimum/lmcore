@@ -140,7 +140,7 @@ namespace LMCore.TiledDungeon
             var lvl = Dungeon.MapName;
 
             var lvlSave = save.levels[lvl];
-            if (lvlSave != null)
+            if (lvlSave == null)
             {
                 return;
             }
