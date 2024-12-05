@@ -65,8 +65,8 @@ namespace LMCore.TiledDungeon.Enemies
                     {
                         Enemy.MayTaxStay = true;
                     }
-                    var nextCoordinates = path[0];
-                    InvokePathBasedMovement(nextCoordinates, movementDuration, PrefixLogMessage);
+                    var (direction, _) = path[0];
+                    InvokePathBasedMovement(direction, movementDuration, PrefixLogMessage);
                 }
 
                 if (length > 3) Enemy.UpdateActivity();

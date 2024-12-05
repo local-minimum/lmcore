@@ -313,16 +313,16 @@ namespace LMCore.TiledDungeon
         /// <param name="path">The path to the target excluding the start coordinates</param>
         /// <returns></returns>
         public bool ClosestPath(
-            GridEntity entity, 
-            Vector3Int start, 
-            Vector3Int target, 
+            GridEntity entity,
+            Vector3Int start,
+            Vector3Int target,
             int maxDepth,
-            out List<Vector3Int> path)
+            out List<KeyValuePair<Direction, Vector3Int>> path)
         {
             // TODO: We don't account for just waiting on a moving platform to reach a goal either
             // nor do we have a way to attatch goals to faces that can move...
 
-            var seen = new Dictionary<Vector3Int, List<Vector3Int>>();
+            var seen = new Dictionary<Vector3Int, List<KeyValuePair<Direction, Vector3Int>>>();
             var seenQueue = new Queue<Vector3Int>();
             var visited = new HashSet<Vector3Int>();
 
@@ -335,7 +335,7 @@ namespace LMCore.TiledDungeon
 
                 visited.Add(coordinates);
 
-                var pathHere = seen.GetValueOrDefault(coordinates) ?? new List<Vector3Int>();
+                var pathHere = seen.GetValueOrDefault(coordinates) ?? new List<KeyValuePair<Direction, Vector3Int>>();
                 
                 // Stop searching if we are too deep in
                 if (pathHere.Count > maxDepth)
@@ -357,21 +357,21 @@ namespace LMCore.TiledDungeon
                     // this is because we would need to consider the neuances of if we
                     // should respect rules about letting entities coexits or not.
                     if (!node.AllowExit(entity, direction)) continue;
-                    var neigbour = direction.Translate(coordinates);
+                    var neighbour = node.Neighbour(direction);
 
-                    if (seen.ContainsKey(neigbour)) continue;
+                    if (seen.ContainsKey(neighbour)) continue;
 
-                    var neighbourPath = new List<Vector3Int>(pathHere);
-                    neighbourPath.Add(neigbour);
+                    var neighbourPath = new List<KeyValuePair<Direction, Vector3Int>>(pathHere);
+                    neighbourPath.Add(new KeyValuePair<Direction, Vector3Int>(direction, neighbour));
 
-                    if (neigbour == target)
+                    if (neighbour == target)
                     {
                         path = neighbourPath;
                         return true;
                     }
                     
-                    seen[neigbour] = neighbourPath; 
-                    seenQueue.Enqueue(neigbour);
+                    seen[neighbour] = neighbourPath; 
+                    seenQueue.Enqueue(neighbour);
                 }
             }
 

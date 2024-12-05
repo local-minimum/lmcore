@@ -29,21 +29,19 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         protected void InvokePathBasedMovement(
-            Vector3Int nextTarget, 
+            Direction direction, 
             float movementDuration,
             System.Func<string, string> prefixLogMessage)
         {
             var entity = Enemy.Entity;
 
-            if (entity.LookDirection.Translate(entity.Coordinates) == nextTarget)
+            if (entity.LookDirection == direction)
             {
                 Debug.Log(prefixLogMessage("Moving forward"));
                 entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
             } else
             {
-                var offset = nextTarget - entity.Coordinates;
-                var wantedLook = offset.AsDirection();
-                var movement = wantedLook.AsMovement(entity.LookDirection, entity.Down);
+                var movement = direction.AsMovement(entity.LookDirection, entity.Down);
                 if (movement == IO.Movement.Up && entity.TransportationMode.HasFlag(TransportationMode.Flying))
                 {
                     // Flying up or climbing up
@@ -57,7 +55,7 @@ namespace LMCore.TiledDungeon.Enemies
                 } else
                 {
                     Debug.Log(prefixLogMessage("Rotating"));
-                    movement = wantedLook.AsPlanarRotation(entity.LookDirection, entity.Down);
+                    movement = direction.AsPlanarRotation(entity.LookDirection, entity.Down);
                     if (movement != IO.Movement.None)
                     {
                         // We are turning
@@ -65,7 +63,7 @@ namespace LMCore.TiledDungeon.Enemies
                     } else
                     {
                         // TODO: Consider better fallback / force getting off patrol
-                        Debug.LogError(prefixLogMessage($"We have no movement based on needed direction {wantedLook} while looking {entity.LookDirection}"));
+                        Debug.LogError(prefixLogMessage($"We have no movement based on needed direction {direction} while looking {entity.LookDirection}"));
                         entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
                     }
                 } 
