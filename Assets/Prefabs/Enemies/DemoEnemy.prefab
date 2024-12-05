@@ -1,5 +1,105 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &692567036518306077
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4291729611264621379}
+  - component: {fileID: 3311713351662482533}
+  - component: {fileID: 4596552218980625441}
+  m_Layer: 8
+  m_Name: Hunting State
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4291729611264621379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692567036518306077}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3388232633028949265}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3311713351662482533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692567036518306077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f66c2a5f6466dea4b8573d14a1c3d192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _state: 7
+  EntryTax:
+    Agressivity: 1
+    Activity: -0.5
+    Explorativity: 0
+    Sociability: 0
+  ExitTax:
+    Agressivity: -1
+    Activity: 0
+    Explorativity: 0
+    Sociability: 0
+  StayTax:
+    Agressivity: -0.1
+    Activity: 0.1
+    Explorativity: 0.05
+    Sociability: 0
+  Transitions:
+  - _Target: 7
+    _LessCriteria: []
+    _MoreCriteria: []
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
+    _RangeCriteria: []
+    _NotOpposingSignCriteria: []
+    _NotOfSignCriteria:
+    - Trait: 0
+      Sign: 1
+      Noise: 0
+      PassingWeight: 1
+  - _Target: 1
+    _LessCriteria:
+    - Trait: 0
+      Noise: 0
+      Amount: 1
+      MinWeight: 0.1
+    _MoreCriteria: []
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
+    _RangeCriteria: []
+    _NotOpposingSignCriteria: []
+    _NotOfSignCriteria: []
+--- !u!114 &4596552218980625441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692567036518306077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d973902a1243852429c22e6b2f5d9229, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementDuration: 0.6
+  looseAgressivityDistance: 5
 --- !u!1 &1134111026260185223
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,7 +111,7 @@ GameObject:
   - component: {fileID: 5654849040361368933}
   - component: {fileID: 3726375543191475081}
   - component: {fileID: 7799530359741664091}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Guarding State
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,6 +186,18 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+  - _Target: 7
+    _LessCriteria: []
+    _MoreCriteria:
+    - Trait: 0
+      Noise: 0.1
+      Amount: 0
+      MinWeight: 0.8
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
+    _RangeCriteria: []
+    _NotOpposingSignCriteria: []
+    _NotOfSignCriteria: []
 --- !u!114 &7799530359741664091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,7 +226,7 @@ GameObject:
   - component: {fileID: 3887786995638095679}
   - component: {fileID: 4631630865616605311}
   - component: {fileID: 2690461587711765856}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Patrolling State
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,6 +301,18 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+  - _Target: 7
+    _LessCriteria: []
+    _MoreCriteria:
+    - Trait: 0
+      Noise: 0.1
+      Amount: 0
+      MinWeight: 0.8
+    _OvershootsCriteria: []
+    _UndershootsCriteria: []
+    _RangeCriteria: []
+    _NotOpposingSignCriteria: []
+    _NotOfSignCriteria: []
 --- !u!114 &2690461587711765856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,7 +338,7 @@ GameObject:
   - component: {fileID: 6425990789448695484}
   - component: {fileID: 3714747489278155940}
   - component: {fileID: 4940280625820795326}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Face
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,7 +440,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1235881674075908799}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Avatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -356,7 +480,8 @@ GameObject:
   - component: {fileID: 3193900623386702382}
   - component: {fileID: 1252019101318263246}
   - component: {fileID: 6694229913017089675}
-  m_Layer: 0
+  - component: {fileID: 1136254329597228268}
+  m_Layer: 8
   m_Name: DemoEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -378,6 +503,7 @@ Transform:
   m_Children:
   - {fileID: 3887786995638095679}
   - {fileID: 5654849040361368933}
+  - {fileID: 4291729611264621379}
   - {fileID: 1235881674075908799}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -473,6 +599,7 @@ MonoBehaviour:
   States:
   - {fileID: 4631630865616605311}
   - {fileID: 3726375543191475081}
+  - {fileID: 3311713351662482533}
 --- !u!114 &3193900623386702382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -513,6 +640,27 @@ MonoBehaviour:
   defaultMat: {fileID: 2100000, guid: 141777e8701a6074ba061d5b92cfd334, type: 2}
   patrolMat: {fileID: 2100000, guid: e4983c5f27e14e6448de290d7f920fa6, type: 2}
   guardMat: {fileID: 2100000, guid: dddf0db425bb0b54d8ef356d70c7b9a9, type: 2}
+  huntMat: {fileID: 2100000, guid: c3d37914b7341d448a08f3e0d18d8f62, type: 2}
+--- !u!114 &1136254329597228268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7372993661751114034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 750b9fa8b6506bc44a8a3c287921e794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxDistance: 5
+  requireLOS: 1
+  LOSFilter:
+    serializedVersion: 2
+    m_Bits: 192
+  losMaxAngle: 60
+  effectTrait: 0
+  effectMagnitude: 2
 --- !u!1 &8148090245210938216
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,7 +673,7 @@ GameObject:
   - component: {fileID: 6445564174442216170}
   - component: {fileID: 5878105678774216172}
   - component: {fileID: 7443104297800665605}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}

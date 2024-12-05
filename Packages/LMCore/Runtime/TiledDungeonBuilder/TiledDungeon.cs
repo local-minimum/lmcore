@@ -125,6 +125,10 @@ namespace LMCore.TiledDungeon
 
             set
             {
+                if (value == null)
+                {
+                    Debug.LogWarning($"Setting a node to null at {coordinates}");
+                }
                 nodes[coordinates] = value;
             }
         }
@@ -170,20 +174,20 @@ namespace LMCore.TiledDungeon
 
             var layerConfig = GetLayerConfig(coordinates.y);
 
-            var aboveNode = this[coordinates + Vector3Int.up];
+            // TODO: Something is iffy here with asking for configs that will not be complete
+            var aboveNodeCoordinates = coordinates + Vector3Int.up;
+            bool storeConfig = true;
+            if (!layerConfig.TopLayer && !HasNodeAt(aboveNodeCoordinates))
+            {
+                Debug.LogWarning($"Asking for a node outside the dungeon at {aboveNodeCoordinates}");
+                storeConfig = false;
+            }
+            var aboveNode = this[aboveNodeCoordinates];
             var roofed = Roofing(aboveNode, layerConfig.TopLayer);
             var config = new TDNodeConfig(layerConfig, coordinates, roofed);
-            nodeConfigurations[coordinates] = config;
+            if (storeConfig) nodeConfigurations[coordinates] = config;
             return config;
         }
-
-        public IEnumerable<T> GetFromConfigs<T>(
-            Func<Vector3Int, TDNodeConfig, bool> filter, 
-            Func<Vector3Int, TDNodeConfig, T> predicate
-            ) =>
-            nodeConfigurations
-                .Where(kvp => filter(kvp.Key, kvp.Value))
-                .Select(kvp => predicate(kvp.Key, kvp.Value));
 
         public IEnumerable<int> Elevations => map
             .FindInLayers(layer => layer.CustomProperties.Int(TiledConfiguration.instance.LayerElevationKey))

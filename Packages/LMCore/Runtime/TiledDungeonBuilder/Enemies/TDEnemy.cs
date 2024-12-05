@@ -5,6 +5,7 @@ using LMCore.Extensions;
 using LMCore.IO;
 using LMCore.TiledDungeon.DungeonFeatures;
 using LMCore.TiledDungeon.SaveLoad;
+using PlasticGui.WorkspaceWindow.QueryViews;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -136,6 +137,19 @@ namespace LMCore.TiledDungeon.Enemies
                 return _Guarding;
             }
         }
+
+        TDEnemyHunting _Hunting;
+        TDEnemyHunting Hunting 
+        {
+            get
+            {
+                if (_Hunting == null)
+                {
+                    _Hunting = GetComponentInChildren<TDEnemyHunting>(true);
+                }
+                return _Hunting;
+            }
+        }
         #endregion
 
         protected string PrefixLogMessage(string message) =>
@@ -177,6 +191,7 @@ namespace LMCore.TiledDungeon.Enemies
             Configure(Id);
         }
 
+        public int ArbitraryMaxPathSearchDepth => 100;
 
         public void Configure(string id)
         {
@@ -242,12 +257,21 @@ namespace LMCore.TiledDungeon.Enemies
                 case StateType.Patrolling:
                     Patrolling.enabled = true;
                     Guarding.enabled = false;
+                    Hunting.enabled = false;
                     if (!Patrolling.HasTarget) SetPatrolGoal();
                     break;
                 case StateType.Guarding:
                     Patrolling.enabled = false;
                     Guarding.enabled = true;
+                    Hunting.enabled = false;
                     Guarding.InitGuarding();
+                    break;
+                case StateType.Hunting:
+                    Hunting.enabled = true;
+                    Patrolling.enabled = false;
+                    Guarding.enabled = false;
+                    var perceptions = GetComponentsInChildren<TDEnemyPerception>().Where(p => p.Target != null);
+                    Hunting.InitHunt(perceptions.FirstOrDefault()?.Target);
                     break;
             }
         }

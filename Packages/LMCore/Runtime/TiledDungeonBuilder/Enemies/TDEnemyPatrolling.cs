@@ -8,29 +8,8 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon
 {
-    public class TDEnemyPatrolling : MonoBehaviour, IOnLoadSave
+    public class TDEnemyPatrolling : TDEnemyBehaviour, IOnLoadSave
     {
-        TDEnemy _enemy;
-        TDEnemy Enemy { 
-            get { 
-                if (_enemy == null)
-                {
-                    _enemy = GetComponentInParent<TDEnemy>();
-                }
-                return _enemy; 
-            } 
-        }
-
-        TiledDungeon _dungeon;
-        protected TiledDungeon Dungeon {
-            get {
-                if (_dungeon == null)
-                {
-                    _dungeon = GetComponentInParent<TiledDungeon>();
-                }
-                return _dungeon;
-            }
-        }
 
         [SerializeField, Tooltip("Note that the turn durations are scaled by Entity abilities")]
         float movementDuration = 2f;
@@ -79,42 +58,12 @@ namespace LMCore.TiledDungeon
             }
 
             var dungeon = Enemy.Dungeon;
-            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, 100, out var path))
+            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
             {
                 if (path.Count > 0)
                 {
                     var nextCoordinates = path[0];
-                    if (entity.LookDirection.Translate(entity.Coordinates) == nextCoordinates)
-                    {
-                        entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
-                    } else
-                    {
-                        var offset = nextCoordinates - entity.Coordinates;
-                        var wantedLook = offset.AsDirection();
-                        var movement = wantedLook.AsMovement(entity.LookDirection, entity.Down);
-                        if (movement == IO.Movement.Up && entity.TransportationMode.HasFlag(TransportationMode.Flying))
-                        {
-                            // Flying up or climbing up
-                            entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
-                        } else if (movement == IO.Movement.Down)
-                        {
-                            // Falling or flying down
-                            entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
-                        } else
-                        {
-                            movement = wantedLook.AsPlanarRotation(entity.LookDirection, entity.Down);
-                            if (movement != IO.Movement.None)
-                            {
-                                // We are turning
-                                entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
-                            } else
-                            {
-                                // TODO: Consider better fallback / force getting off patrol
-                                Debug.LogError(PrefixLogMessage($"We ave no movement based on needed direction {wantedLook} while looking {entity.LookDirection}"));
-                                entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
-                            }
-                        } 
-                    }
+                    InvokePathBasedMovement(nextCoordinates, movementDuration, PrefixLogMessage);
                 } else
                 {
                     // TODO: Consider better fallback / force getting off patroll

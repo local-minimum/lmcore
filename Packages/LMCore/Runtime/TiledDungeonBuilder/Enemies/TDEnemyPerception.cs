@@ -1,0 +1,97 @@
+using LMCore.Crawler;
+using LMCore.EntitySM.Trait;
+using LMCore.Extensions;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace LMCore.TiledDungeon.Enemies
+{
+    public class TDEnemyPerception : MonoBehaviour
+    {
+        [SerializeField]
+        int maxDistance = 5;
+
+        [SerializeField]
+        bool requireLOS = false;
+
+        [SerializeField]
+        LayerMask LOSFilter;
+
+        [SerializeField]
+        float losMaxAngle = 60f;
+
+        [SerializeField]
+        TraitType effectTrait;
+
+        [SerializeField]
+        float effectMagnitude;
+
+        TDEnemy _enemy;
+        TDEnemy Enemy
+        {
+            get
+            {
+                if (_enemy == null)
+                {
+                    _enemy = GetComponentInParent<TDEnemy>();
+                }
+                return _enemy;
+            }
+        }
+
+        private void OnEnable()
+        {
+            GridEntity.OnPositionTransition += CheckDetection;
+        }
+
+        private void OnDisable()
+        {
+            GridEntity.OnPositionTransition -= CheckDetection;
+        }
+
+        HashSet<GridEntity> Players = new HashSet<GridEntity>();
+
+        public GridEntity Target { get; private set; }
+
+        private void CheckDetection(GridEntity entity)
+        {
+            if (entity == Enemy.Entity)
+            {
+                foreach (GridEntity player in Players)
+                {
+                    CheckDetection(player);
+                }
+                return;
+            }
+
+            if (entity.EntityType != GridEntityType.PlayerCharacter) return;
+            Players.Add(entity);
+
+            var distance = entity.Coordinates.ManhattanDistance(Enemy.Entity.Coordinates);
+            if (distance > maxDistance) return;
+            
+            if (requireLOS)
+            {
+                Vector3 lookDirection = Enemy.Entity.LookDirection.AsLookVector3D();
+                var direction = entity.transform.position - transform.position;
+                var angle = Vector3.Angle(lookDirection, direction);
+
+                if (angle < losMaxAngle && Physics.Raycast(transform.position, direction, out var hitInfo, maxDistance * Enemy.Dungeon.GridSize, LOSFilter)) {
+                    if (hitInfo.transform.GetComponentInParent<GridEntity>() == entity) InvokeEffect(entity);
+                }
+            } else
+            {
+                if (Enemy.Dungeon.ClosestPath(Enemy.Entity, Enemy.Entity.Coordinates, entity.Coordinates, maxDistance, out var path)) {
+                    if (path.Count <= maxDistance) InvokeEffect(entity);
+                }
+            }
+        }
+
+        void InvokeEffect(GridEntity entity)
+        {
+            Debug.Log("Player detected");
+            Target = entity;
+            Enemy.Personality.AdjustState(effectTrait, effectMagnitude);
+        }
+    }
+}

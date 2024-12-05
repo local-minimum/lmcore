@@ -15,6 +15,8 @@ namespace LMCore.TiledDungeon.Enemies
         Material patrolMat;
         [SerializeField]
         Material guardMat;
+        [SerializeField]
+        Material huntMat;
 
         ActivityManager _ActivityManager;
         ActivityManager ActivityManager
@@ -57,6 +59,9 @@ namespace LMCore.TiledDungeon.Enemies
                     break;
                 case StateType.Guarding:
                     swapTarget.material = guardMat;
+                    break;
+                case StateType.Hunting:
+                    swapTarget.material = huntMat;
                     break;
                 default:
                     swapTarget.material = defaultMat;

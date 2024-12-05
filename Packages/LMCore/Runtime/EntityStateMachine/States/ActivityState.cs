@@ -135,6 +135,12 @@ namespace LMCore.EntitySM.State
         List<Transition> Transitions = new List<Transition>();
 
         /// <summary>
+        /// If you have any transition to the target state type 
+        /// </summary>
+        public bool HasTransition(StateType target) =>
+            Transitions.Any(t => t.Target == target);
+
+        /// <summary>
         /// Check if any of the registered edges of the state will trigger
         /// a transition to another state
         /// </summary>

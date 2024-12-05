@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon.Enemies
 {
-    public class TDEnemyGuarding : MonoBehaviour
+    public class TDEnemyGuarding : TDEnemyBehaviour
     {
         [SerializeField]
         float minGuardTickTime = 2f;
@@ -22,28 +22,6 @@ namespace LMCore.TiledDungeon.Enemies
         int minSightDirection = 1;
         [SerializeField]
         float maxSightThreshold = 0.4f;
-
-        TDEnemy _enemy;
-        TDEnemy Enemy { 
-            get { 
-                if (_enemy == null)
-                {
-                    _enemy = GetComponentInParent<TDEnemy>();
-                }
-                return _enemy; 
-            } 
-        }
-
-        TiledDungeon _dungeon;
-        protected TiledDungeon Dungeon {
-            get {
-                if (_dungeon == null)
-                {
-                    _dungeon = GetComponentInParent<TiledDungeon>();
-                }
-                return _dungeon;
-            }
-        }
 
         string PrefixLogMessage(string message) =>
             $"Guarding {Enemy.name} ({lookDirection}): {message}";

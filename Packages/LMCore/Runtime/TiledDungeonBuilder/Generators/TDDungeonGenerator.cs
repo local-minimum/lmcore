@@ -86,12 +86,8 @@ namespace LMCore.TiledDungeon
 
             dungeon.GetComponent<AbsInventory>()?.Configure(dungeon.MapName, null, -1);
 
-            // We actually need the configs in place before we start or things will get quite
-            // annoying in when spawning in stuff
-            foreach (var elevation in dungeon.Elevations)
-            {
-                GenerateAllNodeConfigsForLayer(dungeon, elevation);
-            }
+            // We can't really spawn in all configurations at this moment because it messes
+            // up roofing if the node doesn't already exist
 
             foreach (var elevation in dungeon.Elevations)
             {
