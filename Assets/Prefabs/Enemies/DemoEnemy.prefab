@@ -78,7 +78,7 @@ MonoBehaviour:
     _LessCriteria:
     - Trait: 0
       Noise: 0
-      Amount: 1
+      Amount: 0.3
       MinWeight: 0.1
     _MoreCriteria: []
     _OvershootsCriteria: []

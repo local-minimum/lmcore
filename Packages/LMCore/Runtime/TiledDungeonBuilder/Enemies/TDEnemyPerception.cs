@@ -51,7 +51,22 @@ namespace LMCore.TiledDungeon.Enemies
 
         HashSet<GridEntity> Players = new HashSet<GridEntity>();
 
-        public GridEntity Target { get; private set; }
+        private GridEntity _target;
+        public GridEntity Target { 
+            get
+            {
+                if (_target == null)
+                {
+                    _target = Enemy.Dungeon.Player;
+                }
+                return _target;
+            }
+
+            private set
+            {
+                _target = value;
+            }
+        }
 
         private void CheckDetection(GridEntity entity)
         {

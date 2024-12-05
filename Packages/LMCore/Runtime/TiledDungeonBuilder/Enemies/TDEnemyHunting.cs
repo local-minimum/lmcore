@@ -1,7 +1,6 @@
 using LMCore.Crawler;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,6 +21,11 @@ namespace LMCore.TiledDungeon.Enemies
         GridEntity target;
         #endregion
 
+        private void Awake()
+        {
+            enabled = false;
+        }
+
         private void OnDisable()
         {
             target = null;
@@ -36,9 +40,17 @@ namespace LMCore.TiledDungeon.Enemies
             this.target = target;
         }
 
+        float nextFailCheck;
+
         private void Update()
         {
-            if (target == null) return;
+            if (target == null) {
+                Debug.LogError(PrefixLogMessage("Nothing to hunt"));
+                Enemy.MayTaxStay = true;
+                Enemy.UpdateActivity();
+                return;
+            }
+            if (Time.timeSinceLevelLoad < nextFailCheck) return;
 
             var entity = Enemy.Entity;
             if (entity.Moving != Crawler.MovementType.Stationary) return;
@@ -56,9 +68,15 @@ namespace LMCore.TiledDungeon.Enemies
                     var nextCoordinates = path[0];
                     InvokePathBasedMovement(nextCoordinates, movementDuration, PrefixLogMessage);
                 }
+
+                if (length > 3) Enemy.UpdateActivity();
             } else
             {
                 Debug.LogWarning(PrefixLogMessage("Could not find path to player"));
+                Enemy.MayTaxStay = true;
+                nextFailCheck = Time.timeSinceLevelLoad + movementDuration;
+
+                Enemy.UpdateActivity();
             }
         }
 
