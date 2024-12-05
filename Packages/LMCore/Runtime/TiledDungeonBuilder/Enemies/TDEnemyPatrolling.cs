@@ -98,6 +98,7 @@ namespace LMCore.TiledDungeon
                 } : 
                 null;
 
+        #region Save/Load
         public int OnLoadPriority => 500;
         private void OnLoadGameSave(GameSave save)
         {
@@ -138,5 +139,6 @@ namespace LMCore.TiledDungeon
                 OnLoadGameSave(save as GameSave);
             }
         }
+        #endregion
     }
 }

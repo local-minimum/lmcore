@@ -208,6 +208,20 @@ namespace LMCore.TiledDungeon.SaveLoad
     }
 
     [System.Serializable]
+    public class EnemyGuardingSave
+    {
+        public List<Direction> directions;
+        public Direction lookDirection;
+        public float timeToNextTick;
+    }
+
+    [System.Serializable]
+    public class EnemyHuntingSave
+    {
+        public string TargetId;
+    }
+
+    [System.Serializable]
     public class EnemySave
     {
         public string Id;
@@ -219,6 +233,8 @@ namespace LMCore.TiledDungeon.SaveLoad
         public bool mayTaxStay;
 
         public EnemyPatrollingSave patrolling;
+        public EnemyGuardingSave guarding;
+        public EnemyHuntingSave hunting;
     }
 
     [System.Serializable]

@@ -372,6 +372,8 @@ namespace LMCore.TiledDungeon.Enemies
             activeStateActiveDuration = activeState?.ActiveDuration ?? 0,
 
             patrolling = Patrolling?.Save(),
+            guarding = Guarding?.Save(),
+            hunting = Hunting?.Save(),
         };
 
         public int OnLoadPriority => 750;

@@ -1,10 +1,13 @@
 using LMCore.Crawler;
+using LMCore.IO;
+using LMCore.TiledDungeon.SaveLoad;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.Enemies
 {
-    public class TDEnemyHunting : TDEnemyBehaviour 
+    public class TDEnemyHunting : TDEnemyBehaviour, IOnLoadSave
     {
         [SerializeField]
         float movementDuration = 0.6f;
@@ -58,5 +61,48 @@ namespace LMCore.TiledDungeon.Enemies
                 Debug.LogWarning(PrefixLogMessage("Could not find path to player"));
             }
         }
+
+        #region Save/Load
+        public EnemyHuntingSave Save() => 
+            target != null ? new EnemyHuntingSave() {
+                TargetId = target.Identifier,
+            } :
+            null;
+
+        public int OnLoadPriority => 500;
+
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            var lvl = Dungeon.MapName;
+
+            var lvlSave = save.levels[lvl];
+            if (lvlSave == null)
+            {
+                return;
+            }
+
+            var huntingSave = lvlSave.enemies.FirstOrDefault(s => s.Id == Enemy.Id)?.hunting;
+            if (huntingSave != null)
+            {
+                target = Dungeon.GetEntity(huntingSave.TargetId);
+            } else
+            {
+                target = null;
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
+        }
+        #endregion
     }
 }

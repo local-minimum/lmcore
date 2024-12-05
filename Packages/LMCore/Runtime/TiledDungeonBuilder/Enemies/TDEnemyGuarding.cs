@@ -1,13 +1,14 @@
 using LMCore.Crawler;
 using LMCore.Extensions;
 using LMCore.IO;
+using LMCore.TiledDungeon.SaveLoad;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.Enemies
 {
-    public class TDEnemyGuarding : TDEnemyBehaviour
+    public class TDEnemyGuarding : TDEnemyBehaviour, IOnLoadSave
     {
         [SerializeField]
         float minGuardTickTime = 2f;
@@ -119,5 +120,53 @@ namespace LMCore.TiledDungeon.Enemies
 
             nextTick = Time.timeSinceLevelLoad + Random.Range(minGuardTickTime, maxGuardTickTime);
         }
+
+        #region Save/Load
+        public EnemyGuardingSave Save() =>
+            lookDirection != Direction.None ?
+                new EnemyGuardingSave()
+                {
+                    directions = new List<Direction>(directions),
+                    lookDirection = lookDirection,
+                    timeToNextTick = nextTick - Time.timeSinceLevelLoad,
+                } : null;
+
+        public int OnLoadPriority => 500;
+
+        private void OnLoadGameSave(GameSave save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            var lvl = Dungeon.MapName;
+
+            var lvlSave = save.levels[lvl];
+            if (lvlSave == null)
+            {
+                return;
+            }
+
+            var guardingSave = lvlSave.enemies.FirstOrDefault(s => s.Id == Enemy.Id)?.guarding;
+            if (guardingSave != null)
+            {
+                directions = new List<Direction>(guardingSave.directions);
+                lookDirection = guardingSave.lookDirection;
+                nextTick = Time.timeSinceLevelLoad + guardingSave.timeToNextTick;
+            } else
+            {
+                lookDirection = Direction.None;
+            }
+        }
+
+        public void OnLoad<T>(T save) where T : new()
+        {
+            if (save is GameSave)
+            {
+                OnLoadGameSave(save as GameSave);
+            }
+        }
+        #endregion
     }
 }
