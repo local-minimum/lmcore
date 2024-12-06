@@ -356,6 +356,11 @@ namespace LMCore.TiledDungeon
                         Debug.Log($"{node.Coordinates} -> {direction}");
                     }
 
+                    if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && !node.HasFloor)
+                    {
+                        if (direction != Direction.Down) continue;
+                    }
+
                     // TODO: If we want enemies to be able to climb stairs we need to check
                     // be able to move inside a node too and check what directions to ignor
                     // based on anchor and down directions
