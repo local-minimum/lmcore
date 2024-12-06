@@ -303,6 +303,8 @@ namespace LMCore.TiledDungeon
             return null;
         }
 
+        Vector3Int monitorPos = new Vector3Int(26, 0, 19);
+
         /// <summary>
         /// Closest path for the entity to get to target. Not regarding cost of turns.
         /// </summary>
@@ -345,18 +347,19 @@ namespace LMCore.TiledDungeon
                 }
 
                 var node = this[coordinates];
+                if (node == null) continue;
 
                 foreach (var direction in DirectionExtensions.AllDirections)
                 {
+                    if (node.Coordinates == monitorPos)
+                    {
+                        Debug.Log($"{node.Coordinates} -> {direction}");
+                    }
+
                     // TODO: If we want enemies to be able to climb stairs we need to check
                     // be able to move inside a node too and check what directions to ignor
                     // based on anchor and down directions
                     if (direction == Direction.Up && !entity.TransportationMode.HasFlag(TransportationMode.Flying)) continue;
-
-                    // TODO: For now we only check allowed exits and not if we may enter
-                    // this is because we would need to consider the neuances of if we
-                    // should respect rules about letting entities coexits or not.
-                    if (!node.AllowExit(entity, direction)) continue;
 
                     var neighbour = node.Neighbour(direction);
                     var anchor = node.GetAnchor(entity.Down);
@@ -371,13 +374,37 @@ namespace LMCore.TiledDungeon
 
                             if (entity.TransportationMode.HasFlag(TransportationMode.Walking))
                             {
+                                // Exclude transitions that would require climbing more than entity can do
                                 var nodeEdge = anchor.GetEdgePosition(direction);
                                 var neigbourEdge = neighbourAnchor.GetEdgePosition(direction.Inverse());
                                 var up = entity.Down.Inverse().AsLookVector3D();
                                 var delta = neigbourEdge - nodeEdge;
-                                if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight) continue;
+                                if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
+                                {
+                                    if (node.Coordinates == monitorPos && direction == Direction.East)
+                                    {
+                                        Debug.Log($"{node.Coordinates} too high to scale {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
+                                    }
+                                    continue;
+                                }
+
+                                // TODO: Exclude jumps that are too long for the entity
                             }
                         }
+                    } else
+                    {
+                        // TODO: For now we only check allowed exits and not if we may enter
+                        // this is because we would need to consider the neuances of if we
+                        // should respect rules about letting entities coexits or not.
+                        if (!node.AllowExit(entity, direction))
+                        {
+                            if (node.Coordinates == monitorPos && direction == Direction.East)
+                            {
+                                Debug.Log($"{node.Coordinates}: Can't exit");
+                            }
+                            continue;
+                        }
+
                     }
 
                     if (seen.ContainsKey(neighbour)) continue;

@@ -69,6 +69,7 @@ namespace LMCore.TiledDungeon.Enemies
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
             {
+                Debug.Log(PrefixLogMessage($"Found path: {string.Join(", ", path.Select(p => $"{p.Key} {p.Value}"))}"));
                 previousPath = path;
                 var length = path.Count;
                 if (length > 0)
