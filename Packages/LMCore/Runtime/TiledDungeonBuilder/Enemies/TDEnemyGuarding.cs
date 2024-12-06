@@ -110,7 +110,7 @@ namespace LMCore.TiledDungeon.Enemies
                 if (movement.IsRotation())
                 {
                     // We are turning
-                    Debug.Log(PrefixLogMessage(movement.ToString()));
+                    // Debug.Log(PrefixLogMessage(movement.ToString()));
                     entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
                 } else
                 {

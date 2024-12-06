@@ -75,8 +75,25 @@ namespace LMCore.TiledDungeon.Enemies
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
             {
-                Debug.Log(PrefixLogMessage($"Found path: {string.Join(", ", path.Select(p => $"{p.Key} {p.Value}"))}"));
-                previousPath = path;
+                if (previousPath != null && previousPath.Count > 0)
+                {
+                    if (previousPath[0].Value == entity.Coordinates)
+                    {
+                        previousPath = previousPath.Skip(1).ToList();
+                    }
+                }
+
+                var pCount = previousPath?.Count ?? -100;
+                if (Mathf.Abs(pCount - path.Count) < 2)
+                {
+                    path = previousPath;
+                } else
+                {
+                    // Debug.Log(PrefixLogMessage($"Found path: {string.Join(", ", path.Select(p => $"{p.Key} {p.Value}"))}"));
+                    previousPath = path;
+                }
+                    
+
                 var length = path.Count;
                 if (length > 0)
                 {
