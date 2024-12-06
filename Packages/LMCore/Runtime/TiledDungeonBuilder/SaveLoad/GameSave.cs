@@ -219,6 +219,8 @@ namespace LMCore.TiledDungeon.SaveLoad
     public class EnemyHuntingSave
     {
         public string TargetId;
+        public List<Direction> PreviousPathDirections;
+        public List<Vector3Int> PreviousPathCoordinates;
     }
 
     [System.Serializable]

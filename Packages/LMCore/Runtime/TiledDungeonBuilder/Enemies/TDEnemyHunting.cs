@@ -121,6 +121,8 @@ namespace LMCore.TiledDungeon.Enemies
         public EnemyHuntingSave Save() => 
             target != null ? new EnemyHuntingSave() {
                 TargetId = target.Identifier,
+                PreviousPathCoordinates = previousPath?.Select(kvp => kvp.Value)?.ToList(),
+                PreviousPathDirections = previousPath?.Select(kvp => kvp.Key)?.ToList(),
             } :
             null;
 
@@ -145,9 +147,15 @@ namespace LMCore.TiledDungeon.Enemies
             if (huntingSave != null)
             {
                 target = Dungeon.GetEntity(huntingSave.TargetId);
+                previousPath = huntingSave.PreviousPathCoordinates
+                    .Zip(
+                        huntingSave.PreviousPathDirections,
+                        (coords, dir) => new KeyValuePair<Direction, Vector3Int>(dir, coords))
+                    .ToList();
             } else
             {
                 target = null;
+                previousPath = null;
             }
         }
 
