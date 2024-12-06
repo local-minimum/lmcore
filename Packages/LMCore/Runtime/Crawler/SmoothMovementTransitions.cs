@@ -120,6 +120,8 @@ namespace LMCore.Crawler
                     positionConstraint.weight = 1;
                     positionConstraint.enabled = true;
                 }
+
+                ReservationNodes.Clear();
             }
         }
 
@@ -187,6 +189,18 @@ namespace LMCore.Crawler
                 out var checkpoint,
                 out var stepProgress);
 
+            if (ReservationNodes.Count > 0)
+            {
+                if (activeInterpretation.Outcome == MovementInterpretationOutcome.DynamicBounce || activeInterpretation.Outcome == MovementInterpretationOutcome.Bouncing)
+                {
+                    foreach (var node in ReservationNodes)
+                    {
+                        node.RemoveReservation(Entity);
+                    }
+
+                    ReservationNodes.Clear();
+                }
+            }
             transform.rotation = rotation;
 
             if (currentCheckpoint != checkpoint)

@@ -30,6 +30,7 @@ namespace LMCore.TiledDungeon.Enemies
 
         protected void InvokePathBasedMovement(
             Direction direction, 
+            Vector3Int targetCoordinates,
             float movementDuration,
             System.Func<string, string> prefixLogMessage)
         {
@@ -37,21 +38,29 @@ namespace LMCore.TiledDungeon.Enemies
 
             if (entity.LookDirection == direction)
             {
-                Debug.Log(prefixLogMessage("Moving forward"));
-                entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
+                if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse())) { 
+                    Debug.Log(prefixLogMessage("Moving forward"));
+                    entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
+                }
             } else
             {
                 var movement = direction.AsMovement(entity.LookDirection, entity.Down);
                 if (movement == IO.Movement.Up && entity.TransportationMode.HasFlag(TransportationMode.Flying))
                 {
-                    // Flying up or climbing up
-                    Debug.Log(prefixLogMessage("Moving up"));
-                    entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                    if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
+                    {
+                        // Flying up or climbing up
+                        Debug.Log(prefixLogMessage("Moving up"));
+                        entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                    }
                 } else if (movement == IO.Movement.Down)
                 {
-                    // Falling or flying down
-                    Debug.Log(prefixLogMessage("Moving down"));
-                    entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                    if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
+                    {
+                        // Falling or flying down
+                        Debug.Log(prefixLogMessage("Moving down"));
+                        entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
+                    }
                 } else
                 {
                     Debug.Log(prefixLogMessage("Rotating"));
@@ -60,7 +69,7 @@ namespace LMCore.TiledDungeon.Enemies
                     {
                         // We are turning
                         entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
-                    } else
+                    } else if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
                     {
                         // TODO: Consider better fallback / force getting off patrol
                         Debug.LogError(prefixLogMessage($"We have no movement based on needed direction {direction} while looking {entity.LookDirection}"));

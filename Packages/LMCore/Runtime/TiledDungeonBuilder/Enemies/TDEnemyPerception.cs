@@ -39,6 +39,9 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
+        private string PrefixLogMessage(string message) =>
+            $"Perception LOS({requireLOS}) {effectTrait}:{effectMagnitude}: {message}";
+
         private void OnEnable()
         {
             GridEntity.OnPositionTransition += CheckDetection;
@@ -104,7 +107,7 @@ namespace LMCore.TiledDungeon.Enemies
 
         void InvokeEffect(GridEntity entity)
         {
-            Debug.Log("Player detected");
+            Debug.Log(PrefixLogMessage($"{entity.name} detected"));
             Target = entity;
             Enemy.Personality.AdjustState(effectTrait, effectMagnitude);
         }

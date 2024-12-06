@@ -357,7 +357,19 @@ namespace LMCore.TiledDungeon
                     // this is because we would need to consider the neuances of if we
                     // should respect rules about letting entities coexits or not.
                     if (!node.AllowExit(entity, direction)) continue;
+
                     var neighbour = node.Neighbour(direction);
+                    var anchor = node.GetAnchor(entity.Down);
+                    if (anchor != null)
+                    {
+                        // TODO: How to handle if there's no anchor on the neighbour?
+                        // This is also part of where we could expand to allow climbing
+                        var neighbourAnchor = anchor.GetNeighbour(direction, entity, out var outcome);
+                        if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null)
+                        {
+                            neighbour = neighbourAnchor.Node.Coordinates;
+                        }
+                    }
 
                     if (seen.ContainsKey(neighbour)) continue;
 

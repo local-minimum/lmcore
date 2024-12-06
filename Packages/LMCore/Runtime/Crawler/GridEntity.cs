@@ -152,6 +152,9 @@ namespace LMCore.Crawler
             }
         }
         
+        /// <summary>
+        /// The direction of the anchor for the entity
+        /// </summary>
         public Direction Down
         {
             get {

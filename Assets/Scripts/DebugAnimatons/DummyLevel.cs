@@ -27,6 +27,8 @@ public class DummyLevel : MonoBehaviour, IDungeon
 
     public float GridSize => 3;
 
+    public GridEntity Player => null;
+
     public List<IDungeonNode> FindTeleportersById(int id)
     {
         return null;

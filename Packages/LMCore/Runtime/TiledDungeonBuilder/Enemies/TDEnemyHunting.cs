@@ -2,7 +2,9 @@ using LMCore.Crawler;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.Composites;
 
 namespace LMCore.TiledDungeon.Enemies
 {
@@ -12,13 +14,17 @@ namespace LMCore.TiledDungeon.Enemies
         float movementDuration = 0.6f;
 
         [SerializeField]
-        int looseAgressivityDistance = 5;
+        int taxActivityStayDistance = 5;
+
+        [SerializeField]
+        int checkActivityTransitionDistance = 3;
 
         string PrefixLogMessage(string message) =>
             $"Hunting {Enemy.name} ({target}): {message}";
 
         #region SaveState
         GridEntity target;
+        List<KeyValuePair<Direction, Vector3Int>> previousPath;
         #endregion
 
         private void Awake()
@@ -26,9 +32,14 @@ namespace LMCore.TiledDungeon.Enemies
             enabled = false;
         }
 
+        private void OnEnable()
+        {
+        }
+
         private void OnDisable()
         {
             target = null;
+            previousPath = null;
         }
 
         public void InitHunt(GridEntity target)
@@ -40,7 +51,7 @@ namespace LMCore.TiledDungeon.Enemies
             this.target = target;
         }
 
-        float nextFailCheck;
+        float nextCheck;
 
         private void Update()
         {
@@ -50,7 +61,7 @@ namespace LMCore.TiledDungeon.Enemies
                 Enemy.UpdateActivity();
                 return;
             }
-            if (Time.timeSinceLevelLoad < nextFailCheck) return;
+            if (Time.timeSinceLevelLoad < nextCheck) return;
 
             var entity = Enemy.Entity;
             if (entity.Moving != Crawler.MovementType.Stationary) return;
@@ -58,23 +69,48 @@ namespace LMCore.TiledDungeon.Enemies
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
             {
+                previousPath = path;
                 var length = path.Count;
                 if (length > 0)
                 {
-                    if (length > looseAgressivityDistance)
+                    if (length > taxActivityStayDistance)
                     {
                         Enemy.MayTaxStay = true;
                     }
-                    var (direction, _) = path[0];
-                    InvokePathBasedMovement(direction, movementDuration, PrefixLogMessage);
+                    var (direction, coordinates) = path[0];
+                    InvokePathBasedMovement(direction, coordinates, movementDuration, PrefixLogMessage);
+                    nextCheck = Time.timeSinceLevelLoad + movementDuration * 0.5f;
                 }
 
-                if (length > 3) Enemy.UpdateActivity();
+                if (length > checkActivityTransitionDistance)
+                {
+                    Enemy.UpdateActivity();
+                }
             } else
             {
+                if (previousPath != null && previousPath.Count > 0)
+                {
+                    if (previousPath[0].Value != target.Coordinates)
+                    {
+
+                        // If we repeatedly are following prevoius path we
+                        // need to truncate it for each move we have made
+                        if (previousPath[0].Value == entity.Coordinates)
+                        {
+                            previousPath = previousPath.Skip(1).ToList();
+                        }
+
+                        if (previousPath.Count > 0)
+                        {
+                            Debug.Log(PrefixLogMessage("Using previous path to player"));
+                            var (direction, coordinates) = previousPath[0];
+                            InvokePathBasedMovement(direction, coordinates, movementDuration, PrefixLogMessage);
+                        }
+                    }
+                }
                 Debug.LogWarning(PrefixLogMessage("Could not find path to player"));
                 Enemy.MayTaxStay = true;
-                nextFailCheck = Time.timeSinceLevelLoad + movementDuration;
+                nextCheck = Time.timeSinceLevelLoad + movementDuration;
 
                 Enemy.UpdateActivity();
             }

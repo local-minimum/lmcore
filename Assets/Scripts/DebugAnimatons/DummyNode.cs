@@ -92,4 +92,8 @@ public class DummyNode : MonoBehaviour, IDungeonNode
     }
 
     public bool HasIllusorySurface(Direction direction) => false;
+
+    public void RemoveReservation(GridEntity entity)
+    {
+    }
 }

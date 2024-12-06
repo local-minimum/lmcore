@@ -6,6 +6,7 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
+using UnityEngine.Assertions.Must;
 
 namespace LMCore.TiledDungeon
 {
@@ -175,8 +176,9 @@ namespace LMCore.TiledDungeon
                 "Empty tile" :
                 $"Occupants: {string.Join(", ", Occupants.Select(e => $"{e.Identifier} ({e.EntityType})"))} ({_reservations.Count} reservations)";
 
+            var reservations = _reservations.Count == 0 ? "No reservations" : $"Reservations: {string.Join(", ", _reservations.Select(e => $"{e.Identifier} ({e.EntityType})"))}";
             Debug.Log(PrefixLogMessage(
-                $"{occupants}. " +
+                $"{occupants}. {reservations}." +
                 $"Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({SideInfo(d)})"))}"));
         }
 
@@ -477,13 +479,42 @@ namespace LMCore.TiledDungeon
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
-            if (!OccupationRules.MayCoexist(entity, Occupants)) return false;
+            if (!OccupationRules.MayCoexist(entity, Occupants))
+            {
+                var occupants = Occupants.Select(o => o.name);
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
+                return false;
+            }
+            if (!OccupationRules.MayCoexist(entity, _reservations))
+            {
+                var reserves = _reservations.Select(r => r.name);
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
+                return false;
+            }
 
-            if (HasWall(direction, SideCheckMode.Entry) || HasLadder(direction)) return false;
+            if (HasWall(direction, SideCheckMode.Entry))
+            {
+                Debug.Log(PrefixLogMessage($"Entry blocked by wall in {direction} for {entity.name}"));
+                return false;
+            }
 
-            if (HasBlockingDoor(direction)) return false;
+            if (HasLadder(direction))
+            {
+                Debug.Log(PrefixLogMessage($"Entry blocked by ladder in {direction} for {entity.name}"));
+                return false;
+            }
 
-            if (!entity.Falling && Obstructed) return false;
+            if (HasBlockingDoor(direction))
+            {
+                Debug.Log(PrefixLogMessage($"Entry blocked by door for {entity.name}"));
+                return false;
+            }
+
+            if (!entity.Falling && Obstructed)
+            {
+                Debug.Log(PrefixLogMessage($"Entry blocked by obstruction for non falling {entity.name}"));
+                return false;
+            }
 
             var ramp = RampModification;
             if (ramp != null && direction.IsPlanarCardinal())
@@ -492,7 +523,7 @@ namespace LMCore.TiledDungeon
                 if (ramp.Tile.CustomProperties.Elevation(TiledConfiguration.instance.ElevationKey) != TDEnumElevation.Low &&
                     ramp.Tile.CustomProperties.Direction(TiledConfiguration.instance.DownDirectionKey).AsDirection().AsAxis() != axis)
                 {
-                    Debug.Log("Rampblock");
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by non-low ramp"));
                     return false;
                 }
             }
@@ -500,13 +531,21 @@ namespace LMCore.TiledDungeon
             // Cannot check if there's any modification blocking walking here because could be mod doesn't affect the cube face
             // or edge transition we are interested in...
 
-            if (BlockEdgeTraversal(entity, direction, SideCheckMode.Entry)) return false;
+            if (BlockEdgeTraversal(entity, direction, SideCheckMode.Entry))
+            {
+                Debug.LogWarning(PrefixLogMessage($"Entry blocked by edge traversal for {entity.name}"));
+                return false;
+            }
 
             var platform = GetComponentInChildren<TDMovingPlatform>();
             if (platform != null)
             {
-                Debug.Log(PrefixLogMessage("We have a platform"));
-                return platform.MayEnter(entity);
+                var entry = platform.MayEnter(entity);
+                if (!entry)
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Entry blocked by moving platform for {entity.name}"));
+                }
+                return entity;
             }
 
             return true;
@@ -624,6 +663,12 @@ namespace LMCore.TiledDungeon
         }
 
         public IEnumerable<GridEntity> Occupants => _occupants;
+
+        public void RemoveReservation(GridEntity entity)
+        {
+            Debug.Log(PrefixLogMessage($"Removing reservation from {entity}"));
+            _reservations.Remove(entity);
+        }
 
         public void Reserve(GridEntity entity)
         {

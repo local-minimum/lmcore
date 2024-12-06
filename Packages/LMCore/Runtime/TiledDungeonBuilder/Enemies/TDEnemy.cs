@@ -150,6 +150,19 @@ namespace LMCore.TiledDungeon.Enemies
                 return _Hunting;
             }
         }
+
+        SmoothMovementTransitions _movementHandler;
+        public SmoothMovementTransitions movementHandler
+        {
+            get
+            {
+                if (_movementHandler == null)
+                {
+                    _movementHandler = GetComponent<SmoothMovementTransitions>();
+                }
+                return _movementHandler;
+            }
+        }
         #endregion
 
         protected string PrefixLogMessage(string message) =>
@@ -203,7 +216,6 @@ namespace LMCore.TiledDungeon.Enemies
         {
             ActivityState.OnStayState += ActivityState_OnStayState;
             ActivityState.OnEnterState += ActivityState_OnEnterState;
-            if (activeState == null) UpdateActivity();
         }
 
         private void OnDisable()
@@ -234,6 +246,11 @@ namespace LMCore.TiledDungeon.Enemies
         {
             Entity.Dungeon = Dungeon;
             Entity.GridSizeProvider = Dungeon;
+        }
+
+        private void Update()
+        {
+            if (activeState == null) UpdateActivity();
         }
 
         /// <summary>
@@ -282,7 +299,7 @@ namespace LMCore.TiledDungeon.Enemies
             var dungeon = Dungeon;
             TDPathCheckpoint closest = null;
             int closestDistance = int.MaxValue;
-            var points = loop < 0 ? TDPathCheckpoint.GetAll(this) : TDPathCheckpoint.GetLoop(this, loop);
+            var points = (loop < 0 ? TDPathCheckpoint.GetAll(this) : TDPathCheckpoint.GetLoop(this, loop)).ToList();
 
             foreach (var path in points)
             {
@@ -303,6 +320,9 @@ namespace LMCore.TiledDungeon.Enemies
                         closest = path;
                         closestDistance = currentPath.Count();
                     }
+                } else
+                {
+                    Debug.LogWarning(PrefixLogMessage($"Found no path to checkpoint {path.Coordinates}"));
                 }
             }
 

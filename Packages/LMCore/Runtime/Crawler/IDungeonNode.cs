@@ -20,9 +20,13 @@ namespace LMCore.Crawler
         public bool CanAnchorOn(GridEntity entity, Direction anchor);
 
         public void Reserve(GridEntity entity);
+        public void RemoveReservation(GridEntity entity);
         public void AddOccupant(GridEntity entity);
         public void RemoveOccupant(GridEntity entity);
 
+        /// <summary>
+        /// Returns the coordinates of the node in the given direction
+        /// </summary>
         public Vector3Int Neighbour(Direction direction);
 
         public bool HasFloor { get; }

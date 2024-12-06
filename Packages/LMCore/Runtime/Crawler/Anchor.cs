@@ -168,7 +168,10 @@ namespace LMCore.Crawler
 
         bool TraversableEdge(GridEntity entity, Direction edge)
         {
-            // Debug.Log($"{edge} on {CubeFace}: Has({HasEdge(edge)}), Sentinel({Sentinels.GetValueOrDefault(edge)}) for entity ({entity.TransportationMode})");
+            if (entity.EntityType == GridEntityType.Enemy)
+            {
+                Debug.Log($"{Node.Coordinates}:{edge} on {CubeFace}: Has({HasEdge(edge)}), Sentinel({Sentinels.GetValueOrDefault(edge)}) for entity ({entity.TransportationMode})");
+            }
             if (!HasEdge(edge)) return false;
 
             var sentinel = Sentinels.GetValueOrDefault(edge);
@@ -257,7 +260,7 @@ namespace LMCore.Crawler
 
         public Vector3 GetEdgePosition(Direction direction)
         {
-            if (direction == Direction.None || direction == CubeFace) 
+            if (direction == Direction.None || direction == CubeFace)
                 return CenterPosition;
 
             if (direction == CubeFace.Inverse())
@@ -272,6 +275,13 @@ namespace LMCore.Crawler
         }
         #endregion
 
+        /// <summary>
+        /// Check if there's a neighbour in the direction with a vertical offset
+        /// </summary>
+        /// <param name="direction">Main direction of the movement</param>
+        /// <param name="offset">Vertical offset</param>
+        /// <param name="entity">Entity in question</param>
+        /// <returns></returns>
         private Anchor GetNeighbour(Direction direction, Direction offset, GridEntity entity)
         {
             var dungeon = Dungeon;
@@ -340,8 +350,7 @@ namespace LMCore.Crawler
                 {
                     var closest = candidates[0];
 
-                    // TODO: This magic number belongs somewhere else
-                    if (closest.offset == CubeFace.Inverse() && closest.orthoDistance < Dungeon.GridSize * 0.25f)
+                    if (closest.offset == CubeFace.Inverse() && closest.orthoDistance <= entity.Abilities.maxScaleHeight)
                     {
                         // We seem to be going "up" one level, but to be able to do that
                         // we need the opposing of cube side to be free
@@ -378,7 +387,7 @@ namespace LMCore.Crawler
 
                     // If the closest is "down" we should only count it as a neighbour
                     // if it is close. Else we would void ladders and such.
-                    if (closest.offset == Direction.None || closest.orthoDistance < Dungeon.GridSize * 0.25f)
+                    if (closest.offset == Direction.None || closest.orthoDistance <= entity.Abilities.maxScaleHeight)
                     {
                         outcome = MovementOutcome.NodeExit;
                         return closest.neighbour;
@@ -400,8 +409,21 @@ namespace LMCore.Crawler
         [ContextMenu("Info")]
         void Info()
         {
+            var entity = entities.FirstOrDefault() ?? Dungeon.Player;
+            var neighbours = DirectionExtensions.AllDirections
+                .Where(direction => HasEdge(direction))
+                .Select(direction => {
+                    var neighbour = GetNeighbour(direction, entity, out var outcome);
+                    if (neighbour == null)
+                    {
+                        return $"{direction} -> NONE";
+                    }
+                    return $"{direction} -> {neighbour.Node.Coordinates}/{neighbour.CubeFace}/{outcome}";
+                });
+
             Debug.Log(PrefixLogMessage(
-                $"Managed entities: {string.Join(", ", entities.Select(e => e.name))}"));
+                $"Managed entities: {string.Join(", ", entities.Select(e => e.name))}\n" +
+                $"Neighbours for {entity.name}: {string.Join(" | ", neighbours)}"));
         }
     }
 }
