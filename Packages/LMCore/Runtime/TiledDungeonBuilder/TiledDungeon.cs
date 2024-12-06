@@ -368,6 +368,15 @@ namespace LMCore.TiledDungeon
                         if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null)
                         {
                             neighbour = neighbourAnchor.Node.Coordinates;
+
+                            if (entity.TransportationMode.HasFlag(TransportationMode.Walking))
+                            {
+                                var nodeEdge = anchor.GetEdgePosition(direction);
+                                var neigbourEdge = neighbourAnchor.GetEdgePosition(direction.Inverse());
+                                var up = entity.Down.Inverse().AsLookVector3D();
+                                var delta = neigbourEdge - nodeEdge;
+                                if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight) continue;
+                            }
                         }
                     }
 

@@ -335,6 +335,7 @@ namespace LMCore.Crawler
             Steps.Add(intermediary);
             Steps.Add(start);
 
+            Debug.LogWarning("Movement regretted");
             Outcome = MovementInterpretationOutcome.DynamicBounce;
             CurrentSegment = Segment.Last;
         }
@@ -381,6 +382,7 @@ namespace LMCore.Crawler
             {
                 if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
                 {
+                    Debug.LogWarning($"Can't move 'up': {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
                     RegretMovementDynamically();
                 }
             }
