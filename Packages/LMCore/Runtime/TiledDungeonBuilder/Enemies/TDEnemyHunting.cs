@@ -13,6 +13,9 @@ namespace LMCore.TiledDungeon.Enemies
         [SerializeField]
         float movementDuration = 0.6f;
 
+        [SerializeField, Range(0f, 1f)]
+        float fallDurationFactor = 0.5f;
+
         [SerializeField]
         int taxActivityStayDistance = 5;
 
@@ -32,9 +35,6 @@ namespace LMCore.TiledDungeon.Enemies
             enabled = false;
         }
 
-        private void OnEnable()
-        {
-        }
 
         private void OnDisable()
         {
@@ -65,6 +65,12 @@ namespace LMCore.TiledDungeon.Enemies
 
             var entity = Enemy.Entity;
             if (entity.Moving != Crawler.MovementType.Stationary) return;
+            if (entity.Falling)
+            {
+                Enemy.Entity.MovementInterpreter.InvokeMovement(Movement.AbsDown, movementDuration * fallDurationFactor);
+                nextCheck = Time.timeSinceLevelLoad + movementDuration * fallDurationFactor * 0.5f;
+                return;
+            }
 
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))

@@ -248,9 +248,15 @@ namespace LMCore.TiledDungeon.Enemies
             Entity.GridSizeProvider = Dungeon;
         }
 
+        [SerializeField]
+        StateType startState = StateType.Patrolling;
+
         private void Update()
         {
-            if (activeState == null) UpdateActivity();
+            if (activeState == null)
+            {
+                ActivityManager.ForceState(startState);
+            }
         }
 
         /// <summary>
