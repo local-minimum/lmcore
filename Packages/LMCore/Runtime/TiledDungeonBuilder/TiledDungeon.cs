@@ -407,6 +407,16 @@ namespace LMCore.TiledDungeon
 
                     }
 
+                    var neighbourNode = node.Dungeon[neighbour];
+                    if (neighbourNode != null)
+                    {
+                        var entryDirection = direction.Inverse();
+
+                        if (neighbourNode.HasBlockingDoor(entryDirection)) continue;
+                        if (neighbourNode.HasSide(entryDirection, TDNode.SideCheckMode.Entry)) continue;
+                        if (neighbourNode.BlockEdgeTraversal(entity, entryDirection, TDNode.SideCheckMode.Entry)) continue;
+                    } 
+
                     if (seen.ContainsKey(neighbour)) continue;
 
                     var neighbourPath = new List<KeyValuePair<Direction, Vector3Int>>(pathHere);

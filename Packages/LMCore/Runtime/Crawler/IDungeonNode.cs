@@ -31,5 +31,8 @@ namespace LMCore.Crawler
 
         public bool HasFloor { get; }
         public bool HasIllusorySurface(Direction direction);  
+
+        public bool Walkable {  get; }
+        public bool Flyable { get; }
     }
 }

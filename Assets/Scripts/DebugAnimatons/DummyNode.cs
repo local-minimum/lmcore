@@ -24,6 +24,10 @@ public class DummyNode : MonoBehaviour, IDungeonNode
 
     public bool HasFloor => true;
 
+    public bool Walkable => true;
+
+    public bool Flyable => true;
+
     public void AddOccupant(GridEntity entity)
     {
     }

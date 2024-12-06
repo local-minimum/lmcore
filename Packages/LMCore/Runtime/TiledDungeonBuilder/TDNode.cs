@@ -6,7 +6,6 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
-using UnityEngine.Assertions.Must;
 
 namespace LMCore.TiledDungeon
 {
@@ -450,7 +449,7 @@ namespace LMCore.TiledDungeon
             return door.BlockingPassage;
         }
 
-        bool BlockEdgeTraversal(GridEntity entity, Direction direction, SideCheckMode sideCheckMode)
+        public bool BlockEdgeTraversal(GridEntity entity, Direction direction, SideCheckMode sideCheckMode)
         {
             if (sideCheckMode == SideCheckMode.Has && temporarySideNegator.Overrides(direction)) return false;
             if (sideCheckMode == SideCheckMode.Exit && temporaryExitNegator.Overrides(direction)) return false;
