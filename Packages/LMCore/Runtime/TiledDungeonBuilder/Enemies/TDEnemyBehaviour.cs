@@ -28,26 +28,35 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
+        /// <summary>
+        /// Cause relevant translation to approach a target
+        /// </summary>
+        /// <param name="translationDirection">Direction of next translation</param>
+        /// <param name="translatedTarget">Expected coordinates after translation (accounts for rounding corners and such)</param>
+        /// <param name="target">Reference point, i.e. player, to assist in turning direction</param>
+        /// <param name="movementDuration">Duration of translations</param>
+        /// <param name="prefixLogMessage">Formatter or log messages</param>
         protected void InvokePathBasedMovement(
-            Direction direction, 
-            Vector3Int targetCoordinates,
+            Direction translationDirection, 
+            Vector3Int translatedTarget,
+            Vector3Int target,
             float movementDuration,
             System.Func<string, string> prefixLogMessage)
         {
             var entity = Enemy.Entity;
 
-            if (entity.LookDirection == direction)
+            if (entity.LookDirection == translationDirection)
             {
-                if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse())) { 
+                if (Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse())) { 
                     Debug.Log(prefixLogMessage("Moving forward"));
                     entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
                 }
             } else
             {
-                var movement = direction.AsMovement(entity.LookDirection, entity.Down);
+                var movement = translationDirection.AsMovement(entity.LookDirection, entity.Down);
                 if (movement == IO.Movement.Up && entity.TransportationMode.HasFlag(TransportationMode.Flying))
                 {
-                    if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
+                    if (Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse()))
                     {
                         // Flying up or climbing up
                         Debug.Log(prefixLogMessage("Moving up"));
@@ -55,7 +64,7 @@ namespace LMCore.TiledDungeon.Enemies
                     }
                 } else if (movement == IO.Movement.Down)
                 {
-                    if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
+                    if (Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse()))
                     {
                         // Falling or flying down
                         Debug.Log(prefixLogMessage("Moving down"));
@@ -64,15 +73,16 @@ namespace LMCore.TiledDungeon.Enemies
                 } else
                 {
                     Debug.Log(prefixLogMessage("Rotating"));
-                    movement = direction.AsPlanarRotation(entity.LookDirection, entity.Down);
+                    var yawBias = entity.LookDirection.AsPlanarRotation(entity.Down, entity.Coordinates, target);
+                    movement = translationDirection.AsPlanarRotation(entity.LookDirection, entity.Down, yawBias);
                     if (movement != IO.Movement.None)
                     {
                         // We are turning
                         entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
-                    } else if (Dungeon[targetCoordinates].AllowsEntryFrom(entity, direction.Inverse()))
+                    } else if (Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse()))
                     {
                         // TODO: Consider better fallback / force getting off patrol
-                        Debug.LogError(prefixLogMessage($"We have no movement based on needed direction {direction} while looking {entity.LookDirection}"));
+                        Debug.LogError(prefixLogMessage($"We have no movement based on needed direction {translationDirection} while looking {entity.LookDirection}"));
                         entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
                     }
                 } 

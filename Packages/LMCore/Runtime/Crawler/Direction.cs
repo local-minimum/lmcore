@@ -461,6 +461,21 @@ namespace LMCore.Crawler
             }
         }
 
+        public static Vector3Int AsAxisFilter(this DirectionAxis axis)
+        {
+            switch (axis)
+            {
+                case DirectionAxis.UpDown:
+                    return Vector3Int.up;
+                case DirectionAxis.WestEast:
+                    return Vector3Int.right;
+                case DirectionAxis.NorthSouth:
+                    return Vector3Int.forward;
+                default:
+                    return Vector3Int.zero;
+            }
+        }
+
         public static Movement AsMovement(this Direction direction, Direction lookDirection, Direction down)
         {
             if (direction == lookDirection) return Movement.Forward;
@@ -473,12 +488,57 @@ namespace LMCore.Crawler
             return Movement.None;
         }
 
-        public static Movement AsPlanarRotation(this Direction direction, Direction lookDirection, Direction down)
+        /// <summary>
+        /// The rotation needed by the supplied direction to approach primary direction
+        /// of the offset between the source and target coordinates.
+        /// </summary>
+        /// <param name="direction">Current direction</param>
+        /// <param name="down">Reference down of the system</param>
+        /// <param name="sourceCoordinates">Source coordinates</param>
+        /// <param name="targetCoordinates">Target coordinates</parm>
+        public static Movement AsPlanarRotation(
+            this Direction direction,
+            Direction down,
+            Vector3Int sourceCoordinates,
+            Vector3Int targetCoordinates)
         {
-            if (lookDirection == direction) return Movement.None;
-            if (lookDirection.Inverse() == direction) return Random.value < 0.5f ? Movement.YawCCW : Movement.YawCW;
-            if (lookDirection.Rotate3DCCW(down) == direction) return Movement.YawCCW;
-            if (lookDirection.Rotate3DCW(down) == direction) return Movement.YawCW;
+            var offset = targetCoordinates - sourceCoordinates;
+            // Since we are doing a planar offset, we don't care about offsets along the down axis
+            offset = offset - offset * down.AsAxis().AsAxisFilter();
+            var wantedDirection = offset.PrimaryCardinalDirection(true).AsDirectionOrNone();
+            if (wantedDirection == Direction.None) return Movement.None;
+
+            return wantedDirection.AsPlanarRotation(direction, down);
+        }
+
+        /// <summary>
+        /// The yaw that turns source direction into the wanted direction, if exists 
+        /// </summary>
+        /// <param name="target">The target direction</param>
+        /// <param name="source">The look source to be modified</param>
+        /// <param name="down">Reference down of the system</param>
+        /// <param name="preferedYaw">If source and target direction are opposing, this becomes the yaw, it set</param>
+        /// <returns>Yaw or None movement</returns>
+        public static Movement AsPlanarRotation(
+            this Direction target, 
+            Direction source, 
+            Direction down, 
+            Movement preferedYaw = Movement.None)
+        {
+            if (source == target) return Movement.None;
+            if (source.Inverse() == target)
+            {
+                switch (preferedYaw)
+                {
+                    case Movement.YawCW:
+                    case Movement.YawCCW:
+                        return preferedYaw;
+                    default:
+                        return Random.value < 0.5f ? Movement.YawCCW : Movement.YawCW;
+                }
+            }
+            if (source.Rotate3DCCW(down) == target) return Movement.YawCCW;
+            if (source.Rotate3DCW(down) == target) return Movement.YawCW;
             return Movement.None;
         }
 

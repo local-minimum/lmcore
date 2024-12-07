@@ -102,7 +102,7 @@ namespace LMCore.TiledDungeon.Enemies
                         Enemy.MayTaxStay = true;
                     }
                     var (direction, coordinates) = path[0];
-                    InvokePathBasedMovement(direction, coordinates, movementDuration, PrefixLogMessage);
+                    InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
                     nextCheck = Time.timeSinceLevelLoad + movementDuration * 0.5f;
                 }
 
@@ -128,7 +128,7 @@ namespace LMCore.TiledDungeon.Enemies
                         {
                             Debug.Log(PrefixLogMessage("Using previous path to player"));
                             var (direction, coordinates) = previousPath[0];
-                            InvokePathBasedMovement(direction, coordinates, movementDuration, PrefixLogMessage);
+                            InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
                         }
                     }
                 }
