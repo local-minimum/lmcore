@@ -127,6 +127,7 @@ namespace LMCore.TiledDungeon.Enemies
             Debug.Log(PrefixLogMessage($"{entity.name} detected"));
             Target = entity;
             Enemy.Personality.AdjustState(effectTrait, effectMagnitude);
+            Enemy.UpdateActivity();
             _passing = true;
         }
     }

@@ -22,6 +22,9 @@ namespace LMCore.TiledDungeon.Enemies
         [SerializeField]
         int checkActivityTransitionDistance = 3;
 
+        [SerializeField]
+        int maxPlayerSearchDepth = 7;
+
         string PrefixLogMessage(string message) =>
             $"Hunting {Enemy.name} ({target}): {message}";
 
@@ -73,7 +76,7 @@ namespace LMCore.TiledDungeon.Enemies
             }
 
             var dungeon = Enemy.Dungeon;
-            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
+            if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, maxPlayerSearchDepth, out var path))
             {
                 if (previousPath != null && previousPath.Count > 0)
                 {

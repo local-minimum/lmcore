@@ -14,6 +14,9 @@ namespace LMCore.TiledDungeon
         [SerializeField, Tooltip("Note that the turn durations are scaled by Entity abilities")]
         float movementDuration = 2f;
 
+        [SerializeField, Range(0f, 1f)]
+        float fallDurationFactor = 0.5f;
+
         #region SaveState
         bool Patrolling { get; set; }
         TDPathCheckpoint target;
@@ -55,6 +58,12 @@ namespace LMCore.TiledDungeon
                 GetNextCheckpoint();
                 Enemy.UpdateActivity();
                 if (!Patrolling) return;
+            }
+
+            if (entity.Falling)
+            {
+                Enemy.Entity.MovementInterpreter.InvokeMovement(Movement.AbsDown, movementDuration * fallDurationFactor);
+                return;
             }
 
             var dungeon = Enemy.Dungeon;
