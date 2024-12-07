@@ -27,6 +27,8 @@ namespace LMCore.EntitySM.State
         List<NotOpposingSignCriteria> _NotOpposingSignCriteria = new List<NotOpposingSignCriteria>();
         [SerializeField]
         List<NotOfSignCriteria> _NotOfSignCriteria = new List<NotOfSignCriteria>();
+        [SerializeField]
+        List<CustomCriteria> _CustomCriteria = new List<CustomCriteria>();
 
         IEnumerable<ITransitionCriteria> criteria
         {
@@ -59,6 +61,10 @@ namespace LMCore.EntitySM.State
                 for (int i = 0, l = _NotOfSignCriteria.Count; i < l; i++)
                 {
                     yield return _NotOfSignCriteria[i];
+                }
+                for (int i = 0, l = _CustomCriteria.Count; i < l; i++)
+                {
+                    yield return _CustomCriteria[i];
                 }
             }
         }

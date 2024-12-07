@@ -1,4 +1,5 @@
 using LMCore.Crawler;
+using LMCore.EntitySM.State.Critera;
 using LMCore.EntitySM.Trait;
 using LMCore.Extensions;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace LMCore.TiledDungeon.Enemies
 {
-    public class TDEnemyPerception : MonoBehaviour
+    public class TDEnemyPerception : AbsCustomPassingCriteria 
     {
         [SerializeField]
         int maxDistance = 5;
@@ -71,6 +72,9 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
+        private bool _passing;
+        public override bool Passing => _passing;
+
         private void CheckDetection(GridEntity entity)
         {
             if (entity == Enemy.Entity)
@@ -86,7 +90,11 @@ namespace LMCore.TiledDungeon.Enemies
             Players.Add(entity);
 
             var distance = entity.Coordinates.ManhattanDistance(Enemy.Entity.Coordinates);
-            if (distance > maxDistance) return;
+            if (distance > maxDistance)
+            {
+                _passing = false;
+                return;
+            }
             
             if (requireLOS)
             {
@@ -95,14 +103,23 @@ namespace LMCore.TiledDungeon.Enemies
                 var angle = Vector3.Angle(lookDirection, direction);
 
                 if (angle < losMaxAngle && Physics.Raycast(transform.position, direction, out var hitInfo, maxDistance * Enemy.Dungeon.GridSize, LOSFilter)) {
-                    if (hitInfo.transform.GetComponentInParent<GridEntity>() == entity) InvokeEffect(entity);
+                    if (hitInfo.transform.GetComponentInParent<GridEntity>() == entity)
+                    {
+                        InvokeEffect(entity);
+                        return;
+                    }
                 }
             } else
             {
                 if (Enemy.Dungeon.ClosestPath(Enemy.Entity, Enemy.Entity.Coordinates, entity.Coordinates, maxDistance, out var path)) {
-                    if (path.Count <= maxDistance) InvokeEffect(entity);
+                    if (path.Count <= maxDistance)
+                    {
+                        InvokeEffect(entity);
+                        return;
+                    }
                 }
             }
+            _passing = false;
         }
 
         void InvokeEffect(GridEntity entity)
@@ -110,6 +127,7 @@ namespace LMCore.TiledDungeon.Enemies
             Debug.Log(PrefixLogMessage($"{entity.name} detected"));
             Target = entity;
             Enemy.Personality.AdjustState(effectTrait, effectMagnitude);
+            _passing = true;
         }
     }
 }

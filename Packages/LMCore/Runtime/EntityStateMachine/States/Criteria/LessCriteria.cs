@@ -1,5 +1,4 @@
 using LMCore.EntitySM.Trait;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LMCore.EntitySM.State.Critera

@@ -74,6 +74,7 @@ MonoBehaviour:
       Sign: 1
       Noise: 0
       PassingWeight: 1
+    _CustomCriteria: []
   - _Target: 1
     _LessCriteria:
     - Trait: 0
@@ -86,6 +87,7 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria: []
 --- !u!114 &4596552218980625441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99,7 +101,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementDuration: 0.6
-  looseAgressivityDistance: 5
+  fallDurationFactor: 0.5
+  taxActivityStayDistance: 5
+  checkActivityTransitionDistance: 3
 --- !u!1 &1134111026260185223
 GameObject:
   m_ObjectHideFlags: 0
@@ -174,6 +178,7 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria: []
   - _Target: 1
     _LessCriteria:
     - Trait: 1
@@ -186,6 +191,7 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria: []
   - _Target: 7
     _LessCriteria: []
     _MoreCriteria:
@@ -198,6 +204,9 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria:
+    - Weight: 2
+      criteria: {fileID: 1136254329597228268}
 --- !u!114 &7799530359741664091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,6 +298,7 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria: []
   - _Target: 2
     _LessCriteria: []
     _MoreCriteria:
@@ -301,6 +311,7 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria: []
   - _Target: 7
     _LessCriteria: []
     _MoreCriteria:
@@ -313,6 +324,9 @@ MonoBehaviour:
     _RangeCriteria: []
     _NotOpposingSignCriteria: []
     _NotOfSignCriteria: []
+    _CustomCriteria:
+    - Weight: 2
+      criteria: {fileID: 1136254329597228268}
 --- !u!114 &2690461587711765856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -562,6 +576,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _classId: demo
   id: 
+  startState: 1
 --- !u!114 &3410662639409345825
 MonoBehaviour:
   m_ObjectHideFlags: 0
