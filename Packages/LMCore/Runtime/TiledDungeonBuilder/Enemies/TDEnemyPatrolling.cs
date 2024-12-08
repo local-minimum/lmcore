@@ -71,8 +71,12 @@ namespace LMCore.TiledDungeon
             {
                 if (path.Count > 0)
                 {
+                    // TODO: Improve this logic
                     var (direction, coordinates) = path[0];
-                    InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                    if (entity.Coordinates != coordinates || direction != entity.LookDirection)
+                    {
+                        InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                    }
                 } else
                 {
                     // TODO: Consider better fallback / force getting off patroll

@@ -1,5 +1,7 @@
 using LMCore.Crawler;
 using LMCore.IO;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LMCore.TiledDungeon.Enemies
@@ -26,6 +28,30 @@ namespace LMCore.TiledDungeon.Enemies
                 }
                 return _dungeon;
             }
+        }
+
+        public bool FallsOnPlayer(List<KeyValuePair<Direction, Vector3Int>> path, out int index)
+        {
+            index = path.FindIndex(kvp => kvp.Value == Dungeon.Player.Coordinates);
+            if (index < 0) return false;
+
+            return path[Mathf.Max(index - 1, 0)].Key == Direction.Down;
+        }
+
+        public bool NextActionCollidesWithPlayer(List<KeyValuePair<Direction, Vector3Int>> path)
+        {
+            var index = path.FindIndex(kvp => kvp.Value == Dungeon.Player.Coordinates);
+            Debug.Log($"Hunting {Enemy.name} {index}");
+            if (index < 0) return false;
+            if (index == 0) return true;
+
+            var translationsUntilPlayer = path
+                .Take(index + 1)
+                .Reverse()
+                .SkipWhile(kvp => kvp.Key == Direction.Down)
+                .Count();
+
+            return translationsUntilPlayer == 1;
         }
 
         /// <summary>

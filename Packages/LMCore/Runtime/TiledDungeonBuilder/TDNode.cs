@@ -173,11 +173,11 @@ namespace LMCore.TiledDungeon
         {
             var occupants = Occupants.Count() == 0 ? 
                 "Empty tile" :
-                $"Occupants: {string.Join(", ", Occupants.Select(e => $"{e.Identifier} ({e.EntityType})"))} ({_reservations.Count} reservations)";
+                $"Occupants: {string.Join(", ", Occupants.Select(e => $"{e.Identifier} ({e.EntityType})"))}";
 
             var reservations = _reservations.Count == 0 ? "No reservations" : $"Reservations: {string.Join(", ", _reservations.Select(e => $"{e.Identifier} ({e.EntityType})"))}";
             Debug.Log(PrefixLogMessage(
-                $"{occupants}. {reservations}." +
+                $"{occupants}. {reservations}. " +
                 $"Sides: {string.Join(" ", DirectionExtensions.AllDirections.Select(d => $"{d}({SideInfo(d)})"))}"));
         }
 

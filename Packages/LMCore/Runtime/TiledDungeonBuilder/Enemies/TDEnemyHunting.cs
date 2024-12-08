@@ -58,12 +58,19 @@ namespace LMCore.TiledDungeon.Enemies
 
         private void Update()
         {
+            /*
+            Debug.Log(PrefixLogMessage($"Target({target == null}) " +
+                $"nextCheck({Time.timeSinceLevelLoad < nextCheck}) " +
+                $"moving({Enemy.Entity.Moving != Crawler.MovementType.Stationary}) " +
+                $"falling({Enemy.Entity.Falling}"));
+            */
             if (target == null) {
                 Debug.LogError(PrefixLogMessage("Nothing to hunt"));
                 Enemy.MayTaxStay = true;
                 Enemy.UpdateActivity();
                 return;
             }
+
             if (Time.timeSinceLevelLoad < nextCheck) return;
 
             var entity = Enemy.Entity;
@@ -78,6 +85,7 @@ namespace LMCore.TiledDungeon.Enemies
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, maxPlayerSearchDepth, out var path))
             {
+                Debug.Log(PrefixLogMessage("Found path"));
                 if (previousPath != null && previousPath.Count > 0)
                 {
                     if (previousPath[0].Value == entity.Coordinates)
@@ -87,8 +95,9 @@ namespace LMCore.TiledDungeon.Enemies
                 }
 
                 var pCount = previousPath?.Count ?? -100;
-                if (Mathf.Abs(pCount - path.Count) < 2)
+                if (Mathf.Abs(pCount - path.Count) < 2 && pCount > 0)
                 {
+                    // Debug.Log(PrefixLogMessage($"Resuing path:\n{string.Join(", ", previousPath)}\ninstead of {string.Join(", ", path)}"));
                     path = previousPath;
                 } else
                 {
@@ -104,8 +113,14 @@ namespace LMCore.TiledDungeon.Enemies
                     {
                         Enemy.MayTaxStay = true;
                     }
+
+                    // Debug.Log(PrefixLogMessage(string.Join(", ", path)));
+                    // TODO: Improve this logic
                     var (direction, coordinates) = path[0];
-                    InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                    if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
+                    {
+                        InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                    }
                     nextCheck = Time.timeSinceLevelLoad + movementDuration * 0.5f;
                 }
 
@@ -130,8 +145,12 @@ namespace LMCore.TiledDungeon.Enemies
                         if (previousPath.Count > 0)
                         {
                             Debug.Log(PrefixLogMessage("Using previous path to player"));
+                            // TODO: Improve this logic
                             var (direction, coordinates) = previousPath[0];
-                            InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                            if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
+                            {
+                                InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                            }
                         }
                     }
                 }
