@@ -10,10 +10,6 @@ using LMCore.Inventory;
 using LMCore.IO;
 using LMCore.TiledDungeon.SaveLoad;
 using LMCore.TiledDungeon.Style;
-using UnityEngine.Rendering;
-
-
-
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -303,8 +299,6 @@ namespace LMCore.TiledDungeon
             return null;
         }
 
-        Vector3Int monitorPos = new Vector3Int(26, 0, 19);
-
         /// <summary>
         /// Closest path for the entity to get to target. Not regarding cost of turns.
         /// </summary>
@@ -319,7 +313,8 @@ namespace LMCore.TiledDungeon
             Vector3Int start,
             Vector3Int target,
             int maxDepth,
-            out List<KeyValuePair<Direction, Vector3Int>> path)
+            out List<KeyValuePair<Direction, Vector3Int>> path,
+            bool debugLog = false)
         {
             // TODO: We don't account for just waiting on a moving platform to reach a goal either
             // nor do we have a way to attatch goals to faces that can move...
@@ -333,7 +328,11 @@ namespace LMCore.TiledDungeon
             while (seenQueue.Count > 0)
             {
                 var coordinates = seenQueue.Dequeue();
-                if (visited.Contains(coordinates)) continue;
+                if (visited.Contains(coordinates))
+                {
+                    if (debugLog) Debug.Log($"ClosestPath: Ignore {coordinates} because already visited");
+                    continue;
+                }
 
                 visited.Add(coordinates);
 
@@ -342,29 +341,39 @@ namespace LMCore.TiledDungeon
                 // Stop searching if we are too deep in
                 if (pathHere.Count > maxDepth)
                 {
+                    if (debugLog) Debug.Log($"ClosestPath: Aborting because exceeding maxDepth({maxDepth})");
                     path = null;
                     return false;
                 }
 
                 var node = this[coordinates];
-                if (node == null) continue;
+                if (node == null)
+                {
+                    if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates} because there's no node there");
+                    path = null;
+                    continue;
+                }
 
                 foreach (var direction in DirectionExtensions.AllDirections)
                 {
-                    if (node.Coordinates == monitorPos)
-                    {
-                        Debug.Log($"{node.Coordinates} -> {direction}");
-                    }
-
+                    // TODO: If we are anchored to something else we might want other directions
                     if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && !node.HasFloor)
                     {
-                        if (direction != Direction.Down) continue;
+                        if (direction != Direction.Down)
+                        {
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because not flying and no floor");
+                            continue;
+                        }
                     }
 
                     // TODO: If we want enemies to be able to climb stairs we need to check
                     // be able to move inside a node too and check what directions to ignor
                     // based on anchor and down directions
-                    if (direction == Direction.Up && !entity.TransportationMode.HasFlag(TransportationMode.Flying)) continue;
+                    if (direction == Direction.Up && !entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                    {
+                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because not flying");
+                        continue;
+                    }
 
                     var neighbour = node.Neighbour(direction);
                     var anchor = node.GetAnchor(entity.Down);
@@ -386,10 +395,7 @@ namespace LMCore.TiledDungeon
                                 var delta = neigbourEdge - nodeEdge;
                                 if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
                                 {
-                                    if (node.Coordinates == monitorPos && direction == Direction.East)
-                                    {
-                                        Debug.Log($"{node.Coordinates} too high to scale {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
-                                    }
+                                    if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because too high step up {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
                                     continue;
                                 }
 
@@ -403,10 +409,7 @@ namespace LMCore.TiledDungeon
                         // should respect rules about letting entities coexits or not.
                         if (!node.AllowExit(entity, direction))
                         {
-                            if (node.Coordinates == monitorPos && direction == Direction.East)
-                            {
-                                Debug.Log($"{node.Coordinates}: Can't exit");
-                            }
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because exit not allowed");
                             continue;
                         }
 
@@ -417,12 +420,28 @@ namespace LMCore.TiledDungeon
                     {
                         var entryDirection = direction.Inverse();
 
-                        if (neighbourNode.HasBlockingDoor(entryDirection)) continue;
-                        if (neighbourNode.HasSide(entryDirection, TDNode.SideCheckMode.Entry)) continue;
-                        if (neighbourNode.BlockEdgeTraversal(entity, entryDirection, TDNode.SideCheckMode.Entry)) continue;
-                    } 
+                        if (neighbourNode.HasBlockingDoor(entryDirection))
+                        {
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour has a door");
+                            continue;
+                        }
+                        if (neighbourNode.HasSide(entryDirection, TDNode.SideCheckMode.Entry) && direction.Translate(coordinates) == neighbour)
+                        {
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour has solid side towards us");
+                            continue;
+                        }
+                        if (neighbourNode.BlockEdgeTraversal(entity, entryDirection, TDNode.SideCheckMode.Entry))
+                        {
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour edge doesn't allow traversal");
+                            continue;
+                        }
+                    }
 
-                    if (seen.ContainsKey(neighbour)) continue;
+                    if (seen.ContainsKey(neighbour))
+                    {
+                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because we have a closer path to {neighbour}");
+                        continue;
+                    }
 
                     var neighbourPath = new List<KeyValuePair<Direction, Vector3Int>>(pathHere);
                     neighbourPath.Add(new KeyValuePair<Direction, Vector3Int>(direction, neighbour));

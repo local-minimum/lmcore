@@ -41,7 +41,6 @@ namespace LMCore.TiledDungeon.Enemies
         public bool NextActionCollidesWithPlayer(List<KeyValuePair<Direction, Vector3Int>> path)
         {
             var index = path.FindIndex(kvp => kvp.Value == Dungeon.Player.Coordinates);
-            Debug.Log($"Hunting {Enemy.name} {index}");
             if (index < 0) return false;
             if (index == 0) return true;
 
@@ -73,10 +72,50 @@ namespace LMCore.TiledDungeon.Enemies
 
             if (entity.LookDirection == translationDirection)
             {
-                if (Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse())) { 
-                    Debug.Log(prefixLogMessage("Moving forward"));
-                    entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
+                // In most cases translation target is the same as a simple translation, but sometimes
+                // we round corner and the like and then two checks are needed
+                var simpleTranslationTarget = translationDirection.Translate(entity.Coordinates);
+                if (simpleTranslationTarget == translatedTarget && !Dungeon[translatedTarget].AllowsEntryFrom(entity, translationDirection.Inverse())) { 
+                    return;
                 }
+
+                if (translatedTarget != simpleTranslationTarget)
+                {
+                    var secondaryTranslation = (translatedTarget - simpleTranslationTarget).AsDirectionOrNone();
+
+                    if (secondaryTranslation == Direction.None)
+                    {
+                        Debug.LogError(prefixLogMessage($"Translation {translationDirection} from {entity.Coordinates} to {translatedTarget} " +
+                            $"caused unexpected secondary translation of {translatedTarget - simpleTranslationTarget}"));
+                    } else
+                    {
+                        var options = new List<List<Direction>>()
+                        {
+                            new List<Direction>() { translationDirection, secondaryTranslation },
+                            new List<Direction>() { secondaryTranslation, translationDirection },
+                        };
+
+                        if (!options.Any(translations => {
+                            var coordinates = entity.Coordinates;
+                            foreach (var direction in translations)
+                            {
+                                coordinates = direction.Translate(coordinates);
+                                if (
+                                    !(Dungeon[coordinates]?.AllowsEntryFrom(entity, direction.Inverse()) ?? false)
+                                ) {
+                                    return false;
+                                }
+
+                            }
+                            return true;
+                        })) {
+                            return;
+                        }
+                    }
+                }
+
+                Debug.Log(prefixLogMessage("Moving forward"));
+                entity.MovementInterpreter.InvokeMovement(IO.Movement.Forward, movementDuration);
             } else
             {
                 var movement = translationDirection.AsMovement(entity.LookDirection, entity.Down);

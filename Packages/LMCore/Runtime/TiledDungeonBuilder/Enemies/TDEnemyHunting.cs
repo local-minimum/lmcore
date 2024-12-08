@@ -97,7 +97,7 @@ namespace LMCore.TiledDungeon.Enemies
                 var pCount = previousPath?.Count ?? -100;
                 if (Mathf.Abs(pCount - path.Count) < 2 && pCount > 0)
                 {
-                    // Debug.Log(PrefixLogMessage($"Resuing path:\n{string.Join(", ", previousPath)}\ninstead of {string.Join(", ", path)}"));
+                    Debug.Log(PrefixLogMessage($"Resuing path:\n{string.Join(", ", previousPath)}\ninstead of {string.Join(", ", path)}"));
                     path = previousPath;
                 } else
                 {
