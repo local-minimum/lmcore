@@ -159,6 +159,7 @@ namespace LMCore.TiledDungeon
                 if (enemy == null) continue;
 
                 enemy.Configure(info.Id);
+                enemy.name = $"Enemy {info.ClassId}: {info.Id}";
                 ConfigureEntity(node, enemy.GetComponent<GridEntity>());
             }
         }

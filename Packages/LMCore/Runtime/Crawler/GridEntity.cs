@@ -287,6 +287,13 @@ namespace LMCore.Crawler
             }
         }
 
+        [SerializeField]
+        Transform _lookTarget;
+        /// <summary>
+        /// When other entities do raycasts towards the entity use this transform to focus on
+        /// </summary>
+        public Transform LookTarget => _lookTarget ?? transform;
+
         public void TriggerPositionTransitionEvent() =>
             OnPositionTransition?.Invoke(this);
 

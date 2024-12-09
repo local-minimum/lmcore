@@ -27,6 +27,10 @@ namespace LMCore.TiledDungeon.Enemies
         [SerializeField]
         float effectMagnitude;
 
+        [SerializeField]
+        Transform _rayCaster;
+        Transform rayCaster => _rayCaster ?? transform;
+
         TDEnemy _enemy;
         TDEnemy Enemy
         {
@@ -41,16 +45,16 @@ namespace LMCore.TiledDungeon.Enemies
         }
 
         private string PrefixLogMessage(string message) =>
-            $"Perception LOS({requireLOS}) {effectTrait}:{effectMagnitude}: {message}";
+            $"Perception {name} LOS({requireLOS}) ({effectTrait} {effectMagnitude}): {message}";
 
         private void OnEnable()
         {
-            GridEntity.OnPositionTransition += CheckDetection;
+            GridEntity.OnMove += CheckDetection;
         }
 
         private void OnDisable()
         {
-            GridEntity.OnPositionTransition -= CheckDetection;
+            GridEntity.OnMove -= CheckDetection;
         }
 
         HashSet<GridEntity> Players = new HashSet<GridEntity>();
@@ -69,6 +73,25 @@ namespace LMCore.TiledDungeon.Enemies
             private set
             {
                 _target = value;
+            }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Passing ? Color.red : Color.green;
+            if (requireLOS)
+            {
+                foreach (var player in Players)
+                {
+                    var direction = player.LookTarget.position - rayCaster.position;
+                    if (Physics.Raycast(rayCaster.position, direction, out var hitInfo, maxDistance * Enemy.Dungeon.GridSize, LOSFilter))
+                    {
+                        Gizmos.DrawLine(rayCaster.position, hitInfo.point);
+                    }
+                }
+            } else
+            {
+                Gizmos.DrawWireSphere(rayCaster.position, maxDistance * Enemy.Dungeon.GridSize);
             }
         }
 
@@ -92,6 +115,7 @@ namespace LMCore.TiledDungeon.Enemies
             var distance = entity.Coordinates.ManhattanDistance(Enemy.Entity.Coordinates);
             if (distance > maxDistance)
             {
+                Debug.Log(PrefixLogMessage("Player too far"));
                 _passing = false;
                 return;
             }
@@ -99,15 +123,19 @@ namespace LMCore.TiledDungeon.Enemies
             if (requireLOS)
             {
                 Vector3 lookDirection = Enemy.Entity.LookDirection.AsLookVector3D();
-                var direction = entity.transform.position - transform.position;
+                var direction = entity.LookTarget.position - rayCaster.position;
                 var angle = Vector3.Angle(lookDirection, direction);
 
-                if (angle < losMaxAngle && Physics.Raycast(transform.position, direction, out var hitInfo, maxDistance * Enemy.Dungeon.GridSize, LOSFilter)) {
+                if (angle < losMaxAngle && Physics.Raycast(rayCaster.position, direction, out var hitInfo, maxDistance * Enemy.Dungeon.GridSize, LOSFilter)) {
                     if (hitInfo.transform.GetComponentInParent<GridEntity>() == entity)
                     {
                         InvokeEffect(entity);
                         return;
                     }
+                    Debug.Log(PrefixLogMessage($"LOS hit {hitInfo.transform.name}, not {entity.name}"));
+                } else
+                {
+                    Debug.Log(PrefixLogMessage($"LOS hit nothing for {maxDistance}"));
                 }
             } else
             {
@@ -117,6 +145,10 @@ namespace LMCore.TiledDungeon.Enemies
                         InvokeEffect(entity);
                         return;
                     }
+                    Debug.Log(PrefixLogMessage($"Closest Path is too far, {path.Count} > {maxDistance}"));
+                } else
+                {
+                    Debug.Log(PrefixLogMessage("To path to player, can't hear them"));
                 }
             }
             _passing = false;

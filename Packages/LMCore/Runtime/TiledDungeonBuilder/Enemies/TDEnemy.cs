@@ -209,6 +209,7 @@ namespace LMCore.TiledDungeon.Enemies
         public void Configure(string id)
         {
             this.id = id;
+            Entity.Identifier = id;
             Info();
         }
 

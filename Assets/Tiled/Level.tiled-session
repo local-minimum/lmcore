@@ -24,16 +24,16 @@
         },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
+                16,
                 9,
-                21,
-                16
+                7,
+                21
             ],
             "scale": 3,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 858.3333333333333,
-                "y": 301.8333333333333
+                "x": 512.1666666666666,
+                "y": 512.1666666666666
             }
         },
         "Mapping.tsx": {

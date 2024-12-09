@@ -104,6 +104,7 @@ MonoBehaviour:
   fallDurationFactor: 0.5
   taxActivityStayDistance: 5
   checkActivityTransitionDistance: 3
+  maxPlayerSearchDepth: 7
 --- !u!1 &1134111026260185223
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,6 +341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementDuration: 1
+  fallDurationFactor: 0.5
 --- !u!1 &2658880717568808885
 GameObject:
   m_ObjectHideFlags: 0
@@ -676,6 +678,7 @@ MonoBehaviour:
   losMaxAngle: 60
   effectTrait: 0
   effectMagnitude: 2
+  _rayCaster: {fileID: 1843861562045098420}
 --- !u!1 &8148090245210938216
 GameObject:
   m_ObjectHideFlags: 0
