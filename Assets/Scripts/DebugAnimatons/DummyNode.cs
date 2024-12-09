@@ -100,4 +100,17 @@ public class DummyNode : MonoBehaviour, IDungeonNode
     public void RemoveReservation(GridEntity entity)
     {
     }
+
+    public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor)
+    {
+        targetAnchor = null;
+        targetCoordinates = direction.Translate(Coordinates);
+        return MovementOutcome.NodeExit;
+    }
+
+    public Vector3Int Neighbour(GridEntity entity, Direction direction, out Anchor targetAnchor)
+    {
+        targetAnchor = null;
+        return direction.Translate(Coordinates);
+    }
 }

@@ -12,6 +12,18 @@ namespace LMCore.Crawler
 
         public Anchor GetAnchor(Direction direction);
 
+        /// <summary>
+        /// Validate what happens if the entity attempts a movement in a certain direction.
+        /// 
+        /// Checking both node exits and node entries.
+        /// Also accounts for intermediary nodes when rounding corners and such
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="direction"></param>
+        /// <param name="targetCoordinates"></param>
+        /// <param name="targetAnchor"></param>
+        /// <returns>What type of movement this would be if any</returns>
+        public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor);
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
         public bool AllowsEntryFrom(GridEntity entity, Direction direction);
         public bool AllowExit(GridEntity entity, Direction direction);
@@ -28,6 +40,12 @@ namespace LMCore.Crawler
         /// Returns the coordinates of the node in the given direction
         /// </summary>
         public Vector3Int Neighbour(Direction direction);
+
+        /// <summary>
+        /// Returns the coordinates of the node in the given direction based
+        /// on what cube side the entity is attached to or not.
+        /// </summary>
+        public Vector3Int Neighbour(GridEntity entity, Direction direction, out Anchor targetAnchor);
 
         public bool HasFloor { get; }
         public bool HasIllusorySurface(Direction direction);  

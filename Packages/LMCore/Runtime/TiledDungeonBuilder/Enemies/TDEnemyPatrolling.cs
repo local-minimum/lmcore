@@ -75,7 +75,7 @@ namespace LMCore.TiledDungeon
                     var (direction, coordinates) = path[0];
                     if (entity.Coordinates != coordinates || direction != entity.LookDirection)
                     {
-                        InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                        InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
                     }
                 } else
                 {

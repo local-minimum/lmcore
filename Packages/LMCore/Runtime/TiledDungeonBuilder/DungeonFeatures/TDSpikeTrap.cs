@@ -256,7 +256,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
             {
                 var movement = push.AsMovement();
                 Debug.Log(PrefixLogMessage($"Push {occupant.name} {push} using {movement}"));
-                occupant.Input.InjectMovement(movement);
+                occupant.InjectMovement(movement);
             }
         }
 

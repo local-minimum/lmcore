@@ -91,7 +91,11 @@ namespace LMCore.TiledDungeon.Enemies
                     if (previousPath[0].Value == entity.Coordinates)
                     {
                         previousPath = previousPath.Skip(1).ToList();
+                    } else
+                    {
+                        previousPath = null;
                     }
+
                 }
 
                 var pCount = previousPath?.Count ?? -100;
@@ -116,10 +120,10 @@ namespace LMCore.TiledDungeon.Enemies
 
                     // Debug.Log(PrefixLogMessage(string.Join(", ", path)));
                     // TODO: Improve this logic
-                    var (direction, coordinates) = path[0];
+                    var (direction, _) = path[0];
                     if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
                     {
-                        InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                        InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
                     }
                     nextCheck = Time.timeSinceLevelLoad + movementDuration * 0.5f;
                 }
@@ -149,7 +153,7 @@ namespace LMCore.TiledDungeon.Enemies
                             var (direction, coordinates) = previousPath[0];
                             if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
                             {
-                                InvokePathBasedMovement(direction, coordinates, target.Coordinates, movementDuration, PrefixLogMessage);
+                                InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
                             }
                         }
                     }

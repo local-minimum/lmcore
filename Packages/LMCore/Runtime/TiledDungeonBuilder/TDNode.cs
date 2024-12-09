@@ -360,6 +360,128 @@ namespace LMCore.TiledDungeon
             return MovementOutcome.NodeExit;
         }
 
+        public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor)
+        {
+            // TODO: CanAnchorOn should consider entity abilities if entity can climb or not and such...
+
+            var currentCoordinates = entity.Coordinates;
+            if (HasBlockingDoor(direction))
+            {
+                targetAnchor = entity.NodeAnchor;
+                targetCoordinates = currentCoordinates;
+                return MovementOutcome.Blocked;
+            }
+
+            targetCoordinates = Neighbour(entity, direction, out targetAnchor);
+            if (targetCoordinates == currentCoordinates)
+            {
+                if (HasLadder(entity.AnchorDirection))
+                {
+
+                    if (direction == Direction.Up)
+                    {
+                        // The check also checked this before but I don't know why
+                        //  && HasSide(direction, SideCheckMode.Exit)
+                        if (HasCeiling)
+                        {
+                            if (CanAnchorOn(entity, Direction.Up)) return MovementOutcome.NodeInternal;
+                            
+                            targetAnchor = entity.NodeAnchor;
+                            targetCoordinates = currentCoordinates;
+                            return MovementOutcome.Blocked;
+                        }
+
+                        return MovementOutcome.NodeExit;
+                    }
+
+                    if (direction == Direction.Down)
+                    {
+                        if (HasFloor)
+                        {
+                            if (CanAnchorOn(entity, Direction.Down))
+                            {
+                                return MovementOutcome.NodeInternal;
+                            }
+                            
+                            targetAnchor = entity.NodeAnchor;
+                            targetCoordinates = currentCoordinates;
+                            return MovementOutcome.Blocked;
+                        }
+                        return MovementOutcome.NodeExit;
+                    }
+
+                    return MovementOutcome.Refused;
+                }
+
+                if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
+                {
+                    targetAnchor = entity.NodeAnchor;
+                    targetCoordinates = currentCoordinates;
+                    return MovementOutcome.Blocked;
+                }
+                
+                return MovementOutcome.NodeInternal;
+            }
+
+            var simpleTranslationCoordinates = direction.Translate(currentCoordinates);
+            var translationTarget = Dungeon[targetCoordinates];
+            if (simpleTranslationCoordinates == targetCoordinates)
+            {
+                if (AllowExit(entity, direction) && (translationTarget?.AllowsEntryFrom(entity, direction.Inverse()) ?? false))
+                {
+                    return MovementOutcome.NodeExit;
+                }
+
+                targetCoordinates = currentCoordinates;
+                targetAnchor = entity.NodeAnchor;
+                return MovementOutcome.Blocked;
+            }
+
+            var secondaryTranslation = (targetCoordinates - simpleTranslationCoordinates).AsDirectionOrNone();
+
+            if (secondaryTranslation == Direction.None)
+            {
+                Debug.LogError(PrefixLogMessage($"Translation {direction} from {entity.Coordinates} to {translationTarget} " +
+                    $"caused unexpected secondary translation of {targetCoordinates - simpleTranslationCoordinates}"));
+
+                targetCoordinates = currentCoordinates;
+                targetAnchor = entity.NodeAnchor;
+                return MovementOutcome.Refused;
+            }
+
+            var options = new List<List<Direction>>()
+            {
+                new List<Direction>() { direction, secondaryTranslation },
+                new List<Direction>() { secondaryTranslation, direction},
+            };
+
+            if (!options.Any(translations => {
+                var coordinates = currentCoordinates;
+                foreach (var direction in translations)
+                {
+                    if (!Dungeon[coordinates]?.AllowExit(entity, direction) ?? false)
+                    {
+                        return false;
+                    }
+
+                    coordinates = direction.Translate(coordinates);
+                    if (
+                        !(Dungeon[coordinates]?.AllowsEntryFrom(entity, direction.Inverse()) ?? false)
+                    ) {
+                        return false;
+                    }
+
+                }
+                return true;
+            })) {
+                return MovementOutcome.NodeExit;
+            }
+
+            targetAnchor = entity.NodeAnchor;
+            targetCoordinates = currentCoordinates;
+            return MovementOutcome.Blocked;
+        }
+
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
         {
             if (HasBlockingDoor(direction)) return MovementOutcome.Blocked;
@@ -476,19 +598,57 @@ namespace LMCore.TiledDungeon
             !temporaryExitBlocker.Overrides(direction) &&
             !BlockEdgeTraversal(entity, direction, SideCheckMode.Exit);
 
+        /// <summary>
+        /// Used if active entity must have higher precedence to the node. Typically when falling
+        /// </summary>
+        /// <param name="activeEntity">The entity attempting entry to the tile</param>
+        /// <returns></returns>
+        bool PushOccupants(GridEntity activeEntity)
+        {
+            foreach (var occupant in Occupants)
+            {
+                if (occupant == activeEntity) continue;
+
+                foreach (var direction in DirectionExtensions.AllDirections)
+                {
+                    if (AllowExit(occupant, direction))
+                    {
+
+                    }
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Used if active entity must have higher precedence to the node. Typically when falling
+        /// </summary>
+        /// <param name="activeEntity">The entity attempting entry to the tile</param>
+        /// <returns></returns>
+        bool RefuseReservations(GridEntity activeEntity)
+        {
+            return true;
+        }
+
         public bool AllowsEntryFrom(GridEntity entity, Direction direction)
         {
             if (!OccupationRules.MayCoexist(entity, Occupants))
             {
-                var occupants = Occupants.Select(o => o.name);
-                Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
-                return false;
+                if (!entity.Falling || !PushOccupants(entity))
+                {
+                    var occupants = Occupants.Select(o => o.name);
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
+                    return false;
+                }
             }
             if (!OccupationRules.MayCoexist(entity, _reservations))
             {
-                var reserves = _reservations.Select(r => r.name);
-                Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
-                return false;
+                if (!entity.Falling || RefuseReservations(entity))
+                {
+                    var reserves = _reservations.Select(r => r.name);
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
+                    return false;
+                }
             }
 
             if (HasWall(direction, SideCheckMode.Entry))
@@ -592,7 +752,7 @@ namespace LMCore.TiledDungeon
             if (movement != IO.Movement.None)
             {
                 Debug.Log(PrefixLogMessage($"Spinning {entity.name} {movement}"));
-                entity.Input.InjectMovement(movement);
+                entity.InjectMovement(movement);
             }
         }
 
@@ -729,6 +889,30 @@ namespace LMCore.TiledDungeon
             ));
 
             return false;
+        }
+
+        public Vector3Int Neighbour(GridEntity entity, Direction direction, out Anchor neighbourAnchor)
+        {
+            // Though flying or falling entities don't attach to down, they follow their own down
+            var currentAnchorDirection = entity.AnchorDirection;
+            if (currentAnchorDirection == Direction.None)
+            {
+                currentAnchorDirection = entity.Down;
+            }
+
+            var currentDownAnchor = GetAnchor(currentAnchorDirection);
+            if (currentDownAnchor == null)
+            {
+                neighbourAnchor = null;
+                return Neighbour(direction);
+            }
+
+            neighbourAnchor = currentDownAnchor.GetNeighbour(direction, entity, out var _);
+            if (neighbourAnchor == null && entity.NodeAnchor != null)
+            {
+                neighbourAnchor = currentDownAnchor;
+            }
+            return neighbourAnchor.Node.Coordinates;
         }
 
         public Vector3Int Neighbour(Direction direction)

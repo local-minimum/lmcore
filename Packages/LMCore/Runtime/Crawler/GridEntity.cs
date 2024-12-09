@@ -4,6 +4,7 @@ using UnityEngine.Events;
 using LMCore.Inventory;
 using System.Collections.Generic;
 using LMCore.UI;
+using LMCore.IO;
 
 namespace LMCore.Crawler
 {
@@ -43,19 +44,6 @@ namespace LMCore.Crawler
         public UnityEvent OnLand;
         public EntityAbilities Abilities;
         
-        MovementInterpreter _MovementInterpreter;
-        public MovementInterpreter MovementInterpreter
-        {
-            get
-            {
-                if (_MovementInterpreter == null)
-                {
-                    _MovementInterpreter = GetComponentInChildren<MovementInterpreter>();
-                }
-                return _MovementInterpreter;
-            }
-        }
-
         public GridEntityType EntityType;
         public IGridSizeProvider GridSizeProvider { get; set; }
         public IDungeon Dungeon { get; set; }
@@ -323,7 +311,54 @@ namespace LMCore.Crawler
             }
         }
 
+        MovementInterpreter _MovementInterpreter;
+        /// <summary>
+        /// The interpreter of movements for the entity, gerneral for all types of entites.
+        /// To force a movement, use `InjectMovement` instead.
+        /// </summary>
+        public MovementInterpreter MovementInterpreter
+        {
+            get
+            {
+                if (_MovementInterpreter == null)
+                {
+                    _MovementInterpreter = GetComponentInChildren<MovementInterpreter>();
+                }
+                return _MovementInterpreter;
+            }
+        }
+
+        /// <summary>
+        /// Player input system, use `InjectMovement` to force a movement for any type of entity
+        /// </summary>
         public CrawlerInput Input => GetComponent<CrawlerInput>();
+
+        /// <summary>
+        /// Forces a movement upon the grid entity.
+        /// 
+        /// Normal rules for node exit and target node entry still apply
+        ///
+        /// Uses game clock for move duration
+        /// </summary>
+        public void InjectMovement(Movement movement) =>
+            InjectMovement(movement, ElasticGameClock.instance.baseTickDuration);
+
+        /// <summary>
+        /// Forces a movement upon the grid entity.
+        /// 
+        /// Normal rules for node exit and target node entry still apply
+        /// </summary>
+        public void InjectMovement(Movement movement, float duration)
+        {
+            var input = Input;
+            if (input != null)
+            {
+                input.InjectMovement(movement);
+            } else
+            {
+                MovementInterpreter.InvokeMovement(movement, duration);
+            }
+        }
 
         /// <summary>
         /// Updates position and rotation as well as occupying dungeon node at coordinates possible
