@@ -95,7 +95,6 @@ namespace LMCore.TiledDungeon.Enemies
                     {
                         previousPath = null;
                     }
-
                 }
 
                 var pCount = previousPath?.Count ?? -100;

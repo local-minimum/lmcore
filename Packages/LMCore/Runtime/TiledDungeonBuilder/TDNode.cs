@@ -598,6 +598,19 @@ namespace LMCore.TiledDungeon
             !temporaryExitBlocker.Overrides(direction) &&
             !BlockEdgeTraversal(entity, direction, SideCheckMode.Exit);
 
+        bool PushEntity(GridEntity entity)
+        {
+            foreach (var direction in DirectionExtensions.AllDirections.OrderBy(d => d == Direction.Up ? 0 : 1))
+            {
+                if (AllowsTransition(entity, direction, out var _, out var _) == MovementOutcome.NodeExit)
+                {
+                    entity.InjectMovement(direction.AsMovement(entity.LookDirection, entity.Down), ElasticGameClock.instance.baseTickDuration);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Used if active entity must have higher precedence to the node. Typically when falling
         /// </summary>
@@ -608,14 +621,7 @@ namespace LMCore.TiledDungeon
             foreach (var occupant in Occupants)
             {
                 if (occupant == activeEntity) continue;
-
-                foreach (var direction in DirectionExtensions.AllDirections)
-                {
-                    if (AllowExit(occupant, direction))
-                    {
-
-                    }
-                }
+                if (!PushEntity(occupant)) return false;
             }
             return true;
         }
@@ -627,6 +633,11 @@ namespace LMCore.TiledDungeon
         /// <returns></returns>
         bool RefuseReservations(GridEntity activeEntity)
         {
+            foreach (var reservation in _reservations)
+            {
+                if (reservation == activeEntity) continue;
+                if (!PushEntity(reservation)) return false;
+            }
             return true;
         }
 
