@@ -620,6 +620,7 @@ namespace LMCore.TiledDungeon
                     }
                     else
                     {
+                        _occupants.Add(entity);
                         HandleSpinner(entity);
                     }
                 }
