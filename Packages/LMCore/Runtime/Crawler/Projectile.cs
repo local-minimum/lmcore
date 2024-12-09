@@ -24,8 +24,12 @@ namespace LMCore.Crawler
             }
         }
 
-        public void Shoot()
+        Transform shooter;
+        public void Shoot(Transform shooter, Direction flightDirection)
         {
+            this.shooter = shooter;
+            transform.position = shooter.position;
+            FlightDirection = flightDirection;
             phase = Phase.Flying;
             phaseState = Time.timeSinceLevelLoad;
         }
@@ -129,6 +133,7 @@ namespace LMCore.Crawler
                 rb.isKinematic = true;
             }
             OnRecycle?.Invoke(this);
+            transform.position = shooter.position;
         }
     }
 }

@@ -38,6 +38,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
 
         private void SetupProjectile(Projectile projectile)
         {
+            projectile.name = $"Projectile #{projectiles.Count} (Origin: {Coordinates})";
             projectile.transform.SetParent(Node.Dungeon.LevelParent); 
             projectile.OnRecycle += Projectile_OnRecycle;
         }
@@ -61,10 +62,7 @@ namespace LMCore.TiledDungeon.DungeonFeatures
                 return;
             }
 
-            projectile.FlightDirection = ShootDirection;
-            projectile.transform.position = transform.position;
-
-            projectile.Shoot();
+            projectile.Shoot(transform, ShootDirection);
 
             lastShot = Time.timeSinceLevelLoad;
         }
