@@ -563,6 +563,7 @@ MonoBehaviour:
   _anchorDirection: 5
   _Coordinates: {x: 0, y: 0, z: 0}
   _LookDirection: 0
+  _lookTarget: {fileID: 4477600441045616862}
   TransportationMode: 4
 --- !u!114 &6463157269237019217
 MonoBehaviour:

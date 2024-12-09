@@ -69,12 +69,12 @@ MonoBehaviour:
     walkingStepsPerTransition: 0
     climbingStepsPerTransition: 0
     stairsStepsPerTransition: 0
-  MovementInterpreter: {fileID: 0}
   EntityType: 1
   _anchor: {fileID: 0}
   _anchorDirection: 5
   _Coordinates: {x: 0, y: 0, z: 0}
   _LookDirection: 0
+  _lookTarget: {fileID: 394728324821646690}
   TransportationMode: 0
 --- !u!114 &34175688637494714
 MonoBehaviour:
@@ -88,7 +88,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5ab73c95eb05a747b7942d87a78d0e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InkJSon: {fileID: 4900000, guid: 98a36f4a07594eb4db944a17cbb4534a, type: 3}
+  storyId: 434732da-8b68-463c-b1c7-0c8c5a1f434f
+  InkJson: {fileID: 0}
+  Mode: 1
+  stateFullRepeatStartPath: 
+  Passive: 0
   StoryInteractionVerb: Talk
 --- !u!1 &9005314257116889349
 GameObject:
