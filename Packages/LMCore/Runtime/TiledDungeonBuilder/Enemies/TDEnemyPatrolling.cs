@@ -45,6 +45,7 @@ namespace LMCore.TiledDungeon
         private void OnDisable()
         {
             Patrolling = false;
+            previousPath = null;
         }
 
         private void Update()
@@ -69,6 +70,9 @@ namespace LMCore.TiledDungeon
             var dungeon = Enemy.Dungeon;
             if (dungeon.ClosestPath(entity, entity.Coordinates, target.Coordinates, Enemy.ArbitraryMaxPathSearchDepth, out var path))
             {
+                // This is just done for gizmo debugging purposes
+                previousPath = path;
+
                 if (path.Count > 0)
                 {
                     // TODO: Improve this logic

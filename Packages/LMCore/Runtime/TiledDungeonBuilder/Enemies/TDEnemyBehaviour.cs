@@ -30,6 +30,34 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
+
+        // Potentially in save states!
+        protected List<TiledDungeon.Translation> previousPath;
+
+        private void OnDrawGizmosSelected()
+        {
+            if (previousPath == null) return;
+
+            Gizmos.color = Color.yellow;
+            var dungeon = Dungeon;
+            var start = Enemy.Entity.Node.GetEdge(Enemy.Entity.AnchorDirection);
+            foreach (var t in previousPath)
+            {
+                var node = dungeon[t.Checkpoint.Coordinates];
+                if (node == null)
+                {
+                    return;
+                }
+
+                var intermediary = node.GetEdge(t.Checkpoint.Anchor, t.TranslationHere.Inverse());
+                var finish = node.GetEdge(t.Checkpoint.Anchor);
+                Gizmos.DrawLine(start, intermediary);
+                Gizmos.DrawLine(intermediary, finish);
+                Gizmos.DrawSphere(finish, 0.2f);
+                start = finish;
+            }
+        }
+
         public bool NextActionCollidesWithPlayer(List<TiledDungeon.Translation> path)
         {
             if (path == null) return false;
