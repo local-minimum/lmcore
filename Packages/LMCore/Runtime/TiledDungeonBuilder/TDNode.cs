@@ -393,55 +393,60 @@ namespace LMCore.TiledDungeon
             }
 
             targetCoordinates = Neighbour(entity, originAnchorDirection, entity.Down, direction, out targetAnchor);
+
+            if (direction.IsPlanarCardinal() && HasLadder(originAnchorDirection))
+            {
+                // Going up a ladder and anchording on the ceiling
+                if (direction == Direction.Up)
+                {
+                    // The check also checked this before but I don't know why
+                    //  && HasSide(direction, SideCheckMode.Exit)
+                    if (HasCeiling)
+                    {
+                        if (CanAnchorOn(entity, Direction.Up))
+                        {
+                            return MovementOutcome.NodeInternal;
+                        }
+                        
+                        /*
+                        Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on ceiling from ladder"));
+                        */
+                        targetAnchor = originAnchor;
+                        targetCoordinates = origin;
+                        return MovementOutcome.Blocked;
+                    }
+
+                    return MovementOutcome.NodeExit;
+                }
+
+                // Going down off a ladder and anchoring on the floor
+                if (direction == Direction.Down)
+                {
+                    if (HasFloor)
+                    {
+                        if (CanAnchorOn(entity, Direction.Down))
+                        {
+                            return MovementOutcome.NodeInternal;
+                        }
+                        
+                        /*
+                        Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on floor from ladder"));
+                        */
+                        targetAnchor = originAnchor;
+                        targetCoordinates = origin;
+                        return MovementOutcome.Blocked;
+                    }
+                    return MovementOutcome.NodeExit;
+                }
+
+                /*
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by {direction} not allowed from ladder"));
+                */
+                return MovementOutcome.Refused;
+            }
+
             if (targetCoordinates == origin)
             {
-                if (HasLadder(originAnchorDirection))
-                {
-                    // Going up a ladder and anchording on the ceiling
-                    if (direction == Direction.Up)
-                    {
-                        // The check also checked this before but I don't know why
-                        //  && HasSide(direction, SideCheckMode.Exit)
-                        if (HasCeiling)
-                        {
-                            if (CanAnchorOn(entity, Direction.Up)) return MovementOutcome.NodeInternal;
-                            
-                            /*
-                            Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on ceiling from ladder"));
-                            */
-                            targetAnchor = originAnchor;
-                            targetCoordinates = origin;
-                            return MovementOutcome.Blocked;
-                        }
-
-                        return MovementOutcome.NodeExit;
-                    }
-
-                    // Going down off a ladder and anchoring on the floor
-                    if (direction == Direction.Down)
-                    {
-                        if (HasFloor)
-                        {
-                            if (CanAnchorOn(entity, Direction.Down))
-                            {
-                                return MovementOutcome.NodeInternal;
-                            }
-                            
-                            /*
-                            Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on floor from ladder"));
-                            */
-                            targetAnchor = originAnchor;
-                            targetCoordinates = origin;
-                            return MovementOutcome.Blocked;
-                        }
-                        return MovementOutcome.NodeExit;
-                    }
-
-                    /*
-                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by {direction} not allowed from ladder"));
-                    */
-                    return MovementOutcome.Refused;
-                }
 
                 if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
                 {
