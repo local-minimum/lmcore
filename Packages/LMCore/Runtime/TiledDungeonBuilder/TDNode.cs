@@ -6,6 +6,7 @@ using LMCore.Extensions;
 using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
+using System.IO;
 
 namespace LMCore.TiledDungeon
 {
@@ -383,17 +384,20 @@ namespace LMCore.TiledDungeon
 
             if (HasBlockingDoor(direction))
             {
+                /*
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by door in {direction}"));
+                */
                 targetAnchor = originAnchor;
                 targetCoordinates = origin;
                 return MovementOutcome.Blocked;
             }
 
-            targetCoordinates = Neighbour(entity, direction, out targetAnchor);
+            targetCoordinates = Neighbour(entity, originAnchorDirection, entity.Down, direction, out targetAnchor);
             if (targetCoordinates == origin)
             {
                 if (HasLadder(originAnchorDirection))
                 {
-
+                    // Going up a ladder and anchording on the ceiling
                     if (direction == Direction.Up)
                     {
                         // The check also checked this before but I don't know why
@@ -402,6 +406,9 @@ namespace LMCore.TiledDungeon
                         {
                             if (CanAnchorOn(entity, Direction.Up)) return MovementOutcome.NodeInternal;
                             
+                            /*
+                            Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on ceiling from ladder"));
+                            */
                             targetAnchor = originAnchor;
                             targetCoordinates = origin;
                             return MovementOutcome.Blocked;
@@ -410,6 +417,7 @@ namespace LMCore.TiledDungeon
                         return MovementOutcome.NodeExit;
                     }
 
+                    // Going down off a ladder and anchoring on the floor
                     if (direction == Direction.Down)
                     {
                         if (HasFloor)
@@ -419,6 +427,9 @@ namespace LMCore.TiledDungeon
                                 return MovementOutcome.NodeInternal;
                             }
                             
+                            /*
+                            Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on floor from ladder"));
+                            */
                             targetAnchor = originAnchor;
                             targetCoordinates = origin;
                             return MovementOutcome.Blocked;
@@ -426,11 +437,17 @@ namespace LMCore.TiledDungeon
                         return MovementOutcome.NodeExit;
                     }
 
+                    /*
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by {direction} not allowed from ladder"));
+                    */
                     return MovementOutcome.Refused;
                 }
 
                 if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
                 {
+                    /*
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by refused anchor on {direction}"));
+                    */
                     targetAnchor = originAnchor;
                     targetCoordinates = origin;
                     return MovementOutcome.Blocked;
@@ -448,6 +465,12 @@ namespace LMCore.TiledDungeon
                     return MovementOutcome.NodeExit;
                 }
 
+                /*
+                Debug.LogWarning(PrefixLogMessage(
+                    $"Simple translation refused for {entity.name} {origin}({direction})->{targetCoordinates}, " +
+                    $"AllowExit({AllowExit(entity, direction)}) Target({translationTarget !=null}) " +
+                    $"AllowEntry({(translationTarget?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false)})"));
+                */
                 targetAnchor = originAnchor;
                 targetCoordinates = origin;
                 return MovementOutcome.Blocked;
@@ -589,12 +612,19 @@ namespace LMCore.TiledDungeon
 
         public bool BlockEdgeTraversal(GridEntity entity, Direction direction, SideCheckMode sideCheckMode)
         {
+            /*
+            Debug.Log(PrefixLogMessage($"Entry Negators: {string.Join(", ", temporaryEntryNegator)}"));
+            Debug.Log(PrefixLogMessage($"Exit Negators: {string.Join(", ", temporaryExitNegator)}"));
+            Debug.Log(PrefixLogMessage($"Entry Blocker: {string.Join(", ", temporaryEntryBlocker)}"));
+            Debug.Log(PrefixLogMessage($"Exit Blocker: {string.Join(", ", temporaryExitBlocker)}"));
+            */
+
             if (sideCheckMode == SideCheckMode.Has && temporarySideNegator.Overrides(direction)) return false;
             if (sideCheckMode == SideCheckMode.Exit && temporaryExitNegator.Overrides(direction)) return false;
             if (sideCheckMode == SideCheckMode.Entry && temporaryEntryNegator.Overrides(direction)) return false;
             if (sideCheckMode == SideCheckMode.Exit && temporaryExitBlocker.Overrides(direction)) return true;
             if (sideCheckMode == SideCheckMode.Entry && temporaryEntryBlocker.Overrides(direction)) return true;
-            
+
             return modifications.Any(mod =>
             {
                 var modDirection = mod.Tile.CustomProperties.Direction(TiledConfiguration.InstanceOrCreate().DirectionKey, TDEnumDirection.None).AsDirection();
@@ -605,6 +635,15 @@ namespace LMCore.TiledDungeon
                     return flyability == TDEnumAspect.Never;
                 }
                 var walkability = mod.Tile.CustomProperties.Aspect(TiledConfiguration.InstanceOrCreate().WalkabilityKey, TDEnumAspect.Always);
+                /*
+                if (walkability == TDEnumAspect.Never)
+                {
+                    Debug.Log(PrefixLogMessage($"Walkability never for aspect {TiledConfiguration.instance.WalkabilityKey}"));
+                    var value = mod.Tile.CustomProperties.StringEnums.GetValueOrDefault(TiledConfiguration.instance.WalkabilityKey);
+                    Debug.Log(PrefixLogMessage($"From tile {mod.Tile.Id}: {value.Value} ({value.TypeName})"));
+                }
+                Debug.Log(PrefixLogMessage($"Walkability: {walkability}"));
+                */
                 return walkability == TDEnumAspect.Never;
             });
         }
@@ -927,13 +966,13 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
-        public Vector3Int Neighbour(GridEntity entity, Direction direction, out Anchor neighbourAnchor)
+        Vector3Int Neighbour(GridEntity entity, Direction anchorDirection, Direction down, Direction direction, out Anchor neighbourAnchor)
         {
             // Though flying or falling entities don't attach to down, they follow their own down
-            var currentAnchorDirection = entity.AnchorDirection;
+            var currentAnchorDirection = anchorDirection;
             if (currentAnchorDirection == Direction.None)
             {
-                currentAnchorDirection = entity.Down;
+                currentAnchorDirection = down;
             }
 
             var currentDownAnchor = GetAnchor(currentAnchorDirection);
@@ -944,9 +983,9 @@ namespace LMCore.TiledDungeon
             }
 
             neighbourAnchor = currentDownAnchor.GetNeighbour(direction, entity, out var _);
-            if (neighbourAnchor == null && entity.NodeAnchor != null)
+            if (neighbourAnchor == null)
             {
-                neighbourAnchor = currentDownAnchor;
+                return Neighbour(direction);
             }
             return neighbourAnchor.Node.Coordinates;
         }

@@ -282,7 +282,7 @@ namespace LMCore.Crawler
         /// </summary>
         /// <param name="direction">Main direction of the movement</param>
         /// <param name="offset">Vertical offset</param>
-        /// <param name="entity">Entity in question</param>
+        /// <param name="entity">Entity in question, only used for tranportaion mode</param>
         /// <returns></returns>
         private Anchor GetNeighbour(Direction direction, Direction offset, GridEntity entity)
         {

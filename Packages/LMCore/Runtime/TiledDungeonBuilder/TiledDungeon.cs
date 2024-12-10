@@ -398,10 +398,10 @@ namespace LMCore.TiledDungeon
                     var outcome = node.AllowsTransition(entity, checkpoint.Coordinates, checkpoint.Anchor, direction, out var neighbourCoordinates, out var neighbourAnchor, false);
                     if (outcome == MovementOutcome.Refused || outcome == MovementOutcome.Blocked) continue;
 
-                    if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null)
+                    var anchor = node.GetAnchor(checkpoint.Anchor);
+                    if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null && anchor != null)
                     {
                         // Exclude transitions that would require climbing more than entity can do
-                        var anchor = node.GetAnchor(checkpoint.Anchor);
                         var nodeEdge = anchor.GetEdgePosition(direction);
                         var neigbourEdge = neighbourAnchor.GetEdgePosition(direction.Inverse());
                         var up = entity.Down.Inverse().AsLookVector3D();
@@ -415,7 +415,7 @@ namespace LMCore.TiledDungeon
                         // TODO: Exclude jumps that are too long for the entity
                     }
 
-                    var neighbour = new Checkpoint() { Anchor = neighbourAnchor.CubeFace, Coordinates = neighbourCoordinates };
+                    var neighbour = new Checkpoint() { Anchor = neighbourAnchor?.CubeFace ?? Direction.None, Coordinates = neighbourCoordinates };
                     // TODO: How to handle if there's no anchor on the neighbour?
 
                     if (seen.ContainsKey(neighbour))

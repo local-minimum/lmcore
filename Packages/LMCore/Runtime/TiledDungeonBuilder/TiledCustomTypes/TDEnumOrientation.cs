@@ -30,7 +30,6 @@ namespace LMCore.TiledDungeon.Integration
 
         public static DirectionAxis AsAxis(this TDEnumOrientation orientation)
         {
-            Debug.Log(orientation.ToString());
             switch (orientation)
             {
                 case TDEnumOrientation.Vertical:

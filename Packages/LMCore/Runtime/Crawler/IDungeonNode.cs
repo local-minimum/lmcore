@@ -44,12 +44,6 @@ namespace LMCore.Crawler
         /// </summary>
         public Vector3Int Neighbour(Direction direction);
 
-        /// <summary>
-        /// Returns the coordinates of the node in the given direction based
-        /// on what cube side the entity is attached to or not.
-        /// </summary>
-        public Vector3Int Neighbour(GridEntity entity, Direction direction, out Anchor targetAnchor);
-
         public bool HasFloor { get; }
         public bool HasIllusorySurface(Direction direction);  
 
