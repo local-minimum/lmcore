@@ -30,8 +30,32 @@ namespace LMCore.TiledDungeon.Enemies
 
         #region SaveState
         GridEntity target;
-        List<KeyValuePair<Direction, Vector3Int>> previousPath;
+        List<TiledDungeon.Translation> previousPath;
         #endregion
+
+        private void OnDrawGizmosSelected()
+        {
+            if (previousPath == null) return;
+
+            Gizmos.color = Color.yellow;
+            var dungeon = Dungeon;
+            var start = Enemy.Entity.Node.GetEdge(Enemy.Entity.AnchorDirection);
+            foreach (var t in previousPath)
+            {
+                var node = dungeon[t.Checkpoint.Coordinates];
+                if (node == null)
+                {
+                    return;
+                }
+
+                var intermediary = node.GetEdge(t.Checkpoint.Anchor, t.TranslationHere.Inverse());
+                var finish = node.GetEdge(t.Checkpoint.Anchor);
+                Gizmos.DrawLine(start, intermediary);
+                Gizmos.DrawLine(intermediary, finish);
+                Gizmos.DrawSphere(finish, 0.2f);
+                start = finish;
+            }
+        }
 
         private void Awake()
         {
@@ -88,7 +112,7 @@ namespace LMCore.TiledDungeon.Enemies
                 Debug.Log(PrefixLogMessage("Found path"));
                 if (previousPath != null && previousPath.Count > 0)
                 {
-                    if (previousPath[0].Value == entity.Coordinates)
+                    if (previousPath[0].Checkpoint.IsHere(entity))
                     {
                         previousPath = previousPath.Skip(1).ToList();
                     } else
@@ -119,7 +143,7 @@ namespace LMCore.TiledDungeon.Enemies
 
                     // Debug.Log(PrefixLogMessage(string.Join(", ", path)));
                     // TODO: Improve this logic
-                    var (direction, _) = path[0];
+                    var direction = path[0].TranslationHere;
                     if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
                     {
                         InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
@@ -135,12 +159,12 @@ namespace LMCore.TiledDungeon.Enemies
             {
                 if (previousPath != null && previousPath.Count > 0)
                 {
-                    if (previousPath[0].Value != target.Coordinates)
+                    if (!previousPath[0].Checkpoint.IsHere(target))
                     {
 
                         // If we repeatedly are following prevoius path we
                         // need to truncate it for each move we have made
-                        if (previousPath[0].Value == entity.Coordinates)
+                        if (previousPath[0].Checkpoint.IsHere(entity))
                         {
                             previousPath = previousPath.Skip(1).ToList();
                         }
@@ -149,7 +173,7 @@ namespace LMCore.TiledDungeon.Enemies
                         {
                             Debug.Log(PrefixLogMessage("Using previous path to player"));
                             // TODO: Improve this logic
-                            var (direction, coordinates) = previousPath[0];
+                            var direction = previousPath[0].TranslationHere;
                             if (!NextActionCollidesWithPlayer(path) || direction != entity.LookDirection)
                             {
                                 InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
@@ -169,8 +193,7 @@ namespace LMCore.TiledDungeon.Enemies
         public EnemyHuntingSave Save() => 
             target != null ? new EnemyHuntingSave() {
                 TargetId = target.Identifier,
-                PreviousPathCoordinates = previousPath?.Select(kvp => kvp.Value)?.ToList(),
-                PreviousPathDirections = previousPath?.Select(kvp => kvp.Key)?.ToList(),
+                PreviousPath = previousPath,
             } :
             null;
 
@@ -195,11 +218,7 @@ namespace LMCore.TiledDungeon.Enemies
             if (huntingSave != null)
             {
                 target = Dungeon.GetEntity(huntingSave.TargetId);
-                previousPath = huntingSave.PreviousPathCoordinates
-                    .Zip(
-                        huntingSave.PreviousPathDirections,
-                        (coords, dir) => new KeyValuePair<Direction, Vector3Int>(dir, coords))
-                    .ToList();
+                previousPath = huntingSave.PreviousPath;
             } else
             {
                 target = null;

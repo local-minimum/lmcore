@@ -299,6 +299,29 @@ namespace LMCore.TiledDungeon
             return null;
         }
 
+        [System.Serializable]
+        public struct Checkpoint
+        {
+            public Vector3Int Coordinates;
+            public Direction Anchor;
+
+            public bool IsHere(GridEntity entity) =>
+                entity.Coordinates == Coordinates && entity.AnchorDirection == Anchor;
+
+            public override string ToString() =>
+                $"<{Coordinates} {Anchor}>";
+        }
+
+        [System.Serializable]
+        public struct Translation 
+        {
+            public Direction TranslationHere;
+            public Checkpoint Checkpoint;
+
+            public override string ToString() =>
+                $"[{TranslationHere} -> {Checkpoint}]";
+        }
+
         /// <summary>
         /// Closest path for the entity to get to target. Not regarding cost of turns.
         /// </summary>
@@ -313,30 +336,31 @@ namespace LMCore.TiledDungeon
             Vector3Int start,
             Vector3Int target,
             int maxDepth,
-            out List<KeyValuePair<Direction, Vector3Int>> path,
+            out List<Translation> path,
             bool debugLog = false)
         {
             // TODO: We don't account for just waiting on a moving platform to reach a goal either
             // nor do we have a way to attatch goals to faces that can move...
 
-            var seen = new Dictionary<Vector3Int, List<KeyValuePair<Direction, Vector3Int>>>();
-            var seenQueue = new Queue<Vector3Int>();
-            var visited = new HashSet<Vector3Int>();
+            var seen = new Dictionary<Checkpoint, List<Translation>>();
+            var seenQueue = new Queue<Checkpoint>();
+            var visited = new HashSet<Checkpoint>();
 
-            seenQueue.Enqueue(start);
+            var startCheckpoint = new Checkpoint() { Anchor = entity.AnchorDirection, Coordinates = start };
+            seenQueue.Enqueue(startCheckpoint);
 
             while (seenQueue.Count > 0)
             {
-                var coordinates = seenQueue.Dequeue();
-                if (visited.Contains(coordinates))
+                var checkpoint = seenQueue.Dequeue();
+                if (visited.Contains(checkpoint))
                 {
-                    if (debugLog) Debug.Log($"ClosestPath: Ignore {coordinates} because already visited");
+                    if (debugLog) Debug.Log($"ClosestPath: Ignore {checkpoint} because already visited");
                     continue;
                 }
 
-                visited.Add(coordinates);
+                visited.Add(checkpoint);
 
-                var pathHere = seen.GetValueOrDefault(coordinates) ?? new List<KeyValuePair<Direction, Vector3Int>>();
+                var pathHere = seen.GetValueOrDefault(checkpoint) ?? new List<Translation>();
                 
                 // Stop searching if we are too deep in
                 if (pathHere.Count > maxDepth)
@@ -346,107 +370,64 @@ namespace LMCore.TiledDungeon
                     return false;
                 }
 
-                var node = this[coordinates];
+                var node = this[checkpoint.Coordinates];
                 if (node == null)
                 {
-                    if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates} because there's no node there");
+                    if (debugLog) Debug.Log($"ClosestPath: Ignoring {checkpoint} because there's no node there");
                     path = null;
                     continue;
                 }
 
                 foreach (var direction in DirectionExtensions.AllDirections)
                 {
-                    // TODO: If we are anchored to something else we might want other directions
-                    if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && !node.HasFloor)
+                    if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && checkpoint.Anchor == Direction.Down && !node.HasFloor)
                     {
                         if (direction != Direction.Down)
                         {
-                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because not flying and no floor");
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {checkpoint}-{direction} because not flying and no floor");
                             continue;
                         }
                     }
 
-                    // TODO: If we want enemies to be able to climb stairs we need to check
-                    // be able to move inside a node too and check what directions to ignor
-                    // based on anchor and down directions
-                    if (direction == Direction.Up && !entity.TransportationMode.HasFlag(TransportationMode.Flying))
+                    if (direction.IsParallell(checkpoint.Anchor) && !entity.TransportationMode.HasFlag(TransportationMode.Flying))
                     {
-                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because not flying");
+                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {checkpoint}-{direction} because not flying");
                         continue;
                     }
 
-                    var neighbour = node.Neighbour(direction);
-                    var anchor = node.GetAnchor(entity.Down);
-                    if (anchor != null)
-                    {
-                        // TODO: How to handle if there's no anchor on the neighbour?
-                        // This is also part of where we could expand to allow climbing
-                        var neighbourAnchor = anchor.GetNeighbour(direction, entity, out var outcome);
-                        if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null)
-                        {
-                            neighbour = neighbourAnchor.Node.Coordinates;
+                    var outcome = node.AllowsTransition(entity, checkpoint.Coordinates, checkpoint.Anchor, direction, out var neighbourCoordinates, out var neighbourAnchor, false);
+                    if (outcome == MovementOutcome.Refused || outcome == MovementOutcome.Blocked) continue;
 
-                            if (entity.TransportationMode.HasFlag(TransportationMode.Walking))
-                            {
-                                // Exclude transitions that would require climbing more than entity can do
-                                var nodeEdge = anchor.GetEdgePosition(direction);
-                                var neigbourEdge = neighbourAnchor.GetEdgePosition(direction.Inverse());
-                                var up = entity.Down.Inverse().AsLookVector3D();
-                                var delta = neigbourEdge - nodeEdge;
-                                if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
-                                {
-                                    if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because too high step up {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
-                                    continue;
-                                }
-
-                                // TODO: Exclude jumps that are too long for the entity
-                            }
-                        }
-                    } else
+                    if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null)
                     {
-                        // TODO: For now we only check allowed exits and not if we may enter
-                        // this is because we would need to consider the neuances of if we
-                        // should respect rules about letting entities coexits or not.
-                        if (!node.AllowExit(entity, direction))
+                        // Exclude transitions that would require climbing more than entity can do
+                        var anchor = node.GetAnchor(checkpoint.Anchor);
+                        var nodeEdge = anchor.GetEdgePosition(direction);
+                        var neigbourEdge = neighbourAnchor.GetEdgePosition(direction.Inverse());
+                        var up = entity.Down.Inverse().AsLookVector3D();
+                        var delta = neigbourEdge - nodeEdge;
+                        if (Vector3.Dot(delta, up) > entity.Abilities.maxScaleHeight)
                         {
-                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because exit not allowed");
+                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {checkpoint}-{direction} because too high step up {Vector3.Dot(delta, up)} > {entity.Abilities.maxScaleHeight}");
                             continue;
                         }
 
+                        // TODO: Exclude jumps that are too long for the entity
                     }
 
-                    var neighbourNode = node.Dungeon[neighbour];
-                    if (neighbourNode != null)
-                    {
-                        var entryDirection = direction.Inverse();
-
-                        if (neighbourNode.HasBlockingDoor(entryDirection))
-                        {
-                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour has a door");
-                            continue;
-                        }
-                        if (neighbourNode.HasSide(entryDirection, TDNode.SideCheckMode.Entry) && direction.Translate(coordinates) == neighbour)
-                        {
-                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour has solid side towards us");
-                            continue;
-                        }
-                        if (neighbourNode.BlockEdgeTraversal(entity, entryDirection, TDNode.SideCheckMode.Entry))
-                        {
-                            if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because neighbour edge doesn't allow traversal");
-                            continue;
-                        }
-                    }
+                    var neighbour = new Checkpoint() { Anchor = neighbourAnchor.CubeFace, Coordinates = neighbourCoordinates };
+                    // TODO: How to handle if there's no anchor on the neighbour?
 
                     if (seen.ContainsKey(neighbour))
                     {
-                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {coordinates}-{direction} because we have a closer path to {neighbour}");
+                        if (debugLog) Debug.Log($"ClosestPath: Ignoring {checkpoint}-{direction} because we have a closer path to {neighbour}");
                         continue;
                     }
 
-                    var neighbourPath = new List<KeyValuePair<Direction, Vector3Int>>(pathHere);
-                    neighbourPath.Add(new KeyValuePair<Direction, Vector3Int>(direction, neighbour));
+                    var neighbourPath = new List<Translation>(pathHere);
+                    neighbourPath.Add(new Translation() { TranslationHere = direction, Checkpoint = neighbour });
 
-                    if (neighbour == target)
+                    if (neighbour.Coordinates == target)
                     {
                         path = neighbourPath;
                         return true;

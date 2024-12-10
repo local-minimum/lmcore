@@ -29,11 +29,11 @@
                 7,
                 21
             ],
-            "scale": 3,
-            "selectedLayer": 3,
+            "scale": 4,
+            "selectedLayer": 9,
             "viewCenter": {
-                "x": 512.1666666666666,
-                "y": 512.1666666666666
+                "x": 200.75,
+                "y": 293.875
             }
         },
         "Mapping.tsx": {

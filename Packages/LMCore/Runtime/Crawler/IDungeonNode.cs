@@ -18,14 +18,17 @@ namespace LMCore.Crawler
         /// Checking both node exits and node entries.
         /// Also accounts for intermediary nodes when rounding corners and such
         /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="direction"></param>
-        /// <param name="targetCoordinates"></param>
-        /// <param name="targetAnchor"></param>
         /// <returns>What type of movement this would be if any</returns>
-        public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor);
+        public MovementOutcome AllowsTransition(
+            GridEntity entity,
+            Vector3Int origin,
+            Direction originAnchorDirection,
+            Direction direction,
+            out Vector3Int targetCoordinates,
+            out Anchor targetAnchor,
+            bool checkOccupancyRule = true);
         public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
-        public bool AllowsEntryFrom(GridEntity entity, Direction direction);
+        public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true);
         public bool AllowExit(GridEntity entity, Direction direction);
         public bool AllowsRotating(GridEntity entity);
 

@@ -30,26 +30,18 @@ namespace LMCore.TiledDungeon.Enemies
             }
         }
 
-        public bool FallsOnPlayer(List<KeyValuePair<Direction, Vector3Int>> path, out int index)
-        {
-            index = path.FindIndex(kvp => kvp.Value == Dungeon.Player.Coordinates);
-            if (index < 0) return false;
-
-            return path[Mathf.Max(index - 1, 0)].Key == Direction.Down;
-        }
-
-        public bool NextActionCollidesWithPlayer(List<KeyValuePair<Direction, Vector3Int>> path)
+        public bool NextActionCollidesWithPlayer(List<TiledDungeon.Translation> path)
         {
             if (path == null) return false;
 
-            var index = path.FindIndex(kvp => kvp.Value == Dungeon.Player.Coordinates);
+            var index = path.FindIndex(t => t.Checkpoint.IsHere(Dungeon.Player));
             if (index < 0) return false;
             if (index == 0) return true;
 
             var translationsUntilPlayer = path
                 .Take(index + 1)
                 .Reverse()
-                .SkipWhile(kvp => kvp.Key == Direction.Down)
+                .SkipWhile(kvp => kvp.TranslationHere == Direction.Down)
                 .Count();
 
             return translationsUntilPlayer == 1;
@@ -70,7 +62,13 @@ namespace LMCore.TiledDungeon.Enemies
         {
             var entity = Enemy.Entity;
             // var translationTarget = entity.Node.Neighbour(entity, translationDirection, out var targetAnchor);
-            var outcome = entity.Node.AllowsTransition(entity, translationDirection, out var translationTarget, out var targetAnchor);
+            var outcome = entity.Node.AllowsTransition(
+                entity, 
+                entity.Coordinates,
+                entity.AnchorDirection,
+                translationDirection, 
+                out var translationTarget, 
+                out var targetAnchor);
             if (outcome == MovementOutcome.Refused) return;
 
             if (translationDirection == entity.LookDirection)

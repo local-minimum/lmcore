@@ -34,11 +34,18 @@ public class DummyNode : MonoBehaviour, IDungeonNode
 
     public bool AllowExit(GridEntity entity, Direction direction) => true;
 
-    public bool AllowsEntryFrom(GridEntity entity, Direction direction) => true;
+    public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true) => true;
 
-    public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction) => 
-        MovementOutcome.NodeExit;
+
+    public MovementOutcome AllowsTransition(GridEntity entity, Vector3Int origin, Direction originAnchorDirection, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor, bool checkOccupancyRule = true)
+    {
+        targetCoordinates = direction.Translate(origin);
+        targetAnchor = null; 
+        return MovementOutcome.NodeExit;
+    }
     
+    public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction) =>
+        MovementOutcome.NodeExit;
 
     public bool AllowsRotating(GridEntity entity) => true;
 
@@ -101,7 +108,7 @@ public class DummyNode : MonoBehaviour, IDungeonNode
     {
     }
 
-    public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor)
+    public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor, bool checkOccupancyRule = true)
     {
         targetAnchor = null;
         targetCoordinates = direction.Translate(Coordinates);

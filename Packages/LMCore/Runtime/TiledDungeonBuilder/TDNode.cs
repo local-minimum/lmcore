@@ -360,22 +360,38 @@ namespace LMCore.TiledDungeon
             return MovementOutcome.NodeExit;
         }
 
-        public MovementOutcome AllowsTransition(GridEntity entity, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor)
+        public MovementOutcome AllowsTransition(
+            GridEntity entity,
+            Vector3Int origin,
+            Direction originAnchorDirection,
+            Direction direction, 
+            out Vector3Int targetCoordinates, 
+            out Anchor targetAnchor, 
+            bool checkOccupancyRules = true
+        )
         {
             // TODO: CanAnchorOn should consider entity abilities if entity can climb or not and such...
+            var originAnchor = Dungeon[origin]?.GetAnchor(originAnchorDirection);
+            
+            if (direction == Direction.None)
+            {
+                Debug.LogWarning(PrefixLogMessage($"{entity.name} asked for a None transition"));
+                targetAnchor = originAnchor;
+                targetCoordinates = origin;
+                return MovementOutcome.Refused;
+            }
 
-            var currentCoordinates = entity.Coordinates;
             if (HasBlockingDoor(direction))
             {
-                targetAnchor = entity.NodeAnchor;
-                targetCoordinates = currentCoordinates;
+                targetAnchor = originAnchor;
+                targetCoordinates = origin;
                 return MovementOutcome.Blocked;
             }
 
             targetCoordinates = Neighbour(entity, direction, out targetAnchor);
-            if (targetCoordinates == currentCoordinates)
+            if (targetCoordinates == origin)
             {
-                if (HasLadder(entity.AnchorDirection))
+                if (HasLadder(originAnchorDirection))
                 {
 
                     if (direction == Direction.Up)
@@ -386,8 +402,8 @@ namespace LMCore.TiledDungeon
                         {
                             if (CanAnchorOn(entity, Direction.Up)) return MovementOutcome.NodeInternal;
                             
-                            targetAnchor = entity.NodeAnchor;
-                            targetCoordinates = currentCoordinates;
+                            targetAnchor = originAnchor;
+                            targetCoordinates = origin;
                             return MovementOutcome.Blocked;
                         }
 
@@ -403,8 +419,8 @@ namespace LMCore.TiledDungeon
                                 return MovementOutcome.NodeInternal;
                             }
                             
-                            targetAnchor = entity.NodeAnchor;
-                            targetCoordinates = currentCoordinates;
+                            targetAnchor = originAnchor;
+                            targetCoordinates = origin;
                             return MovementOutcome.Blocked;
                         }
                         return MovementOutcome.NodeExit;
@@ -415,25 +431,25 @@ namespace LMCore.TiledDungeon
 
                 if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
                 {
-                    targetAnchor = entity.NodeAnchor;
-                    targetCoordinates = currentCoordinates;
+                    targetAnchor = originAnchor;
+                    targetCoordinates = origin;
                     return MovementOutcome.Blocked;
                 }
                 
                 return MovementOutcome.NodeInternal;
             }
 
-            var simpleTranslationCoordinates = direction.Translate(currentCoordinates);
+            var simpleTranslationCoordinates = direction.Translate(origin);
             var translationTarget = Dungeon[targetCoordinates];
             if (simpleTranslationCoordinates == targetCoordinates)
             {
-                if (AllowExit(entity, direction) && (translationTarget?.AllowsEntryFrom(entity, direction.Inverse()) ?? false))
+                if (AllowExit(entity, direction) && (translationTarget?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false))
                 {
                     return MovementOutcome.NodeExit;
                 }
 
-                targetCoordinates = currentCoordinates;
-                targetAnchor = entity.NodeAnchor;
+                targetAnchor = originAnchor;
+                targetCoordinates = origin;
                 return MovementOutcome.Blocked;
             }
 
@@ -441,11 +457,11 @@ namespace LMCore.TiledDungeon
 
             if (secondaryTranslation == Direction.None)
             {
-                Debug.LogError(PrefixLogMessage($"Translation {direction} from {entity.Coordinates} to {translationTarget} " +
+                Debug.LogError(PrefixLogMessage($"Translation {direction} from {origin} to {translationTarget} " +
                     $"caused unexpected secondary translation of {targetCoordinates - simpleTranslationCoordinates}"));
 
-                targetCoordinates = currentCoordinates;
-                targetAnchor = entity.NodeAnchor;
+                targetAnchor = originAnchor;
+                targetCoordinates = origin;
                 return MovementOutcome.Refused;
             }
 
@@ -456,7 +472,7 @@ namespace LMCore.TiledDungeon
             };
 
             if (!options.Any(translations => {
-                var coordinates = currentCoordinates;
+                var coordinates = origin;
                 foreach (var direction in translations)
                 {
                     if (!Dungeon[coordinates]?.AllowExit(entity, direction) ?? false)
@@ -466,7 +482,7 @@ namespace LMCore.TiledDungeon
 
                     coordinates = direction.Translate(coordinates);
                     if (
-                        !(Dungeon[coordinates]?.AllowsEntryFrom(entity, direction.Inverse()) ?? false)
+                        !(Dungeon[coordinates]?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false)
                     ) {
                         return false;
                     }
@@ -477,8 +493,8 @@ namespace LMCore.TiledDungeon
                 return MovementOutcome.NodeExit;
             }
 
-            targetAnchor = entity.NodeAnchor;
-            targetCoordinates = currentCoordinates;
+            targetAnchor = originAnchor;
+            targetCoordinates = origin;
             return MovementOutcome.Blocked;
         }
 
@@ -602,7 +618,13 @@ namespace LMCore.TiledDungeon
         {
             foreach (var direction in DirectionExtensions.AllDirections.OrderBy(d => d == Direction.Up ? 0 : 1))
             {
-                if (AllowsTransition(entity, direction, out var _, out var _) == MovementOutcome.NodeExit)
+                if (AllowsTransition(
+                    entity, 
+                    entity.Coordinates,
+                    entity.AnchorDirection,
+                    direction, 
+                    out var _, 
+                    out var _) == MovementOutcome.NodeExit)
                 {
                     entity.InjectMovement(direction.AsMovement(entity.LookDirection, entity.Down), ElasticGameClock.instance.baseTickDuration);
                     return true;
@@ -641,24 +663,27 @@ namespace LMCore.TiledDungeon
             return true;
         }
 
-        public bool AllowsEntryFrom(GridEntity entity, Direction direction)
+        public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true)
         {
-            if (!OccupationRules.MayCoexist(entity, Occupants))
+            if (checkOccupancyRules)
             {
-                if (!entity.Falling || !PushOccupants(entity))
+                if (!OccupationRules.MayCoexist(entity, Occupants))
                 {
-                    var occupants = Occupants.Select(o => o.name);
-                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
-                    return false;
+                    if (!entity.Falling || !PushOccupants(entity))
+                    {
+                        var occupants = Occupants.Select(o => o.name);
+                        Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
+                        return false;
+                    }
                 }
-            }
-            if (!OccupationRules.MayCoexist(entity, _reservations))
-            {
-                if (!entity.Falling || RefuseReservations(entity))
+                if (!OccupationRules.MayCoexist(entity, _reservations))
                 {
-                    var reserves = _reservations.Select(r => r.name);
-                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
-                    return false;
+                    if (!entity.Falling || RefuseReservations(entity))
+                    {
+                        var reserves = _reservations.Select(r => r.name);
+                        Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
+                        return false;
+                    }
                 }
             }
 

@@ -72,10 +72,10 @@ namespace LMCore.TiledDungeon
                 if (path.Count > 0)
                 {
                     // TODO: Improve this logic
-                    var (direction, coordinates) = path[0];
-                    if (entity.Coordinates != coordinates || direction != entity.LookDirection)
+                    var translation = path[0];
+                    if (entity.Coordinates != translation.Checkpoint.Coordinates || translation.TranslationHere != entity.LookDirection)
                     {
-                        InvokePathBasedMovement(direction, target.Coordinates, movementDuration, PrefixLogMessage);
+                        InvokePathBasedMovement(translation.TranslationHere, target.Coordinates, movementDuration, PrefixLogMessage);
                     }
                 } else
                 {
