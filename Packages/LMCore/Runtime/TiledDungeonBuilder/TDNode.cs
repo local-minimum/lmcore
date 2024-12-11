@@ -571,7 +571,8 @@ namespace LMCore.TiledDungeon
         /// <returns></returns>
         bool PushOccupants(GridEntity activeEntity)
         {
-            foreach (var occupant in Occupants)
+            // Since the action may mutate occupants we need to copy the collection first
+            foreach (var occupant in Occupants.ToList())
             {
                 if (occupant == activeEntity) continue;
                 if (!PushEntity(occupant)) return false;
@@ -586,7 +587,8 @@ namespace LMCore.TiledDungeon
         /// <returns></returns>
         bool RefuseReservations(GridEntity activeEntity)
         {
-            foreach (var reservation in _reservations)
+            // Since the action may mutate resevations we need to copy the collection first
+            foreach (var reservation in _reservations.ToList())
             {
                 if (reservation == activeEntity) continue;
                 if (!PushEntity(reservation)) return false;
