@@ -562,7 +562,7 @@ namespace LMCore.Crawler
                 PrimaryDirection = direction 
             }; 
 
-            var anchor = Entity.NodeAnchor;
+            var anchor = Entity.Falling ? null : Entity.NodeAnchor;
             if (anchor == null)
             {
                 var node = Entity.Node;
@@ -594,6 +594,7 @@ namespace LMCore.Crawler
                         out var _,
                         out var targetAnchor
                         );
+
                     if (outcome == MovementOutcome.Refused)
                     {
                         interpretation.Steps.Add(interpretation.First);

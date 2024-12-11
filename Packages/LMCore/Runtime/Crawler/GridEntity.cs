@@ -35,6 +35,12 @@ namespace LMCore.Crawler
         public override string ToString() => 
             $"Entity '{name}' @ {Coordinates} Anchor({AnchorDirection}/{AnchorMode}) Down({Down}) Looking({LookDirection})";
 
+        [ContextMenu("Info")]
+        void Info()
+        {
+            Debug.Log($"{this} Falling({Falling}) Mode({TransportationMode}) Moving({Moving})");
+        }
+
         [SerializeField]
         private AbsInventory _inventory;
         public AbsInventory Inventory => _inventory;

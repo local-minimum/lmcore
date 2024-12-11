@@ -463,6 +463,21 @@ namespace LMCore.TiledDungeon
             return MovementOutcome.Blocked;
         }
 
+        public bool HasOpenTrapdoorDoor(Direction direction)
+        {
+            var door = Door;
+
+            if (door == null) return false;
+            Debug.Log(PrefixLogMessage($"{door} Trapdoor({HasTrapDoor})"));
+
+            if (HasTrapDoor)
+            {
+                return direction == Direction.Down && !door.BlockingPassage;
+            }
+
+            return false;
+        }
+
         public bool HasBlockingDoor(Direction direction)
         {
             var door = Door;
@@ -533,7 +548,7 @@ namespace LMCore.TiledDungeon
         }
 
         public bool AllowExit(GridEntity entity, Direction direction) =>
-            !HasSide(direction, SideCheckMode.Exit) &&
+            (!HasSide(direction, SideCheckMode.Exit) || HasOpenTrapdoorDoor(direction) || HasIllusion(direction)) &&
             !temporaryExitBlocker.Overrides(direction) &&
             !BlockEdgeTraversal(entity, direction, SideCheckMode.Exit);
 
