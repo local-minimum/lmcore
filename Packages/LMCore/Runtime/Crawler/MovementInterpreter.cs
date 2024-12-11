@@ -177,8 +177,9 @@ namespace LMCore.Crawler
 
         private bool InterpretRoundOuterCorner(MovementInterpretation interpretation)
         {
-            var origin = interpretation.Last;
+            var origin = interpretation.First;
             var originAnchor = origin.Checkpoint.Anchor;
+            // Debug.Log($"Checking outer corner on:\n'{interpretation}'");
             if (originAnchor == null) return false;
 
             // First one step in primary direction
@@ -198,8 +199,7 @@ namespace LMCore.Crawler
 
             if (!target.CanAnchorOn(Entity, targetAnchorDirection)) return false;
 
-            Debug.Log($"Outer corner movement confirmed");
-
+            // Debug.Log($"Outer corner movement intermediary:\n{interpretation}");
             var targetAnchor = target.GetAnchor(targetAnchorDirection);
 
             var lookDirection = origin.Checkpoint.LookDirection;
@@ -212,10 +212,14 @@ namespace LMCore.Crawler
                 {
                     lookDirection = origin.Checkpoint.LookDirection;
                 }
-
-                // We need to update the first intermediate checkpoint too
-                origin.Checkpoint.LookDirection = lookDirection;
             }
+
+            // Add the edge step of the first node
+            interpretation.Steps.Add(new MovementCheckpointWithTransition()
+            {
+                Checkpoint = MovementCheckpoint.From(originAnchor, interpretation.PrimaryDirection, lookDirection),
+                Transition = MovementTransition.Grounded,
+            });
 
             // Adding intermediary point
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
@@ -227,6 +231,8 @@ namespace LMCore.Crawler
                     ),
                 Transition = MovementTransition.Grounded,
             });
+
+            // Debug.Log($"Outer corner movement second intermediary:\n{interpretation}");
 
             if (Entity.RotationRespectsAnchorDirection)
             {
@@ -245,8 +251,14 @@ namespace LMCore.Crawler
                 Transition = MovementTransition.Grounded,
             });
 
+            Debug.Log($"Outer corner movement confirmed:\n{interpretation}");
             return true;
         }
+
+        private bool IsOuterCorner(Anchor start, Anchor end) =>
+            start != null && 
+            end != null &&
+            start.CubeFace.Translate(start.Node.Coordinates) == end.CubeFace.Translate(end.Node.Coordinates);
 
         private void InterpretTargetNode(MovementInterpretation interpretation, IDungeonNode targetNode, bool allowEntry)
         {
@@ -310,10 +322,6 @@ namespace LMCore.Crawler
                         });
                     }
                     return;
-                }
-
-                if (InterpretRoundOuterCorner(interpretation)) { 
-                    return; 
                 }
 
                 if (targetNode.GetAnchor(wantedAnchorDirection) == null)
@@ -584,7 +592,7 @@ namespace LMCore.Crawler
                         Entity.AnchorDirection, 
                         direction,
                         out var _,
-                        out var _
+                        out var targetAnchor
                         );
                     if (outcome == MovementOutcome.Refused)
                     {
@@ -600,7 +608,7 @@ namespace LMCore.Crawler
                         if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
                         {
                             InterpretByDungeon(interpretation);
-                        } else 
+                        } else if (!IsOuterCorner(Entity.NodeAnchor, targetAnchor) || !InterpretRoundOuterCorner(interpretation))
                         {
                             InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
                         }
@@ -618,6 +626,7 @@ namespace LMCore.Crawler
                 if (outcome == MovementOutcome.Refused)
                 {
                     interpretation.Steps.Add(interpretation.First);
+                    return interpretation;
                 }
                 else if (outcome == MovementOutcome.Blocked)
                 {
@@ -625,11 +634,12 @@ namespace LMCore.Crawler
                     InterpretBlocked(
                         interpretation,
                         $"Anchor {anchor.CubeFace} lacked neighbour to {direction} and said movement was blocked");
+                    return interpretation;
                 }
+
                 if (neighbour != null)
                 {
-                    // If we are not really exiting the normal way, we should already have checked this
-                    if ((neighbour.Node.Coordinates - anchor.Node.Coordinates).AsDirectionOrNone() == Direction.None)
+                    if (!IsOuterCorner(Entity.NodeAnchor, neighbour) || !InterpretRoundOuterCorner(interpretation))
                     {
                         InterpretAnchorMovement(
                             interpretation,
@@ -639,8 +649,9 @@ namespace LMCore.Crawler
                             neighbour,
                             true);
 
-                        return interpretation;
                     }
+
+                    return interpretation;
                 }
 
                 outcome = anchor.Node.AllowsTransition(

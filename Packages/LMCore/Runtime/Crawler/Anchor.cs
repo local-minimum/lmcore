@@ -442,7 +442,7 @@ namespace LMCore.Crawler
                 var outerCornerAnchor = GetOuterCornerAnchor(direction, entity);
                 if (outerCornerAnchor != null)
                 {
-                    Debug.Log(PrefixLogMessage($"Doing outer corner anchor move for {entity.name}"));
+                    Debug.Log(PrefixLogMessage($"Doing outer corner anchor move for {entity.name} to {outerCornerAnchor.Node.Coordinates} {outerCornerAnchor.CubeFace}"));
                     outcome = MovementOutcome.NodeExit;
                     return outerCornerAnchor;
                 }
