@@ -41,7 +41,7 @@ public class DebugPathfinding : MonoBehaviour
         var success = dungeon.ClosestPath(entity, from, to, maxSearch, out var path, true);
         if (success)
         {
-            Debug.Log($"Found path: {string.Join(", ", path)}");
+            Debug.Log($"Found path: {from}({entity.AnchorDirection}) {string.Join(", ", path)}");
         } else
         {
             Debug.Log($"Found no path from {from} to {to} for {entity.name} with max depth {maxSearch}");

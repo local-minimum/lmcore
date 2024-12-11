@@ -578,7 +578,14 @@ namespace LMCore.Crawler
                         Transition = MovementTransition.Ungrounded,
                     });
 
-                    var outcome = node.AllowsMovement(Entity, Entity.AnchorDirection, direction);
+                    var outcome = node.AllowsTransition(
+                        Entity, 
+                        Entity.Coordinates,
+                        Entity.AnchorDirection, 
+                        direction,
+                        out var _,
+                        out var _
+                        );
                     if (outcome == MovementOutcome.Refused)
                     {
                         interpretation.Steps.Add(interpretation.First);
@@ -640,7 +647,13 @@ namespace LMCore.Crawler
                     }
                 }
 
-                outcome = anchor.Node.AllowsMovement(Entity, anchor.CubeFace, direction);
+                outcome = anchor.Node.AllowsTransition(
+                    Entity, 
+                    Entity.Coordinates, 
+                    anchor.CubeFace,
+                    direction,
+                    out var _,
+                    out var _);
                 if (outcome == MovementOutcome.Refused)
                 {
                     interpretation.Steps.Add(interpretation.First);

@@ -7,6 +7,7 @@ using LMCore.TiledImporter;
 using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
 using System.IO;
+using Codice.CM.Common.Serialization;
 
 namespace LMCore.TiledDungeon
 {
@@ -376,6 +377,7 @@ namespace LMCore.TiledDungeon
             
             if (direction == Direction.None)
             {
+                // This warning shouldn't be commented out because this truely should never happen
                 Debug.LogWarning(PrefixLogMessage($"{entity.name} asked for a None transition"));
                 targetAnchor = originAnchor;
                 targetCoordinates = origin;
@@ -393,55 +395,17 @@ namespace LMCore.TiledDungeon
             }
 
             targetCoordinates = Neighbour(entity, originAnchorDirection, entity.Down, direction, out targetAnchor);
+            var translationTarget = Dungeon[targetCoordinates];
 
-            if (direction.IsPlanarCardinal() && HasLadder(originAnchorDirection))
+            if (checkOccupancyRules && !(translationTarget?.CheckMayCoexist(entity) ?? false))
             {
-                // Going up a ladder and anchording on the ceiling
-                if (direction == Direction.Up)
-                {
-                    // The check also checked this before but I don't know why
-                    //  && HasSide(direction, SideCheckMode.Exit)
-                    if (HasCeiling)
-                    {
-                        if (CanAnchorOn(entity, Direction.Up))
-                        {
-                            return MovementOutcome.NodeInternal;
-                        }
-                        
-                        /*
-                        Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on ceiling from ladder"));
-                        */
-                        targetAnchor = originAnchor;
-                        targetCoordinates = origin;
-                        return MovementOutcome.Blocked;
-                    }
+                // Debug.Log(PrefixLogMessage($"Occupancy rules refused target {translationTarget}"));
+                return MovementOutcome.Refused;
+            }
 
-                    return MovementOutcome.NodeExit;
-                }
-
-                // Going down off a ladder and anchoring on the floor
-                if (direction == Direction.Down)
-                {
-                    if (HasFloor)
-                    {
-                        if (CanAnchorOn(entity, Direction.Down))
-                        {
-                            return MovementOutcome.NodeInternal;
-                        }
-                        
-                        /*
-                        Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by not anchoring on floor from ladder"));
-                        */
-                        targetAnchor = originAnchor;
-                        targetCoordinates = origin;
-                        return MovementOutcome.Blocked;
-                    }
-                    return MovementOutcome.NodeExit;
-                }
-
-                /*
-                Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by {direction} not allowed from ladder"));
-                */
+            if (originAnchorDirection.IsPlanarCardinal() && direction.IsPlanarCardinal() && HasLadder(originAnchorDirection))
+            {
+                // Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by {direction} not allowed from ladder"));
                 return MovementOutcome.Refused;
             }
 
@@ -450,9 +414,7 @@ namespace LMCore.TiledDungeon
 
                 if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
                 {
-                    /*
-                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by refused anchor on {direction}"));
-                    */
+                    // Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by refused anchor on {direction}"));
                     targetAnchor = originAnchor;
                     targetCoordinates = origin;
                     return MovementOutcome.Blocked;
@@ -462,7 +424,6 @@ namespace LMCore.TiledDungeon
             }
 
             var simpleTranslationCoordinates = direction.Translate(origin);
-            var translationTarget = Dungeon[targetCoordinates];
             if (simpleTranslationCoordinates == targetCoordinates)
             {
                 if (AllowExit(entity, direction) && (translationTarget?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false))
@@ -485,6 +446,7 @@ namespace LMCore.TiledDungeon
 
             if (secondaryTranslation == Direction.None)
             {
+                // This logging should not be commented out because this truely should never happen
                 Debug.LogError(PrefixLogMessage($"Translation {direction} from {origin} to {translationTarget} " +
                     $"caused unexpected secondary translation of {targetCoordinates - simpleTranslationCoordinates}"));
 
@@ -496,15 +458,17 @@ namespace LMCore.TiledDungeon
             var options = new List<List<Direction>>()
             {
                 new List<Direction>() { direction, secondaryTranslation },
-                new List<Direction>() { secondaryTranslation, direction},
+                new List<Direction>() { secondaryTranslation, direction },
             };
 
-            if (!options.Any(translations => {
+            if (options.Any(translations => {
                 var coordinates = origin;
+                // Debug.Log(PrefixLogMessage($"Checking complex transition sequence {string.Join(", ", translations)}"));
                 foreach (var direction in translations)
                 {
                     if (!Dungeon[coordinates]?.AllowExit(entity, direction) ?? false)
                     {
+                        // Debug.Log(PrefixLogMessage($"Exit from {coordinates} -> {direction} not allowed"));
                         return false;
                     }
 
@@ -512,15 +476,16 @@ namespace LMCore.TiledDungeon
                     if (
                         !(Dungeon[coordinates]?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false)
                     ) {
+                        // Debug.Log(PrefixLogMessage($"Entry to {coordinates} -> {direction.Inverse()} not allowed"));
                         return false;
                     }
-
                 }
                 return true;
             })) {
                 return MovementOutcome.NodeExit;
             }
 
+            // Debug.Log(PrefixLogMessage($"No complex movement allowed ({direction}, {secondaryTranslation}) to {translationTarget}"));
             targetAnchor = originAnchor;
             targetCoordinates = origin;
             return MovementOutcome.Blocked;
@@ -707,28 +672,35 @@ namespace LMCore.TiledDungeon
             return true;
         }
 
+        bool CheckMayCoexist(GridEntity entity)
+        {
+            if (!OccupationRules.MayCoexist(entity, Occupants))
+            {
+                if (!entity.Falling || !PushOccupants(entity))
+                {
+                    var occupants = Occupants.Select(o => o.name);
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
+                    return false;
+                }
+            }
+            if (!OccupationRules.MayCoexist(entity, _reservations))
+            {
+                if (!entity.Falling || RefuseReservations(entity))
+                {
+                    var reserves = _reservations.Select(r => r.name);
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true)
         {
-            if (checkOccupancyRules)
+            if (checkOccupancyRules && !CheckMayCoexist(entity))
             {
-                if (!OccupationRules.MayCoexist(entity, Occupants))
-                {
-                    if (!entity.Falling || !PushOccupants(entity))
-                    {
-                        var occupants = Occupants.Select(o => o.name);
-                        Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
-                        return false;
-                    }
-                }
-                if (!OccupationRules.MayCoexist(entity, _reservations))
-                {
-                    if (!entity.Falling || RefuseReservations(entity))
-                    {
-                        var reserves = _reservations.Select(r => r.name);
-                        Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
-                        return false;
-                    }
-                }
+                return false;
             }
 
             if (HasWall(direction, SideCheckMode.Entry))

@@ -283,7 +283,6 @@ namespace LMCore.Crawler
         /// <param name="direction">Main direction of the movement</param>
         /// <param name="offset">Vertical offset</param>
         /// <param name="entity">Entity in question, only used for tranportaion mode</param>
-        /// <returns></returns>
         private Anchor GetNeighbour(Direction direction, Direction offset, GridEntity entity)
         {
             var dungeon = Dungeon;
@@ -311,6 +310,47 @@ namespace LMCore.Crawler
             return null;
         }
 
+        /// <summary>
+        /// Returns anchor as if rounding an outer corner, if exists.
+        /// 
+        /// Note: This function doesn't check if there are other transitions that should
+        /// have higher priority, such as normal tile to tile neighbours on the same level
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        private Anchor GetOuterCornerAnchor(Direction direction, GridEntity entity)
+        {
+            var node = Node;
+            var intermediaryCoordinates = node.Neighbour(direction);
+            var secondaryDirection = direction.PitchDown(CubeFace, out var _);
+            var targetCoordinates = secondaryDirection.Translate(intermediaryCoordinates);
+
+            var targetNode = Dungeon[targetCoordinates];
+            if (targetNode == null) return null;
+
+            var targetAnchor = targetNode.GetAnchor(direction.Inverse());
+            if (targetAnchor == null) return null;
+
+            var edgePosition = GetEdgePosition(direction);
+            var offset = targetAnchor.GetEdgePosition(secondaryDirection.Inverse()) - edgePosition;
+
+            var orthoDistance = Vector3.Project(offset, CubeFace.AsLookVector3D()).magnitude;
+            var paraDistance = Vector3.Project(offset, direction.AsLookVector3D()).magnitude;
+
+            /*
+            Debug.Log(PrefixLogMessage($"Outer corner neighbour in {direction}/{secondaryDirection} is {targetAnchor}. " +
+                $"{orthoDistance} < {entity.Abilities.maxScaleHeight} && {paraDistance} < {entity.Abilities.maxForwardJump}"));
+            */
+
+            if (orthoDistance < entity.Abilities.maxScaleHeight) // && paraDistance < entity.Abilities.maxForwardJump)
+            {
+                return targetAnchor;
+            }
+
+            return null;
+        }
+
         public Anchor GetNeighbour(Direction direction, GridEntity entity, out MovementOutcome outcome)
         {
             if (!TraversableEdge(entity, direction))
@@ -327,6 +367,7 @@ namespace LMCore.Crawler
                 var down = CubeFace.AsLookVector3D();
                 var edgePosition = GetEdgePosition(direction);
 
+                // deals with normal level transitions and ramps
                 var candidates = new List<Direction>() {
                     Direction.None,
                     CubeFace,
@@ -351,6 +392,7 @@ namespace LMCore.Crawler
                 if (candidates.Count > 0)
                 {
                     var closest = candidates[0];
+                    // Debug.Log(PrefixLogMessage($"My {direction} neigbour is {closest}"));
 
                     if (closest.offset == CubeFace.Inverse() && closest.orthoDistance <= entity.Abilities.maxScaleHeight)
                     {
@@ -396,6 +438,14 @@ namespace LMCore.Crawler
                     }
                 }
 
+                // Getting on and off at the top of ladders as an example
+                var outerCornerAnchor = GetOuterCornerAnchor(direction, entity);
+                if (outerCornerAnchor != null)
+                {
+                    Debug.Log(PrefixLogMessage("Doing outer corner anchor move"));
+                    outcome = MovementOutcome.NodeExit;
+                    return outerCornerAnchor;
+                }
 
                 if (sameNodeNeighbour != null)
                 {

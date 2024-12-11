@@ -62,7 +62,8 @@ namespace LMCore.TiledDungeon.Enemies
         {
             if (path == null) return false;
 
-            var index = path.FindIndex(t => t.Checkpoint.IsHere(Dungeon.Player));
+            // We don't care if we share anchor we care if we are on the same tile
+            var index = path.FindIndex(t => t.Checkpoint.Coordinates == Dungeon.Player.Coordinates);
             if (index < 0) return false;
             if (index == 0) return true;
 
@@ -89,7 +90,6 @@ namespace LMCore.TiledDungeon.Enemies
             System.Func<string, string> prefixLogMessage)
         {
             var entity = Enemy.Entity;
-            // var translationTarget = entity.Node.Neighbour(entity, translationDirection, out var targetAnchor);
             var outcome = entity.Node.AllowsTransition(
                 entity, 
                 entity.Coordinates,
@@ -97,10 +97,10 @@ namespace LMCore.TiledDungeon.Enemies
                 translationDirection, 
                 out var translationTarget, 
                 out var targetAnchor);
-            if (outcome == MovementOutcome.Refused) return;
 
             if (translationDirection == entity.LookDirection)
             {
+                if (outcome == MovementOutcome.Refused) return;
                 Debug.Log(prefixLogMessage("Moving forward"));
                 entity.MovementInterpreter.InvokeMovement(Movement.Forward, movementDuration);
                 return;
@@ -109,6 +109,8 @@ namespace LMCore.TiledDungeon.Enemies
             var movement = translationDirection.AsMovement(entity.LookDirection, entity.Down);
             if (movement == Movement.Up || movement == Movement.Down)
             {
+                if (outcome == MovementOutcome.Refused) return;
+
                 Debug.Log(prefixLogMessage($"Moving {movement}"));
                 entity.MovementInterpreter.InvokeMovement(movement, movementDuration);
                 return;

@@ -380,7 +380,10 @@ namespace LMCore.TiledDungeon
 
                 foreach (var direction in DirectionExtensions.AllDirections)
                 {
-                    if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && checkpoint.Anchor == Direction.Down && !node.HasFloor)
+                    // If we are in the air but no flying capability we should only consider down
+                    if (entity.TransportationMode.HasFlag(TransportationMode.Walking) && 
+                        (checkpoint.Anchor == Direction.None || checkpoint.Anchor == Direction.Down) && 
+                        !node.HasFloor)
                     {
                         if (direction != Direction.Down)
                         {
@@ -396,7 +399,11 @@ namespace LMCore.TiledDungeon
                     }
 
                     var outcome = node.AllowsTransition(entity, checkpoint.Coordinates, checkpoint.Anchor, direction, out var neighbourCoordinates, out var neighbourAnchor, false);
-                    if (outcome == MovementOutcome.Refused || outcome == MovementOutcome.Blocked) continue;
+                    if (outcome == MovementOutcome.Refused || outcome == MovementOutcome.Blocked)
+                    {
+                        if (debugLog) Debug.Log($"ClosestPath: Direction {checkpoint}-{direction} got {outcome}");
+                        continue;
+                    }
 
                     var anchor = node.GetAnchor(checkpoint.Anchor);
                     if (outcome == MovementOutcome.NodeExit && neighbourAnchor != null && anchor != null)
