@@ -44,9 +44,6 @@ public class DummyNode : MonoBehaviour, IDungeonNode
         return MovementOutcome.NodeExit;
     }
     
-    public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction) =>
-        MovementOutcome.NodeExit;
-
     public bool AllowsRotating(GridEntity entity) => true;
 
     public bool CanAnchorOn(GridEntity entity, Direction anchor) => true;

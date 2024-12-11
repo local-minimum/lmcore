@@ -27,7 +27,6 @@ namespace LMCore.Crawler
             out Vector3Int targetCoordinates,
             out Anchor targetAnchor,
             bool checkOccupancyRule = true);
-        public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction);
         public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true);
         public bool AllowExit(GridEntity entity, Direction direction);
         public bool AllowsRotating(GridEntity entity);

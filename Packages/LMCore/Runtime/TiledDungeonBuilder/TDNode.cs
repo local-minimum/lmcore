@@ -8,6 +8,7 @@ using LMCore.TiledDungeon.Integration;
 using LMCore.TiledDungeon.DungeonFeatures;
 using System.IO;
 using Codice.CM.Common.Serialization;
+using Codice.CM.Client.Differences;
 
 namespace LMCore.TiledDungeon
 {
@@ -332,36 +333,6 @@ namespace LMCore.TiledDungeon
             return false;
         }
 
-        private MovementOutcome ExitOrFallback(Direction direction, MovementOutcome fallback)
-        {
-            if (direction == Direction.Up)
-            {
-                return HasCeiling ? fallback : MovementOutcome.NodeExit;
-            } else if (direction == Direction.Down)
-            {
-                return HasFloor ? fallback : MovementOutcome.NodeExit;
-            } else
-            {
-                return HasWall(direction, SideCheckMode.Exit) || HasLadder(direction) ? fallback: MovementOutcome.NodeExit;
-            }
-
-        }
-
-        MovementOutcome PlanarExitOutcome(Direction direction)
-        {
-            if (HasLadder(direction))
-            {
-                return MovementOutcome.NodeInternal;
-            }
-
-            if (HasWall(direction, SideCheckMode.Exit))
-            {
-                return MovementOutcome.Blocked;
-            }
-
-            return MovementOutcome.NodeExit;
-        }
-
         public MovementOutcome AllowsTransition(
             GridEntity entity,
             Vector3Int origin,
@@ -489,64 +460,6 @@ namespace LMCore.TiledDungeon
             targetAnchor = originAnchor;
             targetCoordinates = origin;
             return MovementOutcome.Blocked;
-        }
-
-        public MovementOutcome AllowsMovement(GridEntity entity, Direction anchor, Direction direction)
-        {
-            if (HasBlockingDoor(direction)) return MovementOutcome.Blocked;
-
-            if (entity == null && anchor == Direction.None)
-            {
-                return HasSide(direction, SideCheckMode.Exit) || temporaryExitBlocker.Overrides(direction) ?
-                    MovementOutcome.Refused : MovementOutcome.NodeExit;
-            }
-
-            if (entity.TransportationMode.HasFlag(TransportationMode.Flying))
-            {
-                return ExitOrFallback(direction, MovementOutcome.Blocked);
-            }
-
-            if (anchor == Direction.Down)
-            {
-                return PlanarExitOutcome(direction);
-            } 
-
-            if (anchor == Direction.Up)
-            {
-                return PlanarExitOutcome(direction.Inverse());
-            }
-
-            if (anchor.IsPlanarCardinal())
-            {
-                if (HasLadder(anchor))
-                {
-                    if (direction == Direction.Up)
-                    {
-                        if (HasCeiling && HasSide(direction, SideCheckMode.Exit))
-                        {
-                            return CanAnchorOn(entity, Direction.Up) ? MovementOutcome.NodeInternal : MovementOutcome.Blocked;
-                        }
-
-                        return MovementOutcome.NodeExit;
-                    }
-
-                    if (direction == Direction.Down)
-                    {
-                        if (HasFloor)
-                        {
-                            return CanAnchorOn(entity, Direction.Down) ? MovementOutcome.NodeInternal : MovementOutcome.Blocked;
-                        }
-                        return MovementOutcome.NodeExit;
-                    }
-
-                }
-
-                // TODO: Other types of wall actions
-                Debug.LogWarning(PrefixLogMessage($"{entity.name} is anchored on {anchor} wall but no implementation of movement {direction}"));
-                return MovementOutcome.Refused;
-            }
-
-            return ExitOrFallback(direction, MovementOutcome.Blocked);
         }
 
         public bool HasBlockingDoor(Direction direction)
