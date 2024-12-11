@@ -363,6 +363,12 @@ namespace LMCore.Crawler
 
         private void ValidateAndFinalizeMidpointTransition(GridEntity entity)
         {
+            if (!(Last.Checkpoint.Node?.MayInhabit(entity) ?? false))
+            {
+                RegretMovementDynamically();
+                return;
+            }
+
             if (Steps.Count != 4) return;
 
             var midStart = Steps[1];
@@ -476,6 +482,10 @@ namespace LMCore.Crawler
                     );
                 } else
                 {
+                    if (CurrentSegment != Segment.Last && !(end.Checkpoint.Node?.MayInhabit(entity) ?? false))
+                    {
+                        RegretMovementDynamically();
+                    }
                     CurrentSegment = Segment.Last;
                     var endPos = end.Checkpoint.Position(entity.Dungeon);
                     checkpoint = end.Checkpoint;

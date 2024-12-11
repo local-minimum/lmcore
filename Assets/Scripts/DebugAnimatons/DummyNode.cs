@@ -91,6 +91,7 @@ public class DummyNode : MonoBehaviour, IDungeonNode
     public Vector3Int Neighbour(Direction direction) =>
         direction.Translate(Coordinates);
 
+    public bool MayInhabit(GridEntity entity, bool push = true) => true;
     public void RemoveOccupant(GridEntity entity)
     {
     }

@@ -615,22 +615,18 @@ namespace LMCore.Crawler
 
                 var neighbour = anchor.GetNeighbour(direction, Entity, out var outcome);
 
-                if (neighbour == null)
+                if (outcome == MovementOutcome.Refused)
                 {
-                    if (outcome == MovementOutcome.Refused)
-                    {
-                        interpretation.Steps.Add(interpretation.First);
-                    }
-                    else if (outcome == MovementOutcome.Blocked)
-                    {
-                        Debug.LogWarning("Sentinel has said this is blocked");
-                        InterpretBlocked(
-                            interpretation,
-                            $"Anchor {anchor.CubeFace} lacked neighbour to {direction} and said movement was blocked");
-                    }
-                    // TODO: Do we need to handle these cases?
+                    interpretation.Steps.Add(interpretation.First);
                 }
-                else
+                else if (outcome == MovementOutcome.Blocked)
+                {
+                    Debug.LogWarning("Sentinel has said this is blocked");
+                    InterpretBlocked(
+                        interpretation,
+                        $"Anchor {anchor.CubeFace} lacked neighbour to {direction} and said movement was blocked");
+                }
+                if (neighbour != null)
                 {
                     // If we are not really exiting the normal way, we should already have checked this
                     if ((neighbour.Node.Coordinates - anchor.Node.Coordinates).AsDirectionOrNone() == Direction.None)
@@ -720,6 +716,7 @@ namespace LMCore.Crawler
         {
             this.tickId = tickId;
             var interpretation = InterpretMovement(movement);
+            Debug.Log(interpretation);
             if (interpretation != null) OnMovement?.Invoke(Entity, interpretation, tickId, duration);
         }
 

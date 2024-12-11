@@ -33,6 +33,14 @@ namespace LMCore.Crawler
 
         public bool CanAnchorOn(GridEntity entity, Direction anchor);
 
+        /// <summary>
+        /// If occupancy rules and current occupants / reservations allow
+        /// enty to join node 
+        /// </summary>
+        /// <param name="entity">The new entity</param>
+        /// <param name="push">If we should attempt to push anything in there</param>
+        /// <returns></returns>
+        public bool MayInhabit(GridEntity entity, bool push = true);
         public void Reserve(GridEntity entity);
         public void RemoveReservation(GridEntity entity);
         public void AddOccupant(GridEntity entity);

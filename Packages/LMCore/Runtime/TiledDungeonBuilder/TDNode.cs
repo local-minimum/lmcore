@@ -9,6 +9,7 @@ using LMCore.TiledDungeon.DungeonFeatures;
 using System.IO;
 using Codice.CM.Common.Serialization;
 using Codice.CM.Client.Differences;
+using LMCore.IO;
 
 namespace LMCore.TiledDungeon
 {
@@ -368,7 +369,7 @@ namespace LMCore.TiledDungeon
             targetCoordinates = Neighbour(entity, originAnchorDirection, entity.Down, direction, out targetAnchor);
             var translationTarget = Dungeon[targetCoordinates];
 
-            if (checkOccupancyRules && !(translationTarget?.CheckMayCoexist(entity) ?? false))
+            if (checkOccupancyRules && !(translationTarget?.MayInhabit(entity) ?? false))
             {
                 // Debug.Log(PrefixLogMessage($"Occupancy rules refused target {translationTarget}"));
                 return MovementOutcome.Refused;
@@ -548,10 +549,18 @@ namespace LMCore.TiledDungeon
                     out var _, 
                     out var _) == MovementOutcome.NodeExit)
                 {
-                    entity.InjectMovement(direction.AsMovement(entity.LookDirection, entity.Down), ElasticGameClock.instance.baseTickDuration);
+                    var movement = direction.AsMovement(entity.LookDirection, entity.Down);
+                    if (movement.IsRotation())
+                    {
+                        // Doing absolute movements if needed
+                        movement = direction.AsMovement();
+                    }
+                    Debug.Log(PrefixLogMessage($"Pushing entity {entity.name} {direction} as {movement}"));
+                    entity.InjectMovement(movement, ElasticGameClock.instance.baseTickDuration);
                     return true;
                 }
             }
+            Debug.LogWarning(PrefixLogMessage($"Found no way to push entity {entity.name}"));
             return false;
         }
 
@@ -585,11 +594,11 @@ namespace LMCore.TiledDungeon
             return true;
         }
 
-        bool CheckMayCoexist(GridEntity entity)
+        public bool MayInhabit(GridEntity entity, bool push = true)
         {
             if (!OccupationRules.MayCoexist(entity, Occupants))
             {
-                if (!entity.Falling || !PushOccupants(entity))
+                if (!entity.Falling || !push || !PushOccupants(entity))
                 {
                     var occupants = Occupants.Select(o => o.name);
                     Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of occupants: {string.Join(", ", occupants)}"));
@@ -598,7 +607,7 @@ namespace LMCore.TiledDungeon
             }
             if (!OccupationRules.MayCoexist(entity, _reservations))
             {
-                if (!entity.Falling || RefuseReservations(entity))
+                if (!entity.Falling || !push || RefuseReservations(entity))
                 {
                     var reserves = _reservations.Select(r => r.name);
                     Debug.LogWarning(PrefixLogMessage($"{entity.name} may not enter because of reservations: {string.Join(", ", reserves)}"));
@@ -611,7 +620,7 @@ namespace LMCore.TiledDungeon
 
         public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true)
         {
-            if (checkOccupancyRules && !CheckMayCoexist(entity))
+            if (checkOccupancyRules && !MayInhabit(entity, false))
             {
                 return false;
             }
