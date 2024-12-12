@@ -260,7 +260,7 @@ namespace LMCore.Crawler
             end != null &&
             start.CubeFace.Translate(start.Node.Coordinates) == end.CubeFace.Translate(end.Node.Coordinates);
 
-        private void InterpretTargetNode(MovementInterpretation interpretation, IDungeonNode targetNode, bool allowEntry)
+        private void InterpretByNode(MovementInterpretation interpretation, IDungeonNode targetNode, bool allowEntry)
         {
             var direction = interpretation.PrimaryDirection;
             var origin = interpretation.Last;
@@ -394,7 +394,7 @@ namespace LMCore.Crawler
             if (Entity.Dungeon.HasNodeAt(targetCoordinates))
             {
                 // Going to a new tile / entering a dungeon
-                InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
+                InterpretByNode(interpretation, Entity.Dungeon[targetCoordinates], false);
             } else
             {
                 // Flying or falling outside the dungeon
@@ -414,68 +414,7 @@ namespace LMCore.Crawler
             }
         }
 
-        public MovementInterpretation InterpretMovement(Movement movement)
-        {
-            if (movement.IsTranslation())
-            {
-                var direction = Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement);
-                if (!Entity.RotationRespectsAnchorDirection && Entity.AnchorDirection.IsPlanarCardinal())
-                {
-                    if (Entity.LookDirection == Entity.AnchorDirection)
-                    {
-                        switch (movement)
-                        {
-                            case Movement.StrafeLeft:
-                            case Movement.StrafeRight:
-                                // These movements follow normal rules
-                                break;
-                            case Movement.Forward:
-                                direction = Entity.LookDirection.PitchUp(Direction.Down, out var _);
-                                break;
-                            case Movement.Backward:
-                                direction = Entity.LookDirection.PitchDown(Direction.Down, out var _);
-                                break;
-                        } 
-                    } else
-                    {
-                        Debug.LogWarning($"Movement {movement} for {Entity} not possible becuase enitity is on wall without respecting wall down and not looking at the wall");
-                    }
-                }
-
-                Debug.Log($"Interpret {movement} for {Entity} as {direction}");
-                return InterpretMovement(direction);
-            } else if (movement.IsRotation())
-            {
-                if (Entity.Node?.AllowsRotating(Entity) != true) return null;
-
-                var interpretation = new MovementInterpretation() { 
-                    DurationScale = Entity.Abilities.turnDurationScaleFactor,
-                };
-
-                var startCheckpoint = MovementCheckpoint.From(Entity);
-                interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                {
-                    Checkpoint = startCheckpoint,
-                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
-                });
-
-                interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                {
-                    Checkpoint = MovementCheckpoint.From(
-                        startCheckpoint, 
-                        Direction.None, 
-                        startCheckpoint.LookDirection.ApplyRotation(Entity.Down, movement, out var _)),
-                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
-                });
-
-                return interpretation;
-
-            }
-
-            return null;
-        }
-
-        private void InterpretAnchorMovement(
+        private void InterpretByAnchor(
             MovementInterpretation interpretation,
             Direction direction,
             MovementOutcome outcome,
@@ -544,7 +483,7 @@ namespace LMCore.Crawler
                 else
                 {
                     // Trusting exit is used when we step on to high ramps
-                    InterpretTargetNode(interpretation, targetAnchor.Node, true);
+                    InterpretByNode(interpretation, targetAnchor.Node, true);
                 }
             }
         }
@@ -555,11 +494,6 @@ namespace LMCore.Crawler
                 PrimaryDirection = direction 
             }; 
 
-            /*
-            var anchor = Entity.Falling ? null : Entity.NodeAnchor;
-            if (anchor == null)
-            {
-            */
             var node = Entity.Node;
 
             if (node == null)
@@ -611,7 +545,7 @@ namespace LMCore.Crawler
                         Debug.Log($"Going {anchor}->{targetAnchor} with outcome {outcome}\n{interpretation}");
                         if (anchor != null)
                         {
-                            InterpretAnchorMovement(
+                            InterpretByAnchor(
                                 interpretation,
                                 direction,
                                 outcome,
@@ -619,13 +553,74 @@ namespace LMCore.Crawler
                                 targetAnchor);
                         } else
                         {
-                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], true);
+                            InterpretByNode(interpretation, Entity.Dungeon[targetCoordinates], true);
                         }
                     }
                 }
             }
 
             return interpretation;
+        }
+
+        public MovementInterpretation InterpretMovement(Movement movement)
+        {
+            if (movement.IsTranslation())
+            {
+                var direction = Entity.LookDirection.RelativeTranslation3D(Entity.Down, movement);
+                if (!Entity.RotationRespectsAnchorDirection && Entity.AnchorDirection.IsPlanarCardinal())
+                {
+                    if (Entity.LookDirection == Entity.AnchorDirection)
+                    {
+                        switch (movement)
+                        {
+                            case Movement.StrafeLeft:
+                            case Movement.StrafeRight:
+                                // These movements follow normal rules
+                                break;
+                            case Movement.Forward:
+                                direction = Entity.LookDirection.PitchUp(Direction.Down, out var _);
+                                break;
+                            case Movement.Backward:
+                                direction = Entity.LookDirection.PitchDown(Direction.Down, out var _);
+                                break;
+                        } 
+                    } else
+                    {
+                        Debug.LogWarning($"Movement {movement} for {Entity} not possible becuase enitity is on wall without respecting wall down and not looking at the wall");
+                    }
+                }
+
+                Debug.Log($"Interpret {movement} for {Entity} as {direction}");
+                return InterpretMovement(direction);
+            } else if (movement.IsRotation())
+            {
+                if (Entity.Node?.AllowsRotating(Entity) != true) return null;
+
+                var interpretation = new MovementInterpretation() { 
+                    DurationScale = Entity.Abilities.turnDurationScaleFactor,
+                };
+
+                var startCheckpoint = MovementCheckpoint.From(Entity);
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = startCheckpoint,
+                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
+                });
+
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = MovementCheckpoint.From(
+                        startCheckpoint, 
+                        Direction.None, 
+                        startCheckpoint.LookDirection.ApplyRotation(Entity.Down, movement, out var _)),
+                    Transition = Entity.TransportationMode.HasFlag(TransportationMode.Flying) ? MovementTransition.Grounded : MovementTransition.Ungrounded
+                });
+
+                return interpretation;
+
+            }
+
+            return null;
         }
 
         private void OnEnable()
