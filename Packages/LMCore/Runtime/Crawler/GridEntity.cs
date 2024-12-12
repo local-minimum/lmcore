@@ -303,10 +303,12 @@ namespace LMCore.Crawler
                 {
                     if (value) {
                         Debug.Log(PrefixLogMessage("Is falling"));
+                        TransportationMode = TransportationMode.None;
                         OnFall?.Invoke();
                     } else
                     {
                         Debug.Log(PrefixLogMessage("Stopped falling"));
+                        TransportationMode = NodeAnchor != null && AnchorDirection == Direction.Down ? TransportationMode.Walking : TransportationMode.Flying;
                         OnLand?.Invoke();
                     }
                 } else if (value)

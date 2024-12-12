@@ -358,9 +358,7 @@ namespace LMCore.TiledDungeon
 
             if (HasBlockingDoor(direction))
             {
-                /*
                 Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by door in {direction}"));
-                */
                 targetAnchor = originAnchor;
                 targetCoordinates = origin;
                 return MovementOutcome.Blocked;
@@ -386,7 +384,7 @@ namespace LMCore.TiledDungeon
 
                 if (targetAnchor == null || !CanAnchorOn(entity, targetAnchor.CubeFace))
                 {
-                    // Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by refused anchor on {direction}"));
+                    Debug.LogWarning(PrefixLogMessage($"{entity.name} blocked by refused anchor on {direction}"));
                     targetAnchor = originAnchor;
                     targetCoordinates = origin;
                     return MovementOutcome.Blocked;
@@ -403,12 +401,14 @@ namespace LMCore.TiledDungeon
                     return MovementOutcome.NodeExit;
                 }
 
+                
                 /*
                 Debug.LogWarning(PrefixLogMessage(
                     $"Simple translation refused for {entity.name} {origin}({direction})->{targetCoordinates}, " +
                     $"AllowExit({AllowExit(entity, direction)}) Target({translationTarget !=null}) " +
                     $"AllowEntry({(translationTarget?.AllowsEntryFrom(entity, direction.Inverse(), checkOccupancyRules) ?? false)})"));
                 */
+                
                 targetAnchor = originAnchor;
                 targetCoordinates = origin;
                 return MovementOutcome.Blocked;
@@ -457,7 +457,7 @@ namespace LMCore.TiledDungeon
                 return MovementOutcome.NodeExit;
             }
 
-            // Debug.Log(PrefixLogMessage($"No complex movement allowed ({direction}, {secondaryTranslation}) to {translationTarget}"));
+            Debug.Log(PrefixLogMessage($"No complex movement allowed ({direction}, {secondaryTranslation}) to {translationTarget}"));
             targetAnchor = originAnchor;
             targetCoordinates = origin;
             return MovementOutcome.Blocked;
@@ -660,9 +660,9 @@ namespace LMCore.TiledDungeon
                 return false;
             }
 
-            if (!entity.Falling && Obstructed)
+            if (Obstructed)
             {
-                Debug.Log(PrefixLogMessage($"Entry blocked by obstruction for non falling {entity.name}"));
+                Debug.Log(PrefixLogMessage($"Entry blocked by obstruction {entity.name}"));
                 return false;
             }
 

@@ -480,8 +480,7 @@ namespace LMCore.Crawler
             Direction direction,
             MovementOutcome outcome,
             Anchor anchor,
-            Anchor targetAnchor,
-            bool trustExit)
+            Anchor targetAnchor)
         {
             // Intermediary step at edge of starting anchor
             interpretation.Steps.Add(new MovementCheckpointWithTransition()
@@ -536,7 +535,7 @@ namespace LMCore.Crawler
                     Transition = MovementTransition.Grounded,
                 });
             }
-            else if (trustExit || anchor.Node.AllowExit(Entity, direction))
+            else 
             {
                 if (targetAnchor == null)
                 {
@@ -545,14 +544,8 @@ namespace LMCore.Crawler
                 else
                 {
                     // Trusting exit is used when we step on to high ramps
-                    InterpretTargetNode(interpretation, targetAnchor.Node, trustExit);
+                    InterpretTargetNode(interpretation, targetAnchor.Node, true);
                 }
-            }
-            else
-            {
-                InterpretBlocked(
-                    interpretation, 
-                    $"Anchor {anchor.Node.Coordinates} {anchor.CubeFace} doesn't allow exit in direction {direction}");
             }
         }
 
@@ -562,142 +555,72 @@ namespace LMCore.Crawler
                 PrimaryDirection = direction 
             }; 
 
+            /*
             var anchor = Entity.Falling ? null : Entity.NodeAnchor;
             if (anchor == null)
             {
-                var node = Entity.Node;
+            */
+            var node = Entity.Node;
 
-                if (node == null)
-                {
-                    // We start outside the dungeon
-                    interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
-                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                    {
-                        Checkpoint = MovementCheckpoint.From(Entity),
-                        Transition = MovementTransition.Ungrounded,                    
-                    });
-                    if (!ElevationOffsetEdge(interpretation)) InterpretByDungeon(interpretation);
-                } else
-                {
-                    // We start flying or falling
-                    interpretation.Steps.Add(new MovementCheckpointWithTransition()
-                    {
-                        Checkpoint = MovementCheckpoint.From(Entity),
-                        Transition = MovementTransition.Ungrounded,
-                    });
-
-                    var outcome = node.AllowsTransition(
-                        Entity, 
-                        Entity.Coordinates,
-                        Entity.AnchorDirection, 
-                        direction,
-                        out var _,
-                        out var targetAnchor
-                        );
-
-                    if (outcome == MovementOutcome.Refused)
-                    {
-                        interpretation.Steps.Add(interpretation.First);
-                    } else if (outcome == MovementOutcome.Blocked)
-                    {
-                        InterpretBlocked(
-                            interpretation,
-                            $"Node says {direction} is blocked for airbourne entity");
-                    } else if (!ElevationOffsetEdge(interpretation))
-                    {
-                        var targetCoordinates = node.Neighbour(direction);
-                        if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
-                        {
-                            InterpretByDungeon(interpretation);
-                        } else if (!IsOuterCorner(Entity.NodeAnchor, targetAnchor) || !InterpretRoundOuterCorner(interpretation))
-                        {
-                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
-                        }
-                    }
-                }
-            } else {
+            if (node == null)
+            {
+                // We start outside the dungeon
+                interpretation.Outcome = MovementInterpretationOutcome.Airbourne;
                 interpretation.Steps.Add(new MovementCheckpointWithTransition()
                 {
                     Checkpoint = MovementCheckpoint.From(Entity),
-                    Transition = MovementTransition.Grounded,
+                    Transition = MovementTransition.Ungrounded,                    
+                });
+                if (!ElevationOffsetEdge(interpretation)) InterpretByDungeon(interpretation);
+            } else
+            {
+                var anchor = Entity.NodeAnchor;
+                interpretation.Steps.Add(new MovementCheckpointWithTransition()
+                {
+                    Checkpoint = MovementCheckpoint.From(Entity),
+                    Transition = Entity.Falling || anchor == null ? MovementTransition.Ungrounded : MovementTransition.Grounded,
                 });
 
-                var neighbour = anchor.GetNeighbour(direction, Entity, out var outcome);
+                var outcome = node.AllowsTransition(
+                    Entity, 
+                    Entity.Coordinates,
+                    Entity.AnchorDirection, 
+                    direction,
+                    out var targetCoordinates,
+                    out var targetAnchor
+                    );
 
                 if (outcome == MovementOutcome.Refused)
                 {
                     interpretation.Steps.Add(interpretation.First);
-                    return interpretation;
-                }
-                else if (outcome == MovementOutcome.Blocked)
+                } else if (outcome == MovementOutcome.Blocked)
                 {
-                    Debug.LogWarning("Sentinel has said this is blocked");
                     InterpretBlocked(
                         interpretation,
-                        $"Anchor {anchor.CubeFace} lacked neighbour to {direction} and said movement was blocked");
-                    return interpretation;
-                }
-
-                if (neighbour != null)
+                        $"Node says {direction} is blocked for airbourne entity");
+                } else if (!ElevationOffsetEdge(interpretation))
                 {
-                    if (!IsOuterCorner(Entity.NodeAnchor, neighbour) || !InterpretRoundOuterCorner(interpretation))
+                    if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
                     {
-                        InterpretAnchorMovement(
-                            interpretation,
-                            direction,
-                            outcome,
-                            anchor,
-                            neighbour,
-                            true);
-
-                    }
-
-                    return interpretation;
-                }
-
-                outcome = anchor.Node.AllowsTransition(
-                    Entity, 
-                    Entity.Coordinates, 
-                    anchor.CubeFace,
-                    direction,
-                    out var _,
-                    out var _);
-                if (outcome == MovementOutcome.Refused)
-                {
-                    interpretation.Steps.Add(interpretation.First);
-                }
-                else if (outcome == MovementOutcome.Blocked)
-                {
-                    InterpretBlocked(
-                        interpretation, 
-                        $"Current node considers moving on {anchor.CubeFace} in {direction} direction blocked");
-                }
-                else if (!ElevationOffsetEdge(interpretation))
-                {
-                    if (direction == anchor.CubeFace && Entity.Falling)
+                        // This really should never happpen because we should have checked everything stays in the 
+                        // dungeon before with the node.AllowsTransition above
+                        Debug.LogWarning($"Doing dungeon movement {Entity.Coordinates}[{anchor}]->{targetCoordinates}[{targetAnchor}] with outcome {outcome}\n{interpretation}");
+                        InterpretByDungeon(interpretation);
+                    } else if (!IsOuterCorner(anchor, targetAnchor) || !InterpretRoundOuterCorner(interpretation))
                     {
-                        // This only happens if we thought we were anchored but now are falling
-                        var targetCoordinates = anchor.Node.Neighbour(direction);
-                        if (!Entity.Dungeon.HasNodeAt(targetCoordinates))
+                        Debug.Log($"Going {anchor}->{targetAnchor} with outcome {outcome}\n{interpretation}");
+                        if (anchor != null)
                         {
-                            InterpretByDungeon(interpretation);
-                        }
-                        else
+                            InterpretAnchorMovement(
+                                interpretation,
+                                direction,
+                                outcome,
+                                anchor,
+                                targetAnchor);
+                        } else
                         {
-                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], false);
+                            InterpretTargetNode(interpretation, Entity.Dungeon[targetCoordinates], true);
                         }
-                    }
-                    else
-                    {
-                        var targetAnchor = anchor.GetNeighbour(direction, Entity, out outcome);
-                        InterpretAnchorMovement(
-                            interpretation,
-                            direction,
-                            outcome,
-                            anchor,
-                            targetAnchor,
-                            false);
-
                     }
                 }
             }
