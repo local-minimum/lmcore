@@ -84,7 +84,7 @@ namespace LMCore.Crawler
                         {
                             rb.isKinematic = false;
                         }
-                        rb.velocity = (Vector3)FlightDirection.AsLookVector3D() * speed;
+                        rb.linearVelocity = (Vector3)FlightDirection.AsLookVector3D() * speed;
                     }
                 }
             } else if (phase == Phase.Colliding)
@@ -129,7 +129,7 @@ namespace LMCore.Crawler
             var rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.velocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
                 rb.isKinematic = true;
             }
             OnRecycle?.Invoke(this);

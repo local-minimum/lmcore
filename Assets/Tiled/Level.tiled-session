@@ -3,13 +3,14 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "DemoLevel.tmx",
+    "activeFile": "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/Level1.tmx",
     "automapping.whileDrawing": true,
     "expandedProjectPaths": [
-        ".",
+        "Rules",
         "Automapping",
-        "Rules"
+        "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         ":/automap-tiles.tsx": {
             "scaleInDock": 1
@@ -22,18 +23,57 @@
                 "y": 398
             }
         },
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/DemoLevel.tmx": {
+            "expandedGroupLayers": [
+                7
+            ],
+            "scale": 0.5,
+            "selectedLayer": 14,
+            "viewCenter": {
+                "x": 1202,
+                "y": 321
+            }
+        },
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/Level1.tmx": {
+            "expandedGroupLayers": [
+                12,
+                11,
+                2,
+                10
+            ],
+            "scale": 0.665185546875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 402.8951038684578,
+                "y": 511.88724950451456
+            }
+        },
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/Mapping.tsx": {
+            "scaleInDock": 1
+        },
         "DemoLevel.tmx": {
             "expandedGroupLayers": [
-                7,
                 16,
-                21,
-                9
+                9,
+                7,
+                21
             ],
             "scale": 3,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": 406.5,
-                "y": 284.5
+                "x": 512.3333333333333,
+                "y": 512.1666666666666
+            }
+        },
+        "Level1.tmx": {
+            "expandedGroupLayers": [
+                2
+            ],
+            "scale": 0.665185546875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 511.88724950451444,
+                "y": 511.88724950451456
             }
         },
         "Mapping.tsx": {
@@ -52,8 +92,8 @@
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 512.6666666666666,
-                "y": 511.33333333333337
+                "x": 511.99999999999994,
+                "y": 511.3333333333333
             }
         }
     },
@@ -62,16 +102,19 @@
     "map.lastUsedFormat": "tmx",
     "map.width": 32,
     "openFiles": [
-        "Mapping.tsx",
-        "DemoLevel.tmx",
-        "Rules/ModernDungeonAutomapping.tmx"
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/DemoLevel.tmx",
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/Level1.tmx",
+        "Rules/ModernDungeonAutomapping.tmx",
+        "DemoLevel.tmx"
     ],
     "project": "Level.tiled-project",
-    "property.type": "string",
+    "property.type": "int",
     "recentFiles": [
-        "Mapping.tsx",
-        "Rules/ModernDungeonAutomapping.tmx",
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/DemoLevel.tmx",
         "DemoLevel.tmx",
+        "Rules/ModernDungeonAutomapping.tmx",
+        "C:/Users/Admin/Documents/Unity/untitled-dungeon-crawler/Assets/Tiled/Level1.tmx",
+        "Mapping.tsx",
         "Rules/AutomappingDungeons.tmx",
         "Automapping/AutomappingDungeons.tmx"
     ],

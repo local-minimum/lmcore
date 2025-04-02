@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 49d5ba92de744c14bb31c3bc7ee537aa
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 8b3a43ac7bf126f48a8fef3ba7291efa, type: 3}
+  onlyImportFlaggedLayers: 1
+  scaleObjectCoordinates: 0
