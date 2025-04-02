@@ -1,5 +1,6 @@
 using LMCore.Crawler;
 using LMCore.Extensions;
+using LMCore.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -117,5 +118,45 @@ public class DummyNode : MonoBehaviour, IDungeonNode
     {
         targetAnchor = null;
         return direction.Translate(Coordinates);
+    }
+
+    public MovementOutcome AllowsTransition(GridEntity entity, Vector3Int origin, Direction originAnchorDirection, Direction direction, out Vector3Int targetCoordinates, out Anchor targetAnchor, bool checkOccupancyRule = true, bool withPush = false)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool AllowsEntryFrom(GridEntity entity, Direction direction, bool checkOccupancyRules = true, bool withPush = false)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool AllowExit(GridEntity entity, Direction direction, bool forced)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool AllowsRotation(GridEntity entity, Movement rotation)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool MayInhabit(GridEntity entity, Direction pushDirection, bool checkPush)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void AddOccupant(GridEntity entity, bool push)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool PushOccupants(GridEntity activeEntity, Direction pushDirection)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool HasCubeFace(Direction direction)
+    {
+        throw new System.NotImplementedException();
     }
 }

@@ -1,0 +1,19 @@
+{
+    "name": "se.localminimum.lmcore.devconsole",
+    "rootNamespace": "LMCore.DevConsole",
+    "references": [
+        "GUID:1ef3e91b45f837b4189fe933aed1adb3",
+        "GUID:7133380fdf0a2554eb38dd774526b441",
+        "GUID:38e564a988e42ce47818bf91f0970377",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

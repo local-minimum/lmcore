@@ -223,7 +223,7 @@
       "url": "https://packages.unity.com"
     },
     "se.localminimum.lmcore": {
-      "version": "file:LMCore",
+      "version": "file:se.localminimum.lmcore",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
